@@ -1,0 +1,315 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 9%;
+    --primary: 152 100% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 95%;
+    --secondary-foreground: 220 13% 9%;
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 48 100% 64%;
+    --accent-foreground: 220 13% 9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 152 100% 30%;
+    --radius: 0.75rem;
+    --chart-1: 152 100% 30%;
+    --chart-2: 48 100% 64%;
+    --chart-3: 220 13% 75%;
+    --chart-4: 152 60% 50%;
+    --chart-5: 48 80% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 13% 9%;
+    --sidebar-primary: 152 100% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 13% 95%;
+    --sidebar-accent-foreground: 220 13% 9%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 152 100% 30%;
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+}
+
+@layer components {
+  /* Professional sidebar active state styling */
+  [data-sidebar="menu-button"][data-active="true"] {
+    @apply relative bg-primary text-primary-foreground font-semibold;
+    box-shadow: inset 0 0 12px rgba(22, 163, 74, 0.15), 0 4px 12px rgba(22, 163, 74, 0.2);
+    border-radius: 0.5rem;
+  }
+
+  [data-sidebar="menu-button"][data-active="true"] svg {
+    @apply text-primary-foreground;
+  }
+
+[data-sidebar="menu-button"][data-active="true"]:hover {
+    @apply bg-primary scale-105;
+    box-shadow: inset 0 0 12px rgba(22, 163, 74, 0.15), 0 6px 16px rgba(22, 163, 74, 0.3);
+  }
+
+  /* Ensure non-active items have clean appearance */
+  [data-sidebar="menu-button"] {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  [data-sidebar="menu-button"]:not([data-active="true"]) {
+    @apply text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50;
+  }
+
+  /* Sidebar group label styling */
+  [data-sidebar="group-label"] {
+    @apply text-xs font-semibold uppercase tracking-widest text-foreground/60;
+  }
+}
+
+@layer components {
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+@keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes floatSlow {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+@keyframes pulse {
+    0%, 100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(22, 163, 74, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(22, 163, 74, 0.4);
+    }
+  }
+
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-5px);
+    }
+    75% {
+      transform: translateX(5px);
+    }
+  }
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .animate-fadeInDown {
+    animation: fadeInDown 0.5s ease-out forwards;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slideInRight {
+    animation: slideInRight 0.5s ease-out forwards;
+  }
+
+.animate-scaleIn {
+    animation: scaleIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+/* Form field animation delays - use initial-opacity class instead */
+
+.animate-float {
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .animate-floatSlow {
+    animation: floatSlow 10s ease-in-out infinite;
+  }
+
+  .animate-pulse {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  /* Staggered animation delays for KPI cards */
+  .kpi-card-1 {
+    animation-delay: 0.1s;
+  }
+
+  .kpi-card-2 {
+    animation-delay: 0.2s;
+  }
+
+  .kpi-card-3 {
+    animation-delay: 0.3s;
+  }
+
+  .kpi-card-4 {
+    animation-delay: 0.4s;
+  }
+
+  /* Chart animation delays */
+  .chart-sales {
+    animation-delay: 0.5s;
+  }
+
+  .chart-stock {
+    animation-delay: 0.6s;
+  }
+
+  .chart-profit {
+    animation-delay: 0.65s;
+  }
+
+  .chart-pangkalan {
+    animation-delay: 0.7s;
+  }
+
+  .recent-activity {
+    animation-delay: 0.75s;
+  }
+}
+
+@layer utilities {
+  .gradient-lpg {
+    background: linear-gradient(135deg, hsl(152 100% 30%) 0%, hsl(152 80% 40%) 100%);
+  }
+  .gradient-lpg-subtle {
+    background: linear-gradient(135deg, hsl(152 100% 95%) 0%, hsl(48 100% 95%) 100%);
+  }
+
+  .bg-login-pattern {
+    background: 
+      linear-gradient(135deg, transparent 24%, rgba(152, 100, 30, 0.08) 25%, rgba(152, 100, 30, 0.08) 26%, transparent 27%, transparent 74%, rgba(152, 100, 30, 0.08) 75%, rgba(152, 100, 30, 0.08) 76%, transparent 77%, transparent),
+      linear-gradient(45deg, transparent 24%, rgba(48, 100, 64, 0.08) 25%, rgba(48, 100, 64, 0.08) 26%, transparent 27%, transparent 74%, rgba(48, 100, 64, 0.08) 75%, rgba(48, 100, 64, 0.08) 76%, transparent 77%, transparent),
+      linear-gradient(135deg, hsl(152 100% 30%) 0%, hsl(152 80% 40%) 50%, hsl(48 100% 64%) 100%);
+    background-size: 60px 60px, 60px 60px, 100% 100%;
+    background-position: 0 0, 30px 30px, 0 0;
+  }
+
+  .group-hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+
+  .transition-all-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .card-hover {
+    @apply hover:shadow-lg hover:scale-105 transition-all duration-300 ease-out;
+  }
+
+  .button-interactive {
+    @apply active:scale-95 transition-transform duration-150 ease-out;
+  }
+}
