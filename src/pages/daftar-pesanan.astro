@@ -1,0 +1,18 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminHeader from '@/components/common/AdminHeader.tsx'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
+import AdminFooter from '@/components/common/AdminFooter.tsx'
+import OrderListPage from '@/components/daftar-pesanan/OrderListPage.tsx'
+---
+
+<BaseLayout title="Daftar Pesanan - SIM4LON">
+  <AdminHeader client:load />
+  <AppSidebarLayout client:load headerHeight="64px">
+    <main class="flex-1 flex flex-col">
+      <OrderListPage client:idle />
+      <AdminFooter />
+    </main>
+  </AppSidebarLayout>
+</BaseLayout>

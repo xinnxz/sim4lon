@@ -1,0 +1,13 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminHeader from '@/components/common/AdminHeader.tsx'
+import NotaPembayaranPage from '@/components/nota-pembayaran/NotaPembayaranPage.tsx'
+---
+
+<BaseLayout title="Nota Pembayaran - SIM4LON">
+  <AdminHeader client:load />
+  <main className="flex-1 bg-background">
+    <NotaPembayaranPage client:load />
+  </main>
+</BaseLayout>

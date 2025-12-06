@@ -1,0 +1,29 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+---
+
+<BaseLayout title="Halaman Dalam Pembangunan - SIM4LON">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-lpg-subtle p-4">
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="text-2xl text-center">Halaman Dalam Pembangunan</CardTitle>
+        <CardDescription className="text-center">
+          Halaman ini sedang dalam proses pengembangan
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="text-center">
+        <p className="text-muted-foreground mb-4">
+          Kami sedang bekerja keras untuk menyelesaikan halaman ini. Silakan kembali lagi nanti.
+        </p>
+        <a 
+          href="./dashboard-admin.html" 
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Kembali ke Dashboard
+        </a>
+      </CardContent>
+    </Card>
+  </div>
+</BaseLayout>

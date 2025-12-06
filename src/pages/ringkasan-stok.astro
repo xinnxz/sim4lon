@@ -1,0 +1,16 @@
+
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminHeader from '@/components/common/AdminHeader.tsx'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
+import AdminFooter from '@/components/common/AdminFooter.tsx'
+import RingkasanStokPageContent from '@/components/ringkasan-stok/RingkasanStokPageContent.tsx'
+---
+
+<BaseLayout title="Stok LPG - SIM4LON">
+  <AdminHeader client:load userName="Admin User" userRole="Administrator" notificationCount={3} />
+  <AppSidebarLayout client:load headerHeight="64px">
+    <RingkasanStokPageContent client:load />
+    <AdminFooter />
+  </AppSidebarLayout>
+</BaseLayout>
