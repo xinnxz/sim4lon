@@ -1,6 +1,6 @@
 
         
-import { LPGType, StockMovementType } from "./enums";
+import { LPGType } from "./enums";
 
 /**
  * Model untuk ringkasan stok per jenis LPG.
@@ -19,7 +19,7 @@ export interface StockSummaryModel {
 export interface StockHistoryModel {
   historyId: string;
   type: LPGType;
-  movementType: StockMovementType;
+  movementType: 'MASUK' | 'KELUAR';
   qty: number;
   timestamp: string;
   notes: string;
@@ -47,28 +47,6 @@ export const MOCK_STOCK_SUMMARY: StockSummaryModel[] = [
     lastUpdate: '2025-12-03 14:00',
     iconName: 'Package',
   },
-];
-
-export const MOCK_MOVEMENT_TYPES: StockMovementType[] = ['MASUK', 'KELUAR'];
-
-// Contoh riwayat stok (untuk tampilan tabel jika diperlukan)
-export const MOCK_STOCK_HISTORY: StockHistoryModel[] = [
-    {
-        historyId: "H-001",
-        type: "3kg",
-        movementType: "MASUK",
-        qty: 1000,
-        timestamp: "2025-11-20T09:00:00Z",
-        notes: "Penerimaan dari Supplier A.",
-    },
-    {
-        historyId: "H-002",
-        type: "12kg",
-        movementType: "KELUAR",
-        qty: 150,
-        timestamp: "2025-11-21T10:30:00Z",
-        notes: "Alokasi untuk Pengiriman DLV-005.",
-    },
 ];
         
       

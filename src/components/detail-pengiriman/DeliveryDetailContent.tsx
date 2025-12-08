@@ -1,132 +1,111 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import SafeIcon from "@/components/common/SafeIcon";
-import DeliveryInfoCard from "./DeliveryInfoCard";
-import DeliveryTimeline from "./DeliveryTimeline";
-import DeliveryProofSection from "./DeliveryProofSection";
-import DeliveryStatusOverride from "./DeliveryStatusOverride";
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import SafeIcon from '@/components/common/SafeIcon'
+import DeliveryInfoCard from './DeliveryInfoCard'
+import DeliveryTimeline from './DeliveryTimeline'
+import DeliveryProofSection from './DeliveryProofSection'
+import DeliveryStatusOverride from './DeliveryStatusOverride'
 
 interface DeliveryDetail {
-  id: string;
-  orderId: string;
+  id: string
+  orderId: string
   baseStation: {
-    name: string;
-    address: string;
-    phone: string;
-    contact: string;
-  };
+    name: string
+    address: string
+    phone: string
+    contact: string
+  }
   driver: {
-    name: string;
-    phone: string;
-    vehicle: string;
-    licensePlate: string;
-  };
-  status: "pending" | "in_transit" | "delivered" | "failed";
-  scheduledDate: string;
-  actualDeliveryDate?: string;
+    name: string
+    phone: string
+    vehicle: string
+    licensePlate: string
+  }
+  status: 'pending' | 'in_transit' | 'delivered' | 'failed'
+  scheduledDate: string
+  actualDeliveryDate?: string
   proof?: {
-    image: string;
-    timestamp: string;
-    notes: string;
-  };
+    image: string
+    timestamp: string
+    notes: string
+  }
   timeline: Array<{
-    status: string;
-    timestamp: string;
-    notes: string;
-  }>;
+    status: string
+    timestamp: string
+    notes: string
+  }>
 }
 
 const mockDelivery: DeliveryDetail = {
-  id: "DLV-2024-001",
-  orderId: "ORD-2024-12345",
+  id: 'DLV-2024-001',
+  orderId: 'ORD-2024-12345',
   baseStation: {
-    name: "Pangkalan Maju Jaya",
-    address: "Jl. Raya Industri No. 45, Jakarta Timur",
-    phone: "(021) 5555-1234",
-    contact: "Luthfi Alfaridz",
+    name: 'Pangkalan Maju Jaya',
+    address: 'Jl. Raya Industri No. 45, Jakarta Timur',
+    phone: '(021) 5555-1234',
+    contact: 'Budi Santoso'
   },
   driver: {
-    name: "Ahmad Wijaya",
-    phone: "0812-3456-7890",
-    vehicle: "Truck LPG",
-    licensePlate: "B 1234 ABC",
+    name: 'Ahmad Wijaya',
+    phone: '0812-3456-7890',
+    vehicle: 'Truck LPG',
+    licensePlate: 'B 1234 ABC'
   },
-  status: "in_transit",
-  scheduledDate: "2024-01-15",
+  status: 'in_transit',
+  scheduledDate: '2024-01-15',
   actualDeliveryDate: undefined,
   proof: undefined,
   timeline: [
     {
-      status: "Pesanan Dikonfirmasi",
-      timestamp: "2024-01-15 08:00",
-      notes: "Pesanan telah dikonfirmasi dan disiapkan",
+      status: 'Pesanan Dikonfirmasi',
+      timestamp: '2024-01-15 08:00',
+      notes: 'Pesanan telah dikonfirmasi dan disiapkan'
     },
     {
-      status: "Dalam Perjalanan",
-      timestamp: "2024-01-15 10:30",
-      notes: "Driver telah berangkat dari gudang",
+      status: 'Dalam Perjalanan',
+      timestamp: '2024-01-15 10:30',
+      notes: 'Driver telah berangkat dari gudang'
     },
     {
-      status: "Menunggu Pengiriman",
-      timestamp: "2024-01-15 14:00",
-      notes: "Tiba di lokasi pangkalan",
-    },
-  ],
-};
+      status: 'Menunggu Pengiriman',
+      timestamp: '2024-01-15 14:00',
+      notes: 'Tiba di lokasi pangkalan'
+    }
+  ]
+}
 
 const statusConfig = {
-  pending: {
-    label: "Menunggu",
-    color: "bg-yellow-100 text-yellow-800",
-    icon: "Clock",
-  },
-  in_transit: {
-    label: "Dalam Perjalanan",
-    color: "bg-blue-100 text-blue-800",
-    icon: "Truck",
-  },
-  delivered: {
-    label: "Terkirim",
-    color: "bg-green-100 text-green-800",
-    icon: "CheckCircle",
-  },
-  failed: {
-    label: "Gagal",
-    color: "bg-red-100 text-red-800",
-    icon: "AlertCircle",
-  },
-};
+  pending: { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800', icon: 'Clock' },
+  in_transit: { label: 'Dalam Perjalanan', color: 'bg-blue-100 text-blue-800', icon: 'Truck' },
+  delivered: { label: 'Terkirim', color: 'bg-green-100 text-green-800', icon: 'CheckCircle' },
+  failed: { label: 'Gagal', color: 'bg-red-100 text-red-800', icon: 'AlertCircle' }
+}
 
 export default function DeliveryDetailContent() {
-  const [delivery, setDelivery] = useState<DeliveryDetail>(mockDelivery);
-  const [showStatusOverride, setShowStatusOverride] = useState(false);
+  const [delivery, setDelivery] = useState<DeliveryDetail>(mockDelivery)
+  const [showStatusOverride, setShowStatusOverride] = useState(false)
 
   const handleStatusChange = (newStatus: string) => {
-    setDelivery((prev) => ({
+    setDelivery(prev => ({
       ...prev,
       status: newStatus as any,
       timeline: [
         ...prev.timeline,
         {
           status: `Status diubah menjadi ${statusConfig[newStatus as keyof typeof statusConfig].label}`,
-          timestamp: new Date().toLocaleString("id-ID"),
-          notes: "Status diubah oleh admin",
-        },
-      ],
-    }));
-    setShowStatusOverride(false);
-  };
+          timestamp: new Date().toLocaleString('id-ID'),
+          notes: 'Status diubah oleh admin'
+        }
+      ]
+    }))
+    setShowStatusOverride(false)
+  }
 
-  const config = statusConfig[delivery.status];
+  const config = statusConfig[delivery.status]
 
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 animate-fadeInUp">
@@ -177,10 +156,10 @@ export default function DeliveryDetailContent() {
             title="Informasi Pangkalan"
             icon="Store"
             data={[
-              { label: "Nama", value: delivery.baseStation.name },
-              { label: "Alamat", value: delivery.baseStation.address },
-              { label: "Kontak", value: delivery.baseStation.contact },
-              { label: "Telepon", value: delivery.baseStation.phone },
+              { label: 'Nama', value: delivery.baseStation.name },
+              { label: 'Alamat', value: delivery.baseStation.address },
+              { label: 'Kontak', value: delivery.baseStation.contact },
+              { label: 'Telepon', value: delivery.baseStation.phone }
             ]}
           />
 
@@ -189,15 +168,17 @@ export default function DeliveryDetailContent() {
             title="Informasi Driver"
             icon="User"
             data={[
-              { label: "Nama", value: delivery.driver.name },
-              { label: "Telepon", value: delivery.driver.phone },
-              { label: "Kendaraan", value: delivery.driver.vehicle },
-              { label: "Plat Nomor", value: delivery.driver.licensePlate },
+              { label: 'Nama', value: delivery.driver.name },
+              { label: 'Telepon', value: delivery.driver.phone },
+              { label: 'Kendaraan', value: delivery.driver.vehicle },
+              { label: 'Plat Nomor', value: delivery.driver.licensePlate }
             ]}
           />
 
           {/* Delivery Proof */}
-          {delivery.proof && <DeliveryProofSection proof={delivery.proof} />}
+          {delivery.proof && (
+            <DeliveryProofSection proof={delivery.proof} />
+          )}
         </div>
 
         {/* Right Column - Timeline */}
@@ -214,5 +195,5 @@ export default function DeliveryDetailContent() {
         onStatusChange={handleStatusChange}
       />
     </div>
-  );
+  )
 }

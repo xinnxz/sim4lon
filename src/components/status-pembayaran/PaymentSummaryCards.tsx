@@ -46,7 +46,7 @@ export default function PaymentSummaryCards({ data }: PaymentSummaryCardsProps) 
       iconColor: 'text-green-600',
       delay: '0.1s',
     },
-    {
+{
       title: 'Belum Dibayar',
       value: formatCurrency(data.unpaidAmount),
       subtitle: `${data.unpaidPercentage}% dari total`,
@@ -54,15 +54,6 @@ export default function PaymentSummaryCards({ data }: PaymentSummaryCardsProps) 
       color: 'bg-red-50',
       iconColor: 'text-red-600',
       delay: '0.2s',
-    },
-    {
-      title: 'Tertunda',
-      value: formatCurrency(data.pendingAmount),
-      subtitle: `${data.pendingPercentage}% dari total`,
-      icon: 'Clock',
-      color: 'bg-yellow-50',
-      iconColor: 'text-yellow-600',
-      delay: '0.3s',
     },
   ]
 

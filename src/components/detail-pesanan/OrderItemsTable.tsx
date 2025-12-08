@@ -27,7 +27,7 @@ export default function OrderItemsTable({ items }: OrderItemsTableProps) {
       <CardHeader>
         <CardTitle>Item Pesanan</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent id="ix7i3">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

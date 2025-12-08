@@ -154,7 +154,5 @@ export const getDriverById = (id: string): DriverSummaryModel | undefined => {
     avatarUrl: user.avatarUrl,
   };
 };
-
-export const MOCK_USER_ROLES: UserRole[] = ['ADMIN', 'OPERATOR', 'SUPERVISOR', 'DRIVER'];
         
       

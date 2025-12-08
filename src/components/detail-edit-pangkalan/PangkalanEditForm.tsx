@@ -1,14 +1,9 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -17,47 +12,45 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form'
 import {
   Select,
   SelectValue,
   SelectTrigger,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import SafeIcon from "@/components/common/SafeIcon";
+} from '@/components/ui/select'
+import { useForm } from 'react-hook-form'
+import SafeIcon from '@/components/common/SafeIcon'
 
 interface Pangkalan {
-  id: string;
-  nama: string;
-  alamat: string;
-  kontak: string;
-  email: string;
-  catatan: string;
-  createdAt: string;
-  updatedAt: string;
-  picName: string;
-  area: string;
-  status: string;
+  id: string
+  nama: string
+  alamat: string
+  kontak: string
+  email: string
+  catatan: string
+  createdAt: string
+  updatedAt: string
+  picName: string
+  area: string
+  status: string
 }
 
 interface PangkalanEditFormProps {
-  pangkalan: Pangkalan;
-  onSave: (
-    data: Omit<Pangkalan, "id" | "createdAt" | "updatedAt">
-  ) => Promise<void>;
-  onCancel: () => void;
-  isSaving: boolean;
+  pangkalan: Pangkalan
+  onSave: (data: Omit<Pangkalan, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>
+  onCancel: () => void
+  isSaving: boolean
 }
 
 export default function PangkalanEditForm({
   pangkalan,
   onSave,
   onCancel,
-  isSaving,
+  isSaving
 }: PangkalanEditFormProps) {
-  const form = useForm({
+const form = useForm({
     defaultValues: {
       nama: pangkalan.nama,
       alamat: pangkalan.alamat,
@@ -67,12 +60,12 @@ export default function PangkalanEditForm({
       picName: pangkalan.picName,
       catatan: pangkalan.catatan,
       status: pangkalan.status,
-    },
-  });
+    }
+  })
 
   const onSubmit = async (data: any) => {
-    await onSave(data);
-  };
+    await onSave(data)
+  }
 
   return (
     <Card>
@@ -99,13 +92,15 @@ export default function PangkalanEditForm({
                       disabled={isSaving}
                     />
                   </FormControl>
-                  <FormDescription>Nama resmi pangkalan LPG</FormDescription>
+                  <FormDescription>
+                    Nama resmi pangkalan LPG
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Alamat */}
+{/* Alamat */}
             <FormField
               control={form.control}
               name="alamat"
@@ -130,61 +125,47 @@ export default function PangkalanEditForm({
 
             {/* Area & PIC Name */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
+<FormField
                 control={form.control}
                 name="area"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Area / Wilayah</FormLabel>
                     <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isSaving}
-                      >
+                      <Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
                         <SelectTrigger>
                           <SelectValue placeholder="Pilih area" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Agrabinta">Agrabinta</SelectItem>
-                          <SelectItem value="Bojongpicung">
-                            Bojongpicung
-                          </SelectItem>
-                          <SelectItem value="Campaka">Campaka</SelectItem>
-                          <SelectItem value="Cianjur">Cianjur</SelectItem>
-                          <SelectItem value="Cibeber">Cibeber</SelectItem>
-                          <SelectItem value="Cibinong">Cibinong</SelectItem>
-                          <SelectItem value="Cidaun">Cidaun</SelectItem>
-                          <SelectItem value="Cikalongkulon">
-                            Cikalongkulon
-                          </SelectItem>
-                          <SelectItem value="Cilaku">Cilaku</SelectItem>
-                          <SelectItem value="Cijati">Cijati</SelectItem>
-                          <SelectItem value="Cipanas">Cipanas</SelectItem>
-                          <SelectItem value="Ciranjang">Ciranjang</SelectItem>
-                          <SelectItem value="Cugenang">Cugenang</SelectItem>
-                          <SelectItem value="Gekbrong">Gekbrong</SelectItem>
-                          <SelectItem value="Kadupandak">Kadupandak</SelectItem>
-                          <SelectItem value="Karangtengah">
-                            Karangtengah
-                          </SelectItem>
-                          <SelectItem value="Leles">Leles</SelectItem>
-                          <SelectItem value="Mande">Mande</SelectItem>
-                          <SelectItem value="Naringgul">Naringgul</SelectItem>
-                          <SelectItem value="Pacet">Pacet</SelectItem>
-                          <SelectItem value="Pagelaran">Pagelaran</SelectItem>
-                          <SelectItem value="Sindangbarang">
-                            Sindangbarang
-                          </SelectItem>
-                          <SelectItem value="Sukaluyu">Sukaluyu</SelectItem>
-                          <SelectItem value="Sukanagara">Sukanagara</SelectItem>
-                          <SelectItem value="Sukaresmi">Sukaresmi</SelectItem>
-                          <SelectItem value="Takokak">Takokak</SelectItem>
-                          <SelectItem value="Tanggeung">Tanggeung</SelectItem>
-                          <SelectItem value="Warungkondang">
-                            Warungkondang
-                          </SelectItem>
-                        </SelectContent>
+<SelectContent>
+                            <SelectItem value="Agrabinta">Agrabinta</SelectItem>
+                            <SelectItem value="Bojongpicung">Bojongpicung</SelectItem>
+                            <SelectItem value="Campaka">Campaka</SelectItem>
+                            <SelectItem value="Cianjur">Cianjur</SelectItem>
+                            <SelectItem value="Cibeber">Cibeber</SelectItem>
+                            <SelectItem value="Cibinong">Cibinong</SelectItem>
+                            <SelectItem value="Cidaun">Cidaun</SelectItem>
+                            <SelectItem value="Cikalongkulon">Cikalongkulon</SelectItem>
+                            <SelectItem value="Cilaku">Cilaku</SelectItem>
+                            <SelectItem value="Cijati">Cijati</SelectItem>
+                            <SelectItem value="Cipanas">Cipanas</SelectItem>
+                            <SelectItem value="Ciranjang">Ciranjang</SelectItem>
+                            <SelectItem value="Cugenang">Cugenang</SelectItem>
+                            <SelectItem value="Gekbrong">Gekbrong</SelectItem>
+                            <SelectItem value="Kadupandak">Kadupandak</SelectItem>
+                            <SelectItem value="Karangtengah">Karangtengah</SelectItem>
+                            <SelectItem value="Leles">Leles</SelectItem>
+                            <SelectItem value="Mande">Mande</SelectItem>
+                            <SelectItem value="Naringgul">Naringgul</SelectItem>
+                            <SelectItem value="Pacet">Pacet</SelectItem>
+                            <SelectItem value="Pagelaran">Pagelaran</SelectItem>
+                            <SelectItem value="Sindangbarang">Sindangbarang</SelectItem>
+                            <SelectItem value="Sukaluyu">Sukaluyu</SelectItem>
+                            <SelectItem value="Sukanagara">Sukanagara</SelectItem>
+                            <SelectItem value="Sukaresmi">Sukaresmi</SelectItem>
+                            <SelectItem value="Takokak">Takokak</SelectItem>
+                            <SelectItem value="Tanggeung">Tanggeung</SelectItem>
+                            <SelectItem value="Warungkondang">Warungkondang</SelectItem>
+                          </SelectContent>
                       </Select>
                     </FormControl>
                     <FormMessage />
@@ -200,7 +181,7 @@ export default function PangkalanEditForm({
                     <FormLabel>Nama PIC (Person In Charge)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Contoh: Luthfi Alfaridz"
+                        placeholder="Contoh: Budi Santoso"
                         {...field}
                         disabled={isSaving}
                       />
@@ -251,27 +232,21 @@ export default function PangkalanEditForm({
               />
             </div>
 
-            {/* Status */}
+{/* Status */}
             <FormField
               control={form.control}
               name="status"
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Status Pangkalan
-                    </FormLabel>
+                    <FormLabel className="text-base">Status Pangkalan</FormLabel>
                     <div className="text-sm text-muted-foreground">
-                      {field.value === "Aktif"
-                        ? "Pangkalan sedang aktif"
-                        : "Pangkalan sedang nonaktif"}
+                      {field.value === 'Aktif' ? 'Pangkalan sedang aktif' : 'Pangkalan sedang nonaktif'}
                     </div>
                   </div>
                   <FormControl>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">
-                        {field.value === "Aktif" ? "Aktif" : "Nonaktif"}
-                      </span>
+                      <span className="text-sm font-medium">{field.value === 'Aktif' ? 'Aktif' : 'Nonaktif'}</span>
                       <select
                         {...field}
                         disabled={isSaving}
@@ -311,13 +286,14 @@ export default function PangkalanEditForm({
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4">
-              <Button type="submit" disabled={isSaving} className="flex-1">
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="flex-1"
+              >
                 {isSaving ? (
                   <>
-                    <SafeIcon
-                      name="Loader2"
-                      className="mr-2 h-4 w-4 animate-spin"
-                    />
+                    <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
                     Menyimpan...
                   </>
                 ) : (
@@ -342,5 +318,5 @@ export default function PangkalanEditForm({
         </Form>
       </CardContent>
     </Card>
-  );
+  )
 }

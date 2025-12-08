@@ -1,109 +1,101 @@
-"use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import SafeIcon from "@/components/common/SafeIcon";
-import OrderSummaryCard from "@/components/detail-pesanan/OrderSummaryCard";
-import OrderDetailsCard from "@/components/detail-pesanan/OrderDetailsCard";
-import CustomerInfoCard from "@/components/detail-pesanan/CustomerInfoCard";
-import StatusTimeline from "@/components/detail-pesanan/StatusTimeline";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MOCK_DRIVER_LIST } from "@/data/user";
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import SafeIcon from '@/components/common/SafeIcon'
+import OrderSummaryCard from '@/components/detail-pesanan/OrderSummaryCard'
+import OrderDetailsCard from '@/components/detail-pesanan/OrderDetailsCard'
+import CustomerInfoCard from '@/components/detail-pesanan/CustomerInfoCard'
+import StatusTimeline from '@/components/detail-pesanan/StatusTimeline'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { MOCK_DRIVER_LIST } from '@/data/user'
 
 // Mock order data
 const mockOrder = {
-  id: "PES-2024-12345",
-  date: "2024-01-15",
-  status: "Menunggu Pembayaran",
-  statusCode: "pending_payment",
+  id: 'PES-2024-12345',
+  date: '2024-01-15',
+  status: 'Menunggu Pembayaran',
+  statusCode: 'pending_payment',
   pangkalan: {
-    name: "Pangkalan Maju Jaya",
-    address: "Jl. Raya Utama No. 123, Jakarta Selatan",
-    phone: "(021) 555-1234",
-    contact: "Luthfi Alfaridz",
+    name: 'Pangkalan Maju Jaya',
+    address: 'Jl. Raya Utama No. 123, Jakarta Selatan',
+    phone: '(021) 555-1234',
+    contact: 'Budi Santoso'
   },
   items: [
-    { id: 1, type: "LPG 3kg", quantity: 50, price: 45000, subtotal: 2250000 },
-    { id: 2, type: "LPG 12kg", quantity: 20, price: 120000, subtotal: 2400000 },
+    { id: 1, type: 'LPG 3kg', quantity: 50, price: 45000, subtotal: 2250000 },
+    { id: 2, type: 'LPG 12kg', quantity: 20, price: 120000, subtotal: 2400000 }
   ],
   total: 4650000,
   paymentMethod: null,
-  paymentStatus: "Belum Dibayar",
+  paymentStatus: 'Belum Dibayar',
   timeline: [
-    { status: "Pesanan Dibuat", date: "2024-01-15 10:30", completed: true },
-    {
-      status: "Menunggu Pembayaran",
-      date: "2024-01-15 10:30",
-      completed: true,
-    },
-    { status: "Pembayaran Diterima", date: null, completed: false },
-    { status: "Siap Dikirim", date: null, completed: false },
-    { status: "Dalam Pengiriman", date: null, completed: false },
-    { status: "Selesai", date: null, completed: false },
-  ],
-};
+{ status: 'Pesanan Dibuat', date: '2024-01-15 10:30', completed: true },
+    { status: 'Menunggu Pembayaran', date: '2024-01-15 10:30', completed: true },
+    { status: 'Pembayaran Diterima', date: null, completed: false },
+    { status: 'Siap Dikirim', date: null, completed: false },
+    { status: 'Dalam Pengiriman', date: null, completed: false },
+    { status: 'Selesai', date: null, completed: false }
+  ]
+}
 
 export default function DetailPesananPage() {
-  const [isDriverModalOpen, setIsDriverModalOpen] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
+  const [isDriverModalOpen, setIsDriverModalOpen] = useState(false)
+  const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending_payment":
-        return "bg-yellow-100 text-yellow-800";
-      case "paid":
-        return "bg-blue-100 text-blue-800";
-      case "shipped":
-        return "bg-purple-100 text-purple-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
+      case 'pending_payment':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'paid':
+        return 'bg-blue-100 text-blue-800'
+      case 'shipped':
+        return 'bg-purple-100 text-purple-800'
+      case 'delivered':
+        return 'bg-green-100 text-green-800'
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   const handlePrintOrderDetails = () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       setTimeout(() => {
-        window.print();
-      }, 100);
+        window.print()
+      }, 100)
     }
-  };
+  }
 
   const handleSendOrderViaWhatsApp = () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const orderDetails = `
 Pesanan ${mockOrder.id}
 
 Detail Pesanan:
-${mockOrder.items.map((item) => `- ${item.type}: ${item.quantity} unit @ Rp ${item.price.toLocaleString("id-ID")} = Rp ${item.subtotal.toLocaleString("id-ID")}`).join("\n")}
+${mockOrder.items.map(item => `- ${item.type}: ${item.quantity} unit @ Rp ${item.price.toLocaleString('id-ID')} = Rp ${item.subtotal.toLocaleString('id-ID')}`).join('\n')}
 
-Total: Rp ${mockOrder.total.toLocaleString("id-ID")}
+Total: Rp ${mockOrder.total.toLocaleString('id-ID')}
 Status: ${mockOrder.status}
-Tanggal: ${new Date(mockOrder.date).toLocaleDateString("id-ID")}
+Tanggal: ${new Date(mockOrder.date).toLocaleDateString('id-ID')}
 
 Pelanggan: ${mockOrder.pangkalan.contact}
 Lokasi: ${mockOrder.pangkalan.address}
-`.trim();
-
-      const encodedMessage = encodeURIComponent(orderDetails);
-      const phone = mockOrder.pangkalan.phone.replace(/\D/g, "");
-      const whatsappUrl = `https://wa.me/62${phone.replace(/^0/, "")}?text=${encodedMessage}`;
-      window.open(whatsappUrl, "_blank");
+`.trim()
+      
+      const encodedMessage = encodeURIComponent(orderDetails)
+      const phone = mockOrder.pangkalan.phone.replace(/\D/g, '')
+      const whatsappUrl = `https://wa.me/62${phone.replace(/^0/, '')}?text=${encodedMessage}`
+      window.open(whatsappUrl, '_blank')
     }
-  };
+  }
 
   const handleSelectDriver = (driverId: string) => {
-    setSelectedDriver(driverId);
-    setIsDriverModalOpen(false);
-  };
+    setSelectedDriver(driverId)
+    setIsDriverModalOpen(false)
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -120,9 +112,7 @@ Lokasi: ${mockOrder.pangkalan.address}
             <p className="text-muted-foreground">Pesanan {mockOrder.id}</p>
           </div>
         </div>
-        <Badge
-          className={`text-base px-3 py-1 ${getStatusColor(mockOrder.statusCode)}`}
-        >
+        <Badge className={`text-base px-3 py-1 ${getStatusColor(mockOrder.statusCode)}`}>
           {mockOrder.status}
         </Badge>
       </div>
@@ -142,33 +132,36 @@ Lokasi: ${mockOrder.pangkalan.address}
           <div className="rounded-lg border bg-card p-6 shadow-soft">
             <h3 className="mb-4 text-lg font-semibold">Tindakan</h3>
             <div className="space-y-3">
-              <a href="./catat-pembayaran.html" className="block">
+<a href="./catat-pembayaran.html" className="block">
                 <Button className="w-full" variant="default">
                   <SafeIcon name="CreditCard" className="mr-2 h-4 w-4" />
                   Catat Pembayaran
                 </Button>
               </a>
-              <Button
-                className="w-full"
+              <Button 
+                className="w-full" 
                 variant="outline"
                 onClick={() => setIsDriverModalOpen(true)}
               >
                 <SafeIcon name="Users" className="mr-2 h-4 w-4" />
                 Tugaskan Driver
               </Button>
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={handlePrintOrderDetails}
-              >
-                <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
-                Cetak Invoice
-              </Button>
-              <a href="./nota-pembayaran.html" className="block">
-                <Button className="w-full" variant="outline">
-                  <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
-                  Cetak Nota
-                </Button>
+<Button 
+                 className="w-full" 
+                 variant="outline"
+                 onClick={handlePrintOrderDetails}
+               >
+                 <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
+                 Cetak Invoice
+               </Button>
+<a href="./nota-pembayaran.html" className="block">
+                <Button 
+                 className="w-full" 
+                 variant="outline"
+               >
+                 <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
+                 Cetak Nota
+               </Button>
               </a>
             </div>
           </div>
@@ -183,26 +176,18 @@ Lokasi: ${mockOrder.pangkalan.address}
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tanggal:</span>
-                <span className="font-medium">
-                  {new Date(mockOrder.date).toLocaleDateString("id-ID")}
-                </span>
+                <span className="font-medium">{new Date(mockOrder.date).toLocaleDateString('id-ID')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Status Pembayaran:
-                </span>
-                <span className="font-medium text-yellow-600">
-                  {mockOrder.paymentStatus}
-                </span>
+                <span className="text-muted-foreground">Status Pembayaran:</span>
+                <span className="font-medium text-yellow-600">{mockOrder.paymentStatus}</span>
               </div>
               <div className="border-t pt-3 flex justify-between font-semibold">
                 <span>Total:</span>
-                <span className="text-primary">
-                  Rp {mockOrder.total.toLocaleString("id-ID")}
-                </span>
+                <span className="text-primary">Rp {mockOrder.total.toLocaleString('id-ID')}</span>
               </div>
             </div>
-          </div>
+</div>
 
           {/* Driver Assignment Modal */}
           <Dialog open={isDriverModalOpen} onOpenChange={setIsDriverModalOpen}>
@@ -223,9 +208,7 @@ Lokasi: ${mockOrder.pangkalan.address}
                     </Avatar>
                     <div className="flex-1">
                       <p className="font-medium text-sm">{driver.nama}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {driver.telepon}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{driver.telepon}</p>
                     </div>
                     {selectedDriver === driver.userId && (
                       <SafeIcon name="Check" className="h-5 w-5 text-primary" />
@@ -238,5 +221,5 @@ Lokasi: ${mockOrder.pangkalan.address}
         </div>
       </div>
     </div>
-  );
+  )
 }

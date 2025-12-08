@@ -67,7 +67,7 @@ export default function UserListTable({ users, roleLabels, onEditUser, onDisable
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
-          <TableHeader>
+<TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="font-semibold">Nama</TableHead>
               <TableHead className="font-semibold">No hp</TableHead>
@@ -91,18 +91,18 @@ export default function UserListTable({ users, roleLabels, onEditUser, onDisable
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">{user.phone}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
-                <TableCell>
-                  <Badge className={`${getRoleColor(user.role)} border-0`}>
-                    {roleLabels[user.role]}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getStatusColor(user.status)} border-0`}>
-                    {user.status === 'active' ? 'Aktif' : 'Nonaktif'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
+<TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
+                 <TableCell>
+                   <Badge className={`${getRoleColor(user.role)} border-0`}>
+                     {roleLabels[user.role]}
+                   </Badge>
+                 </TableCell>
+                 <TableCell>
+                   <Badge className={getStatusColor(user.status)}>
+                     {user.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                   </Badge>
+                 </TableCell>
+                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
@@ -123,8 +123,17 @@ export default function UserListTable({ users, roleLabels, onEditUser, onDisable
                         className="cursor-pointer"
                         onClick={() => onDisableUser(user)}
                       >
-                        <SafeIcon name="Ban" className="mr-2 h-4 w-4" />
-                        <span>Nonaktif</span>
+                        {user.status === 'active' ? (
+                          <>
+                            <SafeIcon name="Power" className="mr-2 h-4 w-4 text-red-600" />
+                            <span className="text-red-600">Nonaktifkan</span>
+                          </>
+                        ) : (
+                          <>
+                            <SafeIcon name="Check" className="mr-2 h-4 w-4 text-green-600" />
+                            <span className="text-green-600">Aktifkan</span>
+                          </>
+                        )}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

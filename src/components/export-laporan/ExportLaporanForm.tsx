@@ -78,12 +78,33 @@ export default function ExportLaporanForm() {
     }, 1500)
   }
 
-  const handleReset = () => {
+const handleReset = () => {
     setFormat('pdf')
     setSelectedReports(['penjualan', 'pembayaran'])
     setStartDate('')
     setEndDate('')
   }
+
+const setQuickPeriod = (period: 'thisMonth' | 'thisQuarter' | 'thisYear') => {
+     const today = new Date()
+     let start = new Date()
+     let end = new Date()
+
+     if (period === 'thisMonth') {
+       start = new Date(today.getFullYear(), today.getMonth(), 1)
+       end = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+     } else if (period === 'thisQuarter') {
+       const quarterMonth = Math.floor(today.getMonth() / 3) * 3
+       start = new Date(today.getFullYear(), quarterMonth, 1)
+       end = new Date(today.getFullYear(), quarterMonth + 3, 0)
+     } else if (period === 'thisYear') {
+       start = new Date(today.getFullYear(), 0, 1)
+       end = new Date(today.getFullYear(), 11, 31)
+     }
+
+     setStartDate(start.toISOString().split('T')[0])
+     setEndDate(end.toISOString().split('T')[0])
+   }
 
 return (
     <>
@@ -183,42 +204,81 @@ return (
         </CardContent>
       </Card>
 
-      {/* Date Range Card */}
-      <Card className="card-hover">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SafeIcon name="Calendar" className="h-5 w-5 text-primary" />
-            Periode Laporan
-          </CardTitle>
-          <CardDescription>
-            Tentukan rentang tanggal untuk laporan
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="start-date">Tanggal Mulai</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={startDate || defaultStartDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="end-date">Tanggal Akhir</Label>
-              <Input
-                id="end-date"
-                type="date"
-                value={endDate || defaultEndDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+{/* Date Range Card */}
+       <Card className="card-hover">
+         <CardHeader>
+           <CardTitle className="flex items-center gap-2">
+             <SafeIcon name="Calendar" className="h-5 w-5 text-primary" />
+             Periode Laporan
+           </CardTitle>
+           <CardDescription>
+             Tentukan rentang tanggal untuk laporan
+           </CardDescription>
+         </CardHeader>
+         <CardContent>
+           <div className="space-y-4">
+             {/* Quick Period Selection */}
+             <div className="space-y-2">
+               <Label>Pilihan Cepat</Label>
+<div className="grid grid-cols-3 gap-2">
+                  <Button
+                    type="button"
+                    variant={startDate === defaultStartDate && endDate === defaultEndDate ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setQuickPeriod('thisMonth')}
+                    className="text-xs"
+                  >
+                    1 Bulan
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuickPeriod('thisQuarter')}
+                    className="text-xs"
+                  >
+                    Triwulan
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuickPeriod('thisYear')}
+                    className="text-xs"
+                  >
+                    Tahun
+                  </Button>
+                </div>
+             </div>
+
+             <Separator />
+
+             {/* Manual Date Selection */}
+             <div className="grid gap-4 sm:grid-cols-2">
+               <div className="space-y-2">
+                 <Label htmlFor="start-date">Tanggal Mulai</Label>
+                 <Input
+                   id="start-date"
+                   type="date"
+                   value={startDate || defaultStartDate}
+                   onChange={(e) => setStartDate(e.target.value)}
+                   className="w-full"
+                 />
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="end-date">Tanggal Akhir</Label>
+                 <Input
+                   id="end-date"
+                   type="date"
+                   value={endDate || defaultEndDate}
+                   onChange={(e) => setEndDate(e.target.value)}
+                   className="w-full"
+                 />
+               </div>
+             </div>
+           </div>
+         </CardContent>
+       </Card>
 
 {/* Summary Card */}
        {selectedReports.length > 0 && (

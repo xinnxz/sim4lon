@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
 import SafeIcon from '@/components/common/SafeIcon'
 import ActivityCard from './ActivityCard'
+import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 
 interface Activity {
   id: string
@@ -430,57 +431,61 @@ export default function ActivityPage() {
       </div>
 
 {/* Stats Cards */}
-<div className="grid gap-4 md:grid-cols-5">
-          <Card>
+ <div className="grid gap-4 md:grid-cols-5">
+          <Tilt3DCard className="border-4 border-slate-300 dark:border-slate-600">
             <CardContent className="pt-6">
               <div className="text-center">
                 <p id="iv8f8z" className="text-3xl font-bold text-primary" style={{ color: '#000000' }}>{stats.total}</p>
                 <p className="text-sm text-muted-foreground mt-1">Total Aktivitas</p>
               </div>
             </CardContent>
-          </Card>
-          <Card>
+          </Tilt3DCard>
+          <Tilt3DCard className="border-4 border-purple-400 dark:border-purple-500">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p id="i6i4kk" className="text-3xl font-bold text-green-600" style={{ color: '#d24de1' }}>{stats.payments}</p>
+                <p id="i6i4kk" className="text-3xl font-bold text-purple-600" style={{ color: '#d24de1' }}>{stats.payments}</p>
                 <p id="isjhll" className="text-sm text-muted-foreground mt-1">Pembayaran Masuk</p>
               </div>
             </CardContent>
-          </Card>
-          <Card>
+          </Tilt3DCard>
+          <Tilt3DCard className="border-4 border-emerald-400 dark:border-emerald-500">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p id="i0gqec" className="text-3xl font-bold text-blue-600" style={{ color: '#23b617' }}>{stats.completed}</p>
+                <p id="i0gqec" className="text-3xl font-bold text-emerald-600" style={{ color: '#23b617' }}>{stats.completed}</p>
                 <p className="text-sm text-muted-foreground mt-1">Selesai</p>
               </div>
             </CardContent>
-          </Card>
-          <Card>
+          </Tilt3DCard>
+          <Tilt3DCard className="border-4 border-amber-400 dark:border-amber-500">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-3xl font-bold text-orange-600">{stats.new}</p>
+                <p className="text-3xl font-bold text-amber-600">{stats.new}</p>
                 <p className="text-sm text-muted-foreground mt-1">Pesanan Baru</p>
               </div>
             </CardContent>
-          </Card>
-          <Card>
+          </Tilt3DCard>
+          <Tilt3DCard className="border-4 border-blue-400 dark:border-blue-500">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p id="i5ke5h" className="text-3xl font-bold text-purple-600" style={{ color: '#2563eb' }}>{stats.shipped}</p>
+                <p id="i5ke5h" className="text-3xl font-bold text-blue-600" style={{ color: '#2563eb' }}>{stats.shipped}</p>
                 <p className="text-sm text-muted-foreground mt-1">Dikirim</p>
               </div>
             </CardContent>
-          </Card>
+          </Tilt3DCard>
         </div>
 
 {/* Activities Section */}
-        <Card>
+        <Card className="border-4 border-slate-300 dark:border-slate-600">
          <CardContent className="space-y-6">
            {/* Filter Tabs */}
- <Tabs value={selectedType} onValueChange={handleTypeChange} className="w-full">
-             <TabsList className="grid w-full grid-cols-5" style={{ marginTop: '15px' }}>
+  <Tabs value={selectedType} onValueChange={handleTypeChange} className="w-full">
+             <TabsList className="grid w-full grid-cols-5 bg-transparent p-0 h-auto border-b-2 border-slate-200 dark:border-slate-700 gap-2" style={{ marginTop: '15px' }}>
               {activityTypes.map(type => (
-                <TabsTrigger key={type.value} value={type.value} className="text-xs sm:text-sm">
+                <TabsTrigger 
+                  key={type.value} 
+                  value={type.value} 
+                  className="text-xs sm:text-sm rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-2 transition-all duration-200"
+                >
                   {type.label}
                 </TabsTrigger>
               ))}

@@ -14,7 +14,7 @@ interface StatusPembayaranChartProps {
 }
 
 export default function StatusPembayaranChart({ data }: StatusPembayaranChartProps) {
-  const chartData = [
+const chartData = [
     {
       name: 'Lunas',
       value: data.paidPercentage,
@@ -24,11 +24,6 @@ export default function StatusPembayaranChart({ data }: StatusPembayaranChartPro
       name: 'Belum Dibayar',
       value: data.unpaidPercentage,
       color: '#FF6B6B',
-    },
-    {
-      name: 'Tertunda',
-      value: data.pendingPercentage,
-      color: '#FFD447',
     },
   ]
 

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 
 interface OrderData {
@@ -22,12 +23,14 @@ interface PaymentRecordFormProps {
   order: OrderData
   onSubmit: (data: any) => void
   isSubmitting: boolean
+  isPaymentSuccessful?: boolean
 }
 
 export default function PaymentRecordForm({ 
   order, 
   onSubmit, 
-  isSubmitting 
+  isSubmitting,
+  isPaymentSuccessful = false
 }: PaymentRecordFormProps) {
 const [paymentMethod, setPaymentMethod] = useState('cash')
   const [amount, setAmount] = useState(order.totalAmount.toString())
@@ -103,22 +106,39 @@ const formData = {
     onSubmit(formData)
   }
 
-  return (
+return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Success State - Paid Badge */}
+      {isPaymentSuccessful && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+          <div className="flex-shrink-0">
+            <SafeIcon name="CheckCircle" className="h-6 w-6 text-green-600" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-green-900">✔️ Sudah Dibayar</p>
+            <p className="text-sm text-green-700">Pembayaran telah berhasil dicatat dan aman tersimpan</p>
+          </div>
+        </div>
+      )}
+
       {/* Payment Method Selection */}
       <div className="space-y-3">
         <Label className="text-base font-semibold">Metode Pembayaran</Label>
-        <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-          <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-secondary/50 cursor-pointer">
-            <RadioGroupItem value="cash" id="cash" />
-            <Label htmlFor="cash" className="flex-1 cursor-pointer">
+        <RadioGroup 
+          value={paymentMethod} 
+          onValueChange={setPaymentMethod}
+          disabled={isPaymentSuccessful}
+        >
+          <div className={`flex items-center space-x-2 p-3 border rounded-lg ${isPaymentSuccessful ? 'bg-muted/50 cursor-not-allowed' : 'hover:bg-secondary/50 cursor-pointer'}`}>
+            <RadioGroupItem value="cash" id="cash" disabled={isPaymentSuccessful} />
+            <Label htmlFor="cash" className={`flex-1 ${isPaymentSuccessful ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
               <div className="font-medium">Tunai</div>
               <div className="text-sm text-muted-foreground">Pembayaran langsung dengan uang tunai</div>
             </Label>
           </div>
-          <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-secondary/50 cursor-pointer">
-            <RadioGroupItem value="transfer" id="transfer" />
-            <Label htmlFor="transfer" className="flex-1 cursor-pointer">
+          <div className={`flex items-center space-x-2 p-3 border rounded-lg ${isPaymentSuccessful ? 'bg-muted/50 cursor-not-allowed' : 'hover:bg-secondary/50 cursor-pointer'}`}>
+            <RadioGroupItem value="transfer" id="transfer" disabled={isPaymentSuccessful} />
+            <Label htmlFor="transfer" className={`flex-1 ${isPaymentSuccessful ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
               <div className="font-medium">Transfer Bank</div>
               <div className="text-sm text-muted-foreground">Pembayaran melalui transfer bank dengan bukti</div>
             </Label>
@@ -128,7 +148,7 @@ const formData = {
 
       <div className="border-t pt-6" />
 
-      {/* Amount Input */}
+{/* Amount Input */}
       <div className="space-y-2">
         <Label htmlFor="amount" className="font-semibold">Nominal Pembayaran</Label>
         <div className="relative">
@@ -140,7 +160,7 @@ const formData = {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="pl-10"
-            disabled
+            disabled={isPaymentSuccessful}
           />
         </div>
         {errors.amount && (
@@ -161,21 +181,22 @@ const formData = {
           <div className="space-y-2">
             <Label htmlFor="transferProof" className="font-semibold">Bukti Transfer</Label>
             <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-secondary/50 transition-colors">
-              <input
+<input
                 id="transferProof"
                 type="file"
                 accept=".jpg,.jpeg,.png,.pdf"
                 onChange={handleFileChange}
                 className="hidden"
-              />
-              <label htmlFor="transferProof" className="cursor-pointer block">
+                disabled={isPaymentSuccessful}
+               />
+              <label htmlFor="transferProof" className={isPaymentSuccessful ? 'cursor-not-allowed block' : 'cursor-pointer block'}>
                 {transferProof ? (
                   <div className="flex items-center justify-center gap-2">
                     <SafeIcon name="CheckCircle" className="h-5 w-5 text-primary" />
                     <span className="text-sm font-medium">{transferProof.name}</span>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className={`space-y-2 ${isPaymentSuccessful ? 'opacity-60' : ''}`}>
                     <SafeIcon name="Upload" className="h-8 w-8 mx-auto text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">Klik untuk unggah bukti transfer</p>
@@ -195,7 +216,7 @@ const formData = {
         </>
       )}
 
-      {/* Notes */}
+{/* Notes */}
       <div className="space-y-2">
         <Label htmlFor="notes" className="font-semibold">Catatan (Opsional)</Label>
         <Textarea
@@ -204,36 +225,61 @@ const formData = {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
+          disabled={isPaymentSuccessful}
         />
       </div>
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-6 border-t">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => window.location.href = './detail-pesanan.html'}
-          disabled={isSubmitting}
-        >
-          Batal
-        </Button>
-        <Button
-          type="submit"
-          className="flex-1 bg-primary hover:bg-primary/90"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
-              Menyimpan...
-            </>
-          ) : (
-            <>
-              <SafeIcon name="Save" className="mr-2 h-4 w-4" />
-              Simpan Pembayaran
-            </>
-          )}
-        </Button>
+        {!isPaymentSuccessful ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.location.href = './detail-pesanan.html'}
+              disabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1 bg-primary hover:bg-primary/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                <>
+                  <SafeIcon name="Save" className="mr-2 h-4 w-4" />
+                  Simpan Pembayaran
+                </>
+              )}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.location.href = './detail-pesanan.html'}
+              className="flex-1"
+            >
+              <SafeIcon name="ArrowLeft" className="mr-2 h-4 w-4" />
+              Kembali ke Pesanan
+            </Button>
+            <Button
+              type="button"
+              onClick={() => window.location.href = './nota-pembayaran.html'}
+              className="flex-1 bg-primary hover:bg-primary/90"
+            >
+              <SafeIcon name="FileText" className="mr-2 h-4 w-4" />
+              Lihat Invoice
+            </Button>
+          </>
+        )}
       </div>
     </form>
   )

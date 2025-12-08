@@ -38,9 +38,11 @@
     --sidebar-accent-foreground: 220 13% 9%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 152 100% 30%;
-    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  }
+--shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+     --shadow-card: 0 2px 8px -1px rgb(0 0 0 / 0.08), 0 1px 3px -1px rgb(0 0 0 / 0.06);
+     --shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.08);
+     --shadow-xl: 0 8px 20px -4px rgb(0 0 0 / 0.15);
+   }
 }
 
 @layer base {
@@ -57,34 +59,32 @@
 }
 
 @layer components {
-  /* Professional sidebar active state styling */
-  [data-sidebar="menu-button"][data-active="true"] {
-    @apply relative bg-primary text-primary-foreground font-semibold;
-    box-shadow: inset 0 0 12px rgba(22, 163, 74, 0.15), 0 4px 12px rgba(22, 163, 74, 0.2);
-    border-radius: 0.5rem;
-  }
-
-  [data-sidebar="menu-button"][data-active="true"] svg {
-    @apply text-primary-foreground;
-  }
-
-[data-sidebar="menu-button"][data-active="true"]:hover {
-    @apply bg-primary scale-105;
-    box-shadow: inset 0 0 12px rgba(22, 163, 74, 0.15), 0 6px 16px rgba(22, 163, 74, 0.3);
-  }
-
-  /* Ensure non-active items have clean appearance */
-  [data-sidebar="menu-button"] {
-    @apply transition-all duration-300 ease-out;
-  }
-
-  [data-sidebar="menu-button"]:not([data-active="true"]) {
-    @apply text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50;
-  }
-
   /* Sidebar group label styling */
   [data-sidebar="group-label"] {
-    @apply text-xs font-semibold uppercase tracking-widest text-foreground/60;
+    @apply text-xs font-bold uppercase tracking-widest text-foreground/70 px-3 mb-3 mt-2;
+  }
+  
+  /* Enhanced sidebar menu item styling */
+  [data-sidebar="menu-button"] {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+/* Professional card styling */
+  .card-professional {
+    @apply rounded-xl border-2 border-border bg-card text-card-foreground shadow-[0_2px_8px_-1px_rgb(0_0_0_/0.08),0_1px_3px_-1px_rgb(0_0_0_/0.06)] hover:shadow-[0_8px_20px_-4px_rgb(0_0_0_/0.15),0_4px_12px_-2px_rgb(0_0_0_/0.12)] hover:border-primary/60 transition-all duration-300;
+  }
+
+  /* Enhanced border styling for interactive elements */
+  .border-enhanced {
+    @apply border-2 border-solid transition-all duration-300;
+  }
+
+  .border-gradient-animated {
+    @apply border-2 border-primary/40 hover:border-primary/80 transition-all duration-300;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-card to-card/80;
   }
 }
 
@@ -178,12 +178,32 @@
     }
   }
 
-  @keyframes glow {
+@keyframes glow {
     0%, 100% {
       box-shadow: 0 0 5px rgba(22, 163, 74, 0.2);
     }
     50% {
       box-shadow: 0 0 15px rgba(22, 163, 74, 0.4);
+    }
+  }
+
+  @keyframes borderGlow {
+    0%, 100% {
+      border-color: hsl(152 100% 30% / 0.4);
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.2);
+    }
+    50% {
+      border-color: hsl(152 100% 30% / 0.8);
+      box-shadow: 0 0 10px 2px rgba(22, 163, 74, 0.15);
+    }
+  }
+
+  @keyframes borderPulse {
+    0%, 100% {
+      border-color: hsl(152 100% 30% / 0.4);
+    }
+    50% {
+      border-color: hsl(152 100% 30% / 0.7);
     }
   }
 
@@ -281,12 +301,28 @@
 }
 
 @layer utilities {
+   /* 3D Tilt Card Perspective for Apple-like effect */
+   .perspective-1000 {
+     perspective: 1000px;
+   }
+
+   .preserve-3d {
+     transform-style: preserve-3d;
+   }
+
+   /* Ensure interactive elements remain clickable within 3D tilt cards */
+   .tilt-interactive {
+     pointer-events: auto;
+     position: relative;
+     z-index: 10;
+   }
+
   .gradient-lpg {
     background: linear-gradient(135deg, hsl(152 100% 30%) 0%, hsl(152 80% 40%) 100%);
   }
-  .gradient-lpg-subtle {
-    background: linear-gradient(135deg, hsl(152 100% 95%) 0%, hsl(48 100% 95%) 100%);
-  }
+   .gradient-lpg-subtle {
+     background: linear-gradient(135deg, hsl(152 100% 95%) 0%, hsl(48 100% 95%) 100%);
+   }
 
   .bg-login-pattern {
     background: 

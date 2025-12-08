@@ -160,8 +160,11 @@ export default defineConfig({
       treeShaking: true,
     },
     optimizeDeps: {
-      force: false
+      force: false,
+      include: ['tslib']
+    },
+    ssr: {
+      external: []
     },
   }
 });
-

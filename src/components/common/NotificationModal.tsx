@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon'
 
 interface NotificationModalProps {
@@ -111,8 +112,14 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
               </div>
             ))}
           </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+</ScrollArea>
+         <Button variant="outline" className="w-full mt-4 text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all duration-300 ease-out" asChild>
+           <a href="./page-911994.html">
+             Lihat Semua Aktivitas
+             <SafeIcon name="ArrowRight" className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+           </a>
+         </Button>
+       </DialogContent>
+     </Dialog>
   )
 }

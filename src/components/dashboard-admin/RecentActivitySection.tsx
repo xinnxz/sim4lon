@@ -49,12 +49,12 @@ const recentActivities = [
 ]
 
 export default function RecentActivitySection() {
-  return (
-    <Card className="shadow-sm hover:shadow-lg transition-all duration-300 ease-out h-full flex flex-col">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>
-        <CardDescription className="text-xs sm:text-sm">Ringkasan pembayaran dan pengiriman terbaru</CardDescription>
-      </CardHeader>
+    return (
+<Card className="h-full flex flex-col shadow-sm">
+       <CardHeader className="pb-4">
+         <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>
+         <CardDescription className="text-xs sm:text-sm">Ringkasan pembayaran dan pengiriman terbaru</CardDescription>
+       </CardHeader>
 <CardContent id="i7bc0u" className="space-y-4 flex-1 flex flex-col">
          <div className="space-y-4 max-h-96 overflow-y-auto flex-1">
 {recentActivities.map((activity, index) => {
@@ -106,13 +106,13 @@ export default function RecentActivitySection() {
             );
           })}
         </div>
-<Button variant="outline" className="w-full mt-2 text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all duration-300 ease-out" asChild>
-<a href="./page-911994.html" id="i1jdjs">
+<Button variant="outline" className="w-full mt-2 text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all duration-300 ease-out pointer-events-auto" asChild style={{ pointerEvents: 'auto' }}>
+<a href="./page-911994.html" id="i1jdjs" style={{ pointerEvents: 'auto' }}>
             Lihat Semua Aktivitas
             <SafeIcon name="ArrowRight" className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </a>
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
+</Button>
+</CardContent>
+      </Card>
+    )
+ }

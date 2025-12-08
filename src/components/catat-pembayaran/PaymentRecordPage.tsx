@@ -30,30 +30,29 @@ const mockOrder: OrderData = {
 
 export default function PaymentRecordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [paymentSuccessful, setPaymentSuccessful] = useState(false)
 
-const handleSubmit = async (data: any) => {
+ const handleSubmit = async (data: any) => {
     setIsSubmitting(true)
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000))
     console.log('Payment recorded:', data)
     setIsSubmitting(false)
     
-    // Show elegant success notification
+    // Mark payment as successful
+    setPaymentSuccessful(true)
+    
+ // Show elegant success notification with invoice action
     toast.success('Pembayaran Berhasil!', {
-      description: `Pembayaran sebesar Rp ${mockOrder.totalAmount.toLocaleString('id-ID')} telah dicatat. Invoice akan dibangkitkan.`,
+      description: `Pembayaran sebesar Rp ${mockOrder.totalAmount.toLocaleString('id-ID')} telah dicatat. Data aman tersimpan.`,
       action: {
         label: 'Lihat Invoice',
         onClick: () => {
           window.location.href = './nota-pembayaran.html'
         },
       },
-      duration: 4000,
+      duration: 5000,
     })
-    
-    // Auto redirect after notification
-    setTimeout(() => {
-      window.location.href = './nota-pembayaran.html'
-    }, 2000)
   }
 
   return (
@@ -81,11 +80,12 @@ const handleSubmit = async (data: any) => {
                 Pilih metode pembayaran dan masukkan informasi pembayaran
               </CardDescription>
             </CardHeader>
-            <CardContent>
+<CardContent>
               <PaymentRecordForm 
                 order={mockOrder}
                 onSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
+                isPaymentSuccessful={paymentSuccessful}
               />
             </CardContent>
           </Card>
