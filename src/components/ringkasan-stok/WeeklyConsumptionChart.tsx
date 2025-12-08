@@ -23,7 +23,7 @@ const mockChartData: ChartDataPoint[] = [
 
 export default function WeeklyConsumptionChart() {
   return (
-    <Card style={{ margin: '0 0 20px 0' }}>
+<Card>
       <CardHeader>
         <CardTitle>Grafik Pemakaian Mingguan</CardTitle>
         <CardDescription>

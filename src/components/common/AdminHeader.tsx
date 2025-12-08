@@ -31,7 +31,7 @@ export default function AdminHeader({
 
 return (
     <>
-<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" id="ijli">
+<header className="sticky top-0 z-50 w-full border-b border-border bg-gradient-to-r from-background to-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300" id="ijli">
          <div className="w-full flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & App Name */}
           <div className="flex items-center gap-3">
@@ -88,12 +88,6 @@ return (
                   <a href="./profil-admin.html" className="cursor-pointer">
                     <SafeIcon name="User" className="mr-2 h-4 w-4" />
                     <span>Profil</span>
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <a href="./profil-admin.html" className="cursor-pointer">
-                    <SafeIcon name="Settings" className="mr-2 h-4 w-4" />
-                    <span>Pengaturan</span>
                   </a>
                 </DropdownMenuItem>
 <DropdownMenuSeparator />

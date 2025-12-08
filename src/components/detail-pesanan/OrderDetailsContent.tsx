@@ -1,92 +1,62 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import SafeIcon from "@/components/common/SafeIcon";
-import OrderSummaryCard from "./OrderSummaryCard";
-import OrderItemsTable from "./OrderItemsTable";
-import OrderTimelineStatus from "./OrderTimelineStatus";
-import OrderActionsPanel from "./OrderActionsPanel";
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import SafeIcon from '@/components/common/SafeIcon'
+import OrderSummaryCard from './OrderSummaryCard'
+import OrderItemsTable from './OrderItemsTable'
+import OrderTimelineStatus from './OrderTimelineStatus'
+import OrderActionsPanel from './OrderActionsPanel'
 
 // Mock order data
 const mockOrder = {
-  id: "ORD-2024-001234",
-  date: "2024-01-15",
-  status: "processing",
-  statusLabel: "Sedang Diproses",
-  baseId: "BASE-001",
-  baseName: "Pangkalan Maju Jaya",
-  baseAddress: "Jl. Raya Utama No. 123, Jakarta Selatan",
-  basePhone: "021-1234567",
-  baseContact: "Luthfi Alfaridz",
+  id: 'ORD-2024-001234',
+  date: '2024-01-15',
+  status: 'processing',
+  statusLabel: 'Sedang Diproses',
+  baseId: 'BASE-001',
+  baseName: 'Pangkalan Maju Jaya',
+  baseAddress: 'Jl. Raya Utama No. 123, Jakarta Selatan',
+  basePhone: '021-1234567',
+  baseContact: 'Budi Santoso',
   items: [
-    { id: 1, type: "3kg", quantity: 50, price: 75000, subtotal: 3750000 },
-    { id: 2, type: "12kg", quantity: 20, price: 250000, subtotal: 5000000 },
+    { id: 1, type: '3kg', quantity: 50, price: 75000, subtotal: 3750000 },
+    { id: 2, type: '12kg', quantity: 20, price: 250000, subtotal: 5000000 },
   ],
   subtotal: 8750000,
   tax: 875000,
   total: 9625000,
-  paymentStatus: "pending",
+  paymentStatus: 'pending',
   paymentMethod: null,
   timeline: [
-    {
-      status: "created",
-      label: "Pesanan Dibuat",
-      date: "2024-01-15 10:30",
-      completed: true,
-    },
-    {
-      status: "confirmed",
-      label: "Pesanan Dikonfirmasi",
-      date: "2024-01-15 11:00",
-      completed: true,
-    },
-    {
-      status: "payment",
-      label: "Menunggu Pembayaran",
-      date: null,
-      completed: false,
-    },
-    {
-      status: "assigned",
-      label: "Driver Ditugaskan",
-      date: null,
-      completed: false,
-    },
-    {
-      status: "delivered",
-      label: "Pengiriman Selesai",
-      date: null,
-      completed: false,
-    },
+    { status: 'created', label: 'Pesanan Dibuat', date: '2024-01-15 10:30', completed: true },
+    { status: 'confirmed', label: 'Pesanan Dikonfirmasi', date: '2024-01-15 11:00', completed: true },
+    { status: 'payment', label: 'Menunggu Pembayaran', date: null, completed: false },
+    { status: 'assigned', label: 'Driver Ditugaskan', date: null, completed: false },
+    { status: 'delivered', label: 'Pengiriman Selesai', date: null, completed: false },
   ],
-  notes: "Pesanan reguler, pengiriman standar",
-};
+  notes: 'Pesanan reguler, pengiriman standar',
+}
 
 export default function OrderDetailsContent() {
-  const [order] = useState(mockOrder);
+  const [order] = useState(mockOrder)
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "processing":
-        return "bg-blue-100 text-blue-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
+      case 'completed':
+        return 'bg-green-100 text-green-800'
+      case 'processing':
+        return 'bg-blue-100 text-blue-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
       default:
-        return "bg-gray-100 text-gray-800";
+        return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -96,7 +66,7 @@ export default function OrderDetailsContent() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => (window.location.href = "./daftar-pesanan.html")}
+            onClick={() => window.location.href = './daftar-pesanan.html'}
             className="h-10 w-10"
           >
             <SafeIcon name="ArrowLeft" className="h-5 w-5" />
@@ -106,9 +76,7 @@ export default function OrderDetailsContent() {
             <p className="text-muted-foreground">Pesanan {order.id}</p>
           </div>
         </div>
-        <Badge
-          className={`text-base px-4 py-2 ${getStatusColor(order.status)}`}
-        >
+        <Badge className={`text-base px-4 py-2 ${getStatusColor(order.status)}`}>
           {order.statusLabel}
         </Badge>
       </div>
@@ -134,9 +102,7 @@ export default function OrderDetailsContent() {
           <Card>
             <CardHeader>
               <CardTitle>Timeline Status</CardTitle>
-              <CardDescription>
-                Riwayat perubahan status pesanan
-              </CardDescription>
+              <CardDescription>Riwayat perubahan status pesanan</CardDescription>
             </CardHeader>
             <CardContent>
               <OrderTimelineStatus timeline={order.timeline} />
@@ -165,27 +131,19 @@ export default function OrderDetailsContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Nama Pangkalan
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Nama Pangkalan</p>
                 <p className="text-sm font-semibold">{order.baseName}</p>
               </div>
               <Separator />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Alamat
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Alamat</p>
                 <p className="text-sm">{order.baseAddress}</p>
               </div>
               <Separator />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Kontak
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Kontak</p>
                 <p className="text-sm font-semibold">{order.baseContact}</p>
-                <p className="text-sm text-muted-foreground">
-                  {order.basePhone}
-                </p>
+                <p className="text-sm text-muted-foreground">{order.basePhone}</p>
               </div>
             </CardContent>
           </Card>
@@ -198,36 +156,22 @@ export default function OrderDetailsContent() {
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">
-                  Rp {order.subtotal.toLocaleString("id-ID")}
-                </span>
+                <span className="font-medium">Rp {order.subtotal.toLocaleString('id-ID')}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Pajak (10%)</span>
-                <span className="font-medium">
-                  Rp {order.tax.toLocaleString("id-ID")}
-                </span>
+                <span className="font-medium">Rp {order.tax.toLocaleString('id-ID')}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
                 <span className="font-semibold">Total</span>
-                <span className="text-lg font-bold text-primary">
-                  Rp {order.total.toLocaleString("id-ID")}
-                </span>
+                <span className="text-lg font-bold text-primary">Rp {order.total.toLocaleString('id-ID')}</span>
               </div>
               <Separator />
               <div className="pt-2">
-                <p className="text-xs text-muted-foreground mb-2">
-                  Status Pembayaran
-                </p>
-                <Badge
-                  variant={
-                    order.paymentStatus === "pending" ? "outline" : "default"
-                  }
-                >
-                  {order.paymentStatus === "pending"
-                    ? "Belum Dibayar"
-                    : "Sudah Dibayar"}
+                <p className="text-xs text-muted-foreground mb-2">Status Pembayaran</p>
+                <Badge variant={order.paymentStatus === 'pending' ? 'outline' : 'default'}>
+                  {order.paymentStatus === 'pending' ? 'Belum Dibayar' : 'Sudah Dibayar'}
                 </Badge>
               </div>
             </CardContent>
@@ -238,5 +182,5 @@ export default function OrderDetailsContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }

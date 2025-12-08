@@ -35,8 +35,8 @@ interface FormErrors {
 }
 
 const roleOptions = [
-  { value: 'Admin', label: 'Admin' },
-  { value: 'Operator', label: 'Operator' },
+  { value: 'Admin', label: 'Administrator' },
+  { value: 'Operator', label: 'Operator Lapangan' },
 ]
 
 export default function AddUserForm({ onClose }: AddUserFormProps) {

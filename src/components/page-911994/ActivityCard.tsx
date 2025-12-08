@@ -23,6 +23,9 @@ interface ActivityCardProps {
 }
 
 export default function ActivityCard({ activity, style }: ActivityCardProps) {
+  const handleCardClick = () => {
+    window.location.href = `./detail-pesanan.html?id=${encodeURIComponent(activity.orderNumber)}`
+  }
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'completed':
@@ -80,10 +83,14 @@ const getIconColor = (type: string) => {
   }
 
 return (
-    <Card 
-      className={`p-4 border-l-4 transition-all hover:shadow-md ${getBackgroundColor(activity.type)}`}
-      style={style}
+    <div
+      onClick={handleCardClick}
+      className="cursor-pointer"
     >
+      <Card 
+        className={`p-4 border-l-4 transition-all hover:shadow-md hover:scale-[1.01] ${getBackgroundColor(activity.type)}`}
+        style={style}
+      >
       <div className="flex items-start gap-4">
 {/* Icon */}
          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border ${getBackgroundColor(activity.type)}`}>
@@ -134,9 +141,10 @@ return (
                 <span>{activity.quantity}</span>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-    </Card>
-  )
-}
+</div>
+         </div>
+       </div>
+      </Card>
+    </div>
+   )
+ }

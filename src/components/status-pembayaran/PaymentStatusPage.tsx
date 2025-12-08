@@ -39,14 +39,6 @@ const mockPaymentData = {
       dueDate: '2024-01-21',
     },
     {
-      id: 'ORD-003',
-      pangkalan: 'Pangkalan Bersama',
-      amount: 2750000,
-      status: 'Tertunda',
-      date: '2024-01-13',
-      dueDate: '2024-01-18',
-    },
-    {
       id: 'ORD-004',
       pangkalan: 'Pangkalan Utama',
       amount: 4200000,

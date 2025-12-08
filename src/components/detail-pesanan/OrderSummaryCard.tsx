@@ -25,8 +25,8 @@ interface OrderSummaryCardProps {
 
 export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card id="iu836">
+      <CardHeader id="i52nl">
         <CardTitle>Ringkasan Pesanan</CardTitle>
       </CardHeader>
 <CardContent className="space-y-4">

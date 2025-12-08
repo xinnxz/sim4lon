@@ -23,6 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import OrderStatusBadge from './OrderStatusBadge'
+import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 
 interface Order {
   id: string
@@ -160,54 +161,66 @@ export default function OrderListPage() {
         </Button>
 </div>
 
-       {/* Summary Stats */}
-       <div className="grid gap-4 sm:grid-cols-4">
-         <Card>
-           <CardHeader className="pb-3">
-             <CardTitle className="text-sm font-medium text-muted-foreground">
-               Total Pesanan
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-bold">{mockOrders.length}</p>
-           </CardContent>
-         </Card>
-         <Card>
-<CardHeader className="pb-3">
+{/* Summary Stats */}
+        <div className="grid gap-4 sm:grid-cols-5">
+<Tilt3DCard id="i460z8" className="border-2 rounded-[12px]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Pesanan
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{mockOrders.length}</p>
+            </CardContent>
+          </Tilt3DCard>
+<Tilt3DCard id="iodwmo" className="border-2">
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Belum Dibayar
               </CardTitle>
             </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-bold text-yellow-600">
-               {mockOrders.filter(o => o.status === 'pending').length}
-             </p>
-           </CardContent>
-         </Card>
-         <Card>
-           <CardHeader className="pb-3">
-             <CardTitle className="text-sm font-medium text-muted-foreground">
-               Diproses
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-bold text-blue-600">
-               {mockOrders.filter(o => o.status === 'processing').length}
-             </p>
-           </CardContent>
-         </Card>
-         <Card>
-           <CardHeader className="pb-3">
-             <CardTitle className="text-sm font-medium text-muted-foreground">
-               Selesai
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-bold text-primary">
-               {mockOrders.filter(o => o.status === 'completed').length}
-             </p>
-           </CardContent>
-</Card>
+            <CardContent>
+              <p className="text-2xl font-bold text-yellow-600">
+                {mockOrders.filter(o => o.status === 'pending').length}
+              </p>
+            </CardContent>
+          </Tilt3DCard>
+<Tilt3DCard id="i4y8y9" className="border-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Diproses
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-blue-600">
+                {mockOrders.filter(o => o.status === 'processing').length}
+              </p>
+            </CardContent>
+          </Tilt3DCard>
+<Tilt3DCard id="iab46h" className="border-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Selesai
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-primary">
+                {mockOrders.filter(o => o.status === 'completed').length}
+              </p>
+            </CardContent>
+          </Tilt3DCard>
+<Tilt3DCard id="idihdx" className="border-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Dibatalkan
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-destructive">
+                {mockOrders.filter(o => o.status === 'cancelled').length}
+              </p>
+            </CardContent>
+          </Tilt3DCard>
         </div>
 
         {/* Filters Card */}

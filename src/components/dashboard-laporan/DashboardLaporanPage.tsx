@@ -21,6 +21,7 @@ import {
 import SafeIcon from '@/components/common/SafeIcon'
 import KPICard from './KPICard'
 import ReportChart from './ReportChart'
+import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 // Mock data for KPIs
@@ -85,20 +86,17 @@ const generateMockSalesData = (from: Date, to: Date) => {
 
 // Mock data for Status Pembayaran
 const mockPaymentData = {
-  summary: {
+summary: {
     totalOrders: 1245,
     paidAmount: 98750000,
     unpaidAmount: 18500000,
-    pendingAmount: 8250000,
-    paidPercentage: 79,
-    unpaidPercentage: 15,
-    pendingPercentage: 6
+    paidPercentage: 84,
+    unpaidPercentage: 16
   },
   details: [
     { id: 'ORD-001', pangkalan: 'Pangkalan Merdeka', amount: 5325000, status: 'Lunas', date: '2025-12-01', dueDate: '2025-12-15' },
     { id: 'ORD-002', pangkalan: 'Pangkalan Jaya', amount: 900000, status: 'Belum Dibayar', date: '2025-12-03', dueDate: '2025-12-10' },
     { id: 'ORD-003', pangkalan: 'Pangkalan Sentosa', amount: 6000000, status: 'Lunas', date: '2025-12-03', dueDate: '2025-12-20' },
-    { id: 'ORD-004', pangkalan: 'Pangkalan Utama', amount: 3500000, status: 'Tertunda', date: '2025-12-02', dueDate: '2025-12-09' },
     { id: 'ORD-005', pangkalan: 'Pangkalan Pusat', amount: 4200000, status: 'Lunas', date: '2025-12-04', dueDate: '2025-12-18' },
   ]
 }
@@ -176,25 +174,19 @@ const getStatusBadge = (status: string) => {
         <SafeIcon name="AlertCircle" className="mr-1 h-3 w-3" />
         {status}
       </Badge>
-    case 'Tertunda':
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-        <SafeIcon name="Clock" className="mr-1 h-3 w-3" />
-        {status}
-      </Badge>
-    default:
+default:
       return <Badge variant="outline">{status}</Badge>
   }
 }
 
 export default function DashboardLaporanPage() {
-  const [period, setPeriod] = useState('minggu')
+  const [period, setPeriod] = useState('bulan')
+  const [paymentPeriod, setPaymentPeriod] = useState('bulan')
   const [stockPeriod, setStockPeriod] = useState('30')
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
   })
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
 
   const chartData = generateMockSalesData(dateRange.from, dateRange.to)
   const stockData = getMockStockData(stockPeriod)
@@ -204,141 +196,137 @@ export default function DashboardLaporanPage() {
   }
 
 
-  return (
-    <div className="flex-1 space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard Laporan</h1>
-          <p className="text-muted-foreground mt-1">
-            Ringkasan visual metrik operasional dan keuangan
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="minggu">Minggu Ini</SelectItem>
-              <SelectItem value="bulan">Bulan Ini</SelectItem>
-              <SelectItem value="tahun">Tahun Ini</SelectItem>
-            </SelectContent>
-          </Select>
-<Button asChild variant="outline">
-            <a href="./export-laporan.html">
-              <SafeIcon name="Download" className="mr-2 h-4 w-4" />
-              Export
-            </a>
-          </Button>
-        </div>
-      </div>
+return (
+    <div className="flex-1 space-y-8 p-8 bg-gradient-to-b from-background to-background/50">
+       {/* Header */}
+       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+         <div>
+           <h1 className="text-3xl font-bold tracking-tight">Dashboard Laporan</h1>
+           <p className="text-muted-foreground mt-1">
+             Ringkasan visual metrik operasional dan keuangan
+           </p>
+         </div>
+<div className="flex gap-2">
+ <Button asChild variant="outline">
+             <a href="./export-laporan.html">
+               <SafeIcon name="Download" className="mr-2 h-4 w-4" />
+               Export
+             </a>
+           </Button>
+         </div>
+       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {mockKPIs.map((kpi, index) => (
-          <KPICard key={index} {...kpi} />
-        ))}
-      </div>
-
-      {/* Tabbed Reports Section */}
-      <Card className="border-0 shadow-card">
-        <Tabs defaultValue="tren-penjualan" className="w-full">
-          <div className="border-b border-border px-6 pt-6">
-            <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto gap-4">
-              <TabsTrigger 
-                value="tren-penjualan"
-                className="relative bg-transparent px-0 py-3 font-semibold text-foreground/70 data-[state=active]:text-primary data-[state=active]:bg-transparent border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none"
-              >
-                Tren Penjualan
-              </TabsTrigger>
-              <TabsTrigger 
-                value="status-pembayaran"
-                className="relative bg-transparent px-0 py-3 font-semibold text-foreground/70 data-[state=active]:text-primary data-[state=active]:bg-transparent border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none"
-              >
-                Status Pembayaran
-              </TabsTrigger>
-              <TabsTrigger 
-                value="pemakaian-stok"
-                className="relative bg-transparent px-0 py-3 font-semibold text-foreground/70 data-[state=active]:text-primary data-[state=active]:bg-transparent border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none"
-              >
-                Pemakaian Stok LPG
-              </TabsTrigger>
-            </TabsList>
-          </div>
+ {/* Tabbed Reports Section */}
+ <Card className="border-0">
+         <Tabs defaultValue="tren-penjualan" className="w-full">
+<div id="id30sk" className="border-b-2 border-border px-6 pt-6">
+             <TabsList className="grid w-full grid-cols-3 bg-transparent p-0 h-auto gap-4">
+               <TabsTrigger 
+                 value="tren-penjualan"
+                 className="relative bg-transparent px-0 py-3 font-semibold text-foreground/70 data-[state=active]:text-primary data-[state=active]:bg-transparent border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none"
+               >
+                 Penjualan
+               </TabsTrigger>
+               <TabsTrigger 
+                 value="status-pembayaran"
+                 className="relative bg-transparent px-0 py-3 font-semibold text-foreground/70 data-[state=active]:text-primary data-[state=active]:bg-transparent border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none"
+               >
+                 Pembayaran
+               </TabsTrigger>
+               <TabsTrigger 
+                 value="pemakaian-stok"
+                 className="relative bg-transparent px-0 py-3 font-semibold text-foreground/70 data-[state=active]:text-primary data-[state=active]:bg-transparent border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none"
+               >
+                 Pemakaian Stok
+               </TabsTrigger>
+             </TabsList>
+           </div>
 
           {/* Tren Penjualan Tab */}
           <TabsContent value="tren-penjualan" className="mt-0">
             <CardContent className="pt-6">
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Tren Penjualan</h3>
-                  <p className="text-sm text-muted-foreground">Analisis tren penjualan mingguan dan historis</p>
-                </div>
+<div>
+                   <h3 id="ibydml" className="text-lg font-semibold text-foreground mb-2">Penjualan</h3>
+                   <p className="text-sm text-muted-foreground">Analisis tren penjualan mingguan dan historis</p>
+                 </div>
 
-                {/* Date Range Filter */}
+{/* Period Filter */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Filter Periode</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Dari Tanggal</label>
-                        <input
-                          type="date"
-                          className="w-full px-3 py-2 border rounded-md text-sm bg-background"
-                        />
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                      <div className="flex-1">
+                        <label className="text-sm font-medium mb-2 block">Periode</label>
+                        <Select value={period} onValueChange={setPeriod}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih periode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bulan">Bulan Ini</SelectItem>
+                            <SelectItem value="bulan-lalu">Bulan Lalu</SelectItem>
+                            <SelectItem value="3-bulan">3 Bulan Terakhir</SelectItem>
+                            <SelectItem value="6-bulan">6 Bulan Terakhir</SelectItem>
+                            <SelectItem value="12-bulan">12 Bulan Terakhir</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Sampai Tanggal</label>
-                        <input
-                          type="date"
-                          className="w-full px-3 py-2 border rounded-md text-sm bg-background"
-                        />
-                      </div>
+                      <Button className="w-full sm:w-auto">
+                        <SafeIcon name="RefreshCw" className="mr-2 h-4 w-4" />
+                        Perbarui
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Sales Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="animate-fadeInUp">
-                    <CardHeader className="pb-3">
-                      <p className="text-sm text-muted-foreground font-medium">Total Penjualan</p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-foreground">Rp 982.5M</p>
-                      <p className="text-xs text-muted-foreground mt-1">Dalam periode</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                    <CardHeader className="pb-3">
-                      <p className="text-sm text-muted-foreground font-medium">Total Pesanan</p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-foreground">485</p>
-                      <p className="text-xs text-muted-foreground mt-1">Pesanan dalam periode</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                    <CardHeader className="pb-3">
-                      <p className="text-sm text-muted-foreground font-medium">Rata-rata Harian</p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-foreground">Rp 32.75M</p>
-                      <p className="text-xs text-muted-foreground mt-1">Dari 30 hari terakhir</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                    <CardHeader className="pb-3">
-                      <p className="text-sm text-muted-foreground font-medium">Pertumbuhan</p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-primary">+18.5%</p>
-                      <p className="text-xs text-muted-foreground mt-1">Vs periode sebelumnya</p>
-                    </CardContent>
-                  </Card>
+{/* Sales Metrics */}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Tilt3DCard id="ivcrvq" className="animate-fadeInUp">
+                    <Card>
+                      <CardHeader id="icgna6" className="pb-3">
+                        <p className="text-sm font-semibold text-foreground/70">Total Penjualan</p>
+                      </CardHeader>
+                      <CardContent id="iu4gts">
+                        <p className="text-2xl font-bold text-primary">Rp 982.5M</p>
+                        <p className="text-xs text-foreground/60 mt-1">Dalam periode</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
+                  <Tilt3DCard id="ikzitr" className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <p className="text-sm font-semibold text-foreground/70">Total Pesanan</p>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold text-primary">485</p>
+                        <p className="text-xs text-foreground/60 mt-1">Pesanan dalam periode</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
+<Tilt3DCard id="i5nq8k" className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                    <Card style={{ borderTopRightRadius: '0px' }}>
+                      <CardHeader className="pb-3">
+                        <p className="text-sm font-semibold text-foreground/70">Rata-rata Harian</p>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold text-primary">Rp 32.75M</p>
+                        <p className="text-xs text-foreground/60 mt-1">Dari 30 hari terakhir</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
+                  <Tilt3DCard id="iax1tl" className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                    <Card id="i0i41n" style={{ borderTopLeftRadius: '0px', borderTopRightRadius: '0px' }}>
+                      <CardHeader className="pb-3">
+                        <p className="text-sm font-semibold text-foreground/70">Pertumbuhan</p>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold text-primary">+18.5%</p>
+                        <p className="text-xs text-foreground/60 mt-1">Vs periode sebelumnya</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
                 </div>
 
                 {/* Sales Chart */}
@@ -437,7 +425,7 @@ export default function DashboardLaporanPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b bg-secondary/50">
+<tr className="border-b-2 bg-secondary/50">
                             <th className="text-left px-4 py-3 font-semibold">Tanggal</th>
                             <th className="text-right px-4 py-3 font-semibold">Penjualan</th>
                             <th className="text-right px-4 py-3 font-semibold">Target</th>
@@ -451,7 +439,7 @@ export default function DashboardLaporanPage() {
                             const isAboveTarget = item.penjualan >= item.target
                             
                             return (
-                              <tr key={index} className="border-b hover:bg-secondary/30">
+<tr key={index} className="border-b-2 hover:bg-secondary/30">
                                 <td className="px-4 py-3">{item.fullDate}</td>
                                 <td className="text-right px-4 py-3 font-semibold text-primary">
                                   Rp {(item.penjualan / 1000000).toFixed(1)}M
@@ -477,68 +465,91 @@ export default function DashboardLaporanPage() {
             </CardContent>
           </TabsContent>
 
-          {/* Status Pembayaran Tab */}
-          <TabsContent value="status-pembayaran" className="mt-0">
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Status Pembayaran</h3>
-                  <p className="text-sm text-muted-foreground">Ringkasan status pembayaran pesanan dan analisis keuangan</p>
-                </div>
+{/* Status Pembayaran Tab */}
+           <TabsContent value="status-pembayaran" className="mt-0">
+             <CardContent className="pt-6">
+               <div className="space-y-6">
+                 <div>
+                   <h3 className="text-lg font-semibold text-foreground mb-2">Status Pembayaran</h3>
+                   <p className="text-sm text-muted-foreground">Ringkasan status pembayaran pesanan dan analisis keuangan</p>
+                 </div>
 
-                {/* Summary Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Card className="animate-fadeInUp">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
-                      <div className="p-2 rounded-lg bg-blue-50">
-                        <SafeIcon name="ShoppingCart" className="h-4 w-4 text-blue-600" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{mockPaymentData.summary.totalOrders}</div>
-                    </CardContent>
-                  </Card>
+                 {/* Period Filter */}
+                 <Card>
+                   <CardHeader>
+                     <CardTitle className="text-base">Filter Periode</CardTitle>
+                   </CardHeader>
+                   <CardContent>
+                     <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                       <div className="flex-1">
+                         <label className="text-sm font-medium mb-2 block">Periode</label>
+                         <Select value={paymentPeriod} onValueChange={setPaymentPeriod}>
+                           <SelectTrigger>
+                             <SelectValue placeholder="Pilih periode" />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="bulan">Bulan Ini</SelectItem>
+                             <SelectItem value="bulan-lalu">Bulan Lalu</SelectItem>
+                             <SelectItem value="3-bulan">3 Bulan Terakhir</SelectItem>
+                             <SelectItem value="6-bulan">6 Bulan Terakhir</SelectItem>
+                             <SelectItem value="12-bulan">12 Bulan Terakhir</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+                       <Button className="w-full sm:w-auto">
+                         <SafeIcon name="RefreshCw" className="mr-2 h-4 w-4" />
+                         Perbarui
+                       </Button>
+                     </div>
+                   </CardContent>
+                 </Card>
 
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Sudah Dibayar</CardTitle>
-                      <div className="p-2 rounded-lg bg-green-50">
-                        <SafeIcon name="CheckCircle" className="h-4 w-4 text-green-600" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(mockPaymentData.summary.paidAmount)}</div>
-                      <p className="text-xs text-muted-foreground mt-1">{mockPaymentData.summary.paidPercentage}% dari total</p>
-                    </CardContent>
-                  </Card>
+{/* Summary Cards */}
+                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                   <Tilt3DCard className="animate-fadeInUp">
+                     <Card>
+                       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                         <CardTitle className="text-sm font-semibold text-foreground/70">Total Pesanan</CardTitle>
+                         <div className="p-2 rounded-lg bg-blue-50">
+                           <SafeIcon name="ShoppingCart" className="h-4 w-4 text-blue-600" />
+                         </div>
+                       </CardHeader>
+                       <CardContent>
+                         <div className="text-2xl font-bold text-primary">{mockPaymentData.summary.totalOrders}</div>
+                       </CardContent>
+                     </Card>
+                   </Tilt3DCard>
 
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Belum Dibayar</CardTitle>
-                      <div className="p-2 rounded-lg bg-red-50">
-                        <SafeIcon name="AlertCircle" className="h-4 w-4 text-red-600" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(mockPaymentData.summary.unpaidAmount)}</div>
-                      <p className="text-xs text-muted-foreground mt-1">{mockPaymentData.summary.unpaidPercentage}% dari total</p>
-                    </CardContent>
-                  </Card>
+                   <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                     <Card>
+                       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                         <CardTitle className="text-sm font-semibold text-foreground/70">Sudah Dibayar</CardTitle>
+                         <div className="p-2 rounded-lg bg-green-50">
+                           <SafeIcon name="CheckCircle" className="h-4 w-4 text-green-600" />
+                         </div>
+                       </CardHeader>
+                       <CardContent>
+                         <div className="text-2xl font-bold text-primary">{formatCurrency(mockPaymentData.summary.paidAmount)}</div>
+                         <p className="text-xs text-foreground/60 mt-1">{mockPaymentData.summary.paidPercentage}% dari total</p>
+                       </CardContent>
+                     </Card>
+                   </Tilt3DCard>
 
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Tertunda</CardTitle>
-                      <div className="p-2 rounded-lg bg-yellow-50">
-                        <SafeIcon name="Clock" className="h-4 w-4 text-yellow-600" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(mockPaymentData.summary.pendingAmount)}</div>
-                      <p className="text-xs text-muted-foreground mt-1">{mockPaymentData.summary.pendingPercentage}% dari total</p>
-                    </CardContent>
-                  </Card>
-                </div>
+ <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                      <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-semibold text-foreground/70">Belum Dibayar</CardTitle>
+                          <div className="p-2 rounded-lg bg-red-50">
+                            <SafeIcon name="AlertCircle" className="h-4 w-4 text-red-600" />
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold text-destructive">{formatCurrency(mockPaymentData.summary.unpaidAmount)}</div>
+                          <p className="text-xs text-foreground/60 mt-1">{mockPaymentData.summary.unpaidPercentage}% dari total</p>
+                        </CardContent>
+                      </Card>
+                    </Tilt3DCard>
+                 </div>
 
                 {/* Pie Chart */}
                 <Card className="animate-fadeInUp">
@@ -549,29 +560,27 @@ export default function DashboardLaporanPage() {
                   <CardContent>
                     <div className="w-full h-[400px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={[
-                              { name: 'Lunas', value: mockPaymentData.summary.paidPercentage, fill: '#009B4C' },
-                              { name: 'Belum Dibayar', value: mockPaymentData.summary.unpaidPercentage, fill: '#EF4444' },
-                              { name: 'Tertunda', value: mockPaymentData.summary.pendingPercentage, fill: '#FFD447' }
-                            ]}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, value }) => `${name}: ${value}%`}
-                            outerRadius={120}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {[
-                              { fill: '#009B4C' },
-                              { fill: '#EF4444' },
-                              { fill: '#FFD447' }
-                            ].map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.fill} />
-                            ))}
-                          </Pie>
+<PieChart>
+                           <Pie
+                             data={[
+                               { name: 'Lunas', value: mockPaymentData.summary.paidPercentage, fill: '#009B4C' },
+                               { name: 'Belum Dibayar', value: mockPaymentData.summary.unpaidPercentage, fill: '#EF4444' }
+                             ]}
+                             cx="50%"
+                             cy="50%"
+                             labelLine={false}
+                             label={({ name, value }) => `${name}: ${value}%`}
+                             outerRadius={120}
+                             fill="#8884d8"
+                             dataKey="value"
+                           >
+                             {[
+                               { fill: '#009B4C' },
+                               { fill: '#EF4444' }
+                             ].map((entry, index) => (
+                               <Cell key={`cell-${index}`} fill={entry.fill} />
+                             ))}
+                           </Pie>
                           <Tooltip formatter={(value) => `${value}%`} />
                           <Legend />
                         </PieChart>
@@ -587,7 +596,7 @@ export default function DashboardLaporanPage() {
                     <CardDescription>Daftar lengkap status pembayaran untuk setiap pesanan</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="border rounded-lg overflow-hidden">
+<div className="border-2 rounded-lg overflow-hidden">
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-muted/50">
@@ -662,37 +671,43 @@ export default function DashboardLaporanPage() {
                   </CardContent>
                 </Card>
 
-                {/* Summary Cards */}
+{/* Summary Cards */}
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Total Pemakaian</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">2,450</div>
-                      <p className="text-xs text-muted-foreground mt-1">Tabung dalam periode ini</p>
-                    </CardContent>
-                  </Card>
+                  <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-semibold text-foreground/70">Total Pemakaian</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-primary">2,450</div>
+                        <p className="text-xs text-foreground/60 mt-1">Tabung dalam periode ini</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
 
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Rata-rata Harian</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">81.7</div>
-                      <p className="text-xs text-muted-foreground mt-1">Tabung per hari</p>
-                    </CardContent>
-                  </Card>
+                  <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-semibold text-foreground/70">Rata-rata Harian</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-primary">81.7</div>
+                        <p className="text-xs text-foreground/60 mt-1">Tabung per hari</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
 
-                  <Card className="animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Pemakaian Tertinggi</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">156</div>
-                      <p className="text-xs text-muted-foreground mt-1">Pada 15 Januari 2025</p>
-                    </CardContent>
-                  </Card>
+                  <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-semibold text-foreground/70">Pemakaian Tertinggi</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-primary">156</div>
+                        <p className="text-xs text-foreground/60 mt-1">Pada 15 Januari 2025</p>
+                      </CardContent>
+                    </Card>
+                  </Tilt3DCard>
                 </div>
 
                 {/* Main Chart */}
