@@ -53,44 +53,33 @@ const getStatusLabel = (status: string) => {
   }
 
 const getIconColor = (type: string) => {
-    switch (type) {
-      case 'payment':
-        return 'text-purple-600'
-      case 'completed':
-        return 'text-green-600'
-      case 'new':
-        return 'text-orange-600'
-      case 'shipped':
-        return 'text-blue-600'
-      default:
-        return 'text-foreground'
-    }
-  }
+     switch (type) {
+       case 'payment':
+         return 'text-green-600'
+       case 'completed':
+         return 'text-blue-600'
+       case 'new':
+         return 'text-orange-600'
+       case 'delivery':
+         return 'text-purple-600'
+       default:
+         return 'text-primary'
+     }
+   }
 
-  const getBackgroundColor = (type: string) => {
-    switch (type) {
-      case 'payment':
-        return 'bg-purple-50'
-      case 'completed':
-        return 'bg-green-50'
-      case 'new':
-        return 'bg-orange-50'
-      case 'shipped':
-        return 'bg-blue-50'
-      default:
-        return 'bg-secondary'
-    }
-  }
+   const getBackgroundColor = (type: string) => {
+     return 'bg-secondary'
+   }
 
 return (
     <div
       onClick={handleCardClick}
       className="cursor-pointer"
     >
-      <Card 
-        className={`p-4 border-l-4 transition-all hover:shadow-md hover:scale-[1.01] ${getBackgroundColor(activity.type)}`}
-        style={style}
-      >
+<Card 
+         className={`p-4 transition-all hover:shadow-md hover:scale-[1.01] ${getBackgroundColor(activity.type)}`}
+         style={style}
+       >
       <div className="flex items-start gap-4">
 {/* Icon */}
          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border ${getBackgroundColor(activity.type)}`}>

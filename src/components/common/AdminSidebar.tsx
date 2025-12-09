@@ -63,13 +63,13 @@ return (
       variant="inset"
     >
 <SidebarContent className="bg-gradient-to-b from-sidebar via-sidebar/95 to-sidebar-accent/30 px-4">
-        {menuGroups.map((group) => (
-          <SidebarGroup key={group.label} className="py-6">
-            <SidebarGroupLabel className="text-xs font-bold uppercase tracking-widest text-sidebar-foreground/70 px-4 mb-4 mt-1">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-3">
+         {menuGroups.map((group) => (
+           <SidebarGroup key={group.label} className="py-4">
+             <SidebarGroupLabel className="text-xs font-bold uppercase tracking-widest text-sidebar-foreground/70 px-4 mb-2 mt-1">
+               {group.label}
+             </SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu className="gap-1">
                 {group.items.map((item) => {
                   const normalizedItemHref = normalizeForComparison(item.href)
                   const isActive = normalizedItemHref === activePage
@@ -77,14 +77,15 @@ return (
                   return (
                     <SidebarMenuItem key={item.name}>
 <SidebarMenuButton 
-                          asChild 
-                          isActive={isActive}
-                        >
-<a href={item.href} className="flex items-center gap-3 w-full">
-                           <SafeIcon name={item.icon} />
-                           <span className="text-base font-semibold">{item.name}</span>
-                         </a>
-                      </SidebarMenuButton>
+                           asChild 
+                           isActive={isActive}
+                           className={isActive ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
+                         >
+ <a href={item.href} className="flex items-center gap-3 w-full px-3 py-2">
+                            <SafeIcon name={item.icon} />
+                            <span className="text-base font-semibold">{item.name}</span>
+                          </a>
+                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   )
                 })}

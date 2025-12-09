@@ -16,7 +16,7 @@ const colorClasses = {
 
 export default function DashboardKPICard({ kpi }: DashboardKPICardProps) {
   return (
-    <Card className="shadow-card hover:shadow-lg transition-shadow">
+<Card className="shadow-enterprise transition-shadow duration-300 hover:shadow-enterprise-md">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {kpi.title}

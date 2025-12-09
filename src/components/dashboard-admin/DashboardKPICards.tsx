@@ -71,16 +71,14 @@ const KPICardItem = ({ kpi, index }: KPICardItemProps) => {
         }}
       >
 <div 
-          className="overflow-hidden shadow-sm transition-shadow duration-300 ease-out cursor-default group relative bg-gradient-to-br from-card via-card to-card/70 h-full rounded-xl border-0 bg-card text-card-foreground"
-          style={{
-            boxShadow: isHovering 
-              ? '0 8px 16px -2px rgba(0, 0, 0, 0.1)' 
-              : '0 2px 8px -1px rgba(0, 0, 0, 0.08)',
-            transition: 'box-shadow 0.3s cubic-bezier(0.23, 1, 0.320, 1)',
-            border: 'none',
-            pointerEvents: 'auto'
-          }}
-        >
+       className="overflow-hidden shadow-sm transition-shadow duration-300 ease-out cursor-default group relative bg-gradient-to-br from-card via-card to-card/70 h-full rounded-xl border-0 bg-card text-card-foreground"
+       style={{
+         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+         transition: 'box-shadow 0.3s cubic-bezier(0.23, 1, 0.320, 1)',
+         border: '1px solid hsl(var(--border))',
+         pointerEvents: 'auto'
+       }}
+     >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-sm sm:text-base font-semibold leading-tight">{kpi.title}</CardTitle>
             <div className={`${kpi.color} p-2.5 rounded-lg flex-shrink-0 transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg`}>

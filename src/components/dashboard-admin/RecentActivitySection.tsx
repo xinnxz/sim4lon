@@ -50,7 +50,7 @@ const recentActivities = [
 
 export default function RecentActivitySection() {
     return (
-<Card className="h-full flex flex-col shadow-sm">
+<Card className="h-full flex flex-col shadow-enterprise">
        <CardHeader className="pb-4">
          <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>
          <CardDescription className="text-xs sm:text-sm">Ringkasan pembayaran dan pengiriman terbaru</CardDescription>

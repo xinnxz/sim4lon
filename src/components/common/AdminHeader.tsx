@@ -46,23 +46,23 @@ return (
           {/* Right Section: Notifications & User */}
           <div className="flex items-center gap-2">
             {/* Notifications */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => setShowNotifications(true)}
-              aria-label="Notifikasi"
-            >
-              <SafeIcon name="Bell" className="h-5 w-5" />
-              {notificationCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
-                >
-                  {notificationCount}
-                </Badge>
-              )}
-            </Button>
+<Button
+               variant="ghost"
+               size="lg"
+               className="relative hover:bg-primary/10 transition-colors"
+               onClick={() => setShowNotifications(true)}
+               aria-label="Notifikasi"
+             >
+               <SafeIcon name="Bell" className="h-6 w-6" />
+               {notificationCount > 0 && (
+                 <Badge 
+                   variant="destructive" 
+                   className="absolute -right-1 -top-1 h-6 w-6 rounded-full p-0 text-xs flex items-center justify-center font-bold"
+                 >
+                   {notificationCount}
+                 </Badge>
+               )}
+             </Button>
 
             {/* User Account Dropdown */}
             <DropdownMenu>

@@ -67,19 +67,19 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
             Anda memiliki {mockNotifications.length} notifikasi baru
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-4">
+<ScrollArea className="h-[500px] pr-4">
+         <div className="space-y-2">
 {mockNotifications.map((notification, index) => (
-              <div key={notification.id}>
-                <div 
-                  onClick={() => handleNotificationClick(notification)}
-                  className="flex gap-3 p-3 rounded-lg cursor-pointer hover:bg-accent/10 transition-colors"
-                >
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                    notification.type === 'success' ? 'bg-primary/10' :
-                    notification.type === 'warning' ? 'bg-accent/20' :
-                    'bg-secondary'
-                  }`}>
+             <div key={notification.id}>
+               <div 
+                 onClick={() => handleNotificationClick(notification)}
+                 className="flex gap-3 p-3 rounded-lg cursor-pointer hover:bg-primary/5 active:bg-primary/10 transition-colors duration-200 group"
+               >
+                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                    notification.type === 'success' ? 'bg-primary/15 group-hover:bg-primary/20' :
+                    notification.type === 'warning' ? 'bg-accent/25 group-hover:bg-accent/30' :
+                    'bg-secondary group-hover:bg-secondary/70'
+                  } transition-colors duration-200`}>
                     <SafeIcon 
                       name={notification.icon} 
                       className={`h-5 w-5 ${
@@ -91,27 +91,27 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium leading-none">
+                      <p className="text-sm font-semibold leading-none text-foreground">
                         {notification.title}
                       </p>
                       {notification.type === 'warning' && (
-                        <Badge variant="outline" className="shrink-0">Penting</Badge>
+                        <Badge variant="outline" className="shrink-0 bg-accent/10 text-accent-foreground border-accent/30 text-xs">Penting</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground leading-snug">
                       {notification.message}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground/70">
                       {notification.time}
                     </p>
                   </div>
                 </div>
                 {index < mockNotifications.length - 1 && (
-                  <Separator className="my-4" />
+                  <Separator className="my-2" />
                 )}
               </div>
             ))}
-          </div>
+         </div>
 </ScrollArea>
          <Button variant="outline" className="w-full mt-4 text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all duration-300 ease-out" asChild>
            <a href="./page-911994.html">
