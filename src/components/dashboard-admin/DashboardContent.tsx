@@ -37,7 +37,7 @@ return (
 <ChartContainer animationDelay="0.5s">
           {(isVisible) => (
 <div className="w-full animate-fadeInUp chart-sales">
-              <Card className="shadow-sm">
+               <Card className="shadow-enterprise">
                 <CardHeader className="pb-4">
                   <CardTitle id="i1oio5" className="text-lg sm:text-xl font-semibold">Pesanan Mingguan</CardTitle>
                   <CardDescription id="iwkknt" className="text-xs sm:text-sm">Ringkasan pemesanan gas 7 hari terakhir</CardDescription>
@@ -57,7 +57,7 @@ return (
 <ChartContainer animationDelay="0.6s">
             {(isVisible) => (
 <div className="animate-fadeInUp chart-stock">
-               <Card className="shadow-sm">
+                <Card className="shadow-enterprise">
                   <CardHeader className="pb-4">
                     <CardTitle id="ixkzi5" className="text-lg font-semibold">Stok LPG</CardTitle>
                     <CardDescription id="ico6v7" className="text-xs sm:text-sm">Tren stok lpg mingguan</CardDescription>
@@ -74,7 +74,7 @@ return (
 <ChartContainer animationDelay="0.65s">
             {(isVisible) => (
 <div className="animate-fadeInUp chart-profit">
-                <Card className="shadow-sm">
+                 <Card className="shadow-enterprise">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg font-semibold">Keuntungan</CardTitle>
                     <CardDescription className="text-xs sm:text-sm">Profit harian</CardDescription>
@@ -94,8 +94,8 @@ return (
         <div id="i6w25j" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 <ChartContainer animationDelay="0.7s">
 {(isVisible) => (
-                <div id="i12kle" className="animate-fadeInUp chart-pangkalan">
-                <Card className="h-full shadow-sm">
+<div id="i12kle" className="animate-fadeInUp chart-pangkalan">
+                 <Card className="h-full shadow-enterprise">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg font-semibold">Pangkalan dengan Order Terbanyak</CardTitle>
                    <CardDescription className="text-xs sm:text-sm">Distribusi pesanan per pangkalan</CardDescription>

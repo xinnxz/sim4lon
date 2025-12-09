@@ -1,24 +1,23 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
-import tailwind from '@astrojs/tailwind';
-import { reactNodeTransform, astroSourceIntegration } from './scripts/inject-source-info';
+import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
+import tailwind from "@astrojs/tailwind";
 
 function collectRoutes(projectRoot) {
-  const srcDir = path.join(projectRoot, 'src');
+  const srcDir = path.join(projectRoot, "src");
   const fileTypes = /\.(astro|vue|js|ts|jsx|tsx|md|mdx|html)$/i;
   const routes = new Set();
   const addByName = (name) => {
     if (!name) return;
-    if (name === 'placeholder') return;
+    if (name === "placeholder") return;
     routes.add(`${name}.html`);
   };
   const addByHtmlLink = (name) => {
     if (!name) return;
-    if (name === 'placeholder') return;
+    if (name === "placeholder") return;
     routes.add(`${name}.html`);
   };
   const REGEXES = [
@@ -49,7 +48,7 @@ function collectRoutes(projectRoot) {
       if (e.isDirectory()) {
         walk(full);
       } else if (e.isFile() && fileTypes.test(e.name)) {
-        const txt = fs.readFileSync(full, 'utf8');
+        const txt = fs.readFileSync(full, "utf8");
 
         for (const { re, cb } of REGEXES) {
           let m;
@@ -65,95 +64,90 @@ function collectRoutes(projectRoot) {
 
 function redirectMissingRoutes() {
   return {
-    name: 'redirect-missing-routes',
+    name: "redirect-missing-routes",
     hooks: {
-      'astro:build:done': async ({ dir }) => {
+      "astro:build:done": async ({ dir }) => {
         const outDir = fileURLToPath(dir);
-        const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+        const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
         const existing = new Set();
         (function walk(p) {
           for (const e of fs.readdirSync(p, { withFileTypes: true })) {
             const full = path.join(p, e.name);
             if (e.isDirectory()) walk(full);
-            else if (e.isFile() && e.name.endsWith('.html')) existing.add(e.name);
+            else if (e.isFile() && e.name.endsWith(".html"))
+              existing.add(e.name);
           }
         })(outDir);
 
         const referenced = collectRoutes(projectRoot);
 
         for (const name of referenced) {
-          if (name === 'placeholder.html') continue;
+          if (name === "placeholder.html") continue;
           if (!existing.has(name)) {
             const target = path.join(outDir, name);
-            const html =
-`<!doctype html><meta charset="utf-8">
+            const html = `<!doctype html><meta charset="utf-8">
 <script>location.replace('./placeholder.html')</script>
 <noscript><meta http-equiv="refresh" content="0; url=./placeholder.html"></noscript>`;
-            fs.writeFileSync(target, html, 'utf8');
+            fs.writeFileSync(target, html, "utf8");
             existing.add(name);
           }
         }
-      }
-    }
+      },
+    },
   };
 }
 
 export default defineConfig({
   integrations: [
-    react({
-      babel: {
-        plugins: [reactNodeTransform()]
-      }
-    }),
+    react(),
     tailwind({
-      applyBaseStyles: false
+      applyBaseStyles: false,
     }),
-    astroSourceIntegration(),
-    redirectMissingRoutes()
+    redirectMissingRoutes(),
   ],
-  output: 'static',
+  output: "static",
   build: {
     concurrency: 4,
-    format: 'file',
-    assets: '',
-    assetsPrefix: '.',
+    format: "file",
+    assets: "",
+    assetsPrefix: ".",
     rollupOptions: {
       maxParallelFileOps: 24,
       output: {
         manualChunks: undefined,
-        entryFileNames: '[name].[hash].js',
-        chunkFileNames: '[name].[hash].js',
-        assetFileNames: '[name].[hash].[ext]',
+        entryFileNames: "[name].[hash].js",
+        chunkFileNames: "[name].[hash].js",
+        assetFileNames: "[name].[hash].[ext]",
         generatedCode: {
-          preset: 'es2022'
-        }
-      }
-    }
+          preset: "es2022",
+        },
+      },
+    },
   },
   compressHTML: false,
   vite: {
-    base: './',
+    base: "./",
     resolve: {
       alias: {
-        '@': '/src'
-      }
+        "@": "/src",
+      },
     },
     build: {
-      target: 'es2022',
-      minify: 'esbuild',
+      target: "es2022",
+      minify: "esbuild",
       chunkSizeWarningLimit: 10000,
       rollupOptions: {
         maxParallelFileOps: 24,
         output: {
-          entryFileNames: '[name].[hash].js',
-          chunkFileNames: '[name].[hash].js',
-          assetFileNames: '[name].[hash][extname]'
-        }
-      }
+          entryFileNames: "[name].[hash].js",
+          chunkFileNames: "[name].[hash].js",
+          assetFileNames: "[name].[hash][extname]",
+        },
+      },
     },
     esbuild: {
-      target: 'esnext',
+      target: "esnext",
       minifyIdentifiers: false,
       minifySyntax: true,
       minifyWhitespace: true,
@@ -161,10 +155,10 @@ export default defineConfig({
     },
     optimizeDeps: {
       force: false,
-      include: ['tslib']
+      include: ["tslib"],
     },
     ssr: {
-      external: []
+      external: [],
     },
-  }
+  },
 });

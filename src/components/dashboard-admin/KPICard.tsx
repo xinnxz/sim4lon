@@ -22,7 +22,7 @@ export default function KPICard({
   iconColor,
 }: KPICardProps) {
   return (
-    <Card className="shadow-card hover:shadow-lg transition-shadow">
+<Card className="shadow-sm transition-shadow">
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
