@@ -1,10 +1,5 @@
-
-        
-
-        
-import { StatusPesanan, LPG_TYPES } from "./enums";
+import { LPG_TYPES } from "./enums";
 import { MOCK_ORDER_DATA } from "./order";
-import { getDriverById, DriverSummaryModel } from "./user";
 
 /**
  * Model untuk kartu KPI (Key Performance Indicator).
@@ -134,22 +129,21 @@ export const MOCK_PENJUALAN_MINGGUAN_CHART: ChartDataModel = {
 };
 
 export const MOCK_PEMAKAIAN_STOK_CHART: ChartDataModel = {
-    labels: ["Minggu 48", "Minggu 49", "Minggu 50", "Minggu 51", "Minggu 52"],
-    datasets: [
-        {
-            label: "LPG 3 Kg (Unit)",
-            data: [500, 650, 480, 720, 550],
-            color: "#009B4C", // Hijau
-        },
-        {
-            label: "LPG 12 Kg (Unit)",
-            data: [150, 180, 130, 200, 160],
-            color: "#FFD447", // Kuning Emas
-        }
-    ],
+  labels: ["Minggu 48", "Minggu 49", "Minggu 50", "Minggu 51", "Minggu 52"],
+  datasets: [
+    {
+      label: "LPG 3 Kg (Unit)",
+      data: [500, 650, 480, 720, 550],
+      color: "#009B4C", // Hijau
+    },
+    {
+      label: "LPG 12 Kg (Unit)",
+      data: [150, 180, 130, 200, 160],
+      color: "#FFD447", // Kuning Emas
+    }
+  ],
 };
 
 export const MOCK_KEUNTUNGAN_SUMMARY: number = 25000000; // Keuntungan bulan berjalan
-        
-      
-    
+
+

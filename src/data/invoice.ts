@@ -1,6 +1,6 @@
 
-        
-import { OrderDetailModel, getOrderDetail } from "./order";
+
+import { type OrderDetailModel, getOrderDetail } from "./order";
 
 /**
  * Model professional untuk Nota Pembayaran/Invoice.
@@ -47,5 +47,4 @@ const generateInvoice = (orderId: string): InvoiceModel | undefined => {
 };
 
 export const MOCK_INVOICE_LUNAS: InvoiceModel = generateInvoice("ORD-20251203-001")!;
-        
-      
+

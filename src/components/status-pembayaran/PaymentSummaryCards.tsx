@@ -46,7 +46,7 @@ export default function PaymentSummaryCards({ data }: PaymentSummaryCardsProps) 
       iconColor: 'text-green-600',
       delay: '0.1s',
     },
-{
+    {
       title: 'Belum Dibayar',
       value: formatCurrency(data.unpaidAmount),
       subtitle: `${data.unpaidPercentage}% dari total`,
@@ -60,7 +60,7 @@ export default function PaymentSummaryCards({ data }: PaymentSummaryCardsProps) 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
-        <Card 
+        <Card
           key={card.title}
           className="animate-fadeInUp"
           style={{ animationDelay: card.delay }}

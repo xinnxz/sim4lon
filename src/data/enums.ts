@@ -1,5 +1,5 @@
 
-        
+
 /**
  * Tipe untuk status pesanan dalam sistem.
  */
@@ -44,9 +44,7 @@ export interface LPGTypeSummary {
 
 export const LPG_TYPES: LPGTypeSummary[] = [
   { type: '3kg', label: 'LPG 3 Kg', pricePerUnit: 18000, weight: '3', category: 'subsidi', minStock: 100 },
-  { type: '5kg', label: 'LPG 5 Kg', pricePerUnit: 75000, weight: '5', category: 'subsidi', minStock: 75 },
   { type: '12kg', label: 'LPG 12 Kg', pricePerUnit: 145000, weight: '12', category: 'subsidi', minStock: 80 },
   { type: '50kg', label: 'LPG 50 Kg', pricePerUnit: 600000, weight: '50', category: 'non-subsidi', minStock: 50 },
 ];
-        
-      
+

@@ -91,28 +91,32 @@ return (
        </div>
 
 {/* Recent Activity & Pangkalan Orders */}
-        <div id="i6w25j" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-<ChartContainer animationDelay="0.7s">
-{(isVisible) => (
-<div id="i12kle" className="animate-fadeInUp chart-pangkalan">
-                 <Card className="h-full shadow-enterprise">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg font-semibold">Pangkalan dengan Order Terbanyak</CardTitle>
-                   <CardDescription className="text-xs sm:text-sm">Distribusi pesanan per pangkalan</CardDescription>
-                 </CardHeader>
- <CardContent id="i112jk" className="p-4 sm:p-6 pt-0">
-                    <div className="w-full h-64 sm:h-72 lg:h-80">
-                      <PangkalanOrderChart isVisible={isVisible} />
-                    </div>
-                  </CardContent>
-               </Card>
-             </div>
-           )}
-         </ChartContainer>
-        <div className="animate-fadeInUp recent-activity">
-          <RecentActivitySection />
-        </div>
-      </div>
+         <div id="i6w25j" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+ <ChartContainer animationDelay="0.7s">
+ {(isVisible) => (
+ <div id="i12kle" className="animate-fadeInUp chart-pangkalan">
+                  <Card className="h-full shadow-enterprise">
+                   <CardHeader className="pb-4">
+                     <CardTitle className="text-lg font-semibold">Pangkalan dengan Order Terbanyak</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Distribusi pesanan per pangkalan</CardDescription>
+                  </CardHeader>
+  <CardContent id="i112jk" className="p-4 sm:p-6 pt-0">
+                     <div className="w-full h-64 sm:h-72 lg:h-80">
+                       <PangkalanOrderChart isVisible={isVisible} />
+                     </div>
+                   </CardContent>
+                </Card>
+              </div>
+            )}
+          </ChartContainer>
+         <ChartContainer animationDelay="0.75s">
+         {(isVisible) => (
+           <div className="animate-fadeInUp recent-activity">
+             <RecentActivitySection />
+           </div>
+         )}
+       </ChartContainer>
+       </div>
     </div>
   )
 }

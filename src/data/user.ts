@@ -1,6 +1,6 @@
 
-        
-import { UserRole } from "./enums";
+
+import type { UserRole } from "./enums";
 
 /**
  * Model lengkap detail pengguna.
@@ -26,7 +26,7 @@ export interface UserListItemModel extends Omit<UserModel, 'email' | 'isActive'>
 /**
  * Model ringkas untuk driver yang digunakan dalam jadwal/pengiriman.
  */
-export interface DriverSummaryModel extends Pick<UserModel, 'userId' | 'nama' | 'telepon' | 'avatarUrl'> {}
+export interface DriverSummaryModel extends Pick<UserModel, 'userId' | 'nama' | 'telepon' | 'avatarUrl'> { }
 
 /**
  * Model untuk item daftar Driver dalam halaman manajemen Driver (Daftar Supir).
@@ -154,5 +154,4 @@ export const getDriverById = (id: string): DriverSummaryModel | undefined => {
     avatarUrl: user.avatarUrl,
   };
 };
-        
-      
+
