@@ -1,8 +1,7 @@
 
-        
 
-        
-import { LPGType } from "./enums";
+
+
 
 /**
  * Model lengkap untuk detail sebuah Pangkalan.
@@ -94,6 +93,5 @@ export const getPangkalanSummary = (id: string): PangkalanSummary | undefined =>
 export const getPangkalanDetail = (id: string): PangkalanModel | undefined => {
   return MOCK_PANGKALAN_DATA.find(p => p.pangkalanId === id);
 };
-        
-      
-    
+
+

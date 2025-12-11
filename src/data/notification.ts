@@ -1,5 +1,5 @@
 
-        
+
 /**
  * Model untuk item notifikasi.
  */
@@ -51,5 +51,4 @@ export const MOCK_NOTIFICATIONS: NotificationModel[] = [
     iconName: "AlertTriangle",
   },
 ];
-        
-      
+

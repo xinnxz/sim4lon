@@ -1,6 +1,6 @@
 
-        
-import { LPGType } from "./enums";
+
+import type { LPGType } from "./enums";
 
 /**
  * Model untuk ringkasan stok per jenis LPG.
@@ -48,5 +48,4 @@ export const MOCK_STOCK_SUMMARY: StockSummaryModel[] = [
     iconName: 'Package',
   },
 ];
-        
-      
+

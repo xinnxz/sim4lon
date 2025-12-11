@@ -61,7 +61,7 @@ export default function PaymentStatusPage() {
   const [dateRange, setDateRange] = useState('month')
 
 
-return (
+  return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -71,8 +71,8 @@ return (
             Ringkasan status pembayaran pesanan dan analisis keuangan
           </p>
         </div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           asChild
           className="w-full sm:w-auto"
         >
@@ -107,7 +107,7 @@ return (
                     Persentase pesanan berdasarkan status pembayaran
                   </CardDescription>
                 </div>
-                <select 
+                <select
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
                   className="px-3 py-2 border rounded-md text-sm bg-background"
@@ -178,9 +178,9 @@ return (
             <CardContent>
               <PaymentDetailTable data={mockPaymentData.details} />
             </CardContent>
-</Card>
-         </TabsContent>
-       </Tabs>
-     </div>
-   )
- }
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}

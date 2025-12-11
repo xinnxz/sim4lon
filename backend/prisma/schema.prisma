@@ -1,0 +1,261 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+}
+
+enum StatusPesanan {
+  PESANAN_DIBUAT
+  MENUNGGU_PEMBAYARAN
+  DIPROSES
+  DIKIRIM
+  SELESAI
+  BATAL
+}
+
+enum LpgType {
+  kg3  @map("3kg")
+  kg12 @map("12kg")
+  kg50 @map("50kg")
+}
+
+enum PaymentMethod {
+  TUNAI
+  TRANSFER
+}
+
+enum StockMovementType {
+  MASUK
+  KELUAR
+}
+
+// ===========================================
+// MODELS
+// ===========================================
+
+model User {
+  id        String    @id @default(uuid()) @db.Uuid
+  email     String    @unique @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  role      UserRole
+  isActive  Boolean   @default(true) @map("is_active")
+  name      String    @db.VarChar(255)
+  phone     String?   @db.VarChar(20)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  driver         Driver?
+  paymentRecords PaymentRecord[]
+
+  @@map("users")
+}
+
+model Pangkalan {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @db.VarChar(255)
+  address   String    @db.Text
+  region    String?   @db.VarChar(100)
+  picName   String?   @map("pic_name") @db.VarChar(255)
+  phone     String?   @db.VarChar(20)
+  capacity  Int?
+  note      String?   @db.Text
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  orders         Order[]
+  stockHistories StockHistory[]
+
+  @@map("pangkalans")
+}
+
+model Driver {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @unique @map("user_id") @db.Uuid
+  name      String    @db.VarChar(255)
+  phone     String?   @db.VarChar(20)
+  vehicleId String?   @map("vehicle_id") @db.VarChar(20)
+  isActive  Boolean   @default(true) @map("is_active")
+  note      String?   @db.Text
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  user   User    @relation(fields: [userId], references: [id])
+  orders Order[]
+
+  @@map("drivers")
+}
+
+model Order {
+  id            String        @id @default(uuid()) @db.Uuid
+  pangkalanId   String        @map("pangkalan_id") @db.Uuid
+  driverId      String?       @map("driver_id") @db.Uuid
+  orderDate     DateTime      @map("order_date") @db.Date
+  currentStatus StatusPesanan @map("current_status")
+  totalAmount   Decimal       @map("total_amount") @db.Decimal(15, 2)
+  note          String?       @db.Text
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  pangkalan      Pangkalan           @relation(fields: [pangkalanId], references: [id])
+  driver         Driver?             @relation(fields: [driverId], references: [id])
+  items          OrderItem[]
+  paymentDetail  OrderPaymentDetail?
+  timelineTracks TimelineTrack[]
+  invoices       Invoice[]
+  paymentRecords PaymentRecord[]
+  activityLogs   ActivityLog[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  orderId      String   @map("order_id") @db.Uuid
+  lpgType      LpgType  @map("lpg_type")
+  label        String?  @db.VarChar(50)
+  pricePerUnit Decimal  @map("price_per_unit") @db.Decimal(15, 2)
+  qty          Int
+  subTotal     Decimal? @map("sub_total") @db.Decimal(15, 2)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderPaymentDetail {
+  id            String         @id @default(uuid()) @db.Uuid
+  orderId       String         @unique @map("order_id") @db.Uuid
+  isPaid        Boolean        @default(false) @map("is_paid")
+  isDp          Boolean        @default(false) @map("is_dp")
+  paymentMethod PaymentMethod? @map("payment_method")
+  amountPaid    Decimal?       @map("amount_paid") @db.Decimal(15, 2)
+  paymentDate   DateTime?      @map("payment_date") @db.Timestamptz
+  proofUrl      String?        @map("proof_url") @db.Text
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("order_payment_details")
+}
+
+model TimelineTrack {
+  id             String        @id @default(uuid()) @db.Uuid
+  orderId        String        @map("order_id") @db.Uuid
+  status         StatusPesanan
+  description    String?       @db.Text
+  note           String?       @db.Text
+  containsString String?       @map("contains_string") @db.Text
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("timeline_tracks")
+}
+
+model Invoice {
+  id             String    @id @default(uuid()) @db.Uuid
+  orderId        String    @map("order_id") @db.Uuid
+  invoiceDate    DateTime  @map("invoice_date") @db.Date
+  dueDate        DateTime? @map("due_date") @db.Date
+  billingAddress String?   @map("billing_address") @db.Text
+  billedToName   String?   @map("billed_to_name") @db.VarChar(255)
+  subTotal       Decimal   @map("sub_total") @db.Decimal(15, 2)
+  taxRate        Decimal?  @map("tax_rate") @db.Decimal(5, 2)
+  taxAmount      Decimal?  @map("tax_amount") @db.Decimal(15, 2)
+  grandTotal     Decimal   @map("grand_total") @db.Decimal(15, 2)
+  paymentStatus  String?   @map("payment_status") @db.VarChar(50)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  order          Order           @relation(fields: [orderId], references: [id])
+  paymentRecords PaymentRecord[]
+
+  @@map("invoices")
+}
+
+model PaymentRecord {
+  id               String        @id @default(uuid()) @db.Uuid
+  orderId          String?       @map("order_id") @db.Uuid
+  invoiceId        String?       @map("invoice_id") @db.Uuid
+  method           PaymentMethod
+  amount           Decimal       @db.Decimal(15, 2)
+  paymentTime      DateTime      @default(now()) @map("payment_time") @db.Timestamptz
+  proofUrl         String?       @map("proof_url") @db.Text
+  recordedByUserId String        @map("recorded_by_user_id") @db.Uuid
+  note             String?       @db.Text
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  order      Order?   @relation(fields: [orderId], references: [id])
+  invoice    Invoice? @relation(fields: [invoiceId], references: [id])
+  recordedBy User     @relation(fields: [recordedByUserId], references: [id])
+
+  @@map("payment_records")
+}
+
+model StockHistory {
+  id           String            @id @default(uuid()) @db.Uuid
+  pangkalanId  String            @map("pangkalan_id") @db.Uuid
+  lpgType      LpgType           @map("lpg_type")
+  movementType StockMovementType @map("movement_type")
+  qty          Int
+  note         String?           @db.Text
+  timestamp    DateTime          @default(now()) @db.Timestamptz
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  pangkalan Pangkalan @relation(fields: [pangkalanId], references: [id])
+
+  @@map("stock_histories")
+}
+
+model ActivityLog {
+  id            String         @id @default(uuid()) @db.Uuid
+  orderId       String?        @map("order_id") @db.Uuid
+  type          String         @db.VarChar(50)
+  title         String         @db.VarChar(255)
+  pangkalanName String?        @map("pangkalan_name") @db.VarChar(255)
+  timestamp     DateTime       @default(now()) @db.Timestamptz
+  detailNumeric Decimal?       @map("detail_numeric") @db.Decimal(15, 2)
+  url           String?        @db.Text
+  iconName      String?        @map("icon_name") @db.VarChar(50)
+  orderStatus   StatusPesanan? @map("order_status")
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  order Order? @relation(fields: [orderId], references: [id])
+
+  @@map("activity_logs")
+}
