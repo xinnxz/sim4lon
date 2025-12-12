@@ -9,9 +9,12 @@
 // 3. Membuat beberapa pangkalan contoh
 // ============================================================
 
+import 'dotenv/config'; // Load .env file
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
+// Prisma akan membaca DATABASE_URL dari environment
+// dotenv/config sudah di-import di atas untuk load .env
 const prisma = new PrismaClient();
 
 async function main() {
