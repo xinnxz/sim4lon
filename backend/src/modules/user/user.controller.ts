@@ -15,10 +15,12 @@ export class UserController {
     findAll(
         @Query('page') page?: string,
         @Query('limit') limit?: string,
+        @Query('search') search?: string,
     ) {
         return this.userService.findAll(
             page ? parseInt(page, 10) : 1,
             limit ? parseInt(limit, 10) : 10,
+            search,
         );
     }
 
@@ -44,5 +46,11 @@ export class UserController {
     @Roles(user_role.ADMIN)
     remove(@Param('id') id: string) {
         return this.userService.remove(id);
+    }
+
+    @Post(':id/reset-password')
+    @Roles(user_role.ADMIN)
+    resetPassword(@Param('id') id: string) {
+        return this.userService.resetPassword(id);
     }
 }

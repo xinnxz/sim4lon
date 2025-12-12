@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,68 +16,96 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import SafeIcon from '@/components/common/SafeIcon'
-
-interface UpdateStokFormData {
-  lpgType: string
-  movementType: 'masuk' | 'keluar'
-  quantity: string
-  notes: string
-}
+import { toast } from 'sonner'
+import { stockApi, type LpgType, type MovementType, type StockSummary } from '@/lib/api'
 
 interface UpdateStokFormProps {
   onClose?: () => void
+  onSuccess?: () => void
 }
 
-const mockFormData: UpdateStokFormData = {
-  lpgType: '3kg',
-  movementType: 'masuk',
-  quantity: '100',
-  notes: 'Pengiriman dari supplier PT Maju Jaya',
-}
-
-const lpgTypes = [
-  { value: '3kg', label: 'LPG 3kg', currentStock: 450 },
-  { value: '12kg', label: 'LPG 12kg', currentStock: 280 },
-  { value: '50kg', label: 'LPG 50kg', currentStock: 95 },
+// LPG types - uses Prisma enum VALUE (database format: 3kg, 12kg, 50kg)
+const lpgTypeOptions: { value: LpgType; label: string }[] = [
+  { value: '3kg', label: 'LPG 3kg (Subsidi)' },
+  { value: '12kg', label: 'LPG 12kg' },
+  { value: '50kg', label: 'LPG 50kg (Industri)' },
 ]
 
-export default function UpdateStokForm({ onClose }: UpdateStokFormProps) {
-  const [formData, setFormData] = useState<UpdateStokFormData>(mockFormData)
+export default function UpdateStokForm({ onClose, onSuccess }: UpdateStokFormProps) {
+  const [lpgType, setLpgType] = useState<LpgType>('3kg')
+  const [movementType, setMovementType] = useState<MovementType>('MASUK')
+  const [quantity, setQuantity] = useState('')
+  const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [stockSummary, setStockSummary] = useState<StockSummary>({})
 
-  const selectedLpg = lpgTypes.find(lpg => lpg.value === formData.lpgType)
+  // Fetch current stock summary on mount
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const data = await stockApi.getSummary()
+        setStockSummary(data)
+      } catch (error) {
+        console.error('Failed to fetch stock summary:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchSummary()
+  }, [])
 
-  const handleLpgTypeChange = (value: string) => {
-    setFormData(prev => ({ ...prev, lpgType: value }))
-  }
+  // Get current stock for selected LPG type
+  const currentStock = stockSummary[lpgType]?.current || 0
 
-  const handleMovementTypeChange = (value: 'masuk' | 'keluar') => {
-    setFormData(prev => ({ ...prev, movementType: value }))
-  }
+  // Calculate projected stock after update
+  const projectedStock = movementType === 'MASUK'
+    ? currentStock + parseInt(quantity || '0')
+    : currentStock - parseInt(quantity || '0')
 
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, quantity: e.target.value }))
-  }
-
-  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, notes: e.target.value }))
-  }
-
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const qty = parseInt(quantity)
+    if (!qty || qty <= 0) {
+      toast.error('Jumlah harus lebih dari 0')
+      return
+    }
+
+    // Validate keluar tidak melebihi stok
+    if (movementType === 'KELUAR' && qty > currentStock) {
+      toast.error(`Stok tidak mencukupi. Stok saat ini: ${currentStock} unit`)
+      return
+    }
+
     setIsSubmitting(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    console.log('Form submitted:', formData)
-    setIsSubmitting(false)
-    
-    // Close modal or redirect based on context
-    if (onClose) {
-      onClose()
-    } else {
-      window.location.href = './ringkasan-stok.html'
+
+    try {
+      await stockApi.createMovement({
+        lpg_type: lpgType,
+        movement_type: movementType,
+        qty: qty,
+        note: notes || undefined,
+      })
+
+      toast.success(
+        `Stok berhasil ${movementType === 'MASUK' ? 'ditambahkan' : 'dikurangi'}: ${qty} unit ${lpgTypeOptions.find(l => l.value === lpgType)?.label}`
+      )
+
+      onSuccess?.()
+
+      // Close after short delay
+      setTimeout(() => {
+        if (onClose) {
+          onClose()
+        } else {
+          window.location.href = '/ringkasan-stok'
+        }
+      }, 500)
+    } catch (error: any) {
+      const message = error?.message || 'Gagal menyimpan pergerakan stok'
+      toast.error(message)
+      setIsSubmitting(false)
     }
   }
 
@@ -85,36 +113,31 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (onClose) {
       onClose()
     } else {
-      window.location.href = './ringkasan-stok.html'
+      window.location.href = '/ringkasan-stok'
     }
   }
 
-// When used in modal context, don't show full page header
   const isModal = !!onClose
-  
+
   return (
     <div className={isModal ? "" : "max-w-2xl mx-auto"}>
       {!isModal && (
-        <>
-          {/* Header - only show in full page mode */}
-          <div className="mb-8">
-            <div id="i35u5g" className="flex items-center gap-2 mb-2">
-              <a href="./ringkasan-stok.html" className="text-primary hover:underline flex items-center gap-1">
-                <SafeIcon name="ArrowLeft" className="h-4 w-4" />
-                Kembali ke Ringkasan Stok
-              </a>
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">Update Stok LPG</h1>
-            <p className="text-muted-foreground mt-2">
-              Catat pemasukan atau pengeluaran stok LPG dengan detail yang akurat
-            </p>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <a href="/ringkasan-stok" className="text-primary hover:underline flex items-center gap-1">
+              <SafeIcon name="ArrowLeft" className="h-4 w-4" />
+              Kembali ke Ringkasan Stok
+            </a>
           </div>
-        </>
+          <h1 className="text-3xl font-bold text-foreground">Update Stok LPG</h1>
+          <p className="text-muted-foreground mt-2">
+            Catat pemasukan atau pengeluaran stok LPG dengan detail yang akurat
+          </p>
+        </div>
       )}
 
-{/* Form Card - no shadow in modal */}
-      <Card className={isModal ? "" : "shadow-card"}>
-        <CardHeader>
+      <Card className={isModal ? "border-0 shadow-none" : "shadow-card"}>
+        <CardHeader className={isModal ? "pb-4" : ""}>
           <CardTitle>Form Update Stok</CardTitle>
           <CardDescription>
             Isi semua field di bawah untuk memperbarui data stok LPG
@@ -127,30 +150,35 @@ const handleSubmit = async (e: React.FormEvent) => {
               <Label htmlFor="lpg-type" className="text-base font-semibold">
                 Jenis LPG
               </Label>
-              <Select value={formData.lpgType} onValueChange={handleLpgTypeChange}>
+              <Select value={lpgType} onValueChange={(v) => setLpgType(v as LpgType)}>
                 <SelectTrigger id="lpg-type" className="h-10">
                   <SelectValue placeholder="Pilih jenis LPG" />
                 </SelectTrigger>
                 <SelectContent>
-                  {lpgTypes.map(lpg => (
+                  {lpgTypeOptions.map(lpg => (
                     <SelectItem key={lpg.value} value={lpg.value}>
                       <div className="flex items-center gap-2">
                         <span>{lpg.label}</span>
-                        <span className="text-xs text-muted-foreground">
-                          (Stok: {lpg.currentStock})
-                        </span>
+                        {!isLoading && (
+                          <span className="text-xs text-muted-foreground">
+                            (Stok: {stockSummary[lpg.value]?.current || 0})
+                          </span>
+                        )}
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {selectedLpg && (
-                <div className="mt-2 p-3 bg-secondary rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    Stok saat ini: <span className="font-semibold text-foreground">{selectedLpg.currentStock} unit</span>
-                  </p>
-                </div>
-              )}
+              <div className="mt-2 p-3 bg-secondary rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Stok saat ini: {' '}
+                  {isLoading ? (
+                    <span className="animate-pulse">Loading...</span>
+                  ) : (
+                    <span className="font-semibold text-foreground">{currentStock} unit</span>
+                  )}
+                </p>
+              </div>
             </div>
 
             {/* Movement Type Selection */}
@@ -158,15 +186,19 @@ const handleSubmit = async (e: React.FormEvent) => {
               <Label className="text-base font-semibold">
                 Tipe Pergerakan Stok
               </Label>
-              <RadioGroup 
-                value={formData.movementType} 
-                onValueChange={(value) => handleMovementTypeChange(value as 'masuk' | 'keluar')}
+              <RadioGroup
+                value={movementType}
+                onValueChange={(v) => setMovementType(v as MovementType)}
               >
-                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-secondary cursor-pointer transition-colors">
-                  <RadioGroupItem value="masuk" id="masuk" />
+                <div
+                  className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors ${movementType === 'MASUK' ? 'bg-green-50 border-green-200' : 'hover:bg-secondary'
+                    }`}
+                  onClick={() => setMovementType('MASUK')}
+                >
+                  <RadioGroupItem value="MASUK" id="masuk" />
                   <Label htmlFor="masuk" className="flex-1 cursor-pointer font-normal">
                     <div className="flex items-center gap-2">
-                      <SafeIcon name="TrendingUp" className="h-5 w-5 text-primary" />
+                      <SafeIcon name="TrendingUp" className="h-5 w-5 text-green-600" />
                       <div>
                         <p className="font-medium">Stok Masuk</p>
                         <p className="text-xs text-muted-foreground">Penambahan stok dari supplier</p>
@@ -174,11 +206,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-secondary cursor-pointer transition-colors">
-                  <RadioGroupItem value="keluar" id="keluar" />
+                <div
+                  className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors ${movementType === 'KELUAR' ? 'bg-red-50 border-red-200' : 'hover:bg-secondary'
+                    }`}
+                  onClick={() => setMovementType('KELUAR')}
+                >
+                  <RadioGroupItem value="KELUAR" id="keluar" />
                   <Label htmlFor="keluar" className="flex-1 cursor-pointer font-normal">
                     <div className="flex items-center gap-2">
-                      <SafeIcon name="TrendingDown" className="h-5 w-5 text-destructive" />
+                      <SafeIcon name="TrendingDown" className="h-5 w-5 text-red-600" />
                       <div>
                         <p className="font-medium">Stok Keluar</p>
                         <p className="text-xs text-muted-foreground">Pengurangan stok untuk pengiriman</p>
@@ -192,15 +228,15 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Quantity Input */}
             <div className="space-y-3">
               <Label htmlFor="quantity" className="text-base font-semibold">
-                Jumlah {formData.movementType === 'masuk' ? 'Masuk' : 'Keluar'}
+                Jumlah {movementType === 'MASUK' ? 'Masuk' : 'Keluar'} <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
                 <Input
                   id="quantity"
                   type="number"
                   min="1"
-                  value={formData.quantity}
-                  onChange={handleQuantityChange}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
                   placeholder="Masukkan jumlah unit"
                   className="h-10 pr-12"
                   required
@@ -209,16 +245,17 @@ const handleSubmit = async (e: React.FormEvent) => {
                   unit
                 </span>
               </div>
-              {formData.quantity && (
-                <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+              {quantity && (
+                <div className={`mt-2 p-3 rounded-lg border ${projectedStock < 0 ? 'bg-red-50 border-red-200' : 'bg-primary/5 border-primary/20'
+                  }`}>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Stok setelah update: </span>
-                    <span className="font-semibold text-foreground">
-                      {formData.movementType === 'masuk' 
-                        ? (selectedLpg ? selectedLpg.currentStock + parseInt(formData.quantity || '0') : 0)
-                        : (selectedLpg ? selectedLpg.currentStock - parseInt(formData.quantity || '0') : 0)
-                      } unit
+                    <span className={`font-semibold ${projectedStock < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                      {projectedStock} unit
                     </span>
+                    {projectedStock < 0 && (
+                      <span className="text-xs text-destructive ml-2">(Stok tidak mencukupi!)</span>
+                    )}
                   </p>
                 </div>
               )}
@@ -231,41 +268,36 @@ const handleSubmit = async (e: React.FormEvent) => {
               </Label>
               <Textarea
                 id="notes"
-                value={formData.notes}
-                onChange={handleNotesChange}
-                placeholder="Tambahkan catatan atau keterangan tentang pergerakan stok ini..."
-                className="min-h-24 resize-none"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Tambahkan catatan tentang pergerakan stok..."
+                className="min-h-20 resize-none"
               />
-              <p className="text-xs text-muted-foreground">
-                Contoh: Pengiriman dari supplier PT Maju Jaya, Invoice #INV-2024-001
-              </p>
             </div>
 
             {/* Summary Card */}
-            <div className="p-4 bg-gradient-lpg-subtle rounded-lg border border-primary/20">
+            <div className={`p-4 rounded-lg border ${movementType === 'MASUK' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+              }`}>
               <h3 className="font-semibold text-foreground mb-3">Ringkasan Update</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Jenis LPG:</span>
-                  <span className="font-medium">{selectedLpg?.label}</span>
+                  <span className="font-medium">{lpgTypeOptions.find(l => l.value === lpgType)?.label}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tipe Pergerakan:</span>
-                  <span className="font-medium capitalize">
-                    {formData.movementType === 'masuk' ? 'Stok Masuk' : 'Stok Keluar'}
+                  <span className={`font-medium ${movementType === 'MASUK' ? 'text-green-600' : 'text-red-600'}`}>
+                    {movementType === 'MASUK' ? '↑ Stok Masuk' : '↓ Stok Keluar'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Jumlah:</span>
-                  <span className="font-medium">{formData.quantity || '0'} unit</span>
+                  <span className="font-medium">{quantity || '0'} unit</span>
                 </div>
-                <div className="border-t border-primary/20 pt-2 mt-2 flex justify-between">
+                <div className="border-t pt-2 mt-2 flex justify-between">
                   <span className="text-muted-foreground">Stok Setelah Update:</span>
-                  <span className="font-bold text-primary">
-                    {formData.movementType === 'masuk' 
-                      ? (selectedLpg ? selectedLpg.currentStock + parseInt(formData.quantity || '0') : 0)
-                      : (selectedLpg ? selectedLpg.currentStock - parseInt(formData.quantity || '0') : 0)
-                    } unit
+                  <span className={`font-bold ${projectedStock < 0 ? 'text-destructive' : 'text-primary'}`}>
+                    {projectedStock} unit
                   </span>
                 </div>
               </div>
@@ -285,8 +317,8 @@ const handleSubmit = async (e: React.FormEvent) => {
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-primary hover:bg-primary/90"
-                disabled={isSubmitting || !formData.quantity}
+                className={`flex-1 ${movementType === 'MASUK' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                disabled={isSubmitting || !quantity || projectedStock < 0}
               >
                 {isSubmitting ? (
                   <>
@@ -295,8 +327,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </>
                 ) : (
                   <>
-                    <SafeIcon name="Save" className="mr-2 h-4 w-4" />
-                    Simpan Update Stok
+                    <SafeIcon name={movementType === 'MASUK' ? 'Plus' : 'Minus'} className="mr-2 h-4 w-4" />
+                    {movementType === 'MASUK' ? 'Tambah Stok' : 'Kurangi Stok'}
                   </>
                 )}
               </Button>
@@ -304,25 +336,6 @@ const handleSubmit = async (e: React.FormEvent) => {
           </form>
         </CardContent>
       </Card>
-
-{!isModal && (
-        <>
-          {/* Info Box - only show in full page mode */}
-          <div className="mt-6 p-4 bg-secondary rounded-lg border">
-        <div className="flex gap-3">
-          <SafeIcon name="Info" className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium text-foreground mb-1">Informasi Penting</p>
-            <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-              <li>Pastikan jumlah yang diinput sudah sesuai dengan dokumen fisik</li>
-              <li>Catatan akan membantu dalam audit dan tracking stok</li>
-              <li>Update stok akan langsung mempengaruhi data inventaris</li>
-            </ul>
-</div>
-         </div>
-       </div>
-        </>
-      )}
     </div>
   )
 }

@@ -18,8 +18,8 @@ export declare class ActivityController {
         } & {
             id: string;
             created_at: Date;
-            user_id: string | null;
             order_id: string | null;
+            user_id: string | null;
             type: string;
             title: string;
             description: string | null;
@@ -50,8 +50,8 @@ export declare class ActivityController {
     } & {
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;
@@ -75,8 +75,8 @@ export declare class ActivityController {
     } & {
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;
@@ -89,8 +89,8 @@ export declare class ActivityController {
     create(dto: CreateActivityLogDto): Promise<{
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;

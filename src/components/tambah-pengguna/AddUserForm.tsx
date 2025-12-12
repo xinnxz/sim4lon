@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
+import { usersApi } from '@/lib/api'
 
 interface AddUserFormProps {
   onClose?: () => void
@@ -40,7 +41,7 @@ const roleOptions = [
 ]
 
 export default function AddUserForm({ onClose }: AddUserFormProps) {
-const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<FormData>({
     nama: '',
     telepon: '',
     email: '',
@@ -139,26 +140,38 @@ const [formData, setFormData] = useState<FormData>({
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Map role value to backend enum
+      const roleMap: Record<string, 'ADMIN' | 'OPERATOR'> = {
+        'Admin': 'ADMIN',
+        'Operator': 'OPERATOR'
+      }
 
-toast.success('Pengguna berhasil ditambahkan')
+      await usersApi.create({
+        email: formData.email,
+        password: formData.password,
+        name: formData.nama,
+        phone: formData.telepon,
+        role: roleMap[formData.role] || 'OPERATOR'
+      })
+
+      toast.success('Pengguna berhasil ditambahkan')
 
       // Close modal or redirect based on context
       setTimeout(() => {
         if (onClose) {
           onClose()
         } else {
-          window.location.href = './daftar-pengguna.html'
+          window.location.href = '/daftar-pengguna'
         }
-      }, 1000)
-    } catch (error) {
-      toast.error('Gagal menambahkan pengguna. Silakan coba lagi.')
+      }, 500)
+    } catch (error: any) {
+      const message = error?.message || 'Gagal menambahkan pengguna. Silakan coba lagi.'
+      toast.error(message)
       setIsLoading(false)
     }
   }
 
-const handleCancel = () => {
+  const handleCancel = () => {
     if (onClose) {
       onClose()
     } else {
@@ -266,7 +279,7 @@ const handleCancel = () => {
               Peran <span className="text-destructive">*</span>
             </Label>
             <Select value={formData.role} onValueChange={handleRoleChange} disabled={isLoading}>
-              <SelectTrigger 
+              <SelectTrigger
                 id="role"
                 className={errors.role ? 'border-destructive' : ''}
                 aria-invalid={!!errors.role}
@@ -316,8 +329,8 @@ const handleCancel = () => {
                 disabled={isLoading}
                 aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               >
-                <SafeIcon 
-                  name={showPassword ? 'EyeOff' : 'Eye'} 
+                <SafeIcon
+                  name={showPassword ? 'EyeOff' : 'Eye'}
                   className="h-4 w-4"
                 />
               </button>

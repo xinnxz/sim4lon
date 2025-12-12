@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StockService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../prisma");
+const dto_1 = require("./dto");
 let StockService = class StockService {
     prisma;
     constructor(prisma) {
@@ -21,9 +22,9 @@ let StockService = class StockService {
         const skip = (page - 1) * limit;
         const where = {};
         if (lpgType)
-            where.lpg_type = lpgType;
+            where.lpg_type = (0, dto_1.mapLpgTypeToEnum)(lpgType);
         if (movementType)
-            where.movement_type = movementType;
+            where.movement_type = (0, dto_1.mapMovementTypeToEnum)(movementType);
         const [histories, total] = await Promise.all([
             this.prisma.stock_histories.findMany({
                 where,
@@ -49,25 +50,50 @@ let StockService = class StockService {
         };
     }
     async createMovement(dto, userId) {
-        const history = await this.prisma.stock_histories.create({
-            data: {
-                lpg_type: dto.lpg_type,
-                movement_type: dto.movement_type,
+        console.log('=== createMovement called ===');
+        console.log('DTO:', JSON.stringify(dto));
+        console.log('userId:', userId);
+        try {
+            const movementTypeEnum = (0, dto_1.mapMovementTypeToEnum)(dto.movement_type);
+            console.log('Mapped movement_type:', movementTypeEnum);
+            const data = {
+                movement_type: movementTypeEnum,
                 qty: dto.qty,
                 note: dto.note,
                 recorded_by_user_id: userId,
-            },
-            include: {
-                users: {
-                    select: { id: true, name: true },
+            };
+            if (dto.lpg_product_id) {
+                data.lpg_product_id = dto.lpg_product_id;
+                console.log('Using lpg_product_id:', dto.lpg_product_id);
+            }
+            if (dto.lpg_type) {
+                const lpgTypeEnum = (0, dto_1.mapLpgTypeToEnum)(dto.lpg_type);
+                data.lpg_type = lpgTypeEnum;
+                console.log('Also setting lpg_type:', lpgTypeEnum);
+            }
+            const history = await this.prisma.stock_histories.create({
+                data,
+                include: {
+                    users: {
+                        select: { id: true, name: true },
+                    },
                 },
-            },
-        });
-        return history;
+            });
+            console.log('Created successfully:', history.id);
+            return history;
+        }
+        catch (error) {
+            console.error('=== createMovement ERROR ===');
+            console.error('Error:', error);
+            throw error;
+        }
     }
     async getSummary() {
         const stockData = await this.prisma.stock_histories.groupBy({
             by: ['lpg_type', 'movement_type'],
+            where: {
+                lpg_type: { not: null }
+            },
             _sum: {
                 qty: true,
             },
@@ -75,6 +101,8 @@ let StockService = class StockService {
         const summary = {};
         for (const data of stockData) {
             const type = data.lpg_type;
+            if (!type)
+                continue;
             if (!summary[type]) {
                 summary[type] = { in: 0, out: 0, current: 0 };
             }

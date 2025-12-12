@@ -11,6 +11,8 @@ import { OrderModule } from './modules/order/order.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { StockModule } from './modules/stock/stock.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { LpgProductsModule } from './modules/lpg-products/lpg-products.module';
 
 @Module({
     imports: [
@@ -26,6 +28,8 @@ import { ActivityModule } from './modules/activity/activity.module';
         PaymentModule,
         StockModule,
         ActivityModule,
+        DashboardModule,
+        LpgProductsModule,
     ],
     controllers: [AppController],
     providers: [AppService],

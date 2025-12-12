@@ -1,10 +1,10 @@
 import { PrismaService } from '../../prisma';
 import { CreateStockMovementDto } from './dto';
-import { lpg_type, stock_movement_type } from '@prisma/client';
+import { lpg_type } from '@prisma/client';
 export declare class StockService {
     private prisma;
     constructor(prisma: PrismaService);
-    getHistory(page?: number, limit?: number, lpgType?: lpg_type, movementType?: stock_movement_type): Promise<{
+    getHistory(page?: number, limit?: number, lpgType?: string, movementType?: string): Promise<{
         data: ({
             users: {
                 id: string;
@@ -12,13 +12,14 @@ export declare class StockService {
             } | null;
         } & {
             id: string;
-            created_at: Date;
-            note: string | null;
-            timestamp: Date;
-            lpg_type: import("@prisma/client").$Enums.lpg_type;
-            qty: number;
-            recorded_by_user_id: string | null;
+            lpg_type: import("@prisma/client").$Enums.lpg_type | null;
+            lpg_product_id: string | null;
             movement_type: import("@prisma/client").$Enums.stock_movement_type;
+            qty: number;
+            note: string | null;
+            recorded_by_user_id: string | null;
+            timestamp: Date;
+            created_at: Date;
         })[];
         meta: {
             total: number;
@@ -34,13 +35,14 @@ export declare class StockService {
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        note: string | null;
-        timestamp: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        recorded_by_user_id: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
+        lpg_product_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
+        note: string | null;
+        recorded_by_user_id: string | null;
+        timestamp: Date;
+        created_at: Date;
     }>;
     getSummary(): Promise<Record<string, {
         in: number;
@@ -54,12 +56,13 @@ export declare class StockService {
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        note: string | null;
-        timestamp: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        recorded_by_user_id: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
+        lpg_product_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
+        note: string | null;
+        recorded_by_user_id: string | null;
+        timestamp: Date;
+        created_at: Date;
     })[]>;
 }

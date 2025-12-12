@@ -3,7 +3,7 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    findAll(page?: string, limit?: string): Promise<{
+    findAll(page?: string, limit?: string, search?: string): Promise<{
         data: {
             id: string;
             email: string;
@@ -54,5 +54,9 @@ export declare class UserController {
     }>;
     remove(id: string): Promise<{
         message: string;
+    }>;
+    resetPassword(id: string): Promise<{
+        message: string;
+        newPassword: string;
     }>;
 }

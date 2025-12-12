@@ -7,12 +7,22 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 export class UserService {
     constructor(private prisma: PrismaService) { }
 
-    async findAll(page = 1, limit = 10) {
+    async findAll(page = 1, limit = 10, search?: string) {
         const skip = (page - 1) * limit;
+
+        // Build where clause with optional search
+        const where: any = { deleted_at: null };
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+            ];
+        }
 
         const [users, total] = await Promise.all([
             this.prisma.users.findMany({
-                where: { deleted_at: null },
+                where,
                 skip,
                 take: limit,
                 orderBy: { created_at: 'desc' },
@@ -28,7 +38,7 @@ export class UserService {
                     updated_at: true,
                 },
             }),
-            this.prisma.users.count({ where: { deleted_at: null } }),
+            this.prisma.users.count({ where }),
         ]);
 
         return {
@@ -131,5 +141,37 @@ export class UserService {
         });
 
         return { message: 'User berhasil dihapus' };
+    }
+
+    /**
+     * Reset password user - generate random password dan update ke database
+     * @returns new plain text password untuk diberikan ke user
+     */
+    async resetPassword(id: string) {
+        await this.findOne(id);
+
+        // Generate random password (12 karakter)
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+        let newPassword = '';
+        for (let i = 0; i < 12; i++) {
+            newPassword += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update ke database
+        await this.prisma.users.update({
+            where: { id },
+            data: {
+                password: hashedPassword,
+                updated_at: new Date(),
+            },
+        });
+
+        return {
+            message: 'Password berhasil direset',
+            newPassword: newPassword
+        };
     }
 }
