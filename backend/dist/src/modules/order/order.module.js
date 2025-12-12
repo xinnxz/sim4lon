@@ -10,13 +10,13 @@ exports.OrderModule = void 0;
 const common_1 = require("@nestjs/common");
 const order_controller_1 = require("./order.controller");
 const order_service_1 = require("./order.service");
-const prisma_module_1 = require("../../prisma/prisma.module");
+const prisma_1 = require("../../prisma");
 let OrderModule = class OrderModule {
 };
 exports.OrderModule = OrderModule;
 exports.OrderModule = OrderModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_1.PrismaModule],
         controllers: [order_controller_1.OrderController],
         providers: [order_service_1.OrderService],
         exports: [order_service_1.OrderService],

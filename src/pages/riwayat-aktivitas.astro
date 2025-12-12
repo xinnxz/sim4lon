@@ -5,14 +5,17 @@ import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import ActivityPage from '@/components/page-911994/ActivityPage.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Aktivitas Terbaru - SIM4LON">
-  <AdminHeader client:load />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main class="flex-1 flex flex-col">
-      <ActivityPage client:idle />
-      <AdminFooter />
-    </main>
-  </AppSidebarLayout>
+  <ProtectedDashboard client:load>
+    <AdminHeader client:load />
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col">
+        <ActivityPage client:idle />
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>

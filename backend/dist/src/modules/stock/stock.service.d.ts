@@ -1,4 +1,4 @@
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma';
 import { CreateStockMovementDto } from './dto';
 import { lpg_type, stock_movement_type } from '@prisma/client';
 export declare class StockService {
@@ -14,11 +14,11 @@ export declare class StockService {
             id: string;
             created_at: Date;
             note: string | null;
+            timestamp: Date;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             qty: number;
             recorded_by_user_id: string | null;
             movement_type: import("@prisma/client").$Enums.stock_movement_type;
-            timestamp: Date;
         })[];
         meta: {
             total: number;
@@ -36,11 +36,11 @@ export declare class StockService {
         id: string;
         created_at: Date;
         note: string | null;
+        timestamp: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
         recorded_by_user_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
-        timestamp: Date;
     }>;
     getSummary(): Promise<Record<string, {
         in: number;
@@ -56,10 +56,10 @@ export declare class StockService {
         id: string;
         created_at: Date;
         note: string | null;
+        timestamp: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
         recorded_by_user_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
-        timestamp: Date;
     })[]>;
 }

@@ -47,7 +47,10 @@ async function main() {
     const hashedOperatorPassword = await bcrypt.hash('operator123', 12);
     const adminUser = await prisma.users.upsert({
         where: { email: 'admin@sim4lon.co.id' },
-        update: {},
+        update: {
+            password: hashedAdminPassword,
+            name: 'Administrator',
+        },
         create: {
             email: 'admin@sim4lon.co.id',
             password: hashedAdminPassword,
@@ -57,10 +60,13 @@ async function main() {
             is_active: true,
         },
     });
-    console.log('✅ Created Admin:', adminUser.email);
+    console.log('✅ Created/Updated Admin:', adminUser.email);
     const operatorUser = await prisma.users.upsert({
         where: { email: 'operator@sim4lon.co.id' },
-        update: {},
+        update: {
+            password: hashedOperatorPassword,
+            name: 'Siti Rahmawati',
+        },
         create: {
             email: 'operator@sim4lon.co.id',
             password: hashedOperatorPassword,
@@ -70,7 +76,7 @@ async function main() {
             is_active: true,
         },
     });
-    console.log('✅ Created Operator:', operatorUser.email);
+    console.log('✅ Created/Updated Operator:', operatorUser.email);
     const driver1 = await prisma.drivers.upsert({
         where: { id: '00000000-0000-0000-0000-000000000001' },
         update: {},

@@ -14,11 +14,11 @@ export declare class StockController {
             id: string;
             created_at: Date;
             note: string | null;
+            timestamp: Date;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             qty: number;
             recorded_by_user_id: string | null;
             movement_type: import("@prisma/client").$Enums.stock_movement_type;
-            timestamp: Date;
         })[];
         meta: {
             total: number;
@@ -41,11 +41,11 @@ export declare class StockController {
         id: string;
         created_at: Date;
         note: string | null;
+        timestamp: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
         recorded_by_user_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
-        timestamp: Date;
     })[]>;
     createMovement(dto: CreateStockMovementDto, userId: string): Promise<{
         users: {
@@ -56,10 +56,10 @@ export declare class StockController {
         id: string;
         created_at: Date;
         note: string | null;
+        timestamp: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
         recorded_by_user_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
-        timestamp: Date;
     }>;
 }

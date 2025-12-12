@@ -5,29 +5,32 @@ import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import ExportLaporanForm from '@/components/export-laporan/ExportLaporanForm.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Ekspor Laporan - SIM4LON">
-  <AdminHeader client:load />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main className="flex-1 flex flex-col">
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-{/* Page Header */}
-<div className="mb-8" id="iy5ax" style="margin: 12px 0px 0px 50px">
-            <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-foreground">Eksport Laporan</h1>
+  <ProtectedDashboard client:load>
+    <AdminHeader client:load />
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {/* Page Header */}
+            <div className="mb-8" id="iy5ax" style="margin: 12px 0px 0px 50px">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-foreground">Eksport Laporan</h1>
+              </div>
+              <p className="text-muted-foreground">
+                Unduh laporan dalam format PDF atau Excel sesuai kebutuhan Anda
+              </p>
             </div>
-            <p className="text-muted-foreground">
-              Unduh laporan dalam format PDF atau Excel sesuai kebutuhan Anda
-            </p>
-          </div>
 
-          {/* Export Form */}
-          <ExportLaporanForm client:load />
+            {/* Export Form */}
+            <ExportLaporanForm client:load />
+          </div>
         </div>
-      </div>
-      <AdminFooter />
-    </main>
-  </AppSidebarLayout>
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>

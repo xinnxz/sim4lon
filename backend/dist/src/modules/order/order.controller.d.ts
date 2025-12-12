@@ -19,24 +19,24 @@ export declare class OrderController {
                 id: string;
                 created_at: Date;
                 updated_at: Date;
+                order_id: string;
+                sub_total: import("@prisma/client-runtime-utils").Decimal | null;
                 lpg_type: import("@prisma/client").$Enums.lpg_type;
                 label: string | null;
                 price_per_unit: import("@prisma/client-runtime-utils").Decimal;
                 qty: number;
-                order_id: string;
-                sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             }[];
             order_payment_details: {
                 id: string;
                 created_at: Date;
                 updated_at: Date;
                 order_id: string;
+                proof_url: string | null;
                 is_paid: boolean;
                 is_dp: boolean;
                 payment_method: import("@prisma/client").$Enums.payment_method | null;
                 amount_paid: import("@prisma/client-runtime-utils").Decimal | null;
                 payment_date: Date | null;
-                proof_url: string | null;
             } | null;
         } & {
             id: string;
@@ -46,8 +46,8 @@ export declare class OrderController {
             note: string | null;
             pangkalan_id: string;
             driver_id: string | null;
-            current_status: import("@prisma/client").$Enums.status_pesanan;
             order_date: Date;
+            current_status: import("@prisma/client").$Enums.status_pesanan;
             total_amount: import("@prisma/client-runtime-utils").Decimal;
         })[];
         meta: {
@@ -89,12 +89,12 @@ export declare class OrderController {
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
-            sub_total: import("@prisma/client-runtime-utils").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
+            sub_total: import("@prisma/client-runtime-utils").Decimal;
             tax_rate: import("@prisma/client-runtime-utils").Decimal | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             grand_total: import("@prisma/client-runtime-utils").Decimal;
@@ -104,32 +104,32 @@ export declare class OrderController {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             label: string | null;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
-            order_id: string;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
         }[];
         order_payment_details: {
             id: string;
             created_at: Date;
             updated_at: Date;
             order_id: string;
+            proof_url: string | null;
             is_paid: boolean;
             is_dp: boolean;
             payment_method: import("@prisma/client").$Enums.payment_method | null;
             amount_paid: import("@prisma/client-runtime-utils").Decimal | null;
             payment_date: Date | null;
-            proof_url: string | null;
         } | null;
         timeline_tracks: {
             id: string;
             created_at: Date;
             note: string | null;
-            status: import("@prisma/client").$Enums.status_pesanan;
-            description: string | null;
             order_id: string;
+            description: string | null;
+            status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
@@ -139,8 +139,8 @@ export declare class OrderController {
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
-        current_status: import("@prisma/client").$Enums.status_pesanan;
         order_date: Date;
+        current_status: import("@prisma/client").$Enums.status_pesanan;
         total_amount: import("@prisma/client-runtime-utils").Decimal;
     }>;
     create(dto: CreateOrderDto): Promise<{
@@ -162,20 +162,20 @@ export declare class OrderController {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             label: string | null;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
-            order_id: string;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
         }[];
         timeline_tracks: {
             id: string;
             created_at: Date;
             note: string | null;
-            status: import("@prisma/client").$Enums.status_pesanan;
-            description: string | null;
             order_id: string;
+            description: string | null;
+            status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
@@ -185,8 +185,8 @@ export declare class OrderController {
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
-        current_status: import("@prisma/client").$Enums.status_pesanan;
         order_date: Date;
+        current_status: import("@prisma/client").$Enums.status_pesanan;
         total_amount: import("@prisma/client-runtime-utils").Decimal;
     }>;
     update(id: string, dto: UpdateOrderDto): Promise<{
@@ -219,12 +219,12 @@ export declare class OrderController {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             label: string | null;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
-            order_id: string;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
         }[];
     } & {
         id: string;
@@ -234,8 +234,8 @@ export declare class OrderController {
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
-        current_status: import("@prisma/client").$Enums.status_pesanan;
         order_date: Date;
+        current_status: import("@prisma/client").$Enums.status_pesanan;
         total_amount: import("@prisma/client-runtime-utils").Decimal;
     }>;
     updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<{
@@ -268,20 +268,20 @@ export declare class OrderController {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             label: string | null;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
-            order_id: string;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
         }[];
         timeline_tracks: {
             id: string;
             created_at: Date;
             note: string | null;
-            status: import("@prisma/client").$Enums.status_pesanan;
-            description: string | null;
             order_id: string;
+            description: string | null;
+            status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
@@ -291,8 +291,8 @@ export declare class OrderController {
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
-        current_status: import("@prisma/client").$Enums.status_pesanan;
         order_date: Date;
+        current_status: import("@prisma/client").$Enums.status_pesanan;
         total_amount: import("@prisma/client-runtime-utils").Decimal;
     }>;
     remove(id: string): Promise<{

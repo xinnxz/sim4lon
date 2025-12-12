@@ -10,13 +10,13 @@ exports.ActivityModule = void 0;
 const common_1 = require("@nestjs/common");
 const activity_controller_1 = require("./activity.controller");
 const activity_service_1 = require("./activity.service");
-const prisma_module_1 = require("../../prisma/prisma.module");
+const prisma_1 = require("../../prisma");
 let ActivityModule = class ActivityModule {
 };
 exports.ActivityModule = ActivityModule;
 exports.ActivityModule = ActivityModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_1.PrismaModule],
         controllers: [activity_controller_1.ActivityController],
         providers: [activity_service_1.ActivityService],
         exports: [activity_service_1.ActivityService],
