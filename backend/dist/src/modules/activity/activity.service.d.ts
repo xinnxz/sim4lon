@@ -18,8 +18,8 @@ export declare class ActivityService {
         } & {
             id: string;
             created_at: Date;
-            user_id: string | null;
             order_id: string | null;
+            user_id: string | null;
             type: string;
             title: string;
             description: string | null;
@@ -39,8 +39,8 @@ export declare class ActivityService {
     create(dto: CreateActivityLogDto): Promise<{
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;
@@ -64,8 +64,8 @@ export declare class ActivityService {
     } & {
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;
@@ -89,8 +89,8 @@ export declare class ActivityService {
     } & {
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;
@@ -111,8 +111,8 @@ export declare class ActivityService {
     }): Promise<{
         id: string;
         created_at: Date;
-        user_id: string | null;
         order_id: string | null;
+        user_id: string | null;
         type: string;
         title: string;
         description: string | null;

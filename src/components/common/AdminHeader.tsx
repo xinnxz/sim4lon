@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import NotificationModal from '@/components/common/NotificationModal'
 import ConfirmationModal from '@/components/common/ConfirmationModal'
+import { removeToken, authApi } from '@/lib/api'
 
 interface AdminHeaderProps {
   userName?: string
@@ -21,24 +22,51 @@ interface AdminHeaderProps {
   notificationCount?: number
 }
 
-export default function AdminHeader({ 
-  userName = 'Admin User',
-  userRole = 'Administrator',
+export default function AdminHeader({
+  userName: initialUserName = 'Admin User',
+  userRole: initialUserRole = 'Administrator',
   notificationCount = 3
 }: AdminHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [userName, setUserName] = useState(initialUserName)
+  const [userRole, setUserRole] = useState(initialUserRole)
 
-return (
+  /**
+   * Fetch user profile dari API saat component mount
+   */
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await authApi.getProfile()
+        setUserName(profile.name)
+        setUserRole(profile.role === 'ADMIN' ? 'Administrator' : 'Operator')
+      } catch (err) {
+        // Jika gagal fetch, gunakan default values
+        console.error('Failed to fetch profile:', err)
+      }
+    }
+    fetchProfile()
+  }, [])
+
+  /**
+   * Handle logout: hapus token dan redirect ke login
+   */
+  const handleLogout = () => {
+    removeToken()
+    window.location.href = '/login'
+  }
+
+  return (
     <>
-<header className="sticky top-0 z-50 w-full border-b border-border bg-gradient-to-r from-background to-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300" id="ijli">
-         <div className="w-full flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-gradient-to-r from-background to-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300" id="ijli">
+        <div className="w-full flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & App Name */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <SafeIcon name="Flame" className="h-6 w-6 text-primary-foreground" />
             </div>
-<div className="hidden sm:block">
+            <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-foreground">SIM4LON</h1>
             </div>
           </div>
@@ -46,23 +74,23 @@ return (
           {/* Right Section: Notifications & User */}
           <div className="flex items-center gap-2">
             {/* Notifications */}
-<Button
-               variant="ghost"
-               size="lg"
-               className="relative hover:bg-primary/10 transition-colors"
-               onClick={() => setShowNotifications(true)}
-               aria-label="Notifikasi"
-             >
-               <SafeIcon name="Bell" className="h-6 w-6" />
-               {notificationCount > 0 && (
-                 <Badge 
-                   variant="destructive" 
-                   className="absolute -right-1 -top-1 h-6 w-6 rounded-full p-0 text-xs flex items-center justify-center font-bold"
-                 >
-                   {notificationCount}
-                 </Badge>
-               )}
-             </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              className="relative hover:bg-primary/10 transition-colors"
+              onClick={() => setShowNotifications(true)}
+              aria-label="Notifikasi"
+            >
+              <SafeIcon name="Bell" className="h-6 w-6" />
+              {notificationCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -right-1 -top-1 h-6 w-6 rounded-full p-0 text-xs flex items-center justify-center font-bold"
+                >
+                  {notificationCount}
+                </Badge>
+              )}
+            </Button>
 
             {/* User Account Dropdown */}
             <DropdownMenu>
@@ -85,12 +113,12 @@ return (
                 <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <a href="./profil-admin.html" className="cursor-pointer">
+                  <a href="/profil-admin" className="cursor-pointer">
                     <SafeIcon name="User" className="mr-2 h-4 w-4" />
                     <span>Profil</span>
                   </a>
                 </DropdownMenuItem>
-<DropdownMenuSeparator />
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="cursor-pointer text-destructive">
                   <SafeIcon name="LogOut" className="mr-2 h-4 w-4" />
                   <span>Keluar</span>
@@ -101,27 +129,25 @@ return (
         </div>
       </header>
 
-{/* Notification Modal */}
-       <NotificationModal 
-         open={showNotifications} 
-         onOpenChange={setShowNotifications}
-       />
+      {/* Notification Modal */}
+      <NotificationModal
+        open={showNotifications}
+        onOpenChange={setShowNotifications}
+      />
 
-       {/* Logout Confirmation Modal */}
-       <ConfirmationModal
-         open={showLogoutConfirm}
-         onOpenChange={setShowLogoutConfirm}
-         title="Konfirmasi Keluar"
-         description="Apakah Anda yakin ingin keluar dari sistem?"
-         confirmText="Ya, Keluar"
-         cancelText="Batal"
-         icon="LogOut"
-         iconColor="text-primary"
-         isDangerous={false}
-         onConfirm={async () => {
-           window.location.href = './login.html'
-         }}
-       />
-     </>
-   )
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Konfirmasi Keluar"
+        description="Apakah Anda yakin ingin keluar dari sistem?"
+        confirmText="Ya, Keluar"
+        cancelText="Batal"
+        icon="LogOut"
+        iconColor="text-primary"
+        isDangerous={false}
+        onConfirm={handleLogout}
+      />
+    </>
+  )
 }

@@ -24,8 +24,8 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    findAll(page, limit) {
-        return this.userService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10);
+    findAll(page, limit, search) {
+        return this.userService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, search);
     }
     findOne(id) {
         return this.userService.findOne(id);
@@ -39,6 +39,9 @@ let UserController = class UserController {
     remove(id) {
         return this.userService.remove(id);
     }
+    resetPassword(id) {
+        return this.userService.resetPassword(id);
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -46,8 +49,9 @@ __decorate([
     (0, decorators_1.Roles)(client_1.user_role.ADMIN),
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "findAll", null);
 __decorate([
@@ -83,6 +87,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Post)(':id/reset-password'),
+    (0, decorators_1.Roles)(client_1.user_role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "resetPassword", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(guards_1.JwtAuthGuard, guards_1.RolesGuard),

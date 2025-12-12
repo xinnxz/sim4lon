@@ -7,10 +7,11 @@
 // 1. Membuat user Admin dan Operator
 // 2. Membuat beberapa driver contoh
 // 3. Membuat beberapa pangkalan contoh
+// 4. Membuat sample orders dan stock histories
 // ============================================================
 
 import 'dotenv/config'; // Load .env file
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, lpg_type, stock_movement_type, status_pesanan } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
@@ -158,12 +159,215 @@ async function main() {
     });
     console.log('✅ Created Pangkalan:', pangkalan3.name);
 
+    // ============================================================
+    // 4. CREATE ORDERS
+    // ============================================================
+    // Pesanan dari pangkalan dengan berbagai status
+
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const twoDaysAgo = new Date(today);
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    // Order 1 - Selesai hari ini
+    const order1 = await prisma.orders.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000101' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000101',
+            pangkalan_id: pangkalan1.id,
+            driver_id: driver1.id,
+            current_status: status_pesanan.SELESAI,
+            total_amount: 2500000,
+            note: 'Pesanan rutin mingguan',
+            order_date: today,
+        },
+    });
+    console.log('✅ Created Order 1 (SELESAI)');
+
+    // Order 2 - DIPROSES
+    const order2 = await prisma.orders.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000102' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000102',
+            pangkalan_id: pangkalan2.id,
+            driver_id: driver2.id,
+            current_status: status_pesanan.DIPROSES,
+            total_amount: 1800000,
+            note: 'Urgent delivery',
+            order_date: today,
+        },
+    });
+    console.log('✅ Created Order 2 (DIPROSES)');
+
+    // Order 3 - DRAFT (pending)
+    const order3 = await prisma.orders.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000103' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000103',
+            pangkalan_id: pangkalan3.id,
+            current_status: status_pesanan.DRAFT,
+            total_amount: 900000,
+            note: 'Menunggu konfirmasi',
+            order_date: today,
+        },
+    });
+    console.log('✅ Created Order 3 (DRAFT)');
+
+    // Order 4 - MENUNGGU_PEMBAYARAN
+    const order4 = await prisma.orders.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000104' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000104',
+            pangkalan_id: pangkalan1.id,
+            current_status: status_pesanan.MENUNGGU_PEMBAYARAN,
+            total_amount: 3200000,
+            note: 'Perlu DP dulu',
+            order_date: today,
+        },
+    });
+    console.log('✅ Created Order 4 (MENUNGGU_PEMBAYARAN)');
+
+    // Order 5 - SELESAI kemarin
+    const order5 = await prisma.orders.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000105' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000105',
+            pangkalan_id: pangkalan2.id,
+            driver_id: driver1.id,
+            current_status: status_pesanan.SELESAI,
+            total_amount: 1500000,
+            note: 'Delivered on time',
+            order_date: yesterday,
+        },
+    });
+    console.log('✅ Created Order 5 (SELESAI - kemarin)');
+
+    // ============================================================
+    // 5. CREATE ORDER ITEMS
+    // ============================================================
+
+    await prisma.order_items.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000201' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000201',
+            order_id: order1.id,
+            lpg_type: lpg_type.kg3,
+            label: 'LPG 3kg',
+            price_per_unit: 18000,
+            qty: 100,
+            sub_total: 1800000,
+        },
+    });
+
+    await prisma.order_items.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000202' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000202',
+            order_id: order1.id,
+            lpg_type: lpg_type.kg12,
+            label: 'LPG 12kg',
+            price_per_unit: 140000,
+            qty: 5,
+            sub_total: 700000,
+        },
+    });
+
+    await prisma.order_items.upsert({
+        where: { id: '00000000-0000-0000-0000-000000000203' },
+        update: {},
+        create: {
+            id: '00000000-0000-0000-0000-000000000203',
+            order_id: order2.id,
+            lpg_type: lpg_type.kg3,
+            label: 'LPG 3kg',
+            price_per_unit: 18000,
+            qty: 100,
+            sub_total: 1800000,
+        },
+    });
+    console.log('✅ Created Order Items');
+
+    // ============================================================
+    // 6. CREATE STOCK HISTORIES
+    // ============================================================
+    // Ini data stok masuk/keluar untuk tracking inventory
+
+    try {
+        // Stok masuk awal
+        await prisma.stock_histories.createMany({
+            data: [
+                {
+                    id: '00000000-0000-0000-0000-000000000301',
+                    lpg_type: lpg_type.kg3,
+                    movement_type: stock_movement_type.MASUK,
+                    qty: 500,
+                    note: 'Stok awal',
+                    timestamp: twoDaysAgo,
+                    recorded_by_user_id: adminUser.id,
+                },
+                {
+                    id: '00000000-0000-0000-0000-000000000302',
+                    lpg_type: lpg_type.kg12,
+                    movement_type: stock_movement_type.MASUK,
+                    qty: 200,
+                    note: 'Stok awal',
+                    timestamp: twoDaysAgo,
+                    recorded_by_user_id: adminUser.id,
+                },
+                {
+                    id: '00000000-0000-0000-0000-000000000303',
+                    lpg_type: lpg_type.kg50,
+                    movement_type: stock_movement_type.MASUK,
+                    qty: 50,
+                    note: 'Stok awal',
+                    timestamp: twoDaysAgo,
+                    recorded_by_user_id: adminUser.id,
+                },
+                {
+                    id: '00000000-0000-0000-0000-000000000304',
+                    lpg_type: lpg_type.kg3,
+                    movement_type: stock_movement_type.KELUAR,
+                    qty: 100,
+                    note: 'Pengiriman ke Pangkalan Maju Jaya',
+                    timestamp: yesterday,
+                    recorded_by_user_id: adminUser.id,
+                },
+                {
+                    id: '00000000-0000-0000-0000-000000000305',
+                    lpg_type: lpg_type.kg12,
+                    movement_type: stock_movement_type.KELUAR,
+                    qty: 5,
+                    note: 'Pengiriman ke Pangkalan Maju Jaya',
+                    timestamp: yesterday,
+                    recorded_by_user_id: adminUser.id,
+                },
+            ],
+            skipDuplicates: true,
+        });
+        console.log('✅ Created Stock Histories');
+    } catch (e) {
+        console.log('⚠️ Stock histories already exist, skipping...');
+    }
+
     console.log('');
     console.log('🎉 Seed completed!');
     console.log('');
     console.log('📋 Login credentials:');
     console.log('   Admin    : admin@sim4lon.co.id / admin123');
     console.log('   Operator : operator@sim4lon.co.id / operator123');
+    console.log('');
+    console.log('📊 Sample data:');
+    console.log('   - 5 Orders (various statuses)');
+    console.log('   - Stock: 400 x 3kg, 195 x 12kg, 50 x 50kg');
 }
 
 main()

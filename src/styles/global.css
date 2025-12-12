@@ -74,6 +74,34 @@
     @apply rounded-xl border-2 border-border bg-card text-card-foreground shadow-[0_2px_8px_-1px_rgb(0_0_0_/0.08),0_1px_3px_-1px_rgb(0_0_0_/0.06)] hover:shadow-[0_8px_20px_-4px_rgb(0_0_0_/0.15),0_4px_12px_-2px_rgb(0_0_0_/0.12)] hover:border-primary/60 transition-all duration-300;
   }
 
+  /* Modern interactive card with glass morphism feel */
+  .card-interactive {
+    @apply relative overflow-hidden;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)];
+    @apply hover:scale-[1.02] hover:-translate-y-1;
+    @apply hover:border-primary/50;
+  }
+
+  .card-interactive::before {
+    content: '';
+    @apply absolute inset-0 opacity-0;
+    @apply bg-gradient-to-br from-primary/5 via-transparent to-transparent;
+    @apply transition-opacity duration-300;
+    @apply pointer-events-none;
+  }
+
+  .card-interactive:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Glow effect on hover */
+  .card-glow:hover {
+    box-shadow: 
+      0 20px 40px -12px rgba(0, 0, 0, 0.15),
+      0 0 20px -5px hsl(152 100% 30% / 0.15);
+  }
+
   /* Enhanced border styling for interactive elements */
   .border-enhanced {
     @apply border-2 border-solid transition-all duration-300;
@@ -85,6 +113,11 @@
 
   .card-gradient {
     @apply bg-gradient-to-br from-card to-card/80;
+  }
+
+  /* Ripple effect placeholder - for future enhancement */
+  .card-ripple {
+    @apply relative overflow-hidden;
   }
 }
 

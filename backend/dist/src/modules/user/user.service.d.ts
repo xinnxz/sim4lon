@@ -3,7 +3,7 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 export declare class UserService {
     private prisma;
     constructor(prisma: PrismaService);
-    findAll(page?: number, limit?: number): Promise<{
+    findAll(page?: number, limit?: number, search?: string): Promise<{
         data: {
             id: string;
             email: string;
@@ -54,5 +54,9 @@ export declare class UserService {
     }>;
     remove(id: string): Promise<{
         message: string;
+    }>;
+    resetPassword(id: string): Promise<{
+        message: string;
+        newPassword: string;
     }>;
 }

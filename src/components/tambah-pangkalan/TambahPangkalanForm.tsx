@@ -1,3 +1,19 @@
+/**
+ * TambahPangkalanForm - Form Tambah Pangkalan dengan API Integration
+ * 
+ * PENJELASAN:
+ * Form ini digunakan untuk menambahkan pangkalan baru ke sistem.
+ * Data dikirim ke API /pangkalans via POST request.
+ * 
+ * Fields:
+ * - name: Nama pangkalan (required)
+ * - address: Alamat lengkap (required)
+ * - region: Wilayah/kota (required)
+ * - pic_name: Nama PIC (required)
+ * - phone: Nomor telepon (required)
+ * - capacity: Kapasitas penyimpanan (optional)
+ * - note: Catatan tambahan (optional)
+ */
 
 'use client'
 
@@ -20,21 +36,32 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
+import { pangkalanApi } from '@/lib/api'
 
-// Validation schema
+/**
+ * Validation schema dengan Zod
+ * Semua field divalidasi sebelum submit
+ * Note: capacity jadi string untuk hindari type issue dengan react-hook-form
+ */
 const pangkalanSchema = z.object({
-  nama: z.string()
+  name: z.string()
     .min(3, 'Nama pangkalan minimal 3 karakter')
     .max(100, 'Nama pangkalan maksimal 100 karakter'),
-  alamat: z.string()
+  address: z.string()
     .min(10, 'Alamat minimal 10 karakter')
     .max(255, 'Alamat maksimal 255 karakter'),
-  kontak: z.string()
-    .regex(/^(\+62|0)[0-9]{9,12}$/, 'Nomor telepon tidak valid'),
-  catatan: z.string()
+  region: z.string()
+    .min(2, 'Wilayah minimal 2 karakter')
+    .max(100, 'Wilayah maksimal 100 karakter'),
+  pic_name: z.string()
+    .min(2, 'Nama PIC minimal 2 karakter')
+    .max(100, 'Nama PIC maksimal 100 karakter'),
+  phone: z.string()
+    .regex(/^(\+62|0)[0-9]{9,12}$/, 'Nomor telepon tidak valid (contoh: 08xx atau +62xx)'),
+  capacity: z.string().optional(),
+  note: z.string()
     .max(500, 'Catatan maksimal 500 karakter')
-    .optional()
-    .default(''),
+    .optional(),
 })
 
 type PangkalanFormValues = z.infer<typeof pangkalanSchema>
@@ -50,30 +77,45 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
   const form = useForm<PangkalanFormValues>({
     resolver: zodResolver(pangkalanSchema),
     defaultValues: {
-      nama: '',
-      alamat: '',
-      kontak: '',
-      catatan: '',
+      name: '',
+      address: '',
+      region: '',
+      pic_name: '',
+      phone: '',
+      capacity: '',
+      note: '',
     },
   })
 
-async function onSubmit(values: PangkalanFormValues) {
+  /**
+   * Submit form ke API
+   */
+  async function onSubmit(values: PangkalanFormValues) {
     setIsSubmitting(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Form submitted:', values)
+      // Parse capacity string to number
+      const capacityNum = values.capacity ? parseInt(values.capacity, 10) : 0
+
+      await pangkalanApi.create({
+        name: values.name,
+        address: values.address,
+        region: values.region,
+        pic_name: values.pic_name,
+        phone: values.phone,
+        capacity: capacityNum,
+        note: values.note || '',
+      })
+
       toast.success('Pangkalan berhasil ditambahkan!')
-      
+
       // If in modal, call onSuccess callback
       if (isModal && onSuccess) {
         onSuccess()
       } else {
         // Redirect after success (for standalone page use)
         setTimeout(() => {
-          window.location.href = './daftar-pangkalan.html'
-        }, 1500)
+          window.location.href = '/daftar-pangkalan'
+        }, 1000)
       }
     } catch (error) {
       toast.error('Gagal menambahkan pangkalan. Silakan coba lagi.')
@@ -83,45 +125,44 @@ async function onSubmit(values: PangkalanFormValues) {
     }
   }
 
-return (
+  return (
     <div className={isModal ? '' : 'max-w-2xl mx-auto'}>
       {/* Header - only show when not in modal */}
       {!isModal && (
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <SafeIcon name="Store" className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Tambah Pangkalan</h1>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <SafeIcon name="Store" className="h-6 w-6 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">Tambah Pangkalan</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Daftarkan pangkalan LPG baru ke dalam sistem
+          </p>
         </div>
-        <p className="text-muted-foreground">
-          Daftarkan pangkalan LPG baru ke dalam sistem untuk memperluas jangkauan operasional
-        </p>
-      </div>
       )}
 
-{/* Form Card */}
-       <Card className={isModal ? '' : 'shadow-card'}>
-         <CardHeader>
-           <CardTitle>Informasi Pangkalan</CardTitle>
-           <CardDescription>
-             Isi semua field yang diperlukan untuk mendaftarkan pangkalan baru
-           </CardDescription>
-         </CardHeader>
-        <CardContent>
+      {/* Form Card */}
+      <Card className={isModal ? 'border-0 shadow-none' : 'shadow-card'}>
+        <CardHeader className={isModal ? 'px-0 pt-0' : ''}>
+          <CardTitle>Informasi Pangkalan</CardTitle>
+          <CardDescription>
+            Isi semua field yang diperlukan untuk mendaftarkan pangkalan baru
+          </CardDescription>
+        </CardHeader>
+        <CardContent className={isModal ? 'px-0' : ''}>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Nama Pangkalan */}
               <FormField
                 control={form.control}
-                name="nama"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Nama Pangkalan</FormLabel>
+                    <FormLabel className="text-base font-semibold">Nama Pangkalan *</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Contoh: Pangkalan Maju Jaya"
                         {...field}
                         disabled={isSubmitting}
-                        className="h-10"
                       />
                     </FormControl>
                     <FormDescription>
@@ -135,45 +176,110 @@ return (
               {/* Alamat */}
               <FormField
                 control={form.control}
-                name="alamat"
+                name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Alamat</FormLabel>
+                    <FormLabel className="text-base font-semibold">Alamat Lengkap *</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Contoh: Jl. Merdeka No. 123, Kelurahan Sukamaju, Kecamatan Cibinong, Kabupaten Bogor, Jawa Barat 16810"
+                        placeholder="Contoh: Jl. Merdeka No. 123, Kelurahan Sukamaju"
                         {...field}
                         disabled={isSubmitting}
-                        rows={4}
-                        className="resize-none"
+                        rows={3}
                       />
                     </FormControl>
                     <FormDescription>
-                      Alamat lengkap pangkalan termasuk kota dan provinsi
+                      Alamat lengkap pangkalan
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Kontak */}
+              {/* Wilayah */}
               <FormField
                 control={form.control}
-                name="kontak"
+                name="region"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Nomor Telepon</FormLabel>
+                    <FormLabel className="text-base font-semibold">Wilayah *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Contoh: 0812345678 atau +6212345678"
+                        placeholder="Contoh: Jakarta Pusat"
                         {...field}
                         disabled={isSubmitting}
-                        type="tel"
-                        className="h-10"
                       />
                     </FormControl>
                     <FormDescription>
-                      Nomor telepon yang dapat dihubungi (dimulai dengan 0 atau +62)
+                      Kota atau wilayah pangkalan berada
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* PIC Name */}
+              <FormField
+                control={form.control}
+                name="pic_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Nama PIC *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: Budi Santoso"
+                        {...field}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Nama penanggung jawab pangkalan
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Telepon */}
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Nomor Telepon *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: 081234567890"
+                        {...field}
+                        disabled={isSubmitting}
+                        type="tel"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Nomor telepon yang dapat dihubungi
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Kapasitas */}
+              <FormField
+                control={form.control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Kapasitas (Opsional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: 500"
+                        {...field}
+                        disabled={isSubmitting}
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Kapasitas penyimpanan LPG dalam unit
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -183,21 +289,20 @@ return (
               {/* Catatan */}
               <FormField
                 control={form.control}
-                name="catatan"
+                name="note"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold">Catatan (Opsional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Contoh: Pangkalan dengan fasilitas lengkap, lokasi strategis di pusat kota"
+                        placeholder="Contoh: Lokasi strategis, akses jalan mudah"
                         {...field}
                         disabled={isSubmitting}
-                        rows={3}
-                        className="resize-none"
+                        rows={2}
                       />
                     </FormControl>
                     <FormDescription>
-                      Informasi tambahan tentang pangkalan (maksimal 500 karakter)
+                      Informasi tambahan tentang pangkalan
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -206,20 +311,22 @@ return (
 
               {/* Form Actions */}
               <div className="flex gap-3 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => window.location.href = './daftar-pangkalan.html'}
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  <SafeIcon name="X" className="mr-2 h-4 w-4" />
-                  Batal
-                </Button>
+                {!isModal && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => window.location.href = '/daftar-pangkalan'}
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  >
+                    <SafeIcon name="X" className="mr-2 h-4 w-4" />
+                    Batal
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className={isModal ? 'w-full' : 'flex-1 bg-primary hover:bg-primary/90'}
                 >
                   {isSubmitting ? (
                     <>
@@ -238,23 +345,6 @@ return (
           </Form>
         </CardContent>
       </Card>
-
-{/* Info Box - only show when not in modal */}
-       {!isModal && (
-       <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-         <div className="flex gap-3">
-           <SafeIcon name="Info" className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-           <div className="text-sm text-foreground">
-             <p className="font-semibold mb-1">Informasi Penting</p>
-             <ul className="space-y-1 text-muted-foreground">
-               <li>• Pastikan semua data yang diisi sudah benar sebelum menyimpan</li>
-               <li>• Nomor telepon harus valid dan dapat dihubungi</li>
-               <li>• Pangkalan yang sudah terdaftar dapat diedit dari halaman Daftar Pangkalan</li>
-             </ul>
-           </div>
-         </div>
-       </div>
-       )}
-     </div>
-   )
- }
+    </div>
+  )
+}

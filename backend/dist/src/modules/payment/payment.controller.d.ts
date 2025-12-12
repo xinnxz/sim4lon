@@ -65,11 +65,11 @@ export declare class PaymentController {
                 created_at: Date;
                 updated_at: Date;
                 order_id: string;
-                sub_total: import("@prisma/client-runtime-utils").Decimal | null;
                 lpg_type: import("@prisma/client").$Enums.lpg_type;
                 label: string | null;
                 price_per_unit: import("@prisma/client-runtime-utils").Decimal;
                 qty: number;
+                sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             }[];
         } & {
             id: string;
@@ -89,12 +89,12 @@ export declare class PaymentController {
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
-            sub_total: import("@prisma/client-runtime-utils").Decimal;
             tax_rate: import("@prisma/client-runtime-utils").Decimal | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             grand_total: import("@prisma/client-runtime-utils").Decimal;
@@ -135,12 +135,12 @@ export declare class PaymentController {
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
-            sub_total: import("@prisma/client-runtime-utils").Decimal;
             tax_rate: import("@prisma/client-runtime-utils").Decimal | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             grand_total: import("@prisma/client-runtime-utils").Decimal;

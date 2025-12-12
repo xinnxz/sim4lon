@@ -145,7 +145,8 @@ model payment_records {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model stock_histories {
   id                  String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  lpg_type            lpg_type
+  lpg_type            lpg_type?           // Keep for backward compatibility
+  lpg_product_id      String?             @db.Uuid // New: reference to dynamic product
   movement_type       stock_movement_type
   qty                 Int
   note                String?
@@ -153,9 +154,44 @@ model stock_histories {
   timestamp           DateTime            @default(now()) @db.Timestamptz(6)
   created_at          DateTime            @default(now()) @db.Timestamptz(6)
   users               users?              @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_user")
+  lpg_product         lpg_products?       @relation(fields: [lpg_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_lpg_product")
 
   @@index([timestamp(sort: Desc)], map: "idx_stock_timestamp")
   @@index([lpg_type], map: "idx_stock_type")
+  @@index([lpg_product_id], map: "idx_stock_product")
+}
+
+// Dynamic LPG Products Management
+model lpg_products {
+  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name            String            @db.VarChar(100)
+  size_kg         Decimal           @db.Decimal(5, 2) // e.g., 3.00, 5.50, 12.00, 50.00
+  category        lpg_category      @default(NON_SUBSIDI)
+  color           String?           @db.VarChar(50) // e.g., "hijau", "biru", "pink"
+  description     String?
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
+  prices          lpg_prices[]
+  stock_histories stock_histories[]
+
+  @@index([category], map: "idx_lpg_products_category")
+  @@index([is_active], map: "idx_lpg_products_active")
+}
+
+// Multiple prices per product (e.g., retail, wholesale, different brands)
+model lpg_prices {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  lpg_product_id String       @db.Uuid
+  label          String       @db.VarChar(100) // e.g., "Harga Retail", "Harga Grosir"
+  price          Decimal      @db.Decimal(15, 2)
+  is_default     Boolean      @default(false)
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime     @default(now()) @db.Timestamptz(6)
+  lpg_product    lpg_products @relation(fields: [lpg_product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_prices_product")
+
+  @@index([lpg_product_id], map: "idx_lpg_prices_product")
 }
 
 model timeline_tracks {
@@ -217,4 +253,9 @@ enum stock_movement_type {
 enum user_role {
   ADMIN
   OPERATOR
+}
+
+enum lpg_category {
+  SUBSIDI
+  NON_SUBSIDI
 }

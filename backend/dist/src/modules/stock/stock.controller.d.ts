@@ -12,13 +12,14 @@ export declare class StockController {
             } | null;
         } & {
             id: string;
-            created_at: Date;
-            note: string | null;
-            timestamp: Date;
-            lpg_type: import("@prisma/client").$Enums.lpg_type;
-            qty: number;
-            recorded_by_user_id: string | null;
+            lpg_type: import("@prisma/client").$Enums.lpg_type | null;
+            lpg_product_id: string | null;
             movement_type: import("@prisma/client").$Enums.stock_movement_type;
+            qty: number;
+            note: string | null;
+            recorded_by_user_id: string | null;
+            timestamp: Date;
+            created_at: Date;
         })[];
         meta: {
             total: number;
@@ -39,13 +40,14 @@ export declare class StockController {
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        note: string | null;
-        timestamp: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        recorded_by_user_id: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
+        lpg_product_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
+        note: string | null;
+        recorded_by_user_id: string | null;
+        timestamp: Date;
+        created_at: Date;
     })[]>;
     createMovement(dto: CreateStockMovementDto, userId: string): Promise<{
         users: {
@@ -54,12 +56,13 @@ export declare class StockController {
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        note: string | null;
-        timestamp: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        recorded_by_user_id: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
+        lpg_product_id: string | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
+        note: string | null;
+        recorded_by_user_id: string | null;
+        timestamp: Date;
+        created_at: Date;
     }>;
 }

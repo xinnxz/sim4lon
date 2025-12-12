@@ -1,7 +1,9 @@
-import { lpg_type, stock_movement_type } from '@prisma/client';
 export declare class CreateStockMovementDto {
-    lpg_type: lpg_type;
-    movement_type: stock_movement_type;
+    lpg_type?: string;
+    lpg_product_id?: string;
+    movement_type: string;
     qty: number;
     note?: string;
 }
+export declare function mapLpgTypeToEnum(value: string): 'kg3' | 'kg12' | 'kg50';
+export declare function mapMovementTypeToEnum(value: string): 'MASUK' | 'KELUAR';
