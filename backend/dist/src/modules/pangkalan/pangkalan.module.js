@@ -10,13 +10,13 @@ exports.PangkalanModule = void 0;
 const common_1 = require("@nestjs/common");
 const pangkalan_controller_1 = require("./pangkalan.controller");
 const pangkalan_service_1 = require("./pangkalan.service");
-const prisma_module_1 = require("../../prisma/prisma.module");
+const prisma_1 = require("../../prisma");
 let PangkalanModule = class PangkalanModule {
 };
 exports.PangkalanModule = PangkalanModule;
 exports.PangkalanModule = PangkalanModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_1.PrismaModule],
         controllers: [pangkalan_controller_1.PangkalanController],
         providers: [pangkalan_service_1.PangkalanService],
         exports: [pangkalan_service_1.PangkalanService],

@@ -4,24 +4,27 @@ import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import CreateOrderForm from '@/components/buat-pesanan/CreateOrderForm.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Buat Pesanan - SIM4LON">
-  <AdminHeader client:load />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main class="flex-1 flex flex-col" id="i5rzb7">
-      <div class="flex-1 overflow-auto flex flex-col" id="ixt0d1">
-        <div class="flex-1 container mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10" id="i07vr6">
-          <div class="mb-8 sm:mb-10 lg:mb-12" id="ihltgq">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3" id="ijnbro" data-create-title>Buat Pesanan Baru</h1>
-            <p class="text-sm sm:text-base text-muted-foreground">Isi formulir di bawah untuk membuat pesanan LPG baru</p>
+  <ProtectedDashboard client:load>
+    <AdminHeader client:load />
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col" id="i5rzb7">
+        <div class="flex-1 overflow-auto flex flex-col" id="ixt0d1">
+          <div class="flex-1 container mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10" id="i07vr6">
+            <div class="mb-8 sm:mb-10 lg:mb-12" id="ihltgq">
+              <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3" id="ijnbro" data-create-title>Buat Pesanan Baru</h1>
+              <p class="text-sm sm:text-base text-muted-foreground">Isi formulir di bawah untuk membuat pesanan LPG baru</p>
+            </div>
+            <CreateOrderForm client:load />
+            <AdminFooter />
           </div>
-          <CreateOrderForm client:load />
-          <AdminFooter />
         </div>
-      </div>
-    </main>
-  </AppSidebarLayout>
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>
 
 <script is:inline>

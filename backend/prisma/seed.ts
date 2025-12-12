@@ -37,7 +37,10 @@ async function main() {
 
     const adminUser = await prisma.users.upsert({
         where: { email: 'admin@sim4lon.co.id' },
-        update: {}, // Tidak update apa-apa jika sudah ada
+        update: {
+            password: hashedAdminPassword,  // Update password jika user sudah ada
+            name: 'Administrator',
+        },
         create: {
             email: 'admin@sim4lon.co.id',
             password: hashedAdminPassword,
@@ -47,11 +50,14 @@ async function main() {
             is_active: true,
         },
     });
-    console.log('✅ Created Admin:', adminUser.email);
+    console.log('✅ Created/Updated Admin:', adminUser.email);
 
     const operatorUser = await prisma.users.upsert({
         where: { email: 'operator@sim4lon.co.id' },
-        update: {},
+        update: {
+            password: hashedOperatorPassword,
+            name: 'Siti Rahmawati',
+        },
         create: {
             email: 'operator@sim4lon.co.id',
             password: hashedOperatorPassword,
@@ -61,7 +67,7 @@ async function main() {
             is_active: true,
         },
     });
-    console.log('✅ Created Operator:', operatorUser.email);
+    console.log('✅ Created/Updated Operator:', operatorUser.email);
 
     // ============================================================
     // 2. CREATE DRIVERS

@@ -46,7 +46,7 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
-const prisma_service_1 = require("../../prisma/prisma.service");
+const prisma_1 = require("../../prisma");
 let AuthService = class AuthService {
     prisma;
     jwtService;
@@ -138,7 +138,7 @@ let AuthService = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+    __metadata("design:paramtypes", [prisma_1.PrismaService,
         jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

@@ -1,4 +1,4 @@
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma';
 import { CreateActivityLogDto } from './dto';
 export declare class ActivityService {
     private prisma;
@@ -18,16 +18,16 @@ export declare class ActivityService {
         } & {
             id: string;
             created_at: Date;
-            description: string | null;
-            order_id: string | null;
-            timestamp: Date;
             user_id: string | null;
+            order_id: string | null;
             type: string;
             title: string;
+            description: string | null;
             pangkalan_name: string | null;
             detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
             icon_name: string | null;
             order_status: import("@prisma/client").$Enums.status_pesanan | null;
+            timestamp: Date;
         })[];
         meta: {
             total: number;
@@ -39,16 +39,16 @@ export declare class ActivityService {
     create(dto: CreateActivityLogDto): Promise<{
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     }>;
     getRecent(limit?: number): Promise<({
         users: {
@@ -64,16 +64,16 @@ export declare class ActivityService {
     } & {
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     })[]>;
     getByType(type: string, limit?: number): Promise<({
         users: {
@@ -89,16 +89,16 @@ export declare class ActivityService {
     } & {
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     })[]>;
     logActivity(type: string, title: string, options?: {
         userId?: string;
@@ -111,15 +111,15 @@ export declare class ActivityService {
     }): Promise<{
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     }>;
 }

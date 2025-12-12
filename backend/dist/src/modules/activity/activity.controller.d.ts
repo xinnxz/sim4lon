@@ -18,16 +18,16 @@ export declare class ActivityController {
         } & {
             id: string;
             created_at: Date;
-            description: string | null;
-            order_id: string | null;
-            timestamp: Date;
             user_id: string | null;
+            order_id: string | null;
             type: string;
             title: string;
+            description: string | null;
             pangkalan_name: string | null;
             detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
             icon_name: string | null;
             order_status: import("@prisma/client").$Enums.status_pesanan | null;
+            timestamp: Date;
         })[];
         meta: {
             total: number;
@@ -50,16 +50,16 @@ export declare class ActivityController {
     } & {
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     })[]>;
     getByType(type: string, limit?: string): Promise<({
         users: {
@@ -75,29 +75,29 @@ export declare class ActivityController {
     } & {
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     })[]>;
     create(dto: CreateActivityLogDto): Promise<{
         id: string;
         created_at: Date;
-        description: string | null;
-        order_id: string | null;
-        timestamp: Date;
         user_id: string | null;
+        order_id: string | null;
         type: string;
         title: string;
+        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
+        timestamp: Date;
     }>;
 }

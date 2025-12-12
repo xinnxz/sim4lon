@@ -13,14 +13,14 @@ const passport_1 = require("@nestjs/passport");
 const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const strategies_1 = require("./strategies");
-const prisma_module_1 = require("../../prisma/prisma.module");
+const prisma_1 = require("../../prisma");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            prisma_module_1.PrismaModule,
+            prisma_1.PrismaModule,
             passport_1.PassportModule.register({ defaultStrategy: 'jwt' }),
             jwt_1.JwtModule.register({
                 global: true,

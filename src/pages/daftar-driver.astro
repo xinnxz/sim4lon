@@ -5,14 +5,17 @@ import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import DriverListPage from '@/components/daftar-driver/DriverListPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Daftar Supir - SIM4LON">
-  <AdminHeader client:load userName="Admin User" userRole="Administrator" notificationCount={3} />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main class="flex-1 flex flex-col">
-      <DriverListPage client:load />
-      <AdminFooter />
-    </main>
-  </AppSidebarLayout>
+  <ProtectedDashboard client:load>
+    <AdminHeader client:load userName="Admin User" userRole="Administrator" notificationCount={3} />
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col">
+        <DriverListPage client:load />
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>
