@@ -816,8 +816,8 @@ export const ordersApi = {
             limit: limit.toString(),
         });
         if (status) params.append('status', status);
-        if (pangkalanId) params.append('pangkalanId', pangkalanId);
-        if (driverId) params.append('driverId', driverId);
+        if (pangkalanId) params.append('pangkalan_id', pangkalanId);
+        if (driverId) params.append('driver_id', driverId);
 
         return apiRequest(`/orders?${params.toString()}`);
     },
