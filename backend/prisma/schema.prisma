@@ -71,6 +71,8 @@ model order_items {
   price_per_unit Decimal  @db.Decimal(15, 2)
   qty            Int
   sub_total      Decimal? @db.Decimal(15, 2)
+  is_taxable     Boolean  @default(false)  // true jika NON_SUBSIDI (kena PPN 12%)
+  tax_amount     Decimal  @default(0) @db.Decimal(15, 2)  // PPN per item
   created_at     DateTime @default(now()) @db.Timestamptz(6)
   updated_at     DateTime @default(now()) @db.Timestamptz(6)
   orders         orders   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_order_items_order")
@@ -99,7 +101,9 @@ model orders {
   driver_id             String?                @db.Uuid
   order_date            DateTime               @default(dbgenerated("CURRENT_DATE")) @db.Date
   current_status        status_pesanan         @default(DRAFT)
-  total_amount          Decimal                @default(0) @db.Decimal(15, 2)
+  subtotal              Decimal                @default(0) @db.Decimal(15, 2)  // Total sebelum pajak
+  tax_amount            Decimal                @default(0) @db.Decimal(15, 2)  // Total PPN (12% dari non-subsidi)
+  total_amount          Decimal                @default(0) @db.Decimal(15, 2)  // Subtotal + Tax
   note                  String?
   created_at            DateTime               @default(now()) @db.Timestamptz(6)
   updated_at            DateTime               @default(now()) @db.Timestamptz(6)
@@ -122,6 +126,7 @@ model pangkalans {
   region     String?   @db.VarChar(100)
   pic_name   String?   @db.VarChar(255)
   phone      String?   @db.VarChar(20)
+  email      String?   @db.VarChar(255)  // Email untuk kirim invoice/dokumen
   capacity   Int?
   note       String?
   is_active  Boolean   @default(true)

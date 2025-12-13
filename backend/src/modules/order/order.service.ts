@@ -75,11 +75,6 @@ export class OrderService {
     }
 
     async create(dto: CreateOrderDto) {
-        // Calculate total amount
-        const totalAmount = dto.items.reduce(
-            (sum, item) => sum + item.price_per_unit * item.qty,
-            0,
-        );
 
         /**
          * PENJELASAN MAPPING lpg_type:
@@ -143,22 +138,46 @@ export class OrderService {
         const orderCount = await this.prisma.orders.count();
         const orderCode = `ORD-${String(orderCount + 1).padStart(4, '0')}`;
 
+        // Calculate subtotal, tax, and total
+        // PPN 12% hanya untuk item NON_SUBSIDI
+        const PPN_RATE = 0.12;  // 12%
+
+        let subtotal = 0;
+        let totalTax = 0;
+
+        const orderItemsData = dto.items.map((item) => {
+            const itemSubtotal = item.price_per_unit * item.qty;
+            const isTaxable = item.is_taxable ?? false;  // Default false (subsidi)
+            const itemTax = isTaxable ? Math.round(itemSubtotal * PPN_RATE) : 0;
+
+            subtotal += itemSubtotal;
+            totalTax += itemTax;
+
+            return {
+                lpg_type: mapStringToLpgType(item.lpg_type),
+                label: item.label,
+                price_per_unit: item.price_per_unit,
+                qty: item.qty,
+                sub_total: itemSubtotal,
+                is_taxable: isTaxable,
+                tax_amount: itemTax,
+            };
+        });
+
+        const totalAmount = subtotal + totalTax;
+
         const order = await this.prisma.orders.create({
             data: {
-                code: orderCode,  // Required display code
+                code: orderCode,
                 pangkalan_id: dto.pangkalan_id,
                 driver_id: dto.driver_id,
                 note: dto.note,
+                subtotal: subtotal,
+                tax_amount: totalTax,
                 total_amount: totalAmount,
                 current_status: 'DRAFT',
                 order_items: {
-                    create: dto.items.map((item) => ({
-                        lpg_type: mapStringToLpgType(item.lpg_type),  // Convert string to enum
-                        label: item.label,
-                        price_per_unit: item.price_per_unit,
-                        qty: item.qty,
-                        sub_total: item.price_per_unit * item.qty,
-                    })),
+                    create: orderItemsData,
                 },
                 timeline_tracks: {
                     create: {
@@ -194,6 +213,9 @@ export class OrderService {
                     select: { id: true, code: true, name: true, phone: true },
                 },
                 order_items: true,
+                timeline_tracks: {
+                    orderBy: { created_at: 'desc' },
+                },
             },
         });
 

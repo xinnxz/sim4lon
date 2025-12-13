@@ -46,7 +46,6 @@ interface UIOrder {
   statusLabel: string
   createdDate: string
   createdTime: string
-  dueDate: string
   customer: {
     name: string
     address: string
@@ -83,7 +82,6 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
     statusLabel: statusInfo.label,
     createdDate: createdAt.toLocaleDateString('id-ID'),
     createdTime: createdAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-    dueDate: '-',
     customer: {
       name: apiOrder.pangkalans?.name || 'Unknown',
       address: apiOrder.pangkalans?.address || '-',
@@ -98,8 +96,8 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
       price: item.price_per_unit,
       subtotal: item.sub_total
     })),
-    subtotal: apiOrder.total_amount,
-    tax: 0,
+    subtotal: (apiOrder as any).subtotal || apiOrder.total_amount,
+    tax: (apiOrder as any).tax_amount || 0,
     total: apiOrder.total_amount,
     paymentMethod: null,
     paidAmount: 0,
@@ -250,6 +248,10 @@ export default function OrderDetailContent() {
     await updateStatus('SELESAI', 'Pesanan selesai')
   }
 
+  const handleConfirmOrder = async () => {
+    await updateStatus('MENUNGGU_PEMBAYARAN', 'Pesanan dikonfirmasi, menunggu pembayaran')
+  }
+
   const handleEditOrder = () => {
     if (order) {
       window.location.href = `/buat-pesanan?id=${order.apiId}`
@@ -351,6 +353,7 @@ export default function OrderDetailContent() {
             onCompleteOrder={handleCompleteOrder}
             onEditOrder={handleEditOrder}
             onCancelOrder={handleCancelOrder}
+            onConfirmOrder={handleConfirmOrder}
             isPaymentConfirmed={order.status === 'payment_confirmed'}
             isDriverAssigned={order.delivery.driver !== null}
           />

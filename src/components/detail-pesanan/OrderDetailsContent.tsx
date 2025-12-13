@@ -1,3 +1,10 @@
+/**
+ * OrderDetailsContent - LEGACY/DEMO component with mock data
+ * 
+ * NOTE: File ini hanya untuk demo/preview dengan mock data.
+ * Untuk real implementation, gunakan OrderDetailContent.tsx (tanpa 's')
+ * yang sudah terintegrasi dengan API.
+ */
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -5,18 +12,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import SafeIcon from '@/components/common/SafeIcon'
-import OrderSummaryCard from './OrderSummaryCard'
 import OrderItemsTable from './OrderItemsTable'
 import OrderTimelineStatus from './OrderTimelineStatus'
-import OrderActionsPanel from './OrderActionsPanel'
+import { formatCurrency } from '@/lib/currency'
 
-// Mock order data
+// Mock order data dengan interface yang benar
 const mockOrder = {
   id: 'ORD-2024-001234',
-  date: '2024-01-15',
+  createdDate: '15 Januari 2024',
+  createdTime: '10:30',
   status: 'processing',
   statusLabel: 'Sedang Diproses',
-  baseId: 'BASE-001',
   baseName: 'Pangkalan Maju Jaya',
   baseAddress: 'Jl. Raya Utama No. 123, Jakarta Selatan',
   basePhone: '021-1234567',
@@ -28,8 +34,9 @@ const mockOrder = {
   subtotal: 8750000,
   tax: 875000,
   total: 9625000,
-  paymentStatus: 'pending',
-  paymentMethod: null,
+  paidAmount: 0,
+  paymentStatus: 'pending' as const,
+  paymentMethod: null as string | null,
   timeline: [
     { status: 'created', label: 'Pesanan Dibuat', date: '2024-01-15 10:30', completed: true },
     { status: 'confirmed', label: 'Pesanan Dikonfirmasi', date: '2024-01-15 11:00', completed: true },
@@ -66,7 +73,7 @@ export default function OrderDetailsContent() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.location.href = './daftar-pesanan.html'}
+            onClick={() => window.location.href = '/daftar-pesanan'}
             className="h-10 w-10"
           >
             <SafeIcon name="ArrowLeft" className="h-5 w-5" />
@@ -84,9 +91,6 @@ export default function OrderDetailsContent() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content - Left Side (2 columns) */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Order Summary */}
-          <OrderSummaryCard order={order} />
-
           {/* Order Items */}
           <Card>
             <CardHeader>
@@ -148,24 +152,29 @@ export default function OrderDetailsContent() {
             </CardContent>
           </Card>
 
-          {/* Order Summary Card */}
+          {/* Order Summary Card - Inline to avoid interface mismatch */}
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="text-base">Ringkasan Pembayaran</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Tanggal</span>
+                <span className="font-medium">{order.createdDate} {order.createdTime}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">Rp {order.subtotal.toLocaleString('id-ID')}</span>
+                <span className="font-medium">{formatCurrency(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Pajak (10%)</span>
-                <span className="font-medium">Rp {order.tax.toLocaleString('id-ID')}</span>
+                <span className="text-muted-foreground">PPN 12%</span>
+                <span className="font-medium">{formatCurrency(order.tax)}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
                 <span className="font-semibold">Total</span>
-                <span className="text-lg font-bold text-primary">Rp {order.total.toLocaleString('id-ID')}</span>
+                <span className="text-lg font-bold text-primary">{formatCurrency(order.total)}</span>
               </div>
               <Separator />
               <div className="pt-2">
@@ -177,8 +186,19 @@ export default function OrderDetailsContent() {
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
-          <OrderActionsPanel order={order} />
+          {/* Action Buttons - Inline instead of using OrderActionsPanel */}
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <Button className="w-full" variant="outline">
+                <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
+                Cetak Invoice
+              </Button>
+              <Button className="w-full">
+                <SafeIcon name="CreditCard" className="mr-2 h-4 w-4" />
+                Catat Pembayaran
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

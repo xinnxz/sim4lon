@@ -1,3 +1,10 @@
+/**
+ * OrderItemsTable - Tabel item pesanan
+ * 
+ * PENJELASAN:
+ * Component ini menampilkan daftar item LPG dalam pesanan
+ * dengan format currency yang konsisten menggunakan utility formatCurrency
+ */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -8,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { formatCurrency } from '@/lib/currency'
 
 interface OrderItem {
   id: number
@@ -27,7 +35,7 @@ export default function OrderItemsTable({ items }: OrderItemsTableProps) {
       <CardHeader>
         <CardTitle>Item Pesanan</CardTitle>
       </CardHeader>
-      <CardContent id="ix7i3">
+      <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -43,9 +51,9 @@ export default function OrderItemsTable({ items }: OrderItemsTableProps) {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">LPG {item.type}</TableCell>
                   <TableCell className="text-right">{item.quantity}</TableCell>
-                  <TableCell className="text-right">Rp {item.price.toLocaleString('id-ID')}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
                   <TableCell className="text-right font-medium">
-                    Rp {item.subtotal.toLocaleString('id-ID')}
+                    {formatCurrency(item.subtotal)}
                   </TableCell>
                 </TableRow>
               ))}

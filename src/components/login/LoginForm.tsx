@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
 import { authApi, isAuthenticated, getToken, removeToken } from '@/lib/api'
+import { clearCachedProfile } from '@/components/auth/AuthGuard'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
@@ -68,6 +69,9 @@ export default function LoginForm() {
     try {
       // Real API call
       const response = await authApi.login({ email, password })
+
+      // Clear any old cached profile before redirecting
+      clearCachedProfile()
 
       toast.success('Login berhasil! Mengalihkan ke dashboard...')
 

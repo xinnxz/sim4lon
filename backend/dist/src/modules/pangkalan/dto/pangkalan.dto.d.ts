@@ -4,6 +4,7 @@ export declare class CreatePangkalanDto {
     region?: string;
     pic_name?: string;
     phone?: string;
+    email?: string;
     capacity?: number;
     note?: string;
 }
@@ -13,6 +14,7 @@ export declare class UpdatePangkalanDto {
     region?: string;
     pic_name?: string;
     phone?: string;
+    email?: string;
     capacity?: number;
     note?: string;
     is_active?: boolean;

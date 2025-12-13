@@ -1,14 +1,25 @@
+/**
+ * OrderSummaryCard - Ringkasan pesanan dengan breakdown harga
+ * 
+ * PENJELASAN:
+ * Component ini menampilkan:
+ * - Tanggal pesanan
+ * - Daftar item pesanan
+ * - Breakdown harga: Subtotal, PPN 12% (jika ada), Total
+ * - Menggunakan formatCurrency untuk format uang yang konsisten
+ */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import OrderItemsTable from './OrderItemsTable'
+import { formatCurrency } from '@/lib/currency'
 
 interface OrderSummaryCardProps {
   order: {
     id: string
     createdDate: string
     createdTime: string
-    dueDate: string
     subtotal: number
     tax: number
     total: number
@@ -25,49 +36,50 @@ interface OrderSummaryCardProps {
 
 export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
   return (
-    <Card id="iu836">
-      <CardHeader id="i52nl">
+    <Card>
+      <CardHeader>
         <CardTitle>Ringkasan Pesanan</CardTitle>
       </CardHeader>
-<CardContent className="space-y-4">
-         {/* Dates */}
-         <div className="grid grid-cols-2 gap-4">
-           <div>
-             <p className="text-sm text-muted-foreground">Tanggal Pesanan</p>
-             <p className="font-medium">{order.createdDate} {order.createdTime}</p>
-           </div>
-           <div>
-             <p className="text-sm text-muted-foreground">Tanggal Jatuh Tempo</p>
-             <p className="font-medium">{order.dueDate}</p>
-           </div>
-         </div>
+      <CardContent className="space-y-4">
+        {/* Order Date */}
+        <div>
+          <p className="text-sm text-muted-foreground">Tanggal Pesanan</p>
+          <p className="font-medium">{order.createdDate} {order.createdTime}</p>
+        </div>
 
-         <Separator />
+        <Separator />
 
-         {/* Order Items Table */}
-         <OrderItemsTable items={order.items} />
+        {/* Order Items Table */}
+        <OrderItemsTable items={order.items} />
 
-         <Separator id="iirwmj" />
+        <Separator />
 
-         {/* Price Breakdown */}
-         <div className="space-y-2" id="i50ml5">
-           <div className="flex justify-between" id="imacmg">
-             <span className="text-muted-foreground">Subtotal</span>
-             <span className="font-medium" id="iz15ye">Rp {order.subtotal.toLocaleString('id-ID')}</span>
-           </div>
-           <div className="flex justify-between">
-             <span className="text-muted-foreground" id="iten6g">Pajak (10%)</span>
-             <span className="font-medium">Rp {order.tax.toLocaleString('id-ID')}</span>
-           </div>
-         </div>
+        {/* Price Breakdown */}
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium">{formatCurrency(order.subtotal)}</span>
+          </div>
+          {order.tax > 0 && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground flex items-center gap-1">
+                PPN 12%
+                <Badge variant="outline" className="text-[10px] px-1 py-0 bg-orange-50 text-orange-600 border-orange-200">
+                  Non-Subsidi
+                </Badge>
+              </span>
+              <span className="font-medium text-orange-600">+ {formatCurrency(order.tax)}</span>
+            </div>
+          )}
+        </div>
 
-         <Separator />
+        <Separator />
 
-         {/* Total */}
-         <div className="flex justify-between items-center bg-primary/5 p-3 rounded-lg">
-           <span className="font-semibold">Total</span>
-           <span className="text-lg font-bold text-primary">Rp {order.total.toLocaleString('id-ID')}</span>
-         </div>
+        {/* Total */}
+        <div className="flex justify-between items-center bg-primary/5 p-3 rounded-lg">
+          <span className="font-semibold">Total</span>
+          <span className="text-lg font-bold text-primary">{formatCurrency(order.total)}</span>
+        </div>
       </CardContent>
     </Card>
   )

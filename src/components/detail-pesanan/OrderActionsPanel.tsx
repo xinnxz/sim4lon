@@ -23,6 +23,7 @@ interface OrderActionsPanelProps {
     onCompleteOrder?: () => void
     onEditOrder?: () => void
     onCancelOrder?: () => void
+    onConfirmOrder?: () => void
     isPaymentConfirmed?: boolean
     isDriverAssigned?: boolean
 }
@@ -37,11 +38,13 @@ export default function OrderActionsPanel({
     onCompleteOrder,
     onEditOrder,
     onCancelOrder,
+    onConfirmOrder,
     isPaymentConfirmed = false,
     isDriverAssigned = false,
 }: OrderActionsPanelProps) {
+    const isDraft = orderStatus === 'created'
     const isPending = orderStatus === 'pending_payment'
-    const isConfirmed = orderStatus === 'payment_confirmed'
+    const isConfirmed = orderStatus === 'payment_confirmed' || orderStatus === 'ready_to_ship'
     const isCompleted = orderStatus === 'completed'
     const isCancelled = orderStatus === 'cancelled'
     const canEdit = orderStatus === 'pending_payment' || orderStatus === 'created'
@@ -53,6 +56,22 @@ export default function OrderActionsPanel({
                 <CardTitle className="text-lg">Aksi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+                {/* DRAFT Actions - Confirm to proceed */}
+                {isDraft && (
+                    <>
+                        <Button
+                            onClick={onConfirmOrder}
+                            className="w-full bg-primary hover:bg-primary/90"
+                        >
+                            <SafeIcon name="CheckCircle" className="mr-2 h-4 w-4" />
+                            Konfirmasi Pesanan
+                        </Button>
+                        <p className="text-xs text-muted-foreground text-center">
+                            Konfirmasi untuk memproses ke tahap pembayaran
+                        </p>
+                    </>
+                )}
+
                 {/* Payment Actions */}
                 {isPending && (
                     <>
