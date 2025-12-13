@@ -6,14 +6,15 @@ export declare class UserService {
     findAll(page?: number, limit?: number, search?: string): Promise<{
         data: {
             id: string;
-            email: string;
-            role: import("@prisma/client").$Enums.user_role;
-            is_active: boolean;
             name: string;
-            phone: string | null;
-            avatar_url: string | null;
+            is_active: boolean;
             created_at: Date;
             updated_at: Date;
+            code: string;
+            email: string;
+            role: import("@prisma/client").$Enums.user_role;
+            phone: string | null;
+            avatar_url: string | null;
         }[];
         meta: {
             total: number;
@@ -24,33 +25,35 @@ export declare class UserService {
     }>;
     findOne(id: string): Promise<{
         id: string;
-        email: string;
-        role: import("@prisma/client").$Enums.user_role;
-        is_active: boolean;
         name: string;
-        phone: string | null;
-        avatar_url: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
+        code: string;
+        email: string;
+        role: import("@prisma/client").$Enums.user_role;
+        phone: string | null;
+        avatar_url: string | null;
     }>;
     create(dto: CreateUserDto): Promise<{
         id: string;
+        name: string;
+        is_active: boolean;
+        created_at: Date;
+        code: string;
         email: string;
         role: import("@prisma/client").$Enums.user_role;
-        is_active: boolean;
-        name: string;
         phone: string | null;
-        created_at: Date;
     }>;
     update(id: string, dto: UpdateUserDto): Promise<{
         id: string;
+        name: string;
+        is_active: boolean;
+        updated_at: Date;
         email: string;
         role: import("@prisma/client").$Enums.user_role;
-        is_active: boolean;
-        name: string;
         phone: string | null;
         avatar_url: string | null;
-        updated_at: Date;
     }>;
     remove(id: string): Promise<{
         message: string;

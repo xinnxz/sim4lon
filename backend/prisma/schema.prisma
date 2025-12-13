@@ -1,13 +1,15 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [uuid_ossp(map: "uuid-ossp"), pgcrypto]
 }
 
 model activity_logs {
-  id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id        String?         @db.Uuid
   order_id       String?         @db.Uuid
   type           String          @db.VarChar(50)
@@ -27,7 +29,8 @@ model activity_logs {
 }
 
 model drivers {
-  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String    @unique @db.VarChar(20)  // DRV-001 format for display
   name       String    @db.VarChar(255)
   phone      String?   @db.VarChar(20)
   vehicle_id String?   @db.VarChar(20)
@@ -40,7 +43,7 @@ model drivers {
 }
 
 model invoices {
-  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id        String            @db.Uuid
   invoice_number  String?           @unique @db.VarChar(50)
   invoice_date    DateTime          @default(dbgenerated("CURRENT_DATE")) @db.Date
@@ -61,7 +64,7 @@ model invoices {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model order_items {
-  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id       String   @db.Uuid
   lpg_type       lpg_type
   label          String?  @db.VarChar(50)
@@ -76,7 +79,7 @@ model order_items {
 }
 
 model order_payment_details {
-  id             String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id       String          @unique @db.Uuid
   is_paid        Boolean         @default(false)
   is_dp          Boolean         @default(false)
@@ -90,7 +93,8 @@ model order_payment_details {
 }
 
 model orders {
-  id                    String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                  String                 @unique @db.VarChar(20)  // ORD-0001 format for display
   pangkalan_id          String                 @db.Uuid
   driver_id             String?                @db.Uuid
   order_date            DateTime               @default(dbgenerated("CURRENT_DATE")) @db.Date
@@ -111,7 +115,8 @@ model orders {
 }
 
 model pangkalans {
-  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String    @unique @db.VarChar(20)  // PKL-001 format for display
   name       String    @db.VarChar(255)
   address    String
   region     String?   @db.VarChar(100)
@@ -127,7 +132,7 @@ model pangkalans {
 }
 
 model payment_records {
-  id                  String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id            String?        @db.Uuid
   invoice_id          String?        @db.Uuid
   method              payment_method
@@ -144,7 +149,7 @@ model payment_records {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model stock_histories {
-  id                  String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   lpg_type            lpg_type?           // Keep for backward compatibility
   lpg_product_id      String?             @db.Uuid // New: reference to dynamic product
   movement_type       stock_movement_type
@@ -163,7 +168,7 @@ model stock_histories {
 
 // Dynamic LPG Products Management
 model lpg_products {
-  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name            String            @db.VarChar(100)
   size_kg         Decimal           @db.Decimal(5, 2) // e.g., 3.00, 5.50, 12.00, 50.00
   category        lpg_category      @default(NON_SUBSIDI)
@@ -182,7 +187,7 @@ model lpg_products {
 
 // Multiple prices per product (e.g., retail, wholesale, different brands)
 model lpg_prices {
-  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   lpg_product_id String       @db.Uuid
   label          String       @db.VarChar(100) // e.g., "Harga Retail", "Harga Grosir"
   price          Decimal      @db.Decimal(15, 2)
@@ -195,7 +200,7 @@ model lpg_prices {
 }
 
 model timeline_tracks {
-  id          String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id    String         @db.Uuid
   status      status_pesanan
   description String?
@@ -208,7 +213,8 @@ model timeline_tracks {
 }
 
 model users {
-  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String            @unique @db.VarChar(20)  // USR-001 format for display
   email           String            @unique @db.VarChar(255)
   password        String            @db.VarChar(255)
   role            user_role         @default(OPERATOR)

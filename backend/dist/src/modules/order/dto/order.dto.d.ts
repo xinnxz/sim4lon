@@ -1,6 +1,6 @@
-import { lpg_type, status_pesanan } from '@prisma/client';
+import { status_pesanan } from '@prisma/client';
 export declare class OrderItemDto {
-    lpg_type: lpg_type;
+    lpg_type: string;
     label?: string;
     price_per_unit: number;
     qty: number;

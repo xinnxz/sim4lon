@@ -69,8 +69,11 @@ let PangkalanService = class PangkalanService {
         return pangkalan;
     }
     async create(dto) {
+        const pangkalanCount = await this.prisma.pangkalans.count();
+        const pangkalanCode = `PKL-${String(pangkalanCount + 1).padStart(3, '0')}`;
         const pangkalan = await this.prisma.pangkalans.create({
             data: {
+                code: pangkalanCode,
                 name: dto.name,
                 address: dto.address,
                 region: dto.region,

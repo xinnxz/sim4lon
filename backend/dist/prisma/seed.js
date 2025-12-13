@@ -52,6 +52,7 @@ async function main() {
             name: 'Administrator',
         },
         create: {
+            code: 'USR-001',
             email: 'admin@sim4lon.co.id',
             password: hashedAdminPassword,
             role: 'ADMIN',
@@ -68,6 +69,7 @@ async function main() {
             name: 'Siti Rahmawati',
         },
         create: {
+            code: 'USR-002',
             email: 'operator@sim4lon.co.id',
             password: hashedOperatorPassword,
             role: 'OPERATOR',
@@ -82,6 +84,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000001',
+            code: 'DRV-001',
             name: 'Bambang Sugiharto',
             phone: '083399887766',
             vehicle_id: 'B 1234 ABC',
@@ -95,6 +98,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000002',
+            code: 'DRV-002',
             name: 'Dedi Iskandar',
             phone: '089812312312',
             vehicle_id: 'B 5678 XYZ',
@@ -108,6 +112,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000011',
+            code: 'PKL-001',
             name: 'Pangkalan Maju Jaya',
             address: 'Jl. Sudirman No. 12, Kel. Menteng, Jakarta Pusat',
             region: 'Jakarta Pusat',
@@ -124,6 +129,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000012',
+            code: 'PKL-002',
             name: 'Pangkalan Berkah Sejahtera',
             address: 'Jalan Gajah Mada Blok C5 No. 4, Semarang',
             region: 'Semarang',
@@ -140,6 +146,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000013',
+            code: 'PKL-003',
             name: 'Pangkalan Sumber Rezeki',
             address: 'Perumahan Indah Blok R No. 10, Bandung',
             region: 'Bandung',
@@ -161,6 +168,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000101',
+            code: 'ORD-0001',
             pangkalan_id: pangkalan1.id,
             driver_id: driver1.id,
             current_status: client_1.status_pesanan.SELESAI,
@@ -175,6 +183,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000102',
+            code: 'ORD-0002',
             pangkalan_id: pangkalan2.id,
             driver_id: driver2.id,
             current_status: client_1.status_pesanan.DIPROSES,
@@ -189,6 +198,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000103',
+            code: 'ORD-0003',
             pangkalan_id: pangkalan3.id,
             current_status: client_1.status_pesanan.DRAFT,
             total_amount: 900000,
@@ -202,6 +212,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000104',
+            code: 'ORD-0004',
             pangkalan_id: pangkalan1.id,
             current_status: client_1.status_pesanan.MENUNGGU_PEMBAYARAN,
             total_amount: 3200000,
@@ -215,6 +226,7 @@ async function main() {
         update: {},
         create: {
             id: '00000000-0000-0000-0000-000000000105',
+            code: 'ORD-0005',
             pangkalan_id: pangkalan2.id,
             driver_id: driver1.id,
             current_status: client_1.status_pesanan.SELESAI,

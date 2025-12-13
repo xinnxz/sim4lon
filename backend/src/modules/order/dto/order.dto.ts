@@ -1,10 +1,21 @@
-import { IsArray, IsEnum, IsOptional, IsString, IsUUID, ValidateNested, IsInt, IsNumber, Min } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsInt, IsNumber, Min, IsNotEmpty, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
-import { lpg_type, status_pesanan } from '@prisma/client';
+import { status_pesanan } from '@prisma/client';
 
+// UUID regex pattern - accepts any valid UUID format
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * OrderItemDto - DTO untuk item pesanan
+ * 
+ * PENJELASAN:
+ * - lpg_type sekarang string (bukan enum) untuk support dynamic products
+ * - Contoh: "3kg", "12kg", "50kg", atau ukuran custom lainnya
+ */
 export class OrderItemDto {
-    @IsEnum(lpg_type)
-    lpg_type: lpg_type;
+    @IsString()
+    @IsNotEmpty()
+    lpg_type: string;  // Changed from enum to string for dynamic products
 
     @IsOptional()
     @IsString()
@@ -20,11 +31,13 @@ export class OrderItemDto {
 }
 
 export class CreateOrderDto {
-    @IsUUID()
+    @IsString()
+    @Matches(UUID_REGEX, { message: 'pangkalan_id must be a valid UUID format' })
     pangkalan_id: string;
 
     @IsOptional()
-    @IsUUID()
+    @IsString()
+    @Matches(UUID_REGEX, { message: 'driver_id must be a valid UUID format' })
     driver_id?: string;
 
     @IsOptional()
@@ -39,11 +52,13 @@ export class CreateOrderDto {
 
 export class UpdateOrderDto {
     @IsOptional()
-    @IsUUID()
+    @IsString()
+    @Matches(UUID_REGEX, { message: 'pangkalan_id must be a valid UUID format' })
     pangkalan_id?: string;
 
     @IsOptional()
-    @IsUUID()
+    @IsString()
+    @Matches(UUID_REGEX, { message: 'driver_id must be a valid UUID format' })
     driver_id?: string;
 
     @IsOptional()

@@ -10,12 +10,13 @@ export declare class PangkalanService {
             };
         } & {
             id: string;
-            is_active: boolean;
             name: string;
-            phone: string | null;
+            is_active: boolean;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            code: string;
+            phone: string | null;
             note: string | null;
             address: string;
             region: string | null;
@@ -35,12 +36,13 @@ export declare class PangkalanService {
         };
     } & {
         id: string;
-        is_active: boolean;
         name: string;
-        phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        code: string;
+        phone: string | null;
         note: string | null;
         address: string;
         region: string | null;
@@ -49,12 +51,13 @@ export declare class PangkalanService {
     }>;
     create(dto: CreatePangkalanDto): Promise<{
         id: string;
-        is_active: boolean;
         name: string;
-        phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        code: string;
+        phone: string | null;
         note: string | null;
         address: string;
         region: string | null;
@@ -63,12 +66,13 @@ export declare class PangkalanService {
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
         id: string;
-        is_active: boolean;
         name: string;
-        phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        code: string;
+        phone: string | null;
         note: string | null;
         address: string;
         region: string | null;

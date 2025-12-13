@@ -688,3 +688,180 @@ export const dashboardApi = {
         return apiRequest('/dashboard/activities');
     },
 };
+
+// ============================================================
+// ORDERS API
+// ============================================================
+
+/**
+ * Order Status - matches backend enum status_pesanan
+ */
+export type OrderStatus =
+    | 'DRAFT'
+    | 'MENUNGGU_PEMBAYARAN'
+    | 'DIPROSES'
+    | 'SIAP_KIRIM'
+    | 'DIKIRIM'
+    | 'SELESAI'
+    | 'BATAL';
+
+/**
+ * Order Item interface
+ */
+export interface OrderItem {
+    id: string;
+    order_id: string;
+    lpg_type: string;
+    label: string;
+    price_per_unit: number;
+    qty: number;
+    sub_total: number;
+}
+
+/**
+ * Timeline Track for order status history
+ */
+export interface TimelineTrack {
+    id: string;
+    order_id: string;
+    status: OrderStatus;
+    description: string | null;
+    note: string | null;
+    created_at: string;
+}
+
+/**
+ * Order interface - matches backend orders model
+ */
+export interface Order {
+    id: string;
+    pangkalan_id: string;
+    driver_id: string | null;
+    current_status: OrderStatus;
+    note: string | null;
+    total_amount: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    pangkalans?: Pangkalan;
+    drivers?: Driver | null;
+    order_items: OrderItem[];
+    order_payment_details?: any[];
+    timeline_tracks?: TimelineTrack[];
+    invoices?: any[];
+}
+
+/**
+ * Create Order DTO
+ */
+export interface CreateOrderDto {
+    pangkalan_id: string;
+    driver_id?: string;
+    note?: string;
+    items: {
+        lpg_type: string;
+        label: string;
+        price_per_unit: number;
+        qty: number;
+    }[];
+}
+
+/**
+ * Update Order Status DTO
+ */
+export interface UpdateOrderStatusDto {
+    status: OrderStatus;
+    description?: string;
+    note?: string;
+}
+
+/**
+ * Orders list response with pagination
+ */
+export interface OrdersResponse {
+    data: Order[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
+/**
+ * Orders API
+ * 
+ * PENJELASAN:
+ * API untuk mengelola pesanan (orders):
+ * - CRUD pesanan
+ * - Update status pesanan
+ * - Filter berdasarkan status, pangkalan, driver
+ */
+export const ordersApi = {
+    /**
+     * Get all orders with pagination and filters
+     */
+    async getAll(
+        page = 1,
+        limit = 10,
+        status?: OrderStatus,
+        pangkalanId?: string,
+        driverId?: string
+    ): Promise<OrdersResponse> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        if (status) params.append('status', status);
+        if (pangkalanId) params.append('pangkalanId', pangkalanId);
+        if (driverId) params.append('driverId', driverId);
+
+        return apiRequest(`/orders?${params.toString()}`);
+    },
+
+    /**
+     * Get order by ID with all relations
+     */
+    async getById(id: string): Promise<Order> {
+        return apiRequest(`/orders/${id}`);
+    },
+
+    /**
+     * Create new order
+     */
+    async create(dto: CreateOrderDto): Promise<Order> {
+        return apiRequest('/orders', {
+            method: 'POST',
+            body: JSON.stringify(dto),
+        });
+    },
+
+    /**
+     * Update order status with timeline tracking
+     */
+    async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<Order> {
+        return apiRequest(`/orders/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify(dto),
+        });
+    },
+
+    /**
+     * Update order details (note, driver, etc)
+     */
+    async update(id: string, dto: Partial<{ driver_id: string; note: string }>): Promise<Order> {
+        return apiRequest(`/orders/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(dto),
+        });
+    },
+
+    /**
+     * Delete order (soft delete)
+     */
+    async delete(id: string): Promise<{ message: string }> {
+        return apiRequest(`/orders/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};

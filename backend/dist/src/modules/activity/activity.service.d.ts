@@ -17,12 +17,12 @@ export declare class ActivityService {
             } | null;
         } & {
             id: string;
+            description: string | null;
             created_at: Date;
             order_id: string | null;
             user_id: string | null;
             type: string;
             title: string;
-            description: string | null;
             pangkalan_name: string | null;
             detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
             icon_name: string | null;
@@ -38,12 +38,12 @@ export declare class ActivityService {
     }>;
     create(dto: CreateActivityLogDto): Promise<{
         id: string;
+        description: string | null;
         created_at: Date;
         order_id: string | null;
         user_id: string | null;
         type: string;
         title: string;
-        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
@@ -63,12 +63,12 @@ export declare class ActivityService {
         } | null;
     } & {
         id: string;
+        description: string | null;
         created_at: Date;
         order_id: string | null;
         user_id: string | null;
         type: string;
         title: string;
-        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
@@ -88,12 +88,12 @@ export declare class ActivityService {
         } | null;
     } & {
         id: string;
+        description: string | null;
         created_at: Date;
         order_id: string | null;
         user_id: string | null;
         type: string;
         title: string;
-        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;
@@ -110,12 +110,12 @@ export declare class ActivityService {
         orderStatus?: any;
     }): Promise<{
         id: string;
+        description: string | null;
         created_at: Date;
         order_id: string | null;
         user_id: string | null;
         type: string;
         title: string;
-        description: string | null;
         pangkalan_name: string | null;
         detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
         icon_name: string | null;

@@ -13,6 +13,7 @@ exports.UpdateOrderStatusDto = exports.UpdateOrderDto = exports.CreateOrderDto =
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const client_1 = require("@prisma/client");
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 class OrderItemDto {
     lpg_type;
     label;
@@ -21,7 +22,8 @@ class OrderItemDto {
 }
 exports.OrderItemDto = OrderItemDto;
 __decorate([
-    (0, class_validator_1.IsEnum)(client_1.lpg_type),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], OrderItemDto.prototype, "lpg_type", void 0);
 __decorate([
@@ -47,12 +49,14 @@ class CreateOrderDto {
 }
 exports.CreateOrderDto = CreateOrderDto;
 __decorate([
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(UUID_REGEX, { message: 'pangkalan_id must be a valid UUID format' }),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "pangkalan_id", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(UUID_REGEX, { message: 'driver_id must be a valid UUID format' }),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "driver_id", void 0);
 __decorate([
@@ -75,12 +79,14 @@ class UpdateOrderDto {
 exports.UpdateOrderDto = UpdateOrderDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(UUID_REGEX, { message: 'pangkalan_id must be a valid UUID format' }),
     __metadata("design:type", String)
 ], UpdateOrderDto.prototype, "pangkalan_id", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(UUID_REGEX, { message: 'driver_id must be a valid UUID format' }),
     __metadata("design:type", String)
 ], UpdateOrderDto.prototype, "driver_id", void 0);
 __decorate([

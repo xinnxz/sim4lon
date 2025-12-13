@@ -12,7 +12,7 @@ const Card = React.forwardRef<
       "rounded-xl border-2 border-border bg-card text-card-foreground",
       "shadow-sm hover:shadow-lg",
       "transition-all duration-300 ease-out",
-      "hover:scale-[1.001] hover:-translate-y-0.1",
+      // "hover:scale-[1.001] hover:-translate-y-0.1",
       className
     )}
     {...props}
