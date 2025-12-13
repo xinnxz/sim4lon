@@ -268,6 +268,7 @@ export default function PangkalanListPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold w-24">Kode</TableHead>
                     <TableHead className="font-semibold">Nama Pangkalan</TableHead>
                     <TableHead className="font-semibold">Alamat</TableHead>
                     <TableHead className="font-semibold">Wilayah</TableHead>
@@ -281,6 +282,9 @@ export default function PangkalanListPage() {
                   {pangkalanList.length > 0 ? (
                     pangkalanList.map((pangkalan) => (
                       <TableRow key={pangkalan.id} className="hover:bg-muted/50">
+                        <TableCell className="font-mono text-sm text-primary">
+                          {(pangkalan as any).code || '-'}
+                        </TableCell>
                         <TableCell className="font-medium">
                           {pangkalan.name}
                         </TableCell>

@@ -42,18 +42,19 @@ export declare class PaymentService {
     findOneRecord(id: string): Promise<{
         users: {
             id: string;
-            email: string;
             name: string;
+            email: string;
         };
         orders: ({
             pangkalans: {
                 id: string;
-                is_active: boolean;
                 name: string;
-                phone: string | null;
+                is_active: boolean;
                 created_at: Date;
                 updated_at: Date;
                 deleted_at: Date | null;
+                code: string;
+                phone: string | null;
                 note: string | null;
                 address: string;
                 region: string | null;
@@ -64,9 +65,9 @@ export declare class PaymentService {
                 id: string;
                 created_at: Date;
                 updated_at: Date;
+                label: string | null;
                 order_id: string;
                 lpg_type: import("@prisma/client").$Enums.lpg_type;
-                label: string | null;
                 price_per_unit: import("@prisma/client-runtime-utils").Decimal;
                 qty: number;
                 sub_total: import("@prisma/client-runtime-utils").Decimal | null;
@@ -76,6 +77,7 @@ export declare class PaymentService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            code: string;
             note: string | null;
             pangkalan_id: string;
             driver_id: string | null;
@@ -122,6 +124,7 @@ export declare class PaymentService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            code: string;
             note: string | null;
             pangkalan_id: string;
             driver_id: string | null;

@@ -274,6 +274,7 @@ export default function DriverListPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold w-24">Kode</TableHead>
                     <TableHead className="font-semibold">Nama</TableHead>
                     <TableHead className="font-semibold">Telepon</TableHead>
                     <TableHead className="font-semibold">Kendaraan</TableHead>
@@ -286,6 +287,9 @@ export default function DriverListPage() {
                   {driverList.length > 0 ? (
                     driverList.map((driver) => (
                       <TableRow key={driver.id} className="hover:bg-muted/50">
+                        <TableCell className="font-mono text-sm text-primary">
+                          {(driver as any).code || '-'}
+                        </TableCell>
                         <TableCell className="font-medium">{driver.name}</TableCell>
                         <TableCell>{driver.phone || '-'}</TableCell>
                         <TableCell>{driver.vehicle_id || '-'}</TableCell>

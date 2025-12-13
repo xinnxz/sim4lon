@@ -24,9 +24,14 @@ export class AuthService {
         // Hash password
         const hashedPassword = await bcrypt.hash(dto.password, 10);
 
+        // Generate user code (USR-001, USR-002, etc.)
+        const userCount = await this.prisma.users.count();
+        const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
+
         // Create user
         const user = await this.prisma.users.create({
             data: {
+                code: userCode,  // Required display code
                 email: dto.email,
                 password: hashedPassword,
                 name: dto.name,
@@ -35,6 +40,7 @@ export class AuthService {
             },
             select: {
                 id: true,
+                code: true,
                 email: true,
                 name: true,
                 role: true,

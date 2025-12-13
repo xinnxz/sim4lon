@@ -34,10 +34,10 @@ let OrderService = class OrderService {
                 orderBy: { created_at: 'desc' },
                 include: {
                     pangkalans: {
-                        select: { id: true, name: true, region: true },
+                        select: { id: true, code: true, name: true, region: true, address: true, phone: true },
                     },
                     drivers: {
-                        select: { id: true, name: true },
+                        select: { id: true, code: true, name: true, phone: true },
                     },
                     order_items: true,
                     order_payment_details: true,
@@ -76,8 +76,46 @@ let OrderService = class OrderService {
     }
     async create(dto) {
         const totalAmount = dto.items.reduce((sum, item) => sum + item.price_per_unit * item.qty, 0);
+        const mapStringToLpgType = (strType) => {
+            const normalized = strType.toLowerCase().trim();
+            const mapping = {
+                '3kg': 'kg3',
+                '12kg': 'kg12',
+                '50kg': 'kg50',
+                'kg3': 'kg3',
+                'kg12': 'kg12',
+                'kg50': 'kg50',
+                '3': 'kg3',
+                '12': 'kg12',
+                '50': 'kg50',
+                '3.0': 'kg3',
+                '3.00': 'kg3',
+                '12.0': 'kg12',
+                '12.00': 'kg12',
+                '50.0': 'kg50',
+                '50.00': 'kg50',
+            };
+            const result = mapping[normalized];
+            if (result) {
+                return result;
+            }
+            const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+            if (numberMatch) {
+                const size = parseFloat(numberMatch[1]);
+                if (size <= 5)
+                    return 'kg3';
+                if (size <= 30)
+                    return 'kg12';
+                return 'kg50';
+            }
+            console.warn(`Unable to map lpg_type: ${strType}, defaulting to kg12`);
+            return 'kg12';
+        };
+        const orderCount = await this.prisma.orders.count();
+        const orderCode = `ORD-${String(orderCount + 1).padStart(4, '0')}`;
         const order = await this.prisma.orders.create({
             data: {
+                code: orderCode,
                 pangkalan_id: dto.pangkalan_id,
                 driver_id: dto.driver_id,
                 note: dto.note,
@@ -85,7 +123,7 @@ let OrderService = class OrderService {
                 current_status: 'DRAFT',
                 order_items: {
                     create: dto.items.map((item) => ({
-                        lpg_type: item.lpg_type,
+                        lpg_type: mapStringToLpgType(item.lpg_type),
                         label: item.label,
                         price_per_unit: item.price_per_unit,
                         qty: item.qty,
@@ -116,8 +154,12 @@ let OrderService = class OrderService {
                 updated_at: new Date(),
             },
             include: {
-                pangkalans: true,
-                drivers: true,
+                pangkalans: {
+                    select: { id: true, code: true, name: true, region: true, address: true, phone: true },
+                },
+                drivers: {
+                    select: { id: true, code: true, name: true, phone: true },
+                },
                 order_items: true,
             },
         });

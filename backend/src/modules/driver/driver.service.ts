@@ -58,8 +58,13 @@ export class DriverService {
     }
 
     async create(dto: CreateDriverDto) {
+        // Generate driver code (DRV-001, DRV-002, etc.)
+        const driverCount = await this.prisma.drivers.count();
+        const driverCode = `DRV-${String(driverCount + 1).padStart(3, '0')}`;
+
         const driver = await this.prisma.drivers.create({
             data: {
+                code: driverCode,  // Required display code
                 name: dto.name,
                 phone: dto.phone,
                 vehicle_id: dto.vehicle_id,

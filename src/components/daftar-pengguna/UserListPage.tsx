@@ -287,6 +287,7 @@ export default function UserListPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold w-24">Kode</TableHead>
                     <TableHead className="font-semibold">Nama</TableHead>
                     <TableHead className="font-semibold">Email</TableHead>
                     <TableHead className="font-semibold">Telepon</TableHead>
@@ -299,6 +300,9 @@ export default function UserListPage() {
                   {userList.length > 0 ? (
                     userList.map((user) => (
                       <TableRow key={user.id} className="hover:bg-muted/50">
+                        <TableCell className="font-mono text-sm text-primary">
+                          {(user as any).code || '-'}
+                        </TableCell>
                         <TableCell className="font-medium">{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.phone || '-'}</TableCell>

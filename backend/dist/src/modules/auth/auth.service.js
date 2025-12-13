@@ -62,8 +62,11 @@ let AuthService = class AuthService {
             throw new common_1.ConflictException('Email sudah terdaftar');
         }
         const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const userCount = await this.prisma.users.count();
+        const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
         const user = await this.prisma.users.create({
             data: {
+                code: userCode,
                 email: dto.email,
                 password: hashedPassword,
                 name: dto.name,
@@ -72,6 +75,7 @@ let AuthService = class AuthService {
             },
             select: {
                 id: true,
+                code: true,
                 email: true,
                 name: true,
                 role: true,

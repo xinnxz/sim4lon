@@ -1,7 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv/config");
 const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const adapter_pg_1 = require("@prisma/adapter-pg");
+const pg_1 = require("pg");
+const pool = new pg_1.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new adapter_pg_1.PrismaPg(pool);
+const prisma = new client_1.PrismaClient({ adapter });
 async function seedLpgProducts() {
     console.log('🌱 Seeding LPG Products...');
     const products = [
@@ -47,16 +52,30 @@ async function seedLpgProducts() {
                 { label: 'Harga UMKM', price: 190000, is_default: false },
             ],
         },
+        {
+            name: 'Elpiji 50kg',
+            size_kg: 50.0,
+            category: 'NON_SUBSIDI',
+            color: 'biru',
+            description: 'Tabung LPG industri untuk restoran, hotel, dan pabrik',
+            prices: [
+                { label: 'Harga Industri', price: 750000, is_default: true },
+                { label: 'Harga Kontrak', price: 720000, is_default: false },
+            ],
+        },
     ];
+    let created = 0;
+    let skipped = 0;
     for (const product of products) {
         const existing = await prisma.lpg_products.findFirst({
             where: { name: product.name },
         });
         if (existing) {
-            console.log(`⏭️  Skipping "${product.name}" (already exists)`);
+            console.log(`⏩ Skipping "${product.name}" (already exists)`);
+            skipped++;
             continue;
         }
-        const created = await prisma.lpg_products.create({
+        const result = await prisma.lpg_products.create({
             data: {
                 name: product.name,
                 size_kg: product.size_kg,
@@ -69,9 +88,12 @@ async function seedLpgProducts() {
             },
             include: { prices: true },
         });
-        console.log(`✅ Created "${created.name}" with ${created.prices.length} price(s)`);
+        console.log(`✅ Created "${result.name}" with ${result.prices.length} price(s)`);
+        created++;
     }
-    console.log('🎉 Seeding complete!');
+    console.log('');
+    console.log('🎉 Seed complete!');
+    console.log(`📊 Summary: ${created} created, ${skipped} skipped`);
 }
 seedLpgProducts()
     .catch((e) => {
@@ -80,5 +102,6 @@ seedLpgProducts()
 })
     .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
 });
 //# sourceMappingURL=seed-lpg-products.js.map

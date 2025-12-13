@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
 import { CreateOrderDto, UpdateOrderDto, UpdateOrderStatusDto } from './dto';
-import { status_pesanan } from '@prisma/client';
+import { status_pesanan, lpg_type } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -29,10 +29,10 @@ export class OrderService {
                 orderBy: { created_at: 'desc' },
                 include: {
                     pangkalans: {
-                        select: { id: true, name: true, region: true },
+                        select: { id: true, code: true, name: true, region: true, address: true, phone: true },
                     },
                     drivers: {
-                        select: { id: true, name: true },
+                        select: { id: true, code: true, name: true, phone: true },
                     },
                     order_items: true,
                     order_payment_details: true,
@@ -81,8 +81,71 @@ export class OrderService {
             0,
         );
 
+        /**
+         * PENJELASAN MAPPING lpg_type:
+         * 
+         * Prisma enum lpg_type menggunakan @map directive:
+         * - kg3  @map("3kg")   → Di TypeScript kita pakai "kg3", di database jadi "3kg"
+         * - kg12 @map("12kg")  → Di TypeScript kita pakai "kg12", di database jadi "12kg"
+         * - kg50 @map("50kg")  → Di TypeScript kita pakai "kg50", di database jadi "50kg"
+         * 
+         * Frontend bisa mengirim berbagai format: "3kg", "12kg", "kg3", "kg12", "3", "12", dll
+         * Expand mapping untuk handle semua kemungkinan
+         */
+        const mapStringToLpgType = (strType: string): lpg_type => {
+            // Normalize: lowercase and trim
+            const normalized = strType.toLowerCase().trim();
+
+            // Direct mappings (handle both formats: "3kg" and "kg3")
+            const mapping: Record<string, lpg_type> = {
+                // Standard format (from frontend)
+                '3kg': 'kg3' as lpg_type,
+                '12kg': 'kg12' as lpg_type,
+                '50kg': 'kg50' as lpg_type,
+                // Reversed format (if sent as kg prefix)
+                'kg3': 'kg3' as lpg_type,
+                'kg12': 'kg12' as lpg_type,
+                'kg50': 'kg50' as lpg_type,
+                // Numbers only
+                '3': 'kg3' as lpg_type,
+                '12': 'kg12' as lpg_type,
+                '50': 'kg50' as lpg_type,
+                // With decimal points
+                '3.0': 'kg3' as lpg_type,
+                '3.00': 'kg3' as lpg_type,
+                '12.0': 'kg12' as lpg_type,
+                '12.00': 'kg12' as lpg_type,
+                '50.0': 'kg50' as lpg_type,
+                '50.00': 'kg50' as lpg_type,
+            };
+
+            const result = mapping[normalized];
+            if (result) {
+                return result;
+            }
+
+            // Extract number from string (e.g., "Elpiji 12kg" -> 12)
+            const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+            if (numberMatch) {
+                const size = parseFloat(numberMatch[1]);
+                // Map to closest enum based on size
+                if (size <= 5) return 'kg3' as lpg_type;
+                if (size <= 30) return 'kg12' as lpg_type;
+                return 'kg50' as lpg_type;
+            }
+
+            // Default to kg12 if can't determine (most common)
+            console.warn(`Unable to map lpg_type: ${strType}, defaulting to kg12`);
+            return 'kg12' as lpg_type;
+        };
+
+        // Generate order code (ORD-0001, ORD-0002, etc.)
+        const orderCount = await this.prisma.orders.count();
+        const orderCode = `ORD-${String(orderCount + 1).padStart(4, '0')}`;
+
         const order = await this.prisma.orders.create({
             data: {
+                code: orderCode,  // Required display code
                 pangkalan_id: dto.pangkalan_id,
                 driver_id: dto.driver_id,
                 note: dto.note,
@@ -90,7 +153,7 @@ export class OrderService {
                 current_status: 'DRAFT',
                 order_items: {
                     create: dto.items.map((item) => ({
-                        lpg_type: item.lpg_type,
+                        lpg_type: mapStringToLpgType(item.lpg_type),  // Convert string to enum
                         label: item.label,
                         price_per_unit: item.price_per_unit,
                         qty: item.qty,
@@ -124,8 +187,12 @@ export class OrderService {
                 updated_at: new Date(),
             },
             include: {
-                pangkalans: true,
-                drivers: true,
+                pangkalans: {
+                    select: { id: true, code: true, name: true, region: true, address: true, phone: true },
+                },
+                drivers: {
+                    select: { id: true, code: true, name: true, phone: true },
+                },
                 order_items: true,
             },
         });
