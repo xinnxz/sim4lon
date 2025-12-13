@@ -115,14 +115,20 @@ export default function NotaPembayaranPage() {
         ) as any)?.tax_amount || 0
         return sum + Number(itemTax)
       }, 0)
+      // Determine if paid - from payment record OR order status
+      const paidStatuses = ['DIPROSES', 'DIKIRIM', 'SELESAI']
+      const isPaidFromStatus = paidStatuses.includes(order.current_status)
+      const isPaid = payment?.is_paid || isPaidFromStatus
 
       setData({
         orderId: order.id,
-        orderCode: (order as any).code || `ORD-${order.id.substring(0, 8).toUpperCase()}`,
+        orderCode: order.code || `ORD-${order.id.slice(0, 4).toUpperCase()}`,
         orderDate: new Date(order.created_at).toLocaleDateString('id-ID', {
           year: 'numeric',
           month: 'long',
-          day: 'numeric'
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
         }),
         customerName: pangkalan?.name || 'Unknown',
         customerAddress: pangkalan?.address || '',
@@ -134,7 +140,7 @@ export default function NotaPembayaranPage() {
         taxRate: 12,
         taxAmount,
         total: order.total_amount,
-        isPaid: payment?.is_paid || false,
+        isPaid: isPaid,
         paymentMethod: payment?.payment_method || null,
         paymentDate: payment?.payment_date ? new Date(payment.payment_date).toLocaleDateString('id-ID') : null,
         amountPaid: Number(payment?.amount_paid || 0)
@@ -163,28 +169,40 @@ export default function NotaPembayaranPage() {
     const isNota = documentType === 'nota'
     const docTitle = isNota ? 'NOTA PEMBAYARAN' : 'INVOICE'
 
-    const message = `
-*${docTitle}*
-No. Dokumen: ${data.orderCode}
-Tanggal: ${data.orderDate}
+    // Format items list
+    const itemLines = data.items.map(item =>
+      `• ${item.name} x${item.quantity} = ${formatCurrency(item.subtotal)}`
+    ).join('\n')
+
+    // Get document link
+    const docLink = window.location.href
+
+    // Build clean message with monospace for summary
+    const message = `*${docTitle}*
+
+\`No: ${data.orderCode}\`
+\`Tgl: ${data.orderDate}\`
 
 *Kepada:*
 ${data.customerName}
 ${data.customerAddress}
-${data.contactPerson ? `PIC: ${data.contactPerson}` : ''}
 
 *Detail Pesanan:*
-${data.items.map(item => `• ${item.name} x${item.quantity} = ${formatCurrency(item.subtotal)}`).join('\n')}
+${itemLines}
 
-Subtotal: ${formatCurrency(data.subtotal)}
-PPN 12%: ${formatCurrency(data.taxAmount)}
-*TOTAL: ${formatCurrency(data.total)}*
+\`\`\`
+Subtotal : ${formatCurrency(data.subtotal)}
+PPN 12%  : ${formatCurrency(data.taxAmount)}
+─────────────────────
+TOTAL    : ${formatCurrency(data.total)}
+\`\`\`
 
-${isNota ? `✅ Status: LUNAS\nMetode: ${data.paymentMethod || '-'}` : `⏳ Status: Belum Dibayar`}
+${isNota ? '✅ *Status: LUNAS*' : '⏳ *Status: Belum Dibayar*'}
 
-Terima kasih atas kepercayaan Anda.
-_SIM4LON - Sistem Manajemen LPG_
-`.trim()
+📄 *Lihat Dokumen:*
+${docLink}
+
+_SIM4LON - Sistem Manajemen LPG_`
 
     const phone = data.customerPhone.replace(/\D/g, '')
     const whatsappUrl = `https://wa.me/62${phone.startsWith('0') ? phone.slice(1) : phone}?text=${encodeURIComponent(message)}`
@@ -255,15 +273,31 @@ _SIM4LON - Sistem Manajemen LPG_
           </Button>
 
           {/* Document Type Toggle */}
-          <Tabs value={documentType} onValueChange={(v) => setDocumentType(v as DocumentType)}>
-            <TabsList>
-              <TabsTrigger value="invoice" className="gap-2">
+          <Tabs value={documentType} onValueChange={(v) => {
+            // Only allow switching to nota if paid
+            if (v === 'nota' && !data.isPaid) {
+              toast.error('Nota hanya tersedia setelah pembayaran lunas')
+              return
+            }
+            setDocumentType(v as DocumentType)
+          }}>
+            <TabsList className="bg-secondary">
+              <TabsTrigger
+                value="invoice"
+                className="gap-2 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
+              >
                 <SafeIcon name="FileText" className="h-4 w-4" />
                 Invoice
               </TabsTrigger>
-              <TabsTrigger value="nota" className="gap-2">
+              <TabsTrigger
+                value="nota"
+                className="gap-2 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                disabled={!data.isPaid}
+                title={!data.isPaid ? 'Nota tersedia setelah pembayaran lunas' : ''}
+              >
                 <SafeIcon name="Receipt" className="h-4 w-4" />
                 Nota
+                {!data.isPaid && <SafeIcon name="Lock" className="h-3 w-3 ml-1 opacity-50" />}
               </TabsTrigger>
             </TabsList>
           </Tabs>

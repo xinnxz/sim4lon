@@ -36,8 +36,8 @@ const statusLabels: Record<OrderStatus, string> = {
   DRAFT: 'Draft',
   MENUNGGU_PEMBAYARAN: 'Menunggu Pembayaran',
   DIPROSES: 'Diproses',
-  SIAP_KIRIM: 'Siap Kirim',
-  DIKIRIM: 'Dikirim',
+  SIAP_KIRIM: 'Siap Kirim', // Legacy
+  DIKIRIM: 'Sedang Dikirim',
   SELESAI: 'Selesai',
   BATAL: 'Dibatalkan',
 }
@@ -47,9 +47,9 @@ const statusLabels: Record<OrderStatus, string> = {
  */
 const statusColors: Record<OrderStatus, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',
-  MENUNGGU_PEMBAYARAN: 'bg-yellow-100 text-yellow-700',
+  MENUNGGU_PEMBAYARAN: 'bg-amber-100 text-amber-700',
   DIPROSES: 'bg-blue-100 text-blue-700',
-  SIAP_KIRIM: 'bg-purple-100 text-purple-700',
+  SIAP_KIRIM: 'bg-purple-100 text-purple-700', // Legacy
   DIKIRIM: 'bg-indigo-100 text-indigo-700',
   SELESAI: 'bg-green-100 text-green-700',
   BATAL: 'bg-red-100 text-red-700',
@@ -259,7 +259,7 @@ Status: ${statusLabels[order.current_status]}
             <p className="text-muted-foreground">{order.id.slice(0, 8)}...</p>
           </div>
         </div>
-        <Badge className={`text-base px-3 py-1 ${statusColors[order.current_status]}`}>
+        <Badge variant="status" className={`text-base px-3 py-1 ${statusColors[order.current_status]}`}>
           {statusLabels[order.current_status]}
         </Badge>
       </div>
@@ -322,7 +322,7 @@ Status: ${statusLabels[order.current_status]}
           {order.drivers && (
             <Card>
               <CardHeader>
-                <CardTitle>Driver Ditugaskan</CardTitle>
+                <CardTitle>Info Driver</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
@@ -383,11 +383,9 @@ Status: ${statusLabels[order.current_status]}
         <div className="space-y-4">
           <OrderActionsPanel
             orderStatus={order.current_status}
-            onStatusChange={handleStatusChange}
             onPrintInvoice={handlePrintInvoice}
             onSendWhatsApp={handleSendWhatsApp}
             onEditOrder={handleEditOrder}
-            isLoading={isUpdating}
           />
 
           {/* Assign Driver Button */}

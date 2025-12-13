@@ -24,14 +24,13 @@ export default function DeliveryInfoCard({ delivery }: DeliveryInfoCardProps) {
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm text-muted-foreground">Status Pengiriman</p>
-          <Badge 
-            variant="outline"
-            className={`mt-1 ${
-              delivery.status === 'not_scheduled' || delivery.status === 'ready_to_ship' ? 'bg-gray-100' :
-              delivery.status === 'scheduled' ? 'bg-blue-100' :
-              delivery.status === 'in_delivery' ? 'bg-yellow-100' :
-              'bg-green-100'
-            }`}
+          <Badge
+            variant="status"
+            className={`mt-1 ${delivery.status === 'not_scheduled' || delivery.status === 'ready_to_ship' ? 'bg-gray-100 text-gray-700' :
+              delivery.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
+                delivery.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-700' :
+                  'bg-green-100 text-green-700'
+              }`}
           >
             {delivery.statusLabel}
           </Badge>
@@ -42,7 +41,7 @@ export default function DeliveryInfoCard({ delivery }: DeliveryInfoCardProps) {
             <p className="text-sm text-muted-foreground">Driver</p>
             <p className="font-medium">{delivery.driver}</p>
             {delivery.driverPhone && (
-              <a 
+              <a
                 href={`tel:${delivery.driverPhone}`}
                 className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
               >

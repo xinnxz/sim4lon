@@ -272,7 +272,7 @@ export class OrderService {
         const validTransitions: Record<status_pesanan, status_pesanan[]> = {
             DRAFT: ['MENUNGGU_PEMBAYARAN', 'BATAL'],
             MENUNGGU_PEMBAYARAN: ['DIPROSES', 'BATAL'],
-            DIPROSES: ['SIAP_KIRIM', 'BATAL'],
+            DIPROSES: ['SIAP_KIRIM', 'DIKIRIM', 'BATAL'], // Allow direct to DIKIRIM when driver assigned
             SIAP_KIRIM: ['DIKIRIM', 'BATAL'],
             DIKIRIM: ['SELESAI', 'BATAL'],
             SELESAI: [],

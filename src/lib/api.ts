@@ -147,11 +147,13 @@ export const authApi = {
 
 export interface Pangkalan {
     id: string;
+    code: string;  // Pangkalan code like PKL-0001
     name: string;
     address: string;
     region: string | null;
     pic_name: string | null;
     phone: string | null;
+    email: string | null;  // Email for sending invoices
     capacity: number | null;
     note: string | null;
     is_active: boolean;
@@ -735,6 +737,7 @@ export interface TimelineTrack {
  */
 export interface Order {
     id: string;
+    code: string;  // Order code like ORD-0001
     pangkalan_id: string;
     driver_id: string | null;
     current_status: OrderStatus;

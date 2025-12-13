@@ -127,7 +127,7 @@ export default function OrderActionsPanel({
                     </Button>
                 )}
 
-                {/* Invoice Actions */}
+                {/* Document Actions */}
                 <div className="space-y-2 pt-2 border-t">
                     <Button
                         onClick={onPrintInvoice}
@@ -135,7 +135,7 @@ export default function OrderActionsPanel({
                         className="w-full"
                     >
                         <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
-                        Cetak Invoice
+                        Cetak Invoice/Nota
                     </Button>
                     <Button
                         onClick={onSendWhatsApp}
@@ -143,7 +143,7 @@ export default function OrderActionsPanel({
                         className="w-full"
                     >
                         <SafeIcon name="MessageCircle" className="mr-2 h-4 w-4" />
-                        Kirim Invoice WA
+                        Share via WA
                     </Button>
                 </div>
 

@@ -43,8 +43,8 @@ const statusLabels: Record<OrderStatus, string> = {
   DRAFT: 'Draft',
   MENUNGGU_PEMBAYARAN: 'Menunggu Pembayaran',
   DIPROSES: 'Diproses',
-  SIAP_KIRIM: 'Siap Kirim',
-  DIKIRIM: 'Dikirim',
+  SIAP_KIRIM: 'Siap Kirim', // Legacy - kept for backward compatibility
+  DIKIRIM: 'Sedang Dikirim',
   SELESAI: 'Selesai',
   BATAL: 'Dibatalkan',
 }
@@ -54,9 +54,9 @@ const statusLabels: Record<OrderStatus, string> = {
  */
 const statusColors: Record<OrderStatus, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',
-  MENUNGGU_PEMBAYARAN: 'bg-yellow-100 text-yellow-700',
+  MENUNGGU_PEMBAYARAN: 'bg-amber-100 text-amber-700',
   DIPROSES: 'bg-blue-100 text-blue-700',
-  SIAP_KIRIM: 'bg-purple-100 text-purple-700',
+  SIAP_KIRIM: 'bg-purple-100 text-purple-700', // Legacy
   DIKIRIM: 'bg-indigo-100 text-indigo-700',
   SELESAI: 'bg-green-100 text-green-700',
   BATAL: 'bg-red-100 text-red-700',
@@ -79,8 +79,8 @@ export default function OrderListPage() {
     total: 0,
     menungguPembayaran: 0,
     diproses: 0,
+    dikirim: 0,
     selesai: 0,
-    batal: 0,
   })
 
   /**
@@ -118,8 +118,8 @@ export default function OrderListPage() {
       total,
       menungguPembayaran: orderList.filter(o => o.current_status === 'MENUNGGU_PEMBAYARAN').length,
       diproses: orderList.filter(o => o.current_status === 'DIPROSES').length,
+      dikirim: orderList.filter(o => o.current_status === 'DIKIRIM').length,
       selesai: orderList.filter(o => o.current_status === 'SELESAI').length,
-      batal: orderList.filter(o => o.current_status === 'BATAL').length,
     })
   }
 
@@ -149,14 +149,24 @@ export default function OrderListPage() {
   }
 
   /**
-   * Format date
+   * Format date with time
    */
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })
+  }
+
+  /**
+   * Format order code - use from API or fallback
+   */
+  const formatOrderCode = (order: Order) => {
+    // Use code from API if available, otherwise generate fallback
+    return order.code || `ORD-${order.id.slice(0, 4).toUpperCase()}`
   }
 
   /**
@@ -225,7 +235,7 @@ export default function OrderListPage() {
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Menunggu Bayar
+              Menunggu Pembayaran
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -247,22 +257,22 @@ export default function OrderListPage() {
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Selesai
+              Sedang Dikirim
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-primary">{stats.selesai}</p>
+            <p className="text-2xl font-bold text-indigo-600">{stats.dikirim}</p>
           </CardContent>
         </Tilt3DCard>
 
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Dibatalkan
+              Selesai
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-destructive">{stats.batal}</p>
+            <p className="text-2xl font-bold text-green-600">{stats.selesai}</p>
           </CardContent>
         </Tilt3DCard>
       </div>
@@ -298,8 +308,7 @@ export default function OrderListPage() {
                 <SelectItem value="DRAFT">Draft</SelectItem>
                 <SelectItem value="MENUNGGU_PEMBAYARAN">Menunggu Pembayaran</SelectItem>
                 <SelectItem value="DIPROSES">Diproses</SelectItem>
-                <SelectItem value="SIAP_KIRIM">Siap Kirim</SelectItem>
-                <SelectItem value="DIKIRIM">Dikirim</SelectItem>
+                <SelectItem value="DIKIRIM">Sedang Dikirim</SelectItem>
                 <SelectItem value="SELESAI">Selesai</SelectItem>
                 <SelectItem value="BATAL">Dibatalkan</SelectItem>
               </SelectContent>
@@ -340,8 +349,8 @@ export default function OrderListPage() {
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
                       <TableRow key={order.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium text-primary">
-                          {order.id.slice(0, 8)}...
+                        <TableCell className="font-medium text-primary font-mono">
+                          {formatOrderCode(order)}
                         </TableCell>
                         <TableCell className="text-sm">
                           {order.pangkalans?.name || '-'}
@@ -356,7 +365,7 @@ export default function OrderListPage() {
                           {formatCurrency(order.total_amount)}
                         </TableCell>
                         <TableCell>
-                          <Badge className={statusColors[order.current_status]}>
+                          <Badge variant="status" className={statusColors[order.current_status]}>
                             {statusLabels[order.current_status]}
                           </Badge>
                         </TableCell>

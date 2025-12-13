@@ -54,6 +54,7 @@ export declare class PaymentService {
                 updated_at: Date;
                 deleted_at: Date | null;
                 code: string;
+                email: string | null;
                 phone: string | null;
                 note: string | null;
                 address: string;
