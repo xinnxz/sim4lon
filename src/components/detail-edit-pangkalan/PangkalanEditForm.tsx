@@ -27,6 +27,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
@@ -39,6 +46,44 @@ import {
 } from '@/components/ui/form'
 import SafeIcon from '@/components/common/SafeIcon'
 import { type Pangkalan } from '@/lib/api'
+
+/**
+ * Daftar Kecamatan di Kabupaten Cianjur
+ */
+const CIANJUR_KECAMATAN = [
+  'Agrabinta',
+  'Bojongpicung',
+  'Campaka',
+  'Campakamulya',
+  'Cianjur',
+  'Cibeber',
+  'Cibinong',
+  'Cidaun',
+  'Cijati',
+  'Cikadu',
+  'Cikalongkulon',
+  'Cilaku',
+  'Cipanas',
+  'Ciranjang',
+  'Cugenang',
+  'Gekbrong',
+  'Haurwangi',
+  'Kadupandak',
+  'Karangtengah',
+  'Leles',
+  'Mande',
+  'Naringgul',
+  'Pacet',
+  'Pagelaran',
+  'Pasirkuda',
+  'Sindangbarang',
+  'Sukaluyu',
+  'Sukanagara',
+  'Sukaresmi',
+  'Takokak',
+  'Tanggeung',
+  'Warungkondang',
+]
 
 /**
  * Validation schema dengan Zod - match dengan API fields
@@ -185,15 +230,26 @@ export default function PangkalanEditForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold">Wilayah *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: Cianjur"
-                        {...field}
-                        disabled={isSaving}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isSaving}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Kecamatan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CIANJUR_KECAMATAN.map((kec) => (
+                          <SelectItem key={kec} value={kec}>
+                            {kec}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormDescription>
-                      Kota atau wilayah
+                      Kecamatan Cianjur
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

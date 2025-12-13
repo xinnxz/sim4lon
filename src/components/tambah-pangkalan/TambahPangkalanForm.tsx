@@ -25,6 +25,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Form,
   FormControl,
   FormDescription,
@@ -37,6 +44,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
 import { pangkalanApi } from '@/lib/api'
+import { KABUPATEN_LIST, getKecamatanByKabupaten, formatRegion } from '@/data/regions'
 
 /**
  * Validation schema dengan Zod
@@ -77,6 +85,7 @@ interface TambahPangkalanFormProps {
 
 export default function TambahPangkalanForm({ onSuccess, isModal = false }: TambahPangkalanFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedKabupaten, setSelectedKabupaten] = useState<string>('Cianjur')
 
   const form = useForm<PangkalanFormValues>({
     resolver: zodResolver(pangkalanSchema),
@@ -101,10 +110,13 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
       // Parse capacity string to number
       const capacityNum = values.capacity ? parseInt(values.capacity, 10) : 0
 
+      // Format region as "Kecamatan, Kabupaten"
+      const formattedRegion = formatRegion(values.region, selectedKabupaten)
+
       await pangkalanApi.create({
         name: values.name,
         address: values.address,
-        region: values.region,
+        region: formattedRegion,
         pic_name: values.pic_name,
         phone: values.phone,
         email: values.email || null,
@@ -130,6 +142,9 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
       setIsSubmitting(false)
     }
   }
+
+  // Get kecamatan list based on selected kabupaten
+  const kecamatanList = getKecamatanByKabupaten(selectedKabupaten)
 
   return (
     <div className={isModal ? '' : 'max-w-2xl mx-auto'}>
@@ -202,28 +217,64 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                 )}
               />
 
-              {/* Wilayah */}
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Wilayah *</FormLabel>
+              {/* Wilayah - Cascading Dropdowns */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Kabupaten */}
+                <FormItem>
+                  <FormLabel className="text-base font-semibold">Kabupaten *</FormLabel>
+                  <Select
+                    value={selectedKabupaten}
+                    onValueChange={(val) => {
+                      setSelectedKabupaten(val)
+                      form.setValue('region', '') // Reset kecamatan when kabupaten changes
+                    }}
+                    disabled={isSubmitting}
+                  >
                     <FormControl>
-                      <Input
-                        placeholder="Contoh: Jakarta Pusat"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih Kabupaten" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormDescription>
-                      Kota atau wilayah pangkalan berada
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <SelectContent>
+                      {KABUPATEN_LIST.map((kab) => (
+                        <SelectItem key={kab} value={kab}>
+                          {kab}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
 
+                {/* Kecamatan */}
+                <FormField
+                  control={form.control}
+                  name="region"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">Kecamatan *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isSubmitting || !selectedKabupaten}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih Kecamatan" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {kecamatanList.map((kec) => (
+                            <SelectItem key={kec} value={kec}>
+                              {kec}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               {/* PIC Name */}
               <FormField
                 control={form.control}

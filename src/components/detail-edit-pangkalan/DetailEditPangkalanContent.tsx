@@ -120,6 +120,8 @@ export default function DetailEditPangkalanContent() {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })
   }
 
@@ -222,6 +224,7 @@ export default function DetailEditPangkalanContent() {
                         <TableRow>
                           <TableHead className="min-w-[100px]">Kode</TableHead>
                           <TableHead className="min-w-[110px]">Tanggal</TableHead>
+                          <TableHead className="min-w-[150px]">Item</TableHead>
                           <TableHead className="min-w-[130px] text-right">Total</TableHead>
                           <TableHead className="min-w-[110px]">Status</TableHead>
                           <TableHead className="min-w-[80px]">Aksi</TableHead>
@@ -233,8 +236,19 @@ export default function DetailEditPangkalanContent() {
                             <TableCell className="font-medium font-mono text-primary">
                               {order.code || `ORD-${order.id.slice(0, 4).toUpperCase()}`}
                             </TableCell>
-                            <TableCell className="text-foreground">
+                            <TableCell className="text-foreground text-sm">
                               {formatDate(order.created_at)}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {order.order_items && order.order_items.length > 0 ? (
+                                <div className="space-y-0.5">
+                                  {order.order_items.map((item, idx) => (
+                                    <div key={idx} className="text-foreground">
+                                      {item.label || item.lpg_type} × {item.qty}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : '-'}
                             </TableCell>
                             <TableCell className="text-right font-semibold text-foreground">
                               {formatCurrency(order.total_amount)}
