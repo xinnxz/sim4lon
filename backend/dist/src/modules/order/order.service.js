@@ -222,7 +222,7 @@ let OrderService = class OrderService {
         const validTransitions = {
             DRAFT: ['MENUNGGU_PEMBAYARAN', 'BATAL'],
             MENUNGGU_PEMBAYARAN: ['DIPROSES', 'BATAL'],
-            DIPROSES: ['SIAP_KIRIM', 'BATAL'],
+            DIPROSES: ['SIAP_KIRIM', 'DIKIRIM', 'BATAL'],
             SIAP_KIRIM: ['DIKIRIM', 'BATAL'],
             DIKIRIM: ['SELESAI', 'BATAL'],
             SELESAI: [],

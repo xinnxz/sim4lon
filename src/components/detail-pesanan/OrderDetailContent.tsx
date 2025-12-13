@@ -32,8 +32,8 @@ const STATUS_MAP: Record<OrderStatus, { status: string; label: string }> = {
   DRAFT: { status: 'created', label: 'Draft' },
   MENUNGGU_PEMBAYARAN: { status: 'pending_payment', label: 'Menunggu Pembayaran' },
   DIPROSES: { status: 'payment_confirmed', label: 'Pembayaran Diterima' },
-  SIAP_KIRIM: { status: 'ready_to_ship', label: 'Siap Dikirim' },
-  DIKIRIM: { status: 'driver_assigned', label: 'Driver Ditugaskan' },
+  SIAP_KIRIM: { status: 'ready_to_ship', label: 'Siap Dikirim' }, // Legacy
+  DIKIRIM: { status: 'in_delivery', label: 'Sedang Dikirim' },
   SELESAI: { status: 'completed', label: 'Pesanan Selesai' },
   BATAL: { status: 'cancelled', label: 'Dibatalkan' },
 }
@@ -76,7 +76,7 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
   const createdAt = new Date(apiOrder.created_at)
 
   return {
-    id: (apiOrder as any).code || apiOrder.id.substring(0, 12),
+    id: apiOrder.code || `ORD-${apiOrder.id.slice(0, 4).toUpperCase()}`,
     apiId: apiOrder.id,
     status: statusInfo.status,
     statusLabel: statusInfo.label,
@@ -103,7 +103,7 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
     paidAmount: 0,
     delivery: {
       status: apiOrder.drivers ? 'assigned' : 'not_scheduled',
-      statusLabel: apiOrder.drivers ? 'Driver Ditugaskan' : 'Belum Dijadwalkan',
+      statusLabel: apiOrder.drivers ? 'Sedang Dikirim' : 'Belum Dijadwalkan',
       driver: apiOrder.drivers?.name || null,
       driverPhone: apiOrder.drivers?.phone || null,
       estimatedDate: null,
@@ -119,7 +119,7 @@ function buildTimeline(apiOrder: ApiOrder) {
     { status: 'created', label: 'Pesanan Dibuat', date: null as string | null, completed: false },
     { status: 'pending_payment', label: 'Menunggu Pembayaran', date: null as string | null, completed: false },
     { status: 'payment_confirmed', label: 'Pembayaran Diterima', date: null as string | null, completed: false },
-    { status: 'driver_assigned', label: 'Driver Ditugaskan', date: null as string | null, completed: false },
+    { status: 'in_delivery', label: 'Sedang Dikirim', date: null as string | null, completed: false },
     { status: 'completed', label: 'Pesanan Selesai', date: null as string | null, completed: false },
   ]
 
@@ -215,16 +215,24 @@ export default function OrderDetailContent() {
   }
 
   const handlePrintInvoice = () => {
-    if (typeof window !== 'undefined') {
-      window.print()
-    }
+    if (!order) return
+    // Redirect to nota page - if paid, show nota; if not, show invoice
+    const isPaid = order.status === 'payment_confirmed' ||
+      order.status === 'DIPROSES' ||
+      order.status === 'SELESAI'
+    const docType = isPaid ? 'nota' : 'invoice'
+    window.location.href = `/nota-pembayaran?id=${order.apiId}&type=${docType}`
   }
 
   const handleSendWhatsApp = () => {
     if (!order) return
-    const message = `Halo, berikut adalah detail pesanan Anda:\n\nID Pesanan: ${order.id}\nTotal: Rp ${order.total.toLocaleString('id-ID')}\n\nTerima kasih telah memesan.`
-    const whatsappUrl = `https://wa.me/${order.customer.contactPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, '_blank')
+    // Redirect to nota page for WhatsApp share
+    // If not paid, only allow invoice (not nota)
+    const isPaid = order.status === 'payment_confirmed' ||
+      order.status === 'DIPROSES' ||
+      order.status === 'SELESAI'
+    const docType = isPaid ? 'nota' : 'invoice'
+    window.location.href = `/nota-pembayaran?id=${order.apiId}&type=${docType}`
   }
 
   const handleSelectDriver = async (driverId: string) => {
@@ -232,7 +240,15 @@ export default function OrderDetailContent() {
 
     try {
       setIsUpdating(true)
-      const updated = await ordersApi.update(order.apiId, { driver_id: driverId })
+      // First, update driver assignment
+      await ordersApi.update(order.apiId, { driver_id: driverId })
+
+      // Then, update status to DIKIRIM (driver assigned = being delivered)
+      const updated = await ordersApi.updateStatus(order.apiId, {
+        status: 'DIKIRIM',
+        note: 'Driver ditugaskan, pesanan sedang dikirim'
+      })
+
       setOrder(mapApiToUI(updated))
       setIsDriverModalOpen(false)
       toast.success('Driver berhasil ditugaskan')
@@ -310,11 +326,13 @@ export default function OrderDetailContent() {
           </div>
         </div>
         <Badge
-          className={`text-base px-4 py-2 ${order.status === 'pending_payment' ? 'bg-yellow-100 text-yellow-800' :
+          variant="status"
+          className={`text-base px-4 py-2 ${order.status === 'pending_payment' ? 'bg-amber-100 text-amber-800' :
             order.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800' :
-              order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
+              order.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-800' :
+                order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                  order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
             }`}
         >
           {order.statusLabel}

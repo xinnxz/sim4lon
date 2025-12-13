@@ -58,6 +58,10 @@ const pangkalanSchema = z.object({
     .max(100, 'Nama PIC maksimal 100 karakter'),
   phone: z.string()
     .regex(/^(\+62|0)[0-9]{9,12}$/, 'Nomor telepon tidak valid (contoh: 08xx atau +62xx)'),
+  email: z.string()
+    .email('Format email tidak valid')
+    .optional()
+    .or(z.literal('')),
   capacity: z.string().optional(),
   note: z.string()
     .max(500, 'Catatan maksimal 500 karakter')
@@ -82,6 +86,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
       region: '',
       pic_name: '',
       phone: '',
+      email: '',
       capacity: '',
       note: '',
     },
@@ -102,6 +107,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
         region: values.region,
         pic_name: values.pic_name,
         phone: values.phone,
+        email: values.email || null,
         capacity: capacityNum,
         note: values.note || '',
       })
@@ -257,6 +263,29 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                     </FormControl>
                     <FormDescription>
                       Nomor telepon yang dapat dihubungi
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Email */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Email (Opsional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: pangkalan@email.com"
+                        {...field}
+                        disabled={isSubmitting}
+                        type="email"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Untuk kirim invoice/nota
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

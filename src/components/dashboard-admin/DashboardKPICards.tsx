@@ -163,13 +163,13 @@ export default function DashboardKPICards() {
       iconColor: 'text-blue-600'
     },
     {
-      title: 'Pesanan Belum Diproses',
+      title: 'Menunggu Pembayaran',
       value: formatNumber(stats?.pendingOrders || 0),
-      change: 'Perlu diproses',
+      change: 'Perlu ditagih',
       changeType: stats && stats.pendingOrders > 5 ? 'negative' : 'positive',
       icon: 'Clock',
-      color: 'bg-orange-50',
-      iconColor: 'text-orange-600'
+      color: 'bg-amber-50',
+      iconColor: 'text-amber-600'
     },
     {
       title: 'Pesanan Selesai Hari Ini',

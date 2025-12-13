@@ -41,8 +41,8 @@ const mockOrder = {
     { status: 'created', label: 'Pesanan Dibuat', date: '2024-01-15 10:30', completed: true },
     { status: 'confirmed', label: 'Pesanan Dikonfirmasi', date: '2024-01-15 11:00', completed: true },
     { status: 'payment', label: 'Menunggu Pembayaran', date: null, completed: false },
-    { status: 'assigned', label: 'Driver Ditugaskan', date: null, completed: false },
-    { status: 'delivered', label: 'Pengiriman Selesai', date: null, completed: false },
+    { status: 'in_delivery', label: 'Sedang Dikirim', date: null, completed: false },
+    { status: 'completed', label: 'Pesanan Selesai', date: null, completed: false },
   ],
   notes: 'Pesanan reguler, pengiriman standar',
 }
