@@ -95,7 +95,7 @@ export default function NotaPembayaranPage() {
       // Fetch order and payment data
       const [order, payment] = await Promise.all([
         ordersApi.getById(orderId),
-        paymentApi.getOrderPayment(orderId).catch(() => null)
+        paymentApi.getOrderPayment(orderId).catch((): null => null)
       ])
 
       // Map to DocumentData
