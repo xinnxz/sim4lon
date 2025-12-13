@@ -848,10 +848,11 @@ export const ordersApi = {
 
     /**
      * Update order details (note, driver, etc)
+     * NOTE: Backend uses PUT not PATCH for this endpoint
      */
     async update(id: string, dto: Partial<{ driver_id: string; note: string }>): Promise<Order> {
         return apiRequest(`/orders/${id}`, {
-            method: 'PATCH',
+            method: 'PUT',
             body: JSON.stringify(dto),
         });
     },
@@ -862,6 +863,142 @@ export const ordersApi = {
     async delete(id: string): Promise<{ message: string }> {
         return apiRequest(`/orders/${id}`, {
             method: 'DELETE',
+        });
+    },
+};
+
+// ============================================================
+// PAYMENT API
+// ============================================================
+
+/**
+ * Payment Method enum - sesuai dengan backend payment_method
+ */
+export type PaymentMethod = 'TUNAI' | 'TRANSFER';
+
+/**
+ * DTO untuk create payment record
+ */
+export interface CreatePaymentRecordDto {
+    order_id?: string;
+    invoice_id?: string;
+    method: PaymentMethod;
+    amount: number;
+    proof_url?: string;
+    note?: string;
+}
+
+/**
+ * DTO untuk update order payment
+ */
+export interface UpdateOrderPaymentDto {
+    is_paid?: boolean;
+    is_dp?: boolean;
+    payment_method?: PaymentMethod;
+    amount_paid?: number;
+    proof_url?: string;
+}
+
+/**
+ * Order Payment Detail response
+ */
+export interface OrderPaymentDetail {
+    id: string;
+    order_id: string;
+    is_paid: boolean;
+    is_dp: boolean;
+    payment_method: PaymentMethod | null;
+    amount_paid: number;
+    payment_date: string | null;
+    proof_url: string | null;
+    created_at: string;
+    updated_at: string;
+    orders?: {
+        id: string;
+        total_amount: number;
+        pangkalans?: { name: string };
+    };
+}
+
+/**
+ * Payment Record response
+ */
+export interface PaymentRecord {
+    id: string;
+    order_id: string | null;
+    invoice_id: string | null;
+    method: PaymentMethod;
+    amount: number;
+    payment_time: string;
+    proof_url: string | null;
+    note: string | null;
+    recorded_by_user_id: string;
+    created_at: string;
+    orders?: Order;
+    users?: { id: string; name: string };
+}
+
+/**
+ * Payment API - CRUD untuk payment records dan order payment
+ * 
+ * PENJELASAN:
+ * - createRecord: Mencatat pembayaran baru
+ * - getOrderPayment: Get detail pembayaran order
+ * - updateOrderPayment: Update status pembayaran order
+ */
+export const paymentApi = {
+    /**
+     * Create payment record
+     * Mencatat pembayaran baru untuk order/invoice
+     */
+    async createRecord(dto: CreatePaymentRecordDto): Promise<PaymentRecord> {
+        return apiRequest('/payments/records', {
+            method: 'POST',
+            body: JSON.stringify(dto),
+        });
+    },
+
+    /**
+     * Get all payment records with pagination
+     */
+    async getRecords(
+        page = 1,
+        limit = 10,
+        orderId?: string,
+        method?: PaymentMethod
+    ): Promise<{ data: PaymentRecord[]; meta: { total: number; page: number; limit: number } }> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        if (orderId) params.append('order_id', orderId);
+        if (method) params.append('method', method);
+
+        return apiRequest(`/payments/records?${params.toString()}`);
+    },
+
+    /**
+     * Get payment record by ID
+     */
+    async getRecordById(id: string): Promise<PaymentRecord> {
+        return apiRequest(`/payments/records/${id}`);
+    },
+
+    /**
+     * Get order payment detail
+     */
+    async getOrderPayment(orderId: string): Promise<OrderPaymentDetail> {
+        return apiRequest(`/payments/orders/${orderId}`);
+    },
+
+    /**
+     * Update order payment status
+     * Gunakan untuk menandai order sebagai lunas
+     */
+    async updateOrderPayment(orderId: string, dto: UpdateOrderPaymentDto): Promise<OrderPaymentDetail> {
+        return apiRequest(`/payments/orders/${orderId}`, {
+            method: 'PUT',
+            body: JSON.stringify(dto),
         });
     },
 };

@@ -4,6 +4,7 @@ export declare class OrderItemDto {
     label?: string;
     price_per_unit: number;
     qty: number;
+    is_taxable?: boolean;
 }
 export declare class CreateOrderDto {
     pangkalan_id: string;

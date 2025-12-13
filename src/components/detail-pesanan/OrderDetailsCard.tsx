@@ -1,7 +1,15 @@
+/**
+ * OrderDetailsCard - Card detail pesanan dengan tabel item
+ * 
+ * PENJELASAN:
+ * Component ini menampilkan detail item pesanan dan breakdown harga
+ * Menggunakan formatCurrency untuk format uang yang konsisten
+ */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
+import { formatCurrency } from '@/lib/currency'
 
 interface OrderItem {
   id: number
@@ -39,10 +47,10 @@ export default function OrderDetailsCard({ items, total }: OrderDetailsCardProps
                   <TableCell className="font-medium">{item.type}</TableCell>
                   <TableCell className="text-right">{item.quantity}</TableCell>
                   <TableCell className="text-right">
-                    Rp {item.price.toLocaleString('id-ID')}
+                    {formatCurrency(item.price)}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    Rp {item.subtotal.toLocaleString('id-ID')}
+                    {formatCurrency(item.subtotal)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -55,20 +63,20 @@ export default function OrderDetailsCard({ items, total }: OrderDetailsCardProps
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>Rp {items.reduce((sum, item) => sum + item.subtotal, 0).toLocaleString('id-ID')}</span>
+            <span>{formatCurrency(items.reduce((sum, item) => sum + item.subtotal, 0))}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Pajak (0%)</span>
-            <span>Rp 0</span>
+            <span>{formatCurrency(0)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Biaya Pengiriman</span>
-            <span>Rp 0</span>
+            <span>{formatCurrency(0)}</span>
           </div>
           <Separator className="my-2" />
           <div className="flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span className="text-primary">Rp {total.toLocaleString('id-ID')}</span>
+            <span className="text-primary">{formatCurrency(total)}</span>
           </div>
         </div>
       </CardContent>

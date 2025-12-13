@@ -34,6 +34,7 @@ import {
   type LpgProduct,
   type OrderStatus
 } from '@/lib/api'
+import { formatCurrency } from '@/lib/currency'
 
 interface OrderItem {
   id: string
@@ -42,6 +43,7 @@ interface OrderItem {
   label: string
   price: number
   quantity: number
+  isTaxable: boolean  // true jika NON_SUBSIDI (kena PPN 12%)
 }
 
 interface OrderFormData {
@@ -110,22 +112,42 @@ export default function CreateOrderForm() {
 
   /**
    * Load order data for edit mode
+   * PENJELASAN: Saat edit, perlu match productId dari lpgProducts
+   * berdasarkan lpg_type dari order item
    */
   const loadOrderForEdit = async (orderId: string) => {
     try {
       const order = await ordersApi.getById(orderId)
       setEditOrderStatus(order.current_status)
+
+      // Wait for lpgProducts to load if not ready
+      const products = lpgProducts.length > 0 ? lpgProducts : await lpgProductsApi.getAll()
+
       setFormData({
         pangkalanId: order.pangkalan_id,
         note: order.note || '',
-        items: order.order_items.map((item, index) => ({
-          id: String(index + 1),
-          productId: '', // Will need to match with products
-          lpgType: item.lpg_type,
-          label: item.label,
-          price: item.price_per_unit,
-          quantity: item.qty,
-        })),
+        items: order.order_items.map((item, index) => {
+          // Match productId by finding product with same size
+          // lpg_type format: "kg3", "kg12", "kg50" -> extract number
+          const sizeMatch = item.lpg_type.match(/\d+/)
+          const size = sizeMatch ? parseFloat(sizeMatch[0]) : 0
+
+          // Find matching product by size
+          const matchedProduct = products.find(p =>
+            parseFloat(String(p.size_kg)) === size ||
+            p.name.toLowerCase().includes(item.label?.toLowerCase() || '')
+          )
+
+          return {
+            id: String(index + 1),
+            productId: matchedProduct?.id || '',
+            lpgType: item.lpg_type,
+            label: item.label || matchedProduct?.name || item.lpg_type,
+            price: item.price_per_unit,
+            quantity: item.qty,
+            isTaxable: (item as any).is_taxable ?? false,
+          }
+        }),
       })
     } catch (error) {
       console.error('Failed to load order:', error)
@@ -159,6 +181,7 @@ export default function CreateOrderForm() {
             lpgType: `${product.size_kg}kg`,
             label: product.name,
             price: defaultPrice,
+            isTaxable: product.category === 'NON_SUBSIDI',  // Update tax status
           }
           : item
       ),
@@ -186,6 +209,8 @@ export default function CreateOrderForm() {
     const newId = String(Math.max(...formData.items.map(i => parseInt(i.id)), 0) + 1)
     const defaultProduct = lpgProducts[0]
     const defaultPrice = defaultProduct.prices?.find(p => p.is_default)?.price || defaultProduct.prices?.[0]?.price || 0
+    // NON_SUBSIDI products are taxable (12% PPN)
+    const isTaxable = defaultProduct.category === 'NON_SUBSIDI'
 
     setFormData(prev => ({
       ...prev,
@@ -198,6 +223,7 @@ export default function CreateOrderForm() {
           label: defaultProduct.name,
           price: defaultPrice,
           quantity: 1,
+          isTaxable: isTaxable,
         },
       ],
     }))
@@ -220,8 +246,28 @@ export default function CreateOrderForm() {
   /**
    * Calculate total
    */
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     return formData.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  }
+
+  /**
+   * Calculate PPN 12% for non-subsidi items
+   */
+  const calculateTax = () => {
+    const PPN_RATE = 0.12
+    return formData.items.reduce((sum, item) => {
+      if (item.isTaxable) {
+        return sum + Math.round(item.price * item.quantity * PPN_RATE)
+      }
+      return sum
+    }, 0)
+  }
+
+  /**
+   * Calculate grand total (subtotal + tax)
+   */
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateTax()
   }
 
   /**
@@ -252,6 +298,7 @@ export default function CreateOrderForm() {
           label: item.label,
           price_per_unit: Number(item.price),  // Ensure it's a number
           qty: Math.floor(Number(item.quantity)),  // Ensure it's an integer
+          is_taxable: item.isTaxable,  // Send tax status for PPN calculation
         })),
       }
 
@@ -407,7 +454,7 @@ export default function CreateOrderForm() {
                                     const price = product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
                                     return (
                                       <SelectItem key={product.id} value={product.id}>
-                                        {product.name} - Rp {price.toLocaleString('id-ID')}
+                                        {product.name} - {formatCurrency(price)}
                                       </SelectItem>
                                     )
                                   })}
@@ -433,7 +480,7 @@ export default function CreateOrderForm() {
                           <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
                             <span className="text-sm text-muted-foreground">Harga per unit:</span>
                             <span className="font-semibold text-foreground">
-                              Rp {item.price.toLocaleString('id-ID')}
+                              {formatCurrency(item.price)}
                             </span>
                           </div>
 
@@ -441,7 +488,7 @@ export default function CreateOrderForm() {
                           <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
                             <span className="text-sm font-medium text-foreground">Subtotal:</span>
                             <span className="font-bold text-primary">
-                              Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+                              {formatCurrency(item.price * item.quantity)}
                             </span>
                           </div>
                         </div>
@@ -562,7 +609,7 @@ export default function CreateOrderForm() {
                         <span className="text-muted-foreground">× {item.quantity}</span>
                       </div>
                       <span className="font-medium text-foreground">
-                        Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+                        {formatCurrency(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -588,16 +635,41 @@ export default function CreateOrderForm() {
 
             <Separator />
 
-            {/* Total */}
-            <div className="space-y-2 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+            {/* Price Breakdown with PPN */}
+            <div className="space-y-3 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+              {/* Subtotal */}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal:</span>
+                <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
+              </div>
+
+              {/* PPN 12% (if any taxable items) */}
+              {calculateTax() > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    PPN 12%
+                    <Badge variant="outline" className="text-[10px] px-1 py-0 bg-orange-50 text-orange-600 border-orange-200">
+                      Non-Subsidi
+                    </Badge>
+                  </span>
+                  <span className="font-medium text-orange-600">
+                    + {formatCurrency(calculateTax())}
+                  </span>
+                </div>
+              )}
+
+              <Separator className="my-2" />
+
+              {/* Grand Total */}
               <div className="flex justify-between items-baseline">
-                <span className="text-sm text-muted-foreground">Total Pembayaran:</span>
+                <span className="text-sm font-medium text-foreground">Total Pembayaran:</span>
                 <span className="text-2xl font-bold text-primary">
-                  Rp {calculateTotal().toLocaleString('id-ID')}
+                  {formatCurrency(calculateTotal())}
                 </span>
               </div>
+
               <p className="text-xs text-muted-foreground">
-                Belum termasuk biaya pengiriman
+                {calculateTax() > 0 ? 'Sudah termasuk PPN untuk produk Non-Subsidi' : 'Produk Subsidi tidak dikenakan PPN'}
               </p>
             </div>
 

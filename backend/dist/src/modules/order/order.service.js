@@ -75,7 +75,6 @@ let OrderService = class OrderService {
         return order;
     }
     async create(dto) {
-        const totalAmount = dto.items.reduce((sum, item) => sum + item.price_per_unit * item.qty, 0);
         const mapStringToLpgType = (strType) => {
             const normalized = strType.toLowerCase().trim();
             const mapping = {
@@ -113,22 +112,38 @@ let OrderService = class OrderService {
         };
         const orderCount = await this.prisma.orders.count();
         const orderCode = `ORD-${String(orderCount + 1).padStart(4, '0')}`;
+        const PPN_RATE = 0.12;
+        let subtotal = 0;
+        let totalTax = 0;
+        const orderItemsData = dto.items.map((item) => {
+            const itemSubtotal = item.price_per_unit * item.qty;
+            const isTaxable = item.is_taxable ?? false;
+            const itemTax = isTaxable ? Math.round(itemSubtotal * PPN_RATE) : 0;
+            subtotal += itemSubtotal;
+            totalTax += itemTax;
+            return {
+                lpg_type: mapStringToLpgType(item.lpg_type),
+                label: item.label,
+                price_per_unit: item.price_per_unit,
+                qty: item.qty,
+                sub_total: itemSubtotal,
+                is_taxable: isTaxable,
+                tax_amount: itemTax,
+            };
+        });
+        const totalAmount = subtotal + totalTax;
         const order = await this.prisma.orders.create({
             data: {
                 code: orderCode,
                 pangkalan_id: dto.pangkalan_id,
                 driver_id: dto.driver_id,
                 note: dto.note,
+                subtotal: subtotal,
+                tax_amount: totalTax,
                 total_amount: totalAmount,
                 current_status: 'DRAFT',
                 order_items: {
-                    create: dto.items.map((item) => ({
-                        lpg_type: mapStringToLpgType(item.lpg_type),
-                        label: item.label,
-                        price_per_unit: item.price_per_unit,
-                        qty: item.qty,
-                        sub_total: item.price_per_unit * item.qty,
-                    })),
+                    create: orderItemsData,
                 },
                 timeline_tracks: {
                     create: {
@@ -161,6 +176,9 @@ let OrderService = class OrderService {
                     select: { id: true, code: true, name: true, phone: true },
                 },
                 order_items: true,
+                timeline_tracks: {
+                    orderBy: { created_at: 'desc' },
+                },
             },
         });
         return order;

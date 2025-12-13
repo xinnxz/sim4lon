@@ -21,6 +21,10 @@ export class CreatePangkalanDto {
     phone?: string;
 
     @IsOptional()
+    @IsString()
+    email?: string;
+
+    @IsOptional()
     @IsInt()
     capacity?: number;
 
@@ -50,6 +54,10 @@ export class UpdatePangkalanDto {
     @IsOptional()
     @IsString()
     phone?: string;
+
+    @IsOptional()
+    @IsString()
+    email?: string;
 
     @IsOptional()
     @IsInt()

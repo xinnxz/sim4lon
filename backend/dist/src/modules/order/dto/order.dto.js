@@ -19,6 +19,7 @@ class OrderItemDto {
     label;
     price_per_unit;
     qty;
+    is_taxable;
 }
 exports.OrderItemDto = OrderItemDto;
 __decorate([
@@ -41,6 +42,10 @@ __decorate([
     (0, class_validator_1.Min)(1),
     __metadata("design:type", Number)
 ], OrderItemDto.prototype, "qty", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], OrderItemDto.prototype, "is_taxable", void 0);
 class CreateOrderDto {
     pangkalan_id;
     driver_id;

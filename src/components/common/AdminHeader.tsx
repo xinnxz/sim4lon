@@ -15,6 +15,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import NotificationModal from '@/components/common/NotificationModal'
 import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { removeToken, authApi } from '@/lib/api'
+import { clearCachedProfile } from '@/components/auth/AuthGuard'
 
 interface AdminHeaderProps {
   userName?: string
@@ -50,9 +51,10 @@ export default function AdminHeader({
   }, [])
 
   /**
-   * Handle logout: hapus token dan redirect ke login
+   * Handle logout: hapus token, clear cache, dan redirect ke login
    */
   const handleLogout = () => {
+    clearCachedProfile() // Clear profile cache
     removeToken()
     window.location.href = '/login'
   }

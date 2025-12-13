@@ -8,6 +8,7 @@ import EditLPGTypeModal from './EditLPGTypeModal'
 import AddLPGTypeModal from './AddLPGTypeModal'
 import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { LPG_TYPES } from '@/data/enums'
+import { formatCurrency } from '@/lib/currency'
 
 interface EditingLPGType {
   type: string
@@ -30,7 +31,7 @@ export default function ManageLPGTypesForm({ onClose }: { onClose?: () => void }
   const [showAddModal, setShowAddModal] = useState(false)
   const [deletingType, setDeletingType] = useState<string | null>(null)
 
-const handleEditType = (type: LPGTypeWithPrice) => {
+  const handleEditType = (type: LPGTypeWithPrice) => {
     setEditingType({
       type: type.type,
       label: type.label,
@@ -43,26 +44,26 @@ const handleEditType = (type: LPGTypeWithPrice) => {
     setShowEditModal(true)
   }
 
-const handleSaveEdit = (updatedType: EditingLPGType) => {
-     const updated = lpgTypes.map(item => 
-       item.type === updatedType.type 
-         ? { ...item, label: updatedType.label, weight: updatedType.weight, category: updatedType.category, minStock: updatedType.minStock, maxCapacity: updatedType.maxCapacity, pricePerUnit: updatedType.pricePerUnit }
-         : item
-     )
-     setLpgTypes(updated)
-     setShowEditModal(false)
-     setEditingType(null)
-   }
+  const handleSaveEdit = (updatedType: EditingLPGType) => {
+    const updated = lpgTypes.map(item =>
+      item.type === updatedType.type
+        ? { ...item, label: updatedType.label, weight: updatedType.weight, category: updatedType.category, minStock: updatedType.minStock, maxCapacity: updatedType.maxCapacity, pricePerUnit: updatedType.pricePerUnit }
+        : item
+    )
+    setLpgTypes(updated)
+    setShowEditModal(false)
+    setEditingType(null)
+  }
 
-const handleAddType = (newType: {
-     type: string
-     label: string
-     weight: string
-     category: 'subsidi' | 'non-subsidi'
-     minStock: number
-     maxCapacity: number
-     pricePerUnit: number
-   }) => {
+  const handleAddType = (newType: {
+    type: string
+    label: string
+    weight: string
+    category: 'subsidi' | 'non-subsidi'
+    minStock: number
+    maxCapacity: number
+    pricePerUnit: number
+  }) => {
     // Check if type already exists
     if (lpgTypes.some(item => item.type === newType.type)) {
       alert('Kode jenis LPG sudah ada')
@@ -110,15 +111,15 @@ const handleAddType = (newType: {
               <div key={lpg.type} className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary transition-colors">
                 <div className="flex-1 space-y-1">
                   <p className="font-medium text-foreground">{lpg.label}</p>
-<div className="text-sm text-muted-foreground space-y-0.5">
-                     <p>Berat: {lpg.weight} Kg</p>
-                     <p>Jenis: {lpg.category === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}</p>
-                     <p>Min. Stok: {lpg.minStock} tabung</p>
-                     <p>Max Kapasitas: {lpg.maxCapacity || 500} tabung</p>
-                     <p>Harga: Rp {lpg.pricePerUnit.toLocaleString('id-ID')}</p>
-                   </div>
+                  <div className="text-sm text-muted-foreground space-y-0.5">
+                    <p>Berat: {lpg.weight} Kg</p>
+                    <p>Jenis: {lpg.category === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}</p>
+                    <p>Min. Stok: {lpg.minStock} tabung</p>
+                    <p>Max Kapasitas: {lpg.maxCapacity || 500} tabung</p>
+                    <p>Harga: {formatCurrency(lpg.pricePerUnit)}</p>
+                  </div>
                 </div>
-<div className="flex gap-2">
+                <div className="flex gap-2">
                   <Button
                     onClick={() => handleEditType(lpg)}
                     variant="outline"
@@ -154,7 +155,7 @@ const handleAddType = (newType: {
         />
       )}
 
-{/* Add Modal */}
+      {/* Add Modal */}
       <AddLPGTypeModal
         open={showAddModal}
         onOpenChange={setShowAddModal}
@@ -165,13 +166,13 @@ const handleAddType = (newType: {
       {deletingType && (
         <ConfirmationModal
           open={!!deletingType}
+          onOpenChange={(open) => !open && setDeletingType(null)}
           title="Hapus Jenis LPG"
           description={`Apakah Anda yakin ingin menghapus jenis LPG ini? Tindakan ini tidak dapat dibatalkan.`}
           confirmText="Hapus"
           cancelText="Batal"
-          variant="destructive"
+          isDangerous={true}
           onConfirm={confirmDeleteType}
-          onCancel={() => setDeletingType(null)}
         />
       )}
     </div>

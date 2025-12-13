@@ -28,6 +28,9 @@ export class OrderItemDto {
     @IsInt()
     @Min(1)
     qty: number;
+
+    @IsOptional()
+    is_taxable?: boolean;  // true jika NON_SUBSIDI (kena PPN 12%)
 }
 
 export class CreateOrderDto {

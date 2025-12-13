@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import SafeIcon from '@/components/common/SafeIcon'
+import { formatCurrency } from '@/lib/currency'
 
 interface AddLPGTypeModalProps {
   open: boolean
@@ -21,12 +22,12 @@ interface AddLPGTypeModalProps {
   }) => void
 }
 
-export default function AddLPGTypeModal({ 
-  open, 
-  onOpenChange, 
+export default function AddLPGTypeModal({
+  open,
+  onOpenChange,
   onAdd
 }: AddLPGTypeModalProps) {
-const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     label: '',
     weight: '',
     category: 'subsidi' as 'subsidi' | 'non-subsidi',
@@ -45,8 +46,8 @@ const [formData, setFormData] = useState({
 
     setIsSaving(true)
     await new Promise(resolve => setTimeout(resolve, 500))
-    
-// Auto-generate type code from weight
+
+    // Auto-generate type code from weight
     const generatedType = `${formData.weight}kg`
     onAdd({
       ...formData,
@@ -62,7 +63,7 @@ const [formData, setFormData] = useState({
     onOpenChange(false)
   }
 
-const resetForm = () => {
+  const resetForm = () => {
     setFormData({
       label: '',
       weight: '',
@@ -132,29 +133,29 @@ const resetForm = () => {
             />
           </div>
 
-<div className="space-y-2">
-             <Label htmlFor="minStock">Min. Stok (Tabung)</Label>
-             <Input
-               id="minStock"
-               type="number"
-               value={formData.minStock}
-               onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 50 })}
-               placeholder="Masukkan minimum stok"
-             />
-           </div>
+          <div className="space-y-2">
+            <Label htmlFor="minStock">Min. Stok (Tabung)</Label>
+            <Input
+              id="minStock"
+              type="number"
+              value={formData.minStock}
+              onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 50 })}
+              placeholder="Masukkan minimum stok"
+            />
+          </div>
 
-           <div className="space-y-2">
-             <Label htmlFor="maxCapacity">Max Kapasitas Gudang (Tabung)</Label>
-             <Input
-               id="maxCapacity"
-               type="number"
-               value={formData.maxCapacity}
-               onChange={(e) => setFormData({ ...formData, maxCapacity: parseInt(e.target.value) || 500 })}
-               placeholder="Masukkan kapasitas maksimal"
-             />
-           </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxCapacity">Max Kapasitas Gudang (Tabung)</Label>
+            <Input
+              id="maxCapacity"
+              type="number"
+              value={formData.maxCapacity}
+              onChange={(e) => setFormData({ ...formData, maxCapacity: parseInt(e.target.value) || 500 })}
+              placeholder="Masukkan kapasitas maksimal"
+            />
+          </div>
 
-           {error && (
+          {error && (
             <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20 text-sm text-destructive">
               {error}
             </div>
@@ -162,14 +163,14 @@ const resetForm = () => {
 
           <div className="p-3 bg-secondary rounded-lg border">
             <p className="text-sm text-foreground font-medium mb-2">Ringkasan:</p>
-<div className="space-y-1 text-sm text-muted-foreground">
-               <p>Nama: <span className="font-medium text-foreground">{formData.label || '-'}</span></p>
-               <p>Berat: <span className="font-medium text-foreground">{formData.weight || '-'} Kg</span></p>
-               <p>Jenis: <span className="font-medium text-foreground">{formData.category === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}</span></p>
-               <p>Min. Stok: <span className="font-medium text-foreground">{formData.minStock} tabung</span></p>
-               <p>Max Kapasitas: <span className="font-medium text-foreground">{formData.maxCapacity} tabung</span></p>
-               <p>Harga: <span className="font-medium text-foreground">Rp {formData.pricePerUnit.toLocaleString('id-ID') || '-'}</span></p>
-             </div>
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <p>Nama: <span className="font-medium text-foreground">{formData.label || '-'}</span></p>
+              <p>Berat: <span className="font-medium text-foreground">{formData.weight || '-'} Kg</span></p>
+              <p>Jenis: <span className="font-medium text-foreground">{formData.category === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}</span></p>
+              <p>Min. Stok: <span className="font-medium text-foreground">{formData.minStock} tabung</span></p>
+              <p>Max Kapasitas: <span className="font-medium text-foreground">{formData.maxCapacity} tabung</span></p>
+              <p>Harga: <span className="font-medium text-foreground">{formatCurrency(formData.pricePerUnit)}</span></p>
+            </div>
           </div>
         </div>
 

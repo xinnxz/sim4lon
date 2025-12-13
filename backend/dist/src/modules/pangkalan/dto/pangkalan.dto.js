@@ -17,6 +17,7 @@ class CreatePangkalanDto {
     region;
     pic_name;
     phone;
+    email;
     capacity;
     note;
 }
@@ -47,6 +48,11 @@ __decorate([
 ], CreatePangkalanDto.prototype, "phone", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePangkalanDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], CreatePangkalanDto.prototype, "capacity", void 0);
@@ -61,6 +67,7 @@ class UpdatePangkalanDto {
     region;
     pic_name;
     phone;
+    email;
     capacity;
     note;
     is_active;
@@ -92,6 +99,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdatePangkalanDto.prototype, "phone", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdatePangkalanDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),

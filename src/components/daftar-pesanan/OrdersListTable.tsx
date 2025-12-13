@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon'
+import { formatCurrency } from '@/lib/currency'
 
 interface OrderItem {
   type: string
@@ -51,14 +52,6 @@ const statusConfig: Record<string, { label: string; variant?: 'outline' | 'secon
     label: 'Dibatalkan',
     className: 'bg-red-600 text-red-600 border-red-600'
   }
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(value)
 }
 
 function formatDate(dateString: string): string {
