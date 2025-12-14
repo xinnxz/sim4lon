@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import SafeIcon from '@/components/common/SafeIcon'
 import PangkalanInfoCard from '@/components/detail-edit-pangkalan/PangkalanInfoCard'
 import PangkalanEditForm from '@/components/detail-edit-pangkalan/PangkalanEditForm'
+import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { toast } from 'sonner'
 import { pangkalanApi, ordersApi, type Pangkalan, type Order } from '@/lib/api'
 import { formatCurrency } from '@/lib/currency'
@@ -49,6 +50,8 @@ export default function DetailEditPangkalanContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Get pangkalan ID from URL
   const getPangkalanId = () => {
@@ -113,6 +116,29 @@ export default function DetailEditPangkalanContent() {
 
   const handleCancel = () => {
     setIsEditing(false)
+  }
+
+  /**
+   * Handle delete pangkalan (soft delete)
+   * Data disembunyikan dari UI tapi tetap tersimpan di database
+   */
+  const handleDelete = async () => {
+    if (!pangkalan) return
+
+    setIsDeleting(true)
+    try {
+      await pangkalanApi.delete(pangkalan.id)
+      toast.success('Pangkalan berhasil dihapus')
+      // Redirect to list page
+      window.location.href = '/daftar-pangkalan'
+    } catch (error: any) {
+      console.error('Failed to delete pangkalan:', error)
+      const errorMessage = error?.message || 'Gagal menghapus pangkalan'
+      toast.error(errorMessage)
+      setShowDeleteModal(false)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -191,6 +217,17 @@ export default function DetailEditPangkalanContent() {
             >
               <SafeIcon name={isEditing ? "X" : "Pencil"} className="h-3.5 w-3.5" />
               {isEditing ? 'Batal' : 'Edit'}
+            </Button>
+            {/* Delete button - soft delete (data tetap tersimpan) */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => setShowDeleteModal(true)}
+              title="Hapus pangkalan (soft delete)"
+            >
+              <SafeIcon name="Trash2" className="h-3.5 w-3.5" />
+              Hapus
             </Button>
           </div>
         </div>
@@ -291,6 +328,19 @@ export default function DetailEditPangkalanContent() {
           />
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleDelete}
+        title="Hapus Pangkalan"
+        description={`Apakah Anda yakin ingin menghapus pangkalan "${pangkalan?.name}"? Pangkalan akan disembunyikan dari daftar, tetapi riwayat pesanan tetap tersimpan.`}
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        isDangerous={true}
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

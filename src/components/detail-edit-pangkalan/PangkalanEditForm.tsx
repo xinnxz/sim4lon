@@ -1,25 +1,16 @@
 /**
- * PangkalanEditForm - Form Edit Pangkalan dengan API Integration
+ * PangkalanEditForm - Form Edit Pangkalan dengan Cascading Dropdown
  * 
  * PENJELASAN:
- * Form ini digunakan untuk mengedit data pangkalan.
- * Menggunakan field names yang match dengan API.
- * 
- * Fields (sesuai API):
- * - name: Nama pangkalan (required)
- * - address: Alamat lengkap (required)
- * - region: Wilayah/kota (required)
- * - pic_name: Nama PIC (required)
- * - phone: Nomor telepon (required)
- * - email: Email (optional)
- * - capacity: Kapasitas penyimpanan (optional)
- * - note: Catatan tambahan (optional)
- * - is_active: Status aktif (required)
+ * Form untuk edit data pangkalan dengan:
+ * - Cascading dropdown Kabupaten → Kecamatan
+ * - Zod validation
+ * - Pre-populate dari existing region data
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -46,47 +37,41 @@ import {
 } from '@/components/ui/form'
 import SafeIcon from '@/components/common/SafeIcon'
 import { type Pangkalan } from '@/lib/api'
+import { KABUPATEN_DATA, getKecamatanByKabupaten } from '@/data/regions'
 
 /**
- * Daftar Kecamatan di Kabupaten Cianjur
+ * Helper: Parse existing region string to kabupaten/kecamatan
+ * Format: "Kecamatan, Kabupaten Xxx" 
  */
-const CIANJUR_KECAMATAN = [
-  'Agrabinta',
-  'Bojongpicung',
-  'Campaka',
-  'Campakamulya',
-  'Cianjur',
-  'Cibeber',
-  'Cibinong',
-  'Cidaun',
-  'Cijati',
-  'Cikadu',
-  'Cikalongkulon',
-  'Cilaku',
-  'Cipanas',
-  'Ciranjang',
-  'Cugenang',
-  'Gekbrong',
-  'Haurwangi',
-  'Kadupandak',
-  'Karangtengah',
-  'Leles',
-  'Mande',
-  'Naringgul',
-  'Pacet',
-  'Pagelaran',
-  'Pasirkuda',
-  'Sindangbarang',
-  'Sukaluyu',
-  'Sukanagara',
-  'Sukaresmi',
-  'Takokak',
-  'Tanggeung',
-  'Warungkondang',
-]
+function parseRegion(region: string | null): { kabupaten: string; kecamatan: string } {
+  if (!region) return { kabupaten: '', kecamatan: '' }
+
+  // Try to match "Kecamatan, Kabupaten Xxx" format
+  const parts = region.split(',')
+  if (parts.length >= 2) {
+    const kecamatan = parts[0].trim()
+    const kabupatenName = parts[1].trim()
+    // Find kabupaten ID by name
+    const kabupaten = KABUPATEN_DATA.find(k =>
+      k.name === kabupatenName || kabupatenName.includes(k.name.replace('Kabupaten ', ''))
+    )
+    if (kabupaten) {
+      return { kabupaten: kabupaten.id, kecamatan }
+    }
+  }
+
+  // Fallback: try to find kecamatan in any kabupaten
+  for (const kab of KABUPATEN_DATA) {
+    if (kab.kecamatan.includes(region)) {
+      return { kabupaten: kab.id, kecamatan: region }
+    }
+  }
+
+  return { kabupaten: '', kecamatan: region }
+}
 
 /**
- * Validation schema dengan Zod - match dengan API fields
+ * Validation schema
  */
 const pangkalanSchema = z.object({
   name: z.string()
@@ -95,9 +80,10 @@ const pangkalanSchema = z.object({
   address: z.string()
     .min(10, 'Alamat minimal 10 karakter')
     .max(255, 'Alamat maksimal 255 karakter'),
-  region: z.string()
-    .min(2, 'Wilayah minimal 2 karakter')
-    .max(100, 'Wilayah maksimal 100 karakter'),
+  kabupaten: z.string()
+    .min(1, 'Kabupaten harus dipilih'),
+  kecamatan: z.string()
+    .min(1, 'Kecamatan harus dipilih'),
   pic_name: z.string()
     .min(2, 'Nama PIC minimal 2 karakter')
     .max(100, 'Nama PIC maksimal 100 karakter'),
@@ -129,12 +115,17 @@ export default function PangkalanEditForm({
   onCancel,
   isSaving
 }: PangkalanEditFormProps) {
+  // Parse existing region to kabupaten/kecamatan
+  const parsedRegion = parseRegion(pangkalan.region)
+  const [selectedKabupaten, setSelectedKabupaten] = useState(parsedRegion.kabupaten)
+
   const form = useForm<PangkalanFormValues>({
     resolver: zodResolver(pangkalanSchema),
     defaultValues: {
       name: pangkalan.name || '',
       address: pangkalan.address || '',
-      region: pangkalan.region || '',
+      kabupaten: parsedRegion.kabupaten,
+      kecamatan: parsedRegion.kecamatan,
       pic_name: pangkalan.pic_name || '',
       phone: pangkalan.phone || '',
       email: pangkalan.email || '',
@@ -144,15 +135,21 @@ export default function PangkalanEditForm({
     },
   })
 
+  // Get kecamatan list based on selected kabupaten
+  const kecamatanList = getKecamatanByKabupaten(selectedKabupaten)
+
   /**
-   * Submit form - convert to API format
-   * Only send fields that have values to avoid validation issues
+   * Submit form - combine kabupaten+kecamatan into region
    */
   const onSubmit = async (values: PangkalanFormValues) => {
+    // Combine kabupaten + kecamatan into region
+    const kabupatenName = KABUPATEN_DATA.find(k => k.id === values.kabupaten)?.name || values.kabupaten
+    const region = `${values.kecamatan}, ${kabupatenName}`
+
     const data: Partial<Pangkalan> = {
       name: values.name,
       address: values.address,
-      region: values.region,
+      region: region,
       pic_name: values.pic_name,
       phone: values.phone,
       is_active: values.is_active,
@@ -191,9 +188,6 @@ export default function PangkalanEditForm({
                       disabled={isSaving}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Nama resmi pangkalan LPG
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -208,7 +202,7 @@ export default function PangkalanEditForm({
                   <FormLabel className="text-base font-semibold">Alamat Lengkap *</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Contoh: Jl. Merdeka No. 123, Kelurahan Sukamaju"
+                      placeholder="Masukkan alamat lengkap..."
                       {...field}
                       disabled={isSaving}
                       rows={3}
@@ -222,40 +216,76 @@ export default function PangkalanEditForm({
               )}
             />
 
-            {/* Wilayah & PIC Name - 2 columns */}
+            {/* Wilayah - Cascading Dropdowns */}
             <div className="grid gap-4 sm:grid-cols-2">
+              {/* Kabupaten */}
               <FormField
                 control={form.control}
-                name="region"
+                name="kabupaten"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Wilayah *</FormLabel>
+                    <FormLabel className="text-base font-semibold">Kabupaten *</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        setSelectedKabupaten(value)
+                        // Reset kecamatan when kabupaten changes
+                        form.setValue('kecamatan', '')
+                      }}
                       defaultValue={field.value}
                       disabled={isSaving}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Pilih Kecamatan" />
+                          <SelectValue placeholder="Pilih Kabupaten" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CIANJUR_KECAMATAN.map((kec) => (
+                        {KABUPATEN_DATA.map((kab) => (
+                          <SelectItem key={kab.id} value={kab.id}>
+                            {kab.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Kecamatan */}
+              <FormField
+                control={form.control}
+                name="kecamatan"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Kecamatan *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isSaving || !selectedKabupaten}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedKabupaten ? "Pilih Kecamatan" : "Pilih Kabupaten dulu"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {kecamatanList.map((kec) => (
                           <SelectItem key={kec} value={kec}>
                             {kec}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Kecamatan Cianjur
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
 
+            {/* PIC Name & Phone */}
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="pic_name"
@@ -264,31 +294,25 @@ export default function PangkalanEditForm({
                     <FormLabel className="text-base font-semibold">Nama PIC *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Contoh: Budi Santoso"
+                        placeholder="Nama penanggung jawab"
                         {...field}
                         disabled={isSaving}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Penanggung jawab
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
 
-            {/* Telepon & Email - 2 columns */}
-            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Nomor Telepon *</FormLabel>
+                    <FormLabel className="text-base font-semibold">No. Telepon *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Contoh: 081234567890"
+                        placeholder="08xx atau +62xx"
                         {...field}
                         disabled={isSaving}
                         type="tel"
@@ -298,31 +322,32 @@ export default function PangkalanEditForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Contoh: pangkalan@email.com"
-                        {...field}
-                        disabled={isSaving}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Untuk kirim invoice
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
-            {/* Kapasitas */}
+            {/* Email */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-semibold">Email (Opsional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="email@example.com"
+                      {...field}
+                      disabled={isSaving}
+                      type="email"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Untuk kirim invoice/nota
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Capacity */}
             <FormField
               control={form.control}
               name="capacity"
@@ -354,10 +379,10 @@ export default function PangkalanEditForm({
                   <FormLabel className="text-base font-semibold">Catatan (Opsional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Informasi tambahan tentang pangkalan"
+                      placeholder="Catatan tambahan..."
                       {...field}
                       disabled={isSaving}
-                      rows={2}
+                      rows={3}
                     />
                   </FormControl>
                   <FormMessage />
@@ -370,11 +395,11 @@ export default function PangkalanEditForm({
               control={form.control}
               name="is_active"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base font-semibold">Status Pangkalan</FormLabel>
+                    <FormLabel className="text-base font-semibold">Status Aktif</FormLabel>
                     <FormDescription>
-                      {field.value ? 'Pangkalan sedang aktif' : 'Pangkalan sedang nonaktif'}
+                      Pangkalan aktif dapat menerima pesanan
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -389,11 +414,20 @@ export default function PangkalanEditForm({
             />
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSaving}
+              >
+                <SafeIcon name="X" className="mr-2 h-4 w-4" />
+                Batal
+              </Button>
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="flex-1"
+                className="min-w-[140px]"
               >
                 {isSaving ? (
                   <>
@@ -406,16 +440,6 @@ export default function PangkalanEditForm({
                     Simpan Perubahan
                   </>
                 )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={isSaving}
-                className="flex-1"
-              >
-                <SafeIcon name="X" className="mr-2 h-4 w-4" />
-                Batal
               </Button>
             </div>
           </form>
