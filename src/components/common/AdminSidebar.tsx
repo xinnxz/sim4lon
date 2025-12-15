@@ -18,7 +18,7 @@ const menuGroups = [
     items: [
       { name: 'Dashboard', href: './dashboard-admin.html', icon: 'LayoutDashboard' },
       { name: 'Pesanan', href: './daftar-pesanan.html', icon: 'ShoppingCart' },
-      { name: 'Laporan', href: './dashboard-laporan.html', icon: 'BarChart3' },
+      { name: 'Laporan', href: '/laporan', icon: 'BarChart3' },
       { name: 'Stok LPG', href: './ringkasan-stok.html', icon: 'Package' },
     ]
   },

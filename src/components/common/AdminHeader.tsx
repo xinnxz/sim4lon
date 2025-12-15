@@ -77,6 +77,14 @@ export default function AdminHeader({
     window.location.href = '/login'
   }
 
+  /**
+   * Handle notification modal: clear badge saat modal dibuka
+   */
+  const handleNotificationOpen = () => {
+    setShowNotifications(true)
+    setNotificationCount(0) // Clear badge saat sudah dilihat
+  }
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-gradient-to-r from-background to-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300" id="ijli">
@@ -98,7 +106,7 @@ export default function AdminHeader({
               variant="ghost"
               size="lg"
               className="relative hover:bg-primary/10 transition-colors"
-              onClick={() => setShowNotifications(true)}
+              onClick={handleNotificationOpen}
               aria-label="Notifikasi"
             >
               <SafeIcon name="Bell" className="h-6 w-6" />

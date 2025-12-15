@@ -220,6 +220,113 @@ export const notificationApi = {
 };
 
 // ============================================================
+// REPORTS API
+// ============================================================
+
+export interface ReportPeriod {
+    start: string;
+    end: string;
+}
+
+export interface SalesReportSummary {
+    total_orders: number;
+    total_revenue: number;
+    average_order: number;
+    status_breakdown: Record<string, number>;
+}
+
+export interface SalesReportItem {
+    id: string;
+    date: string;
+    code: string;
+    pangkalan: string;
+    pangkalan_code: string;
+    subtotal: number;
+    tax: number;
+    total: number;
+    status: string;
+}
+
+export interface SalesReportResponse {
+    summary: SalesReportSummary;
+    data: SalesReportItem[];
+    period: ReportPeriod;
+}
+
+export interface PaymentsReportSummary {
+    total_payments: number;
+    total_amount: number;
+    average_payment: number;
+    method_breakdown: Record<string, { count: number; amount: number }>;
+}
+
+export interface PaymentsReportItem {
+    id: string;
+    date: string;
+    invoice_number: string;
+    order_code: string;
+    pangkalan: string;
+    amount: number;
+    method: string;
+    note: string | null;
+    recorded_by: string;
+}
+
+export interface PaymentsReportResponse {
+    summary: PaymentsReportSummary;
+    data: PaymentsReportItem[];
+    period: ReportPeriod;
+}
+
+export interface StockMovementSummary {
+    total_in: number;
+    total_out: number;
+    net_change: number;
+    current_balance: number;
+    movement_count: number;
+}
+
+export interface StockMovementItem {
+    id: string;
+    date: string;
+    product: string;
+    type: string;
+    qty: number;
+    note: string | null;
+    recorded_by: string;
+}
+
+export interface StockMovementResponse {
+    summary: StockMovementSummary;
+    data: StockMovementItem[];
+    period: ReportPeriod;
+}
+
+export const reportsApi = {
+    async getSalesReport(startDate?: string, endDate?: string): Promise<SalesReportResponse> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        return apiRequest<SalesReportResponse>(`/reports/sales?${params.toString()}`);
+    },
+
+    async getPaymentsReport(startDate?: string, endDate?: string): Promise<PaymentsReportResponse> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        return apiRequest<PaymentsReportResponse>(`/reports/payments?${params.toString()}`);
+    },
+
+    async getStockMovementReport(startDate?: string, endDate?: string, productId?: string): Promise<StockMovementResponse> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (productId) params.append('productId', productId);
+        return apiRequest<StockMovementResponse>(`/reports/stock-movement?${params.toString()}`);
+    },
+};
+
+// ============================================================
 // PANGKALAN API
 // ============================================================
 

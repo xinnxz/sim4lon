@@ -5,16 +5,18 @@
  * Menggabungkan notifikasi dari:
  * 1. Activity logs (pesanan baru)
  * 2. Stock alerts (calculated - stok menipis/habis)
+ * 
+ * Support both legacy lpg_type and new lpg_product_id
  */
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
 
-// Stock alert thresholds
-const LOW_STOCK_THRESHOLD = 50;  // Warning jika stok < 50
-const CRITICAL_STOCK_THRESHOLD = 10;  // Critical jika stok < 10
+// Stock alert thresholds - sesuaikan sesuai kebutuhan
+const LOW_STOCK_THRESHOLD = 250;  // Warning jika stok < 250
+const CRITICAL_STOCK_THRESHOLD = 100;  // Critical jika stok < 100
 
-interface Notification {
+export interface Notification {
     id: string;
     type: 'order_new' | 'stock_low' | 'stock_critical' | 'stock_out';
     title: string;
@@ -83,42 +85,49 @@ export class NotificationService {
     private async calculateStockAlerts(): Promise<Notification[]> {
         const alerts: Notification[] = [];
 
-        // Get stock summary from stock_histories
-        const stockData = await this.prisma.stock_histories.groupBy({
-            by: ['lpg_type', 'movement_type'],
+        // Get all active LPG products
+        const products = await this.prisma.lpg_products.findMany({
             where: {
-                lpg_type: { not: null },
+                is_active: true,
+                deleted_at: null,
             },
-            _sum: {
-                qty: true,
+            select: {
+                id: true,
+                name: true,
             },
         });
 
-        // Calculate net stock for each type
-        const stockSummary: Record<string, number> = {};
+        // Calculate stock for each product from stock_histories
+        for (const product of products) {
+            // Get stock movements for this product
+            const stockData = await this.prisma.stock_histories.groupBy({
+                by: ['movement_type'],
+                where: {
+                    lpg_product_id: product.id,
+                },
+                _sum: {
+                    qty: true,
+                },
+            });
 
-        for (const data of stockData) {
-            const type = data.lpg_type;
-            if (!type) continue;
+            let totalIn = 0;
+            let totalOut = 0;
 
-            if (!stockSummary[type]) {
-                stockSummary[type] = 0;
+            for (const data of stockData) {
+                if (data.movement_type === 'MASUK') {
+                    totalIn = data._sum.qty || 0;
+                } else {
+                    totalOut = data._sum.qty || 0;
+                }
             }
 
-            if (data.movement_type === 'MASUK') {
-                stockSummary[type] += data._sum.qty || 0;
-            } else {
-                stockSummary[type] -= data._sum.qty || 0;
-            }
-        }
+            const currentStock = totalIn - totalOut;
+            const productName = product.name;
 
-        // Generate alerts based on stock levels
-        for (const [type, currentStock] of Object.entries(stockSummary)) {
-            const productName = this.getProductName(type);
-
+            // Generate alerts based on stock levels
             if (currentStock <= 0) {
                 alerts.push({
-                    id: `stock-out-${type}`,
+                    id: `stock-out-${product.id}`,
                     type: 'stock_out',
                     title: 'Stok Habis!',
                     message: `${productName} HABIS! Segera lakukan restock.`,
@@ -130,7 +139,7 @@ export class NotificationService {
                 });
             } else if (currentStock < CRITICAL_STOCK_THRESHOLD) {
                 alerts.push({
-                    id: `stock-critical-${type}`,
+                    id: `stock-critical-${product.id}`,
                     type: 'stock_critical',
                     title: 'Stok Kritis!',
                     message: `${productName} tersisa ${currentStock} tabung`,
@@ -142,7 +151,7 @@ export class NotificationService {
                 });
             } else if (currentStock < LOW_STOCK_THRESHOLD) {
                 alerts.push({
-                    id: `stock-low-${type}`,
+                    id: `stock-low-${product.id}`,
                     type: 'stock_low',
                     title: 'Stok Menipis',
                     message: `${productName} tersisa ${currentStock} tabung`,
@@ -156,18 +165,6 @@ export class NotificationService {
         }
 
         return alerts;
-    }
-
-    private getProductName(lpgType: string): string {
-        const names: Record<string, string> = {
-            'LPG_3KG': 'LPG 3kg Subsidi',
-            'LPG_5KG': 'LPG 5.5kg',
-            'LPG_12KG': 'LPG 12kg',
-            'LPG_50KG': 'LPG 50kg',
-            'BRIGHT_GAS_5KG': 'Bright Gas 5.5kg',
-            'BRIGHT_GAS_12KG': 'Bright Gas 12kg',
-        };
-        return names[lpgType] || lpgType;
     }
 
     private formatTimeAgo(date: Date): string {
