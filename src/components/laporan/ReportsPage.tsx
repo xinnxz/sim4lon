@@ -165,12 +165,12 @@ export default function ReportsPage() {
     }
 
     const statusLabels: Record<string, string> = {
-        DRAFT: 'Draft',
-        MENUNGGU_PEMBAYARAN: 'Menunggu Pembayaran',
-        DIPROSES: 'Diproses',
-        DIKIRIM: 'Dikirim',
-        SELESAI: 'Selesai',
-        DIBATALKAN: 'Dibatalkan',
+        DRAFT: 'DRAFT',
+        MENUNGGU_PEMBAYARAN: 'MENUNGGU PEMBAYARAN',
+        DIPROSES: 'DIPROSES',
+        DIKIRIM: 'DIKIRIM',
+        SELESAI: 'SELESAI',
+        DIBATALKAN: 'BATAL',
     }
 
     const getStatusColor = (status: string) => {

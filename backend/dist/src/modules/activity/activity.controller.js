@@ -36,6 +36,9 @@ let ActivityController = class ActivityController {
     create(dto) {
         return this.activityService.create(dto);
     }
+    seedActivities() {
+        return this.activityService.seedSampleActivities();
+    }
 };
 exports.ActivityController = ActivityController;
 __decorate([
@@ -72,6 +75,14 @@ __decorate([
     __metadata("design:paramtypes", [dto_1.CreateActivityLogDto]),
     __metadata("design:returntype", void 0)
 ], ActivityController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('seed'),
+    (0, common_1.UseGuards)(guards_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.user_role.ADMIN),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ActivityController.prototype, "seedActivities", null);
 exports.ActivityController = ActivityController = __decorate([
     (0, common_1.Controller)('activities'),
     (0, common_1.UseGuards)(guards_1.JwtAuthGuard),

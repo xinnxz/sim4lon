@@ -146,7 +146,7 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
           </div>
         </ScrollArea>
         <Button variant="outline" className="w-full mt-4 text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all duration-300 ease-out" asChild>
-          <a href="/log-aktivitas">
+          <a href="/riwayat-aktivitas">
             Lihat Semua Aktivitas
             <SafeIcon name="ArrowRight" className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </a>

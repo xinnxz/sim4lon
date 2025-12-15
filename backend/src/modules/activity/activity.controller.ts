@@ -44,4 +44,12 @@ export class ActivityController {
     create(@Body() dto: CreateActivityLogDto) {
         return this.activityService.create(dto);
     }
+
+    // DEV ONLY: Seed sample activities for testing
+    @Post('seed')
+    @UseGuards(RolesGuard)
+    @Roles(user_role.ADMIN)
+    seedActivities() {
+        return this.activityService.seedSampleActivities();
+    }
 }
