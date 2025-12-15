@@ -14,6 +14,7 @@ import { ActivityModule } from './modules/activity/activity.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { LpgProductsModule } from './modules/lpg-products/lpg-products.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
     imports: [
@@ -32,6 +33,7 @@ import { UploadModule } from './modules/upload/upload.module';
         DashboardModule,
         LpgProductsModule,
         UploadModule,
+        NotificationModule,
     ],
     controllers: [AppController],
     providers: [AppService],

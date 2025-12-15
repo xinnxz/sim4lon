@@ -194,6 +194,32 @@ export const uploadApi = {
 };
 
 // ============================================================
+// NOTIFICATION API
+// ============================================================
+
+export interface NotificationItem {
+    id: string;
+    type: 'order_new' | 'stock_low' | 'stock_critical' | 'stock_out';
+    title: string;
+    message: string;
+    icon: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    link?: string;
+    time: string;
+}
+
+export interface NotificationResponse {
+    notifications: NotificationItem[];
+    unread_count: number;
+}
+
+export const notificationApi = {
+    async getNotifications(limit = 10): Promise<NotificationResponse> {
+        return apiRequest<NotificationResponse>(`/notifications?limit=${limit}`);
+    },
+};
+
+// ============================================================
 // PANGKALAN API
 // ============================================================
 
