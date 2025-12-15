@@ -1,8 +1,10 @@
+import { SupabaseStorageService } from './supabase-storage.service';
 export declare class UploadController {
-    uploadAvatar(file: any): {
+    private readonly supabaseStorage;
+    constructor(supabaseStorage: SupabaseStorageService);
+    uploadAvatar(file: Express.Multer.File): Promise<{
         message: string;
-        filename: any;
+        filename: string;
         url: string;
-    };
-    serveAvatar(filename: string, res: any): any;
+    }>;
 }

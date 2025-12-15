@@ -1,12 +1,12 @@
 /**
- * Upload Controller - Handle file uploads
+ * Upload Controller - Handle file uploads with Supabase Storage
  * 
  * PENJELASAN:
  * Controller ini menangani upload file (gambar avatar, dll)
- * menggunakan Multer untuk multipart/form-data
+ * File disimpan ke Supabase Storage untuk persistent storage
  * 
+ * Endpoints:
  * - POST /upload/avatar - Upload avatar (requires auth)
- * - GET /upload/avatars/:filename - Serve avatar (public)
  */
 
 import {
@@ -16,24 +16,12 @@ import {
     UploadedFile,
     BadRequestException,
     UseGuards,
-    Get,
-    Param,
-    Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
 import { JwtAuthGuard } from '../auth/guards';
-import { existsSync, mkdirSync } from 'fs';
-
-// Use process.cwd() which always points to backend root folder
-const uploadsDir = join(process.cwd(), 'uploads', 'avatars');
-
-// Ensure uploads directory exists
-if (!existsSync(uploadsDir)) {
-    mkdirSync(uploadsDir, { recursive: true });
-    console.log('Created uploads directory:', uploadsDir);
-}
+import { SupabaseStorageService } from './supabase-storage.service';
+import { memoryStorage } from 'multer';
 
 // Generate unique filename with timestamp
 function generateFilename(originalname: string): string {
@@ -42,15 +30,6 @@ function generateFilename(originalname: string): string {
     const ext = extname(originalname);
     return `avatar-${timestamp}-${random}${ext}`;
 }
-
-// Configure storage for avatar uploads  
-const avatarStorage = diskStorage({
-    destination: uploadsDir,
-    filename: (req, file, callback) => {
-        const uniqueName = generateFilename(file.originalname);
-        callback(null, uniqueName);
-    },
-});
 
 // File filter to accept only images
 const imageFileFilter = (req: any, file: any, callback: any) => {
@@ -63,53 +42,43 @@ const imageFileFilter = (req: any, file: any, callback: any) => {
 
 @Controller('upload')
 export class UploadController {
+    constructor(private readonly supabaseStorage: SupabaseStorageService) { }
+
     /**
-     * Upload avatar image (requires authentication)
-     * Returns the URL to access the uploaded image
+     * Upload avatar image to Supabase Storage (requires authentication)
+     * Returns the public URL to access the uploaded image
      */
     @Post('avatar')
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(
         FileInterceptor('file', {
-            storage: avatarStorage,
+            storage: memoryStorage(), // Store in memory, then upload to Supabase
             fileFilter: imageFileFilter,
             limits: {
                 fileSize: 2 * 1024 * 1024, // Max 2MB
             },
         }),
     )
-    uploadAvatar(@UploadedFile() file: any) {
+    async uploadAvatar(@UploadedFile() file: Express.Multer.File) {
         if (!file) {
             throw new BadRequestException('File tidak ditemukan');
         }
 
-        console.log('Avatar uploaded:', file.filename, 'to', uploadsDir);
+        const filename = generateFilename(file.originalname);
 
-        // Return the URL that can be used to access the file
+        // Upload to Supabase Storage
+        const publicUrl = await this.supabaseStorage.uploadFile(
+            file.buffer,
+            filename,
+            file.mimetype,
+        );
+
+        console.log('Avatar uploaded to Supabase:', filename);
+
         return {
             message: 'Avatar berhasil diupload',
-            filename: file.filename,
-            url: `/upload/avatars/${file.filename}`,
+            filename: filename,
+            url: publicUrl,
         };
-    }
-
-    /**
-     * Serve uploaded avatar files (PUBLIC - no auth required)
-     */
-    @Get('avatars/:filename')
-    serveAvatar(@Param('filename') filename: string, @Res() res: any) {
-        // Sanitize filename to prevent directory traversal
-        const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '');
-        const filePath = join(uploadsDir, sanitizedFilename);
-
-        if (!existsSync(filePath)) {
-            return res.status(404).json({
-                message: 'File tidak ditemukan',
-                path: filePath,
-                uploadsDir: uploadsDir
-            });
-        }
-
-        return res.sendFile(filePath);
     }
 }

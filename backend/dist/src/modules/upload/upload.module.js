@@ -9,12 +9,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadModule = void 0;
 const common_1 = require("@nestjs/common");
 const upload_controller_1 = require("./upload.controller");
+const supabase_storage_service_1 = require("./supabase-storage.service");
 let UploadModule = class UploadModule {
 };
 exports.UploadModule = UploadModule;
 exports.UploadModule = UploadModule = __decorate([
     (0, common_1.Module)({
         controllers: [upload_controller_1.UploadController],
+        providers: [supabase_storage_service_1.SupabaseStorageService],
+        exports: [supabase_storage_service_1.SupabaseStorageService],
     })
 ], UploadModule);
 //# sourceMappingURL=upload.module.js.map
