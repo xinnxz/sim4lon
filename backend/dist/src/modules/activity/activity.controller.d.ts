@@ -22,7 +22,7 @@ export declare class ActivityController {
             type: string;
             title: string;
             description: string | null;
-            detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
+            detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
             icon_name: string | null;
             order_status: import("@prisma/client").$Enums.status_pesanan | null;
             timestamp: Date;
@@ -54,7 +54,7 @@ export declare class ActivityController {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;
@@ -79,7 +79,7 @@ export declare class ActivityController {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;
@@ -93,7 +93,7 @@ export declare class ActivityController {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client-runtime-utils").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;

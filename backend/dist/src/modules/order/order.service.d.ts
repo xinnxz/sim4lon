@@ -26,11 +26,11 @@ export declare class OrderService {
                 updated_at: Date;
                 order_id: string;
                 label: string | null;
-                tax_amount: import("@prisma/client-runtime-utils").Decimal;
+                tax_amount: import("@prisma/client/runtime/client").Decimal;
                 lpg_type: import("@prisma/client").$Enums.lpg_type;
-                price_per_unit: import("@prisma/client-runtime-utils").Decimal;
+                price_per_unit: import("@prisma/client/runtime/client").Decimal;
                 qty: number;
-                sub_total: import("@prisma/client-runtime-utils").Decimal | null;
+                sub_total: import("@prisma/client/runtime/client").Decimal | null;
                 is_taxable: boolean;
             }[];
             order_payment_details: {
@@ -42,7 +42,7 @@ export declare class OrderService {
                 is_paid: boolean;
                 is_dp: boolean;
                 payment_method: import("@prisma/client").$Enums.payment_method | null;
-                amount_paid: import("@prisma/client-runtime-utils").Decimal | null;
+                amount_paid: import("@prisma/client/runtime/client").Decimal | null;
                 payment_date: Date | null;
             } | null;
         } & {
@@ -56,9 +56,9 @@ export declare class OrderService {
             driver_id: string | null;
             order_date: Date;
             current_status: import("@prisma/client").$Enums.status_pesanan;
-            subtotal: import("@prisma/client-runtime-utils").Decimal;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal;
-            total_amount: import("@prisma/client-runtime-utils").Decimal;
+            subtotal: import("@prisma/client/runtime/client").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal;
+            total_amount: import("@prisma/client/runtime/client").Decimal;
         })[];
         meta: {
             total: number;
@@ -102,15 +102,15 @@ export declare class OrderService {
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
-            sub_total: import("@prisma/client-runtime-utils").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal | null;
+            sub_total: import("@prisma/client/runtime/client").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
-            tax_rate: import("@prisma/client-runtime-utils").Decimal | null;
-            grand_total: import("@prisma/client-runtime-utils").Decimal;
+            tax_rate: import("@prisma/client/runtime/client").Decimal | null;
+            grand_total: import("@prisma/client/runtime/client").Decimal;
             payment_status: string | null;
         }[];
         order_items: {
@@ -119,11 +119,11 @@ export declare class OrderService {
             updated_at: Date;
             order_id: string;
             label: string | null;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
-            price_per_unit: import("@prisma/client-runtime-utils").Decimal;
+            price_per_unit: import("@prisma/client/runtime/client").Decimal;
             qty: number;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
+            sub_total: import("@prisma/client/runtime/client").Decimal | null;
             is_taxable: boolean;
         }[];
         order_payment_details: {
@@ -135,7 +135,7 @@ export declare class OrderService {
             is_paid: boolean;
             is_dp: boolean;
             payment_method: import("@prisma/client").$Enums.payment_method | null;
-            amount_paid: import("@prisma/client-runtime-utils").Decimal | null;
+            amount_paid: import("@prisma/client/runtime/client").Decimal | null;
             payment_date: Date | null;
         } | null;
         timeline_tracks: {
@@ -157,9 +157,9 @@ export declare class OrderService {
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
-        subtotal: import("@prisma/client-runtime-utils").Decimal;
-        tax_amount: import("@prisma/client-runtime-utils").Decimal;
-        total_amount: import("@prisma/client-runtime-utils").Decimal;
+        subtotal: import("@prisma/client/runtime/client").Decimal;
+        tax_amount: import("@prisma/client/runtime/client").Decimal;
+        total_amount: import("@prisma/client/runtime/client").Decimal;
     }>;
     create(dto: CreateOrderDto): Promise<{
         pangkalans: {
@@ -184,11 +184,11 @@ export declare class OrderService {
             updated_at: Date;
             order_id: string;
             label: string | null;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
-            price_per_unit: import("@prisma/client-runtime-utils").Decimal;
+            price_per_unit: import("@prisma/client/runtime/client").Decimal;
             qty: number;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
+            sub_total: import("@prisma/client/runtime/client").Decimal | null;
             is_taxable: boolean;
         }[];
         timeline_tracks: {
@@ -210,9 +210,9 @@ export declare class OrderService {
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
-        subtotal: import("@prisma/client-runtime-utils").Decimal;
-        tax_amount: import("@prisma/client-runtime-utils").Decimal;
-        total_amount: import("@prisma/client-runtime-utils").Decimal;
+        subtotal: import("@prisma/client/runtime/client").Decimal;
+        tax_amount: import("@prisma/client/runtime/client").Decimal;
+        total_amount: import("@prisma/client/runtime/client").Decimal;
     }>;
     update(id: string, dto: UpdateOrderDto): Promise<{
         drivers: {
@@ -249,15 +249,15 @@ export declare class OrderService {
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
-            sub_total: import("@prisma/client-runtime-utils").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal | null;
+            sub_total: import("@prisma/client/runtime/client").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
-            tax_rate: import("@prisma/client-runtime-utils").Decimal | null;
-            grand_total: import("@prisma/client-runtime-utils").Decimal;
+            tax_rate: import("@prisma/client/runtime/client").Decimal | null;
+            grand_total: import("@prisma/client/runtime/client").Decimal;
             payment_status: string | null;
         }[];
         order_items: {
@@ -266,11 +266,11 @@ export declare class OrderService {
             updated_at: Date;
             order_id: string;
             label: string | null;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
-            price_per_unit: import("@prisma/client-runtime-utils").Decimal;
+            price_per_unit: import("@prisma/client/runtime/client").Decimal;
             qty: number;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
+            sub_total: import("@prisma/client/runtime/client").Decimal | null;
             is_taxable: boolean;
         }[];
         order_payment_details: {
@@ -282,7 +282,7 @@ export declare class OrderService {
             is_paid: boolean;
             is_dp: boolean;
             payment_method: import("@prisma/client").$Enums.payment_method | null;
-            amount_paid: import("@prisma/client-runtime-utils").Decimal | null;
+            amount_paid: import("@prisma/client/runtime/client").Decimal | null;
             payment_date: Date | null;
         } | null;
         timeline_tracks: {
@@ -304,9 +304,9 @@ export declare class OrderService {
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
-        subtotal: import("@prisma/client-runtime-utils").Decimal;
-        tax_amount: import("@prisma/client-runtime-utils").Decimal;
-        total_amount: import("@prisma/client-runtime-utils").Decimal;
+        subtotal: import("@prisma/client/runtime/client").Decimal;
+        tax_amount: import("@prisma/client/runtime/client").Decimal;
+        total_amount: import("@prisma/client/runtime/client").Decimal;
     }>;
     updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<{
         drivers: {
@@ -343,11 +343,11 @@ export declare class OrderService {
             updated_at: Date;
             order_id: string;
             label: string | null;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal;
+            tax_amount: import("@prisma/client/runtime/client").Decimal;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
-            price_per_unit: import("@prisma/client-runtime-utils").Decimal;
+            price_per_unit: import("@prisma/client/runtime/client").Decimal;
             qty: number;
-            sub_total: import("@prisma/client-runtime-utils").Decimal | null;
+            sub_total: import("@prisma/client/runtime/client").Decimal | null;
             is_taxable: boolean;
         }[];
         timeline_tracks: {
@@ -369,9 +369,9 @@ export declare class OrderService {
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
-        subtotal: import("@prisma/client-runtime-utils").Decimal;
-        tax_amount: import("@prisma/client-runtime-utils").Decimal;
-        total_amount: import("@prisma/client-runtime-utils").Decimal;
+        subtotal: import("@prisma/client/runtime/client").Decimal;
+        tax_amount: import("@prisma/client/runtime/client").Decimal;
+        total_amount: import("@prisma/client/runtime/client").Decimal;
     }>;
     remove(id: string): Promise<{
         message: string;
