@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../prisma");
-const LOW_STOCK_THRESHOLD = 50;
-const CRITICAL_STOCK_THRESHOLD = 10;
+const LOW_STOCK_THRESHOLD = 250;
+const CRITICAL_STOCK_THRESHOLD = 100;
 let NotificationService = class NotificationService {
     prisma;
     constructor(prisma) {
@@ -62,35 +62,41 @@ let NotificationService = class NotificationService {
     }
     async calculateStockAlerts() {
         const alerts = [];
-        const stockData = await this.prisma.stock_histories.groupBy({
-            by: ['lpg_type', 'movement_type'],
+        const products = await this.prisma.lpg_products.findMany({
             where: {
-                lpg_type: { not: null },
+                is_active: true,
+                deleted_at: null,
             },
-            _sum: {
-                qty: true,
+            select: {
+                id: true,
+                name: true,
             },
         });
-        const stockSummary = {};
-        for (const data of stockData) {
-            const type = data.lpg_type;
-            if (!type)
-                continue;
-            if (!stockSummary[type]) {
-                stockSummary[type] = 0;
+        for (const product of products) {
+            const stockData = await this.prisma.stock_histories.groupBy({
+                by: ['movement_type'],
+                where: {
+                    lpg_product_id: product.id,
+                },
+                _sum: {
+                    qty: true,
+                },
+            });
+            let totalIn = 0;
+            let totalOut = 0;
+            for (const data of stockData) {
+                if (data.movement_type === 'MASUK') {
+                    totalIn = data._sum.qty || 0;
+                }
+                else {
+                    totalOut = data._sum.qty || 0;
+                }
             }
-            if (data.movement_type === 'MASUK') {
-                stockSummary[type] += data._sum.qty || 0;
-            }
-            else {
-                stockSummary[type] -= data._sum.qty || 0;
-            }
-        }
-        for (const [type, currentStock] of Object.entries(stockSummary)) {
-            const productName = this.getProductName(type);
+            const currentStock = totalIn - totalOut;
+            const productName = product.name;
             if (currentStock <= 0) {
                 alerts.push({
-                    id: `stock-out-${type}`,
+                    id: `stock-out-${product.id}`,
                     type: 'stock_out',
                     title: 'Stok Habis!',
                     message: `${productName} HABIS! Segera lakukan restock.`,
@@ -103,7 +109,7 @@ let NotificationService = class NotificationService {
             }
             else if (currentStock < CRITICAL_STOCK_THRESHOLD) {
                 alerts.push({
-                    id: `stock-critical-${type}`,
+                    id: `stock-critical-${product.id}`,
                     type: 'stock_critical',
                     title: 'Stok Kritis!',
                     message: `${productName} tersisa ${currentStock} tabung`,
@@ -116,7 +122,7 @@ let NotificationService = class NotificationService {
             }
             else if (currentStock < LOW_STOCK_THRESHOLD) {
                 alerts.push({
-                    id: `stock-low-${type}`,
+                    id: `stock-low-${product.id}`,
                     type: 'stock_low',
                     title: 'Stok Menipis',
                     message: `${productName} tersisa ${currentStock} tabung`,
@@ -129,17 +135,6 @@ let NotificationService = class NotificationService {
             }
         }
         return alerts;
-    }
-    getProductName(lpgType) {
-        const names = {
-            'LPG_3KG': 'LPG 3kg Subsidi',
-            'LPG_5KG': 'LPG 5.5kg',
-            'LPG_12KG': 'LPG 12kg',
-            'LPG_50KG': 'LPG 50kg',
-            'BRIGHT_GAS_5KG': 'Bright Gas 5.5kg',
-            'BRIGHT_GAS_12KG': 'Bright Gas 12kg',
-        };
-        return names[lpgType] || lpgType;
     }
     formatTimeAgo(date) {
         const now = new Date();

@@ -15,6 +15,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { LpgProductsModule } from './modules/lpg-products/lpg-products.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
     imports: [
@@ -34,6 +35,7 @@ import { NotificationModule } from './modules/notification/notification.module';
         LpgProductsModule,
         UploadModule,
         NotificationModule,
+        ReportsModule,
     ],
     controllers: [AppController],
     providers: [AppService],

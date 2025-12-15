@@ -1,5 +1,5 @@
 import { PrismaService } from '../../prisma';
-interface Notification {
+export interface Notification {
     id: string;
     type: 'order_new' | 'stock_low' | 'stock_critical' | 'stock_out';
     title: string;
@@ -18,7 +18,5 @@ export declare class NotificationService {
         unread_count: number;
     }>;
     private calculateStockAlerts;
-    private getProductName;
     private formatTimeAgo;
 }
-export {};

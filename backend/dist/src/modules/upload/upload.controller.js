@@ -60,7 +60,6 @@ let UploadController = class UploadController {
     serveAvatar(filename, res) {
         const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '');
         const filePath = (0, path_1.join)(uploadsDir, sanitizedFilename);
-        console.log('Serving avatar from:', filePath, 'exists:', (0, fs_1.existsSync)(filePath));
         if (!(0, fs_1.existsSync)(filePath)) {
             return res.status(404).json({
                 message: 'File tidak ditemukan',
