@@ -8,14 +8,14 @@ export declare class OrderService {
         data: ({
             drivers: {
                 id: string;
-                name: string;
                 code: string;
+                name: string;
                 phone: string | null;
             } | null;
             pangkalans: {
                 id: string;
-                name: string;
                 code: string;
+                name: string;
                 phone: string | null;
                 address: string;
                 region: string | null;
@@ -24,9 +24,9 @@ export declare class OrderService {
                 id: string;
                 created_at: Date;
                 updated_at: Date;
+                order_id: string;
                 label: string | null;
                 tax_amount: import("@prisma/client-runtime-utils").Decimal;
-                order_id: string;
                 lpg_type: import("@prisma/client").$Enums.lpg_type;
                 price_per_unit: import("@prisma/client-runtime-utils").Decimal;
                 qty: number;
@@ -47,10 +47,10 @@ export declare class OrderService {
             } | null;
         } & {
             id: string;
+            code: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
             note: string | null;
             pangkalan_id: string;
             driver_id: string | null;
@@ -70,26 +70,26 @@ export declare class OrderService {
     findOne(id: string): Promise<{
         drivers: {
             id: string;
-            name: string;
+            code: string;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            phone: string | null;
             vehicle_id: string | null;
             note: string | null;
         } | null;
         pangkalans: {
             id: string;
-            name: string;
+            code: string;
+            email: string | null;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            email: string | null;
-            phone: string | null;
             note: string | null;
             address: string;
             region: string | null;
@@ -101,8 +101,8 @@ export declare class OrderService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             order_id: string;
+            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             sub_total: import("@prisma/client-runtime-utils").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
@@ -117,9 +117,9 @@ export declare class OrderService {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
             label: string | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal;
-            order_id: string;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
@@ -140,18 +140,18 @@ export declare class OrderService {
         } | null;
         timeline_tracks: {
             id: string;
-            description: string | null;
             created_at: Date;
-            note: string | null;
+            description: string | null;
             order_id: string;
+            note: string | null;
             status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
+        code: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
@@ -164,14 +164,14 @@ export declare class OrderService {
     create(dto: CreateOrderDto): Promise<{
         pangkalans: {
             id: string;
-            name: string;
+            code: string;
+            email: string | null;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            email: string | null;
-            phone: string | null;
             note: string | null;
             address: string;
             region: string | null;
@@ -182,9 +182,9 @@ export declare class OrderService {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
             label: string | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal;
-            order_id: string;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
@@ -193,18 +193,18 @@ export declare class OrderService {
         }[];
         timeline_tracks: {
             id: string;
-            description: string | null;
             created_at: Date;
-            note: string | null;
+            description: string | null;
             order_id: string;
+            note: string | null;
             status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
+        code: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
@@ -217,26 +217,26 @@ export declare class OrderService {
     update(id: string, dto: UpdateOrderDto): Promise<{
         drivers: {
             id: string;
-            name: string;
+            code: string;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            phone: string | null;
             vehicle_id: string | null;
             note: string | null;
         } | null;
         pangkalans: {
             id: string;
-            name: string;
+            code: string;
+            email: string | null;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            email: string | null;
-            phone: string | null;
             note: string | null;
             address: string;
             region: string | null;
@@ -248,8 +248,8 @@ export declare class OrderService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             order_id: string;
+            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
             sub_total: import("@prisma/client-runtime-utils").Decimal;
             invoice_number: string | null;
             invoice_date: Date;
@@ -264,9 +264,9 @@ export declare class OrderService {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
             label: string | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal;
-            order_id: string;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
@@ -287,18 +287,18 @@ export declare class OrderService {
         } | null;
         timeline_tracks: {
             id: string;
-            description: string | null;
             created_at: Date;
-            note: string | null;
+            description: string | null;
             order_id: string;
+            note: string | null;
             status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
+        code: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
@@ -311,26 +311,26 @@ export declare class OrderService {
     updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<{
         drivers: {
             id: string;
-            name: string;
+            code: string;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            phone: string | null;
             vehicle_id: string | null;
             note: string | null;
         } | null;
         pangkalans: {
             id: string;
-            name: string;
+            code: string;
+            email: string | null;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            email: string | null;
-            phone: string | null;
             note: string | null;
             address: string;
             region: string | null;
@@ -341,9 +341,9 @@ export declare class OrderService {
             id: string;
             created_at: Date;
             updated_at: Date;
+            order_id: string;
             label: string | null;
             tax_amount: import("@prisma/client-runtime-utils").Decimal;
-            order_id: string;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             price_per_unit: import("@prisma/client-runtime-utils").Decimal;
             qty: number;
@@ -352,18 +352,18 @@ export declare class OrderService {
         }[];
         timeline_tracks: {
             id: string;
-            description: string | null;
             created_at: Date;
-            note: string | null;
+            description: string | null;
             order_id: string;
+            note: string | null;
             status: import("@prisma/client").$Enums.status_pesanan;
         }[];
     } & {
         id: string;
+        code: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
         note: string | null;
         pangkalan_id: string;
         driver_id: string | null;
