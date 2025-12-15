@@ -10,13 +10,13 @@ export declare class DriverController {
             };
         } & {
             id: string;
-            name: string;
+            code: string;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            phone: string | null;
             vehicle_id: string | null;
             note: string | null;
         })[];
@@ -33,37 +33,37 @@ export declare class DriverController {
         };
     } & {
         id: string;
-        name: string;
+        code: string;
         is_active: boolean;
+        name: string;
+        phone: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
-        phone: string | null;
         vehicle_id: string | null;
         note: string | null;
     }>;
     create(dto: CreateDriverDto): Promise<{
         id: string;
-        name: string;
+        code: string;
         is_active: boolean;
+        name: string;
+        phone: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
-        phone: string | null;
         vehicle_id: string | null;
         note: string | null;
     }>;
     update(id: string, dto: UpdateDriverDto): Promise<{
         id: string;
-        name: string;
+        code: string;
         is_active: boolean;
+        name: string;
+        phone: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
-        phone: string | null;
         vehicle_id: string | null;
         note: string | null;
     }>;

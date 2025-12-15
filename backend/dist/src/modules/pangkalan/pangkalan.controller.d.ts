@@ -10,14 +10,14 @@ export declare class PangkalanController {
             };
         } & {
             id: string;
-            name: string;
+            code: string;
+            email: string | null;
             is_active: boolean;
+            name: string;
+            phone: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            code: string;
-            email: string | null;
-            phone: string | null;
             note: string | null;
             address: string;
             region: string | null;
@@ -37,14 +37,14 @@ export declare class PangkalanController {
         };
     } & {
         id: string;
-        name: string;
+        code: string;
+        email: string | null;
         is_active: boolean;
+        name: string;
+        phone: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
-        email: string | null;
-        phone: string | null;
         note: string | null;
         address: string;
         region: string | null;
@@ -53,14 +53,14 @@ export declare class PangkalanController {
     }>;
     create(dto: CreatePangkalanDto): Promise<{
         id: string;
-        name: string;
+        code: string;
+        email: string | null;
         is_active: boolean;
+        name: string;
+        phone: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
-        email: string | null;
-        phone: string | null;
         note: string | null;
         address: string;
         region: string | null;
@@ -69,14 +69,14 @@ export declare class PangkalanController {
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
         id: string;
-        name: string;
+        code: string;
+        email: string | null;
         is_active: boolean;
+        name: string;
+        phone: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        code: string;
-        email: string | null;
-        phone: string | null;
         note: string | null;
         address: string;
         region: string | null;
