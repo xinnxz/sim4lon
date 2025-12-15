@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
+import { authApi } from '@/lib/api'
 
 interface ChangePasswordModalProps {
   open: boolean
@@ -98,20 +99,15 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
-      // Mock validation - in real app, verify old password with backend
-      if (formData.oldPassword !== 'admin123') {
-        setErrors({ general: 'Kata sandi lama tidak sesuai' })
-        toast.error('Kata sandi lama tidak sesuai')
-        setIsLoading(false)
-        return
-      }
+      // Call real API to change password
+      await authApi.changePassword({
+        oldPassword: formData.oldPassword,
+        newPassword: formData.newPassword,
+      })
 
       // Success
       toast.success('Kata sandi berhasil diubah')
-      
+
       // Reset and close modal
       setTimeout(() => {
         onOpenChange(false)
@@ -123,9 +119,10 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
         setErrors({})
         setShowPasswords({ old: false, new: false, confirm: false })
       }, 500)
-    } catch (error) {
-      setErrors({ general: 'Terjadi kesalahan saat mengubah kata sandi' })
-      toast.error('Terjadi kesalahan saat mengubah kata sandi')
+    } catch (error: any) {
+      const message = error.message || 'Terjadi kesalahan saat mengubah kata sandi'
+      setErrors({ general: message })
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -187,8 +184,8 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
               >
-                <SafeIcon 
-                  name={showPasswords.old ? 'EyeOff' : 'Eye'} 
+                <SafeIcon
+                  name={showPasswords.old ? 'EyeOff' : 'Eye'}
                   className="h-4 w-4"
                 />
               </button>
@@ -224,8 +221,8 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
               >
-                <SafeIcon 
-                  name={showPasswords.new ? 'EyeOff' : 'Eye'} 
+                <SafeIcon
+                  name={showPasswords.new ? 'EyeOff' : 'Eye'}
                   className="h-4 w-4"
                 />
               </button>
@@ -236,7 +233,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
                 {errors.newPassword}
               </p>
             )}
-            
+
             {/* Password Requirements */}
             {formData.newPassword && (
               <div className="mt-2 p-2 bg-secondary rounded text-xs space-y-1">
@@ -286,8 +283,8 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
               >
-                <SafeIcon 
-                  name={showPasswords.confirm ? 'EyeOff' : 'Eye'} 
+                <SafeIcon
+                  name={showPasswords.confirm ? 'EyeOff' : 'Eye'}
                   className="h-4 w-4"
                 />
               </button>
@@ -298,12 +295,12 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
                 {errors.confirmPassword}
               </p>
             )}
-            
+
             {/* Password Match Indicator */}
             {formData.newPassword && formData.confirmPassword && (
               <div className={`text-xs flex items-center gap-1 ${formData.newPassword === formData.confirmPassword ? 'text-primary' : 'text-destructive'}`}>
-                <SafeIcon 
-                  name={formData.newPassword === formData.confirmPassword ? 'Check' : 'X'} 
+                <SafeIcon
+                  name={formData.newPassword === formData.confirmPassword ? 'Check' : 'X'}
                   className="h-3 w-3"
                 />
                 {formData.newPassword === formData.confirmPassword ? 'Kata sandi cocok' : 'Kata sandi tidak cocok'}

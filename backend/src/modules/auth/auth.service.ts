@@ -150,4 +150,38 @@ export class AuthService {
             user,
         };
     }
+
+    async changePassword(userId: string, oldPassword: string, newPassword: string) {
+        // Get user with password
+        const user = await this.prisma.users.findUnique({
+            where: { id: userId },
+            select: { id: true, password: true },
+        });
+
+        if (!user) {
+            throw new UnauthorizedException('User tidak ditemukan');
+        }
+
+        // Verify old password
+        const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Kata sandi lama tidak sesuai');
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password
+        await this.prisma.users.update({
+            where: { id: userId },
+            data: {
+                password: hashedPassword,
+                updated_at: new Date(),
+            },
+        });
+
+        return {
+            message: 'Kata sandi berhasil diubah',
+        };
+    }
 }

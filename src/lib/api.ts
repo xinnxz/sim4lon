@@ -141,6 +141,13 @@ export const authApi = {
         });
     },
 
+    async changePassword(data: { oldPassword: string; newPassword: string }): Promise<{ message: string }> {
+        return apiRequest('/auth/change-password', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
     logout(): void {
         removeToken();
         if (typeof window !== 'undefined') {
