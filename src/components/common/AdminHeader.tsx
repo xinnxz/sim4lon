@@ -35,30 +35,37 @@ interface AdminHeaderProps {
 export default function AdminHeader({
   userName: initialUserName = 'Admin User',
   userRole: initialUserRole = 'Administrator',
-  notificationCount = 3
+  notificationCount: initialCount = 0
 }: AdminHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [userName, setUserName] = useState(initialUserName)
   const [userRole, setUserRole] = useState(initialUserRole)
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined)
+  const [notificationCount, setNotificationCount] = useState(initialCount)
 
   /**
-   * Fetch user profile dari API saat component mount
+   * Fetch user profile dan notification count dari API saat component mount
    */
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch profile
         const profile = await authApi.getProfile()
         setUserName(profile.name)
         setUserRole(profile.role === 'ADMIN' ? 'Administrator' : 'Operator')
         setAvatarUrl(getAvatarUrl(profile.avatar_url))
+
+        // Fetch notification count
+        const { notificationApi } = await import('@/lib/api')
+        const notifData = await notificationApi.getNotifications(20)
+        setNotificationCount(notifData.unread_count)
       } catch (err) {
         // Jika gagal fetch, gunakan default values
-        console.error('Failed to fetch profile:', err)
+        console.error('Failed to fetch data:', err)
       }
     }
-    fetchProfile()
+    fetchData()
   }, [])
 
   /**
