@@ -3,6 +3,89 @@
 @tailwind components;
 @tailwind utilities;
 
+/* react-image-crop CSS */
+.ReactCrop {
+  position: relative;
+  display: inline-block;
+  cursor: crosshair;
+  overflow: hidden;
+  max-width: 100%;
+}
+.ReactCrop *,
+.ReactCrop *::before,
+.ReactCrop *::after {
+  box-sizing: border-box;
+}
+.ReactCrop--disabled, .ReactCrop--locked {
+  cursor: inherit;
+}
+.ReactCrop__child-wrapper {
+  max-height: inherit;
+}
+.ReactCrop__child-wrapper > img,
+.ReactCrop__child-wrapper > video {
+  display: block;
+  max-width: 100%;
+  max-height: inherit;
+}
+.ReactCrop__crop-selection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate3d(0, 0, 0);
+  cursor: move;
+  box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+  touch-action: none;
+  border: 1px dashed #fff;
+}
+.ReactCrop--disabled .ReactCrop__crop-selection {
+  cursor: inherit;
+}
+.ReactCrop--circular-crop .ReactCrop__crop-selection {
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+}
+.ReactCrop--invisible-crop .ReactCrop__crop-selection {
+  display: none;
+}
+.ReactCrop__drag-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  outline: 1px solid transparent;
+}
+.ReactCrop__drag-handle::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: -10px;
+}
+.ReactCrop .ord-nw { top: 0; left: 0; margin-top: -5px; margin-left: -5px; cursor: nw-resize; }
+.ReactCrop .ord-n { top: 0; left: 50%; margin-top: -5px; margin-left: -5px; cursor: n-resize; }
+.ReactCrop .ord-ne { top: 0; right: 0; margin-top: -5px; margin-right: -5px; cursor: ne-resize; }
+.ReactCrop .ord-e { top: 50%; right: 0; margin-top: -5px; margin-right: -5px; cursor: e-resize; }
+.ReactCrop .ord-se { bottom: 0; right: 0; margin-bottom: -5px; margin-right: -5px; cursor: se-resize; }
+.ReactCrop .ord-s { bottom: 0; left: 50%; margin-bottom: -5px; margin-left: -5px; cursor: s-resize; }
+.ReactCrop .ord-sw { bottom: 0; left: 0; margin-bottom: -5px; margin-left: -5px; cursor: sw-resize; }
+.ReactCrop .ord-w { top: 50%; left: 0; margin-top: -5px; margin-left: -5px; cursor: w-resize; }
+.ReactCrop__drag-bar.ord-n { top: 0; left: 0; width: 100%; height: 6px; margin-top: -3px; }
+.ReactCrop__drag-bar.ord-e { right: 0; top: 0; width: 6px; height: 100%; margin-right: -3px; }
+.ReactCrop__drag-bar.ord-s { bottom: 0; left: 0; width: 100%; height: 6px; margin-bottom: -3px; }
+.ReactCrop__drag-bar.ord-w { top: 0; left: 0; width: 6px; height: 100%; margin-left: -3px; }
+.ReactCrop--new-crop .ReactCrop__drag-bar,
+.ReactCrop--new-crop .ReactCrop__drag-handle,
+.ReactCrop--fixed-aspect .ReactCrop__drag-bar {
+  display: none;
+}
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-n,
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-e,
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-s,
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-w {
+  display: none;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

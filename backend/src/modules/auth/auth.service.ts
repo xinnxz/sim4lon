@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, UpdateProfileDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -103,6 +103,7 @@ export class AuthService {
             where: { id: userId },
             select: {
                 id: true,
+                code: true,
                 email: true,
                 name: true,
                 phone: true,
@@ -119,5 +120,34 @@ export class AuthService {
         }
 
         return user;
+    }
+
+    async updateProfile(userId: string, dto: UpdateProfileDto) {
+        const user = await this.prisma.users.update({
+            where: { id: userId },
+            data: {
+                name: dto.name,
+                phone: dto.phone,
+                avatar_url: dto.avatar_url,
+                updated_at: new Date(),
+            },
+            select: {
+                id: true,
+                code: true,
+                email: true,
+                name: true,
+                phone: true,
+                role: true,
+                avatar_url: true,
+                is_active: true,
+                created_at: true,
+                updated_at: true,
+            },
+        });
+
+        return {
+            message: 'Profil berhasil diperbarui',
+            user,
+        };
     }
 }

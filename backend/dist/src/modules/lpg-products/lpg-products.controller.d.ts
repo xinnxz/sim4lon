@@ -6,6 +6,7 @@ export declare class LpgProductsController {
     findAll(includeInactive?: string): Promise<({
         prices: {
             id: string;
+            cost_price: import("@prisma/client-runtime-utils").Decimal | null;
             created_at: Date;
             updated_at: Date;
             label: string;
@@ -20,6 +21,8 @@ export declare class LpgProductsController {
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
         description: string | null;
+        selling_price: import("@prisma/client-runtime-utils").Decimal;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -33,6 +36,7 @@ export declare class LpgProductsController {
         };
         prices: {
             id: string;
+            cost_price: import("@prisma/client-runtime-utils").Decimal | null;
             created_at: Date;
             updated_at: Date;
             label: string;
@@ -46,6 +50,8 @@ export declare class LpgProductsController {
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
         description: string | null;
+        selling_price: import("@prisma/client-runtime-utils").Decimal;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -54,6 +60,7 @@ export declare class LpgProductsController {
     findOne(id: string): Promise<{
         prices: {
             id: string;
+            cost_price: import("@prisma/client-runtime-utils").Decimal | null;
             created_at: Date;
             updated_at: Date;
             label: string;
@@ -68,6 +75,8 @@ export declare class LpgProductsController {
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
         description: string | null;
+        selling_price: import("@prisma/client-runtime-utils").Decimal;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -76,6 +85,7 @@ export declare class LpgProductsController {
     create(dto: CreateLpgProductDto): Promise<{
         prices: {
             id: string;
+            cost_price: import("@prisma/client-runtime-utils").Decimal | null;
             created_at: Date;
             updated_at: Date;
             label: string;
@@ -90,6 +100,8 @@ export declare class LpgProductsController {
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
         description: string | null;
+        selling_price: import("@prisma/client-runtime-utils").Decimal;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -98,6 +110,7 @@ export declare class LpgProductsController {
     update(id: string, dto: UpdateLpgProductDto): Promise<{
         prices: {
             id: string;
+            cost_price: import("@prisma/client-runtime-utils").Decimal | null;
             created_at: Date;
             updated_at: Date;
             label: string;
@@ -112,6 +125,8 @@ export declare class LpgProductsController {
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
         description: string | null;
+        selling_price: import("@prisma/client-runtime-utils").Decimal;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -122,6 +137,7 @@ export declare class LpgProductsController {
     }>;
     addPrice(productId: string, dto: CreateLpgPriceDto): Promise<{
         id: string;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         created_at: Date;
         updated_at: Date;
         label: string;
@@ -131,6 +147,7 @@ export declare class LpgProductsController {
     }>;
     updatePrice(priceId: string, dto: CreateLpgPriceDto): Promise<{
         id: string;
+        cost_price: import("@prisma/client-runtime-utils").Decimal | null;
         created_at: Date;
         updated_at: Date;
         label: string;

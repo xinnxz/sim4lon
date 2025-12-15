@@ -1,23 +1,11 @@
-import { IsString, IsNumber, IsEnum, IsOptional, IsBoolean, IsArray, ValidateNested, Min } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { IsString, IsNumber, IsEnum, IsOptional, IsBoolean, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { lpg_category } from '@prisma/client';
 
-// DTO for price variants
-export class LpgPriceDto {
-    @IsString()
-    label: string;
-
-    @Transform(({ value }) => parseFloat(value))
-    @IsNumber()
-    @Min(0)
-    price: number;
-
-    @IsOptional()
-    @IsBoolean()
-    is_default?: boolean;
-}
-
-// Create LPG Product
+/**
+ * Create LPG Product DTO
+ * Simplified: 1 selling_price + 1 cost_price per product
+ */
 export class CreateLpgProductDto {
     @IsString()
     name: string;
@@ -38,14 +26,20 @@ export class CreateLpgProductDto {
     @IsString()
     description?: string;
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => LpgPriceDto)
-    prices?: LpgPriceDto[];
+    @Transform(({ value }) => parseFloat(value))
+    @IsNumber()
+    @Min(0)
+    selling_price: number;  // Harga jual default
+
+    @Transform(({ value }) => parseFloat(value))
+    @IsNumber()
+    @Min(0)
+    cost_price: number;    // Harga beli (wajib untuk profit)
 }
 
-// Update LPG Product
+/**
+ * Update LPG Product DTO
+ */
 export class UpdateLpgProductDto {
     @IsOptional()
     @IsString()
@@ -70,11 +64,38 @@ export class UpdateLpgProductDto {
     description?: string;
 
     @IsOptional()
+    @Transform(({ value }) => parseFloat(value))
+    @IsNumber()
+    @Min(0)
+    selling_price?: number;
+
+    @IsOptional()
+    @Transform(({ value }) => value != null ? parseFloat(value) : undefined)
+    @IsNumber()
+    @Min(0)
+    cost_price?: number;
+
+    @IsOptional()
     @IsBoolean()
     is_active?: boolean;
 }
 
-// Add/Update Price
+// DEPRECATED: Keep for backward compatibility
+export class LpgPriceDto {
+    @IsString()
+    label: string;
+
+    @Transform(({ value }) => parseFloat(value))
+    @IsNumber()
+    @Min(0)
+    price: number;
+
+    @IsOptional()
+    @IsBoolean()
+    is_default?: boolean;
+}
+
+// DEPRECATED: Keep for backward compatibility  
 export class CreateLpgPriceDto {
     @IsString()
     label: string;

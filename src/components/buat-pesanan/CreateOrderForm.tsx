@@ -9,7 +9,7 @@
  * - Support edit mode untuk update pesanan existing
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -31,7 +31,7 @@ import {
   lpgProductsApi,
   ordersApi,
   type Pangkalan,
-  type LpgProduct,
+  type LpgProductWithStock,
   type OrderStatus
 } from '@/lib/api'
 import { formatCurrency } from '@/lib/currency'
@@ -55,7 +55,7 @@ interface OrderFormData {
 export default function CreateOrderForm() {
   // Data state
   const [pangkalanList, setPangkalanList] = useState<Pangkalan[]>([])
-  const [lpgProducts, setLpgProducts] = useState<LpgProduct[]>([])
+  const [lpgProducts, setLpgProducts] = useState<LpgProductWithStock[]>([])
   const [isLoadingData, setIsLoadingData] = useState(true)
 
   // Form state
@@ -71,6 +71,71 @@ export default function CreateOrderForm() {
   const [editOrderId, setEditOrderId] = useState<string | null>(null)
   const [editOrderStatus, setEditOrderStatus] = useState<OrderStatus | null>(null)
 
+  // Hold +/- button refs for quantity stepper
+  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const holdCountRef = useRef(0)
+  const holdItemIdRef = useRef<string | null>(null)
+
+  // Start holding - with acceleration (longer hold = bigger increments)
+  const startHold = useCallback((itemId: string, action: 'increment' | 'decrement') => {
+    holdCountRef.current = 0
+    holdItemIdRef.current = itemId
+
+    // Wait 250ms before starting rapid mode
+    holdTimeoutRef.current = setTimeout(() => {
+      const tick = () => {
+        holdCountRef.current++
+
+        // Acceleration: 0-10 ticks: +1, 11-30: +5, 31+: +10
+        let step = 1
+        if (holdCountRef.current > 30) step = 10
+        else if (holdCountRef.current > 10) step = 5
+
+        const currentItemId = holdItemIdRef.current
+        if (!currentItemId) return
+
+        setFormData(prev => ({
+          ...prev,
+          items: prev.items.map(item => {
+            if (item.id !== currentItemId) return item
+            const newQty = action === 'increment'
+              ? item.quantity + step
+              : Math.max(0, item.quantity - step)
+            return { ...item, quantity: newQty }
+          })
+        }))
+
+        // Speed increases: 100ms → 80ms → 75ms
+        let delay = 100
+        if (holdCountRef.current > 20) delay = 75
+        else if (holdCountRef.current > 5) delay = 80
+
+        holdIntervalRef.current = setTimeout(tick, delay)
+      }
+      tick()
+    }, 450)
+  }, [])
+
+  // Stop holding
+  const stopHold = useCallback(() => {
+    holdCountRef.current = 0
+    holdItemIdRef.current = null
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current)
+      holdTimeoutRef.current = null
+    }
+    if (holdIntervalRef.current) {
+      clearTimeout(holdIntervalRef.current)
+      holdIntervalRef.current = null
+    }
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopHold()
+  }, [stopHold])
+
   /**
    * Fetch pangkalan dan products saat mount
    */
@@ -80,7 +145,7 @@ export default function CreateOrderForm() {
         setIsLoadingData(true)
         const [pangkalanRes, productsRes] = await Promise.all([
           pangkalanApi.getAll(1, 100, undefined, true), // Only active pangkalan
-          lpgProductsApi.getAll(), // All active LPG products
+          lpgProductsApi.getWithStock(), // LPG products with stock info
         ])
 
         setPangkalanList(pangkalanRes.data)
@@ -169,7 +234,11 @@ export default function CreateOrderForm() {
     const product = lpgProducts.find(p => p.id === productId)
     if (!product) return
 
-    const defaultPrice = product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+    // Use selling_price directly, fallback to old prices[] for backward compat
+    const defaultPrice = product.selling_price
+      || product.prices?.find(p => p.is_default)?.price
+      || product.prices?.[0]?.price
+      || 0
 
     setFormData(prev => ({
       ...prev,
@@ -180,7 +249,7 @@ export default function CreateOrderForm() {
             productId,
             lpgType: `${product.size_kg}kg`,
             label: product.name,
-            price: defaultPrice,
+            price: Number(defaultPrice),
             isTaxable: product.category === 'NON_SUBSIDI',  // Update tax status
           }
           : item
@@ -189,16 +258,52 @@ export default function CreateOrderForm() {
   }
 
   /**
-   * Handle quantity change
+   * Handle quantity change - allow typing without immediate validation
+   * PENJELASAN: Validasi max stok hanya saat blur, bukan setiap keystroke
    */
   const handleQuantityChange = (itemId: string, quantity: number) => {
-    if (quantity < 1) return
+    // Allow 0 during typing, validation happens on blur
+    if (quantity < 0) quantity = 0
+
     setFormData(prev => ({
       ...prev,
       items: prev.items.map(item =>
         item.id === itemId ? { ...item, quantity } : item
       ),
     }))
+  }
+
+  /**
+   * Validate quantity on blur - ensure min 1 and cap to max stock
+   */
+  const handleQuantityBlur = (itemId: string) => {
+    const item = formData.items.find(i => i.id === itemId)
+    if (!item) return
+
+    let newQuantity = item.quantity
+    const product = lpgProducts.find(p => p.id === item.productId)
+    const maxStock = product?.stock?.current || 0
+
+    // Ensure min 1 (orders must have at least 1)
+    if (newQuantity < 1) {
+      newQuantity = 1
+    }
+
+    // Cap to max stock
+    if (maxStock > 0 && newQuantity > maxStock) {
+      toast.warning(`Maksimal stok ${product?.name}: ${maxStock} unit`)
+      newQuantity = maxStock
+    }
+
+    // Update if changed
+    if (newQuantity !== item.quantity) {
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.map(i =>
+          i.id === itemId ? { ...i, quantity: newQuantity } : i
+        ),
+      }))
+    }
   }
 
   /**
@@ -295,6 +400,7 @@ export default function CreateOrderForm() {
         note: formData.note || undefined,
         items: formData.items.map(item => ({
           lpg_type: item.lpgType,
+          lpg_product_id: item.productId,  // For dynamic product stock tracking
           label: item.label,
           price_per_unit: Number(item.price),  // Ensure it's a number
           qty: Math.floor(Number(item.quantity)),  // Ensure it's an integer
@@ -304,16 +410,26 @@ export default function CreateOrderForm() {
 
       // DEBUG: Log what's being sent
       console.log('=== DEBUG ORDER SUBMISSION ===')
+      console.log('isEditMode:', isEditMode)
+      console.log('editOrderId:', editOrderId)
       console.log('orderDto:', JSON.stringify(orderDto, null, 2))
 
-      const result = await ordersApi.create(orderDto)
-      toast.success('Pesanan berhasil dibuat!')
+      let result
+      if (isEditMode && editOrderId) {
+        // UPDATE existing order
+        result = await ordersApi.update(editOrderId, orderDto)
+        toast.success('Pesanan berhasil diperbarui!')
+      } else {
+        // CREATE new order
+        result = await ordersApi.create(orderDto)
+        toast.success('Pesanan berhasil dibuat!')
+      }
 
       // Redirect to order detail
       window.location.href = `/detail-pesanan?id=${result.id}`
     } catch (error: any) {
-      console.error('Failed to create order:', error)
-      toast.error(error.message || 'Gagal membuat pesanan')
+      console.error('Failed to submit order:', error)
+      toast.error(error.message || (isEditMode ? 'Gagal memperbarui pesanan' : 'Gagal membuat pesanan'))
     } finally {
       setIsSubmitting(false)
     }
@@ -452,9 +568,21 @@ export default function CreateOrderForm() {
                                 <SelectContent>
                                   {lpgProducts.map(product => {
                                     const price = product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+                                    const stock = product.stock?.current || 0
+                                    const isOutOfStock = stock <= 0
                                     return (
-                                      <SelectItem key={product.id} value={product.id}>
-                                        {product.name} - {formatCurrency(price)}
+                                      <SelectItem
+                                        key={product.id}
+                                        value={product.id}
+                                        disabled={isOutOfStock}
+                                        className={isOutOfStock ? 'opacity-50' : ''}
+                                      >
+                                        <div className="flex items-center justify-between w-full gap-2">
+                                          <span>{product.name} - {formatCurrency(price)}</span>
+                                          <span className={`text-xs ${isOutOfStock ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                            (Stok: {stock})
+                                          </span>
+                                        </div>
                                       </SelectItem>
                                     )
                                   })}
@@ -462,17 +590,61 @@ export default function CreateOrderForm() {
                               </Select>
                             </div>
 
-                            {/* Quantity */}
+                            {/* Quantity with +/- buttons */}
                             <div className="space-y-2">
                               <Label className="text-sm">Jumlah</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                value={item.quantity}
-                                onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                                className="h-9"
-                                disabled={isFormDisabled}
-                              />
+                              <div className="flex items-center gap-1">
+                                {/* Minus Button - with hold support */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-9 w-9 shrink-0 hover:bg-destructive/10 hover:border-destructive/50 active:scale-95 transition-all select-none"
+                                  onClick={() => handleQuantityChange(item.id, Math.max(0, item.quantity - 1))}
+                                  onMouseDown={() => startHold(item.id, 'decrement')}
+                                  onMouseUp={stopHold}
+                                  onMouseLeave={stopHold}
+                                  onTouchStart={() => startHold(item.id, 'decrement')}
+                                  onTouchEnd={stopHold}
+                                  disabled={isFormDisabled || item.quantity <= 0}
+                                >
+                                  <SafeIcon name="Minus" className="h-4 w-4" />
+                                </Button>
+
+                                {/* Quantity Input */}
+                                <Input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={item.quantity || ''}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '')
+                                    handleQuantityChange(item.id, parseInt(val) || 0)
+                                  }}
+                                  onBlur={() => handleQuantityBlur(item.id)}
+                                  onWheel={(e) => e.currentTarget.blur()}
+                                  placeholder="0"
+                                  className="h-9 text-center font-medium"
+                                  disabled={isFormDisabled}
+                                />
+
+                                {/* Plus Button - with hold support */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-9 w-9 shrink-0 hover:bg-primary/10 hover:border-primary/50 active:scale-95 transition-all select-none"
+                                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                  onMouseDown={() => startHold(item.id, 'increment')}
+                                  onMouseUp={stopHold}
+                                  onMouseLeave={stopHold}
+                                  onTouchStart={() => startHold(item.id, 'increment')}
+                                  onTouchEnd={stopHold}
+                                  disabled={isFormDisabled}
+                                >
+                                  <SafeIcon name="Plus" className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
 

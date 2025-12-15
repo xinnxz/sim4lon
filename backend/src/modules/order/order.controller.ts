@@ -26,6 +26,12 @@ export class OrderController {
         );
     }
 
+    @Get('stats')
+    getStats(@Query('today') today?: string) {
+        const todayOnly = today === 'true';
+        return this.orderService.getStats(todayOnly);
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.orderService.findOne(id);

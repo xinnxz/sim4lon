@@ -67,6 +67,16 @@ export declare class OrderController {
             totalPages: number;
         };
     }>;
+    getStats(today?: string): Promise<{
+        total: number;
+        menunggu_pembayaran: number;
+        diproses: number;
+        siap_kirim: number;
+        dikirim: number;
+        selesai: number;
+        batal: number;
+        today_only: boolean;
+    }>;
     findOne(id: string): Promise<{
         drivers: {
             id: string;
@@ -218,17 +228,48 @@ export declare class OrderController {
         drivers: {
             id: string;
             name: string;
+            is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             code: string;
             phone: string | null;
+            vehicle_id: string | null;
+            note: string | null;
         } | null;
         pangkalans: {
             id: string;
             name: string;
+            is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             code: string;
+            email: string | null;
             phone: string | null;
+            note: string | null;
             address: string;
             region: string | null;
+            pic_name: string | null;
+            capacity: number | null;
         };
+        invoices: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            tax_amount: import("@prisma/client-runtime-utils").Decimal | null;
+            order_id: string;
+            sub_total: import("@prisma/client-runtime-utils").Decimal;
+            invoice_number: string | null;
+            invoice_date: Date;
+            due_date: Date | null;
+            billing_address: string | null;
+            billed_to_name: string | null;
+            tax_rate: import("@prisma/client-runtime-utils").Decimal | null;
+            grand_total: import("@prisma/client-runtime-utils").Decimal;
+            payment_status: string | null;
+        }[];
         order_items: {
             id: string;
             created_at: Date;
@@ -242,6 +283,18 @@ export declare class OrderController {
             sub_total: import("@prisma/client-runtime-utils").Decimal | null;
             is_taxable: boolean;
         }[];
+        order_payment_details: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            order_id: string;
+            proof_url: string | null;
+            is_paid: boolean;
+            is_dp: boolean;
+            payment_method: import("@prisma/client").$Enums.payment_method | null;
+            amount_paid: import("@prisma/client-runtime-utils").Decimal | null;
+            payment_date: Date | null;
+        } | null;
         timeline_tracks: {
             id: string;
             description: string | null;

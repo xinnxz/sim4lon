@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,10 +44,19 @@ const getCategoryLabel = (category: LpgCategory): string => {
   return category === 'SUBSIDI' ? 'Subsidi' : 'Non-Subsidi';
 }
 
-const getCategoryColor = (category: LpgCategory) => {
-  return category === 'SUBSIDI'
-    ? { color: 'text-green-600', bg: 'bg-green-500/10' }
-    : { color: 'text-blue-600', bg: 'bg-blue-500/10' };
+// Get color hex from product color name
+const getColorHex = (colorName: string | null): string => {
+  if (!colorName) return '#6b7280';  // gray default
+  const colorMap: Record<string, string> = {
+    'hijau': '#22c55e',
+    'biru': '#38bdf8',
+    'ungu': '#a855f7',
+    'pink': '#ec4899',
+    'merah': '#dc2626',
+    'kuning': '#eab308',
+    'orange': '#f97316',
+  };
+  return colorMap[colorName.toLowerCase()] || '#6b7280';
 }
 
 export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsProps) {
@@ -59,6 +68,72 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
   const [editingCard, setEditingCard] = useState<string | null>(null)
   const [editQuantity, setEditQuantity] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Hold +/- button refs
+  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const holdCountRef = useRef(0)  // Track how long held for acceleration
+
+  // Single click handlers - just +1 or -1
+  const handleIncrement = useCallback(() => {
+    setEditQuantity(prev => String(parseInt(prev || '0') + 1))
+  }, [])
+
+  const handleDecrement = useCallback(() => {
+    setEditQuantity(prev => String(Math.max(0, parseInt(prev || '0') - 1)))
+  }, [])
+
+  // Start holding - with acceleration (longer hold = bigger increments)
+  const startHold = useCallback((action: 'increment' | 'decrement') => {
+    holdCountRef.current = 0
+
+    // Wait 250ms before starting rapid mode
+    holdTimeoutRef.current = setTimeout(() => {
+      const tick = () => {
+        holdCountRef.current++
+
+        // Acceleration: increment amount increases over time
+        // 0-10 ticks: +1, 11-30 ticks: +5, 31+: +10
+        let step = 1
+        if (holdCountRef.current > 30) step = 10
+        else if (holdCountRef.current > 10) step = 5
+
+        if (action === 'increment') {
+          setEditQuantity(prev => String(parseInt(prev || '0') + step))
+        } else {
+          setEditQuantity(prev => String(Math.max(0, parseInt(prev || '0') - step)))
+        }
+
+        // Speed also increases: 100ms → 75ms → 50ms
+        let delay = 100
+        if (holdCountRef.current > 30) delay = 50
+        else if (holdCountRef.current > 10) delay = 75
+
+        holdIntervalRef.current = setTimeout(tick, delay)
+      }
+      tick()
+    }, 250)  // Initial delay before rapid mode
+  }, [])
+
+  // Stop holding
+  const stopHold = useCallback(() => {
+    holdCountRef.current = 0
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current)
+      holdTimeoutRef.current = null
+    }
+    if (holdIntervalRef.current) {
+      clearTimeout(holdIntervalRef.current)
+      holdIntervalRef.current = null
+    }
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopHold()
+    }
+  }, [stopHold])
 
   const fetchData = async () => {
     try {
@@ -186,10 +261,10 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {products.map((product, index) => {
         const isEditing = editingCard === product.id
-        const colors = getCategoryColor(product.category)
         const minStock = product.category === 'SUBSIDI' ? 100 : 50
         const status = getStatusFromStock(product.stock.current, minStock)
-        const defaultPrice = product.prices.find(p => p.is_default) || product.prices[0]
+        // Use selling_price directly, fallback to old prices[] for backward compat
+        const displayPrice = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
 
         return (
           <div
@@ -197,17 +272,22 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
             className="animate-fadeInUp"
             style={{ animationDelay: `${0.1 + index * 0.05}s` }}
           >
-            <Card className={`border-2 shadow-soft hover:shadow-card transition-all duration-300 ${isEditing ? 'ring-2 ring-primary' : ''}`}>
+            <Card
+              className={`border shadow-soft hover:shadow-card transition-all duration-300 overflow-hidden ${isEditing ? 'ring-2 ring-primary' : ''}`}
+              style={{ borderLeftWidth: '4px', borderLeftColor: getColorHex(product.color) }}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-base font-bold truncate">{product.name}</CardTitle>
                     <div className="text-muted-foreground text-xs">
-                      {product.size_kg} kg • {product.color || 'Standard'}
+                      {product.size_kg} kg
                     </div>
                   </div>
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colors.bg}`}>
-                    <SafeIcon name="Cylinder" className={`h-5 w-5 ${colors.color}`} />
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50"
+                  >
+                    <SafeIcon name="Cylinder" className="h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
               </CardHeader>
@@ -222,11 +302,11 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
 
                 {/* Price & Category */}
                 <div className="flex justify-between items-center text-xs">
-                  <Badge variant="outline" className={product.category === 'SUBSIDI' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
+                  <Badge variant="outline" className="text-muted-foreground">
                     {getCategoryLabel(product.category)}
                   </Badge>
-                  {defaultPrice && (
-                    <span className="font-semibold">{formatPrice(Number(defaultPrice.price))}</span>
+                  {displayPrice > 0 && (
+                    <span className="font-semibold">{formatPrice(Number(displayPrice))}</span>
                   )}
                 </div>
 
@@ -241,9 +321,14 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-10 w-10 p-0"
-                          onClick={() => setEditQuantity(String(Math.max(1, parseInt(editQuantity || '0') - 1)))}
-                          disabled={!editQuantity || parseInt(editQuantity) <= 1}
+                          className="h-10 w-10 p-0 select-none"
+                          onClick={handleDecrement}
+                          onMouseDown={() => startHold('decrement')}
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() => startHold('decrement')}
+                          onTouchEnd={stopHold}
+                          disabled={!editQuantity || parseInt(editQuantity) <= 0}
                         >
                           <SafeIcon name="Minus" className="h-4 w-4" />
                         </Button>
@@ -256,6 +341,7 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                             const val = e.target.value.replace(/\D/g, '')
                             setEditQuantity(val)
                           }}
+                          onWheel={(e) => e.currentTarget.blur()}
                           placeholder="0"
                           className="h-10 text-center text-lg font-semibold flex-1"
                           autoFocus
@@ -264,8 +350,13 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-10 w-10 p-0"
-                          onClick={() => setEditQuantity(String(parseInt(editQuantity || '0') + 1))}
+                          className="h-10 w-10 p-0 select-none"
+                          onClick={handleIncrement}
+                          onMouseDown={() => startHold('increment')}
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() => startHold('increment')}
+                          onTouchEnd={stopHold}
                         >
                           <SafeIcon name="Plus" className="h-4 w-4" />
                         </Button>
@@ -273,21 +364,6 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleSubmit(product, 'MASUK')}
-                        disabled={isSubmitting || !editQuantity}
-                      >
-                        {isSubmitting ? (
-                          <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <SafeIcon name="Plus" className="h-4 w-4 mr-1" />
-                            Masuk
-                          </>
-                        )}
-                      </Button>
                       <Button
                         size="sm"
                         className="bg-red-600 hover:bg-red-700 text-white"
@@ -300,6 +376,21 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                           <>
                             <SafeIcon name="Minus" className="h-4 w-4 mr-1" />
                             Keluar
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => handleSubmit(product, 'MASUK')}
+                        disabled={isSubmitting || !editQuantity}
+                      >
+                        {isSubmitting ? (
+                          <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <SafeIcon name="Plus" className="h-4 w-4 mr-1" />
+                            Masuk
                           </>
                         )}
                       </Button>

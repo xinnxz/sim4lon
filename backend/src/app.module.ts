@@ -13,6 +13,7 @@ import { StockModule } from './modules/stock/stock.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { LpgProductsModule } from './modules/lpg-products/lpg-products.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { LpgProductsModule } from './modules/lpg-products/lpg-products.module';
         ActivityModule,
         DashboardModule,
         LpgProductsModule,
+        UploadModule,
     ],
     controllers: [AppController],
     providers: [AppService],

@@ -34,7 +34,7 @@ import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import { toast } from 'sonner'
-import { ordersApi, type Order, type OrderStatus } from '@/lib/api'
+import { ordersApi, type Order, type OrderStatus, type OrderStats } from '@/lib/api'
 
 /**
  * Status labels for display
@@ -74,14 +74,9 @@ export default function OrderListPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  // Stats state
-  const [stats, setStats] = useState({
-    total: 0,
-    menungguPembayaran: 0,
-    diproses: 0,
-    dikirim: 0,
-    selesai: 0,
-  })
+  // Stats state - fetch from API for accurate counts (today only)
+  const [stats, setStats] = useState<OrderStats | null>(null)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
 
   /**
    * Fetch orders from API
@@ -96,10 +91,6 @@ export default function OrderListPage() {
       setTotalOrders(response.meta.total)
       setTotalPages(response.meta.totalPages)
 
-      // Update stats (fetch all untuk hitung stats)
-      if (currentPage === 1 && !status) {
-        calculateStats(response.data, response.meta.total)
-      }
     } catch (error) {
       console.error('Failed to fetch orders:', error)
       toast.error('Gagal memuat data pesanan')
@@ -109,21 +100,26 @@ export default function OrderListPage() {
   }
 
   /**
-   * Calculate stats from orders
+   * Fetch stats from API
    */
-  const calculateStats = (orderList: Order[], total: number) => {
-    // For accurate stats, we need to fetch all statuses
-    // This is a simplified version using current page data
-    setStats({
-      total,
-      menungguPembayaran: orderList.filter(o => o.current_status === 'MENUNGGU_PEMBAYARAN').length,
-      diproses: orderList.filter(o => o.current_status === 'DIPROSES').length,
-      dikirim: orderList.filter(o => o.current_status === 'DIKIRIM').length,
-      selesai: orderList.filter(o => o.current_status === 'SELESAI').length,
-    })
+  const fetchStats = async () => {
+    try {
+      setIsLoadingStats(true)
+      const data = await ordersApi.getStats(true) // today only
+      setStats(data)
+    } catch (error) {
+      console.error('Failed to fetch stats:', error)
+    } finally {
+      setIsLoadingStats(false)
+    }
   }
 
-  // Fetch on mount and filter change
+  // Fetch on mount
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  // Fetch orders on page/filter change
   useEffect(() => {
     fetchOrders()
   }, [currentPage, statusFilter])
@@ -219,60 +215,65 @@ export default function OrderListPage() {
         </Button>
       </div>
 
-      {/* Summary Stats */}
+      {/* Summary Stats - Hari Ini */}
       <div className="grid gap-4 sm:grid-cols-5">
         <Tilt3DCard className="animate-fadeInUp">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Pesanan
+              Total Hari Ini
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{totalOrders}</p>
+            <p className="text-2xl font-bold">{isLoadingStats ? '-' : stats?.total || 0}</p>
+            <p className="text-xs text-muted-foreground mt-1">pesanan</p>
           </CardContent>
         </Tilt3DCard>
 
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Menunggu Pembayaran
+              Menunggu Bayar
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-yellow-600">{stats.menungguPembayaran}</p>
+            <p className="text-2xl font-bold text-yellow-600">{isLoadingStats ? '-' : stats?.menunggu_pembayaran || 0}</p>
+            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
           </CardContent>
         </Tilt3DCard>
 
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Diproses
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-blue-600">{stats.diproses}</p>
+            <p className="text-2xl font-bold text-blue-600">{isLoadingStats ? '-' : stats?.diproses || 0}</p>
+            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
           </CardContent>
         </Tilt3DCard>
 
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Sedang Dikirim
+              Dikirim
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-indigo-600">{stats.dikirim}</p>
+            <p className="text-2xl font-bold text-indigo-600">{isLoadingStats ? '-' : stats?.dikirim || 0}</p>
+            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
           </CardContent>
         </Tilt3DCard>
 
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Selesai
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-600">{stats.selesai}</p>
+            <p className="text-2xl font-bold text-green-600">{isLoadingStats ? '-' : stats?.selesai || 0}</p>
+            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
           </CardContent>
         </Tilt3DCard>
       </div>

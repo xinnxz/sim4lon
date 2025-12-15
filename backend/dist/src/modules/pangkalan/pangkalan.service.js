@@ -79,6 +79,7 @@ let PangkalanService = class PangkalanService {
                 region: dto.region,
                 pic_name: dto.pic_name,
                 phone: dto.phone,
+                email: dto.email,
                 capacity: dto.capacity,
                 note: dto.note,
             },

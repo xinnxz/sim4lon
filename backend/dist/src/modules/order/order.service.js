@@ -158,30 +158,83 @@ let OrderService = class OrderService {
                 timeline_tracks: true,
             },
         });
+        for (let i = 0; i < dto.items.length; i++) {
+            const dtoItem = dto.items[i];
+            const orderItem = order.order_items[i];
+            await this.prisma.stock_histories.create({
+                data: {
+                    lpg_type: orderItem.lpg_type,
+                    lpg_product_id: dtoItem.lpg_product_id || null,
+                    movement_type: 'KELUAR',
+                    qty: orderItem.qty,
+                    note: `Order ${order.code} - ${orderItem.label || orderItem.lpg_type}`,
+                },
+            });
+        }
         return order;
     }
     async update(id, dto) {
-        await this.findOne(id);
-        const order = await this.prisma.orders.update({
-            where: { id },
-            data: {
-                ...dto,
-                updated_at: new Date(),
-            },
-            include: {
-                pangkalans: {
-                    select: { id: true, code: true, name: true, region: true, address: true, phone: true },
+        const existingOrder = await this.findOne(id);
+        const { items, ...orderData } = dto;
+        if (items && items.length > 0) {
+            const PPN_RATE = 0.12;
+            let subtotal = 0;
+            let totalTax = 0;
+            const mapStringToLpgType = (strType) => {
+                const normalized = strType.toLowerCase().trim();
+                const mapping = {
+                    '3kg': 'kg3', '12kg': 'kg12', '50kg': 'kg50',
+                    'kg3': 'kg3', 'kg12': 'kg12', 'kg50': 'kg50',
+                    '3': 'kg3', '12': 'kg12', '50': 'kg50',
+                };
+                return mapping[normalized] || 'kg12';
+            };
+            const orderItemsData = items.map((item) => {
+                const itemSubtotal = item.price_per_unit * item.qty;
+                const isTaxable = item.is_taxable ?? false;
+                const itemTax = isTaxable ? Math.round(itemSubtotal * PPN_RATE) : 0;
+                subtotal += itemSubtotal;
+                totalTax += itemTax;
+                return {
+                    order_id: id,
+                    lpg_type: mapStringToLpgType(item.lpg_type),
+                    label: item.label,
+                    price_per_unit: item.price_per_unit,
+                    qty: item.qty,
+                    sub_total: itemSubtotal,
+                    is_taxable: isTaxable,
+                    tax_amount: itemTax,
+                };
+            });
+            const totalAmount = subtotal + totalTax;
+            await this.prisma.order_items.deleteMany({ where: { order_id: id } });
+            await this.prisma.order_items.createMany({ data: orderItemsData });
+            await this.prisma.orders.update({
+                where: { id },
+                data: {
+                    pangkalan_id: orderData.pangkalan_id,
+                    driver_id: orderData.driver_id,
+                    note: orderData.note,
+                    subtotal: subtotal,
+                    tax_amount: totalTax,
+                    total_amount: totalAmount,
+                    updated_at: new Date(),
                 },
-                drivers: {
-                    select: { id: true, code: true, name: true, phone: true },
+            });
+        }
+        else {
+            await this.prisma.orders.update({
+                where: { id },
+                data: {
+                    pangkalan_id: orderData.pangkalan_id,
+                    driver_id: orderData.driver_id,
+                    note: orderData.note,
+                    current_status: orderData.current_status,
+                    updated_at: new Date(),
                 },
-                order_items: true,
-                timeline_tracks: {
-                    orderBy: { created_at: 'desc' },
-                },
-            },
-        });
-        return order;
+            });
+        }
+        return this.findOne(id);
     }
     async updateStatus(id, dto) {
         const order = await this.findOne(id);
@@ -208,6 +261,27 @@ let OrderService = class OrderService {
                 },
             },
         });
+        if (dto.status === 'BATAL') {
+            const orderNote = `Order ${updated.code}`;
+            for (const item of updated.order_items) {
+                const originalStock = await this.prisma.stock_histories.findFirst({
+                    where: {
+                        note: { contains: orderNote },
+                        lpg_type: item.lpg_type,
+                        movement_type: 'KELUAR'
+                    }
+                });
+                await this.prisma.stock_histories.create({
+                    data: {
+                        lpg_type: item.lpg_type,
+                        lpg_product_id: originalStock?.lpg_product_id || null,
+                        movement_type: 'MASUK',
+                        qty: item.qty,
+                        note: `Batal Order ${updated.code} - ${item.label || item.lpg_type}`,
+                    },
+                });
+            }
+        }
         return updated;
     }
     async remove(id) {
@@ -231,6 +305,33 @@ let OrderService = class OrderService {
         if (!validTransitions[currentStatus].includes(newStatus)) {
             throw new common_1.BadRequestException(`Tidak dapat mengubah status dari ${currentStatus} ke ${newStatus}`);
         }
+    }
+    async getStats(todayOnly = false) {
+        const where = { deleted_at: null };
+        if (todayOnly) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            where.created_at = { gte: today };
+        }
+        const [total, menungguPembayaran, diproses, siapKirim, dikirim, selesai, batal,] = await Promise.all([
+            this.prisma.orders.count({ where }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'MENUNGGU_PEMBAYARAN' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'DIPROSES' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'SIAP_KIRIM' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'DIKIRIM' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'SELESAI' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'BATAL' } }),
+        ]);
+        return {
+            total,
+            menunggu_pembayaran: menungguPembayaran,
+            diproses,
+            siap_kirim: siapKirim,
+            dikirim,
+            selesai,
+            batal,
+            today_only: todayOnly,
+        };
     }
 };
 exports.OrderService = OrderService;

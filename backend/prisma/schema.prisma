@@ -179,11 +179,13 @@ model lpg_products {
   category        lpg_category      @default(NON_SUBSIDI)
   color           String?           @db.VarChar(50) // e.g., "hijau", "biru", "pink"
   description     String?
+  selling_price   Decimal           @default(0) @db.Decimal(15, 2)  // Harga jual default
+  cost_price      Decimal?          @db.Decimal(15, 2)              // Harga beli (untuk profit)
   is_active       Boolean           @default(true)
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   updated_at      DateTime          @default(now()) @db.Timestamptz(6)
   deleted_at      DateTime?         @db.Timestamptz(6)
-  prices          lpg_prices[]
+  prices          lpg_prices[]      // Keep for backward compat, akan di-deprecate
   stock_histories stock_histories[]
 
   @@index([category], map: "idx_lpg_products_category")
@@ -195,7 +197,8 @@ model lpg_prices {
   id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   lpg_product_id String       @db.Uuid
   label          String       @db.VarChar(100) // e.g., "Harga Retail", "Harga Grosir"
-  price          Decimal      @db.Decimal(15, 2)
+  price          Decimal      @db.Decimal(15, 2)  // Harga jual
+  cost_price     Decimal?     @db.Decimal(15, 2)  // Harga beli (untuk hitung profit)
   is_default     Boolean      @default(false)
   created_at     DateTime     @default(now()) @db.Timestamptz(6)
   updated_at     DateTime     @default(now()) @db.Timestamptz(6)
