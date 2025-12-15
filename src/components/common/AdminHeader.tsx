@@ -32,16 +32,55 @@ interface AdminHeaderProps {
   notificationCount?: number
 }
 
+// localStorage keys for caching
+const PROFILE_CACHE_KEY = 'sim4lon_profile_cache'
+const NOTIF_READ_KEY = 'sim4lon_last_notif_read'
+
 export default function AdminHeader({
-  userName: initialUserName = 'Admin User',
-  userRole: initialUserRole = 'Administrator',
+  userName: initialUserName = '',
+  userRole: initialUserRole = '',
   notificationCount: initialCount = 0
 }: AdminHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-  const [userName, setUserName] = useState(initialUserName)
-  const [userRole, setUserRole] = useState(initialUserRole)
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined)
+  const [isLoading, setIsLoading] = useState(true)
+  const [userName, setUserName] = useState(() => {
+    // Try to get cached profile first to prevent flicker
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(PROFILE_CACHE_KEY)
+        if (cached) {
+          const profile = JSON.parse(cached)
+          return profile.name || initialUserName
+        }
+      } catch { /* ignore */ }
+    }
+    return initialUserName
+  })
+  const [userRole, setUserRole] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(PROFILE_CACHE_KEY)
+        if (cached) {
+          const profile = JSON.parse(cached)
+          return profile.role === 'ADMIN' ? 'Administrator' : 'Operator'
+        }
+      } catch { /* ignore */ }
+    }
+    return initialUserRole
+  })
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(PROFILE_CACHE_KEY)
+        if (cached) {
+          const profile = JSON.parse(cached)
+          return getAvatarUrl(profile.avatar_url)
+        }
+      } catch { /* ignore */ }
+    }
+    return undefined
+  })
   const [notificationCount, setNotificationCount] = useState(initialCount)
 
   /**
@@ -56,13 +95,20 @@ export default function AdminHeader({
         setUserRole(profile.role === 'ADMIN' ? 'Administrator' : 'Operator')
         setAvatarUrl(getAvatarUrl(profile.avatar_url))
 
+        // Cache profile to localStorage for faster subsequent loads
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile))
+        }
+
         // Fetch notification count
         const { notificationApi } = await import('@/lib/api')
         const notifData = await notificationApi.getNotifications(20)
         setNotificationCount(notifData.unread_count)
       } catch (err) {
-        // Jika gagal fetch, gunakan default values
+        // Jika gagal fetch, gunakan cached/default values
         console.error('Failed to fetch data:', err)
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchData()
@@ -142,14 +188,14 @@ export default function AdminHeader({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={avatarUrl} alt={userName} />
+                    <AvatarImage src={avatarUrl} alt={userName || 'User'} />
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      {userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                      {userName ? userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : '..'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium">{userName}</p>
-                    <p className="text-xs text-muted-foreground">{userRole}</p>
+                  <div className="hidden md:block text-left min-w-[80px]">
+                    <p className="text-sm font-medium">{userName || <span className="text-muted-foreground">Loading...</span>}</p>
+                    <p className="text-xs text-muted-foreground">{userRole || ''}</p>
                   </div>
                   <SafeIcon name="ChevronDown" className="h-4 w-4 hidden md:block" />
                 </Button>
