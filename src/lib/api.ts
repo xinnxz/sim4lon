@@ -220,6 +220,74 @@ export const notificationApi = {
 };
 
 // ============================================================
+// ACTIVITY API
+// ============================================================
+
+export interface ActivityLog {
+    id: string;
+    type: string;
+    title: string;
+    description: string | null;
+    pangkalan_name: string | null;
+    detail_numeric: number | null;
+    icon_name: string | null;
+    order_status: string | null;
+    timestamp: string;
+    users: {
+        id: string;
+        name: string;
+    } | null;
+    orders: {
+        id: string;
+        pangkalans: {
+            name: string;
+        };
+    } | null;
+}
+
+export interface ActivityResponse {
+    data: ActivityLog[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
+export const activityApi = {
+    /**
+     * Get all activities with pagination and filter
+     */
+    async getAll(
+        page = 1,
+        limit = 20,
+        type?: string
+    ): Promise<ActivityResponse> {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('limit', limit.toString());
+        if (type && type !== 'all') params.append('type', type);
+
+        return apiRequest<ActivityResponse>(`/activities?${params.toString()}`);
+    },
+
+    /**
+     * Get recent activities
+     */
+    async getRecent(limit = 10): Promise<ActivityLog[]> {
+        return apiRequest<ActivityLog[]>(`/activities/recent?limit=${limit}`);
+    },
+
+    /**
+     * Get activities by type
+     */
+    async getByType(type: string, limit = 20): Promise<ActivityLog[]> {
+        return apiRequest<ActivityLog[]>(`/activities/by-type?type=${type}&limit=${limit}`);
+    },
+};
+
+// ============================================================
 // REPORTS API
 // ============================================================
 

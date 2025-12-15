@@ -78,11 +78,28 @@ export default function AdminHeader({
   }
 
   /**
-   * Handle notification modal: clear badge saat modal dibuka
+   * Handle notification modal: buka modal tanpa langsung clear badge
+   * Badge akan tetap sampai modal ditutup
    */
   const handleNotificationOpen = () => {
     setShowNotifications(true)
-    setNotificationCount(0) // Clear badge saat sudah dilihat
+  }
+
+  /**
+   * Handle notification modal close: refresh count untuk cek notif baru
+   */
+  const handleNotificationClose = async (open: boolean) => {
+    setShowNotifications(open)
+    if (!open) {
+      // Saat modal ditutup, refresh notification count
+      try {
+        const { notificationApi } = await import('@/lib/api')
+        const notifData = await notificationApi.getNotifications(20)
+        setNotificationCount(notifData.unread_count)
+      } catch (err) {
+        console.error('Failed to refresh notifications:', err)
+      }
+    }
   }
 
   return (
@@ -160,7 +177,7 @@ export default function AdminHeader({
       {/* Notification Modal */}
       <NotificationModal
         open={showNotifications}
-        onOpenChange={setShowNotifications}
+        onOpenChange={handleNotificationClose}
       />
 
       {/* Logout Confirmation Modal */}
