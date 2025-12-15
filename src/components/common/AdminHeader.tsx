@@ -17,6 +17,15 @@ import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { removeToken, authApi } from '@/lib/api'
 import { clearCachedProfile } from '@/components/auth/AuthGuard'
 
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000'
+
+// Helper to get proper avatar URL with API prefix
+const getAvatarUrl = (url: string | null | undefined) => {
+  if (!url) return undefined
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}/api${url}`
+}
+
 interface AdminHeaderProps {
   userName?: string
   userRole?: string
@@ -32,6 +41,7 @@ export default function AdminHeader({
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [userName, setUserName] = useState(initialUserName)
   const [userRole, setUserRole] = useState(initialUserRole)
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined)
 
   /**
    * Fetch user profile dari API saat component mount
@@ -42,6 +52,7 @@ export default function AdminHeader({
         const profile = await authApi.getProfile()
         setUserName(profile.name)
         setUserRole(profile.role === 'ADMIN' ? 'Administrator' : 'Operator')
+        setAvatarUrl(getAvatarUrl(profile.avatar_url))
       } catch (err) {
         // Jika gagal fetch, gunakan default values
         console.error('Failed to fetch profile:', err)
@@ -99,7 +110,7 @@ export default function AdminHeader({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/307adb9b-4e82-4810-bce6-d781a7e2c71a.png" alt={userName} />
+                    <AvatarImage src={avatarUrl} alt={userName} />
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                     </AvatarFallback>

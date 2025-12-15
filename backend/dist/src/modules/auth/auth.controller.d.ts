@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, UpdateProfileDto } from './dto';
+import { LoginDto, RegisterDto, UpdateProfileDto, ChangePasswordDto } from './dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
@@ -7,11 +7,11 @@ export declare class AuthController {
         message: string;
         user: {
             id: string;
-            name: string;
-            created_at: Date;
             code: string;
             email: string;
             role: import("@prisma/client").$Enums.user_role;
+            name: string;
+            created_at: Date;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -26,29 +26,32 @@ export declare class AuthController {
     }>;
     getProfile(userId: string): Promise<{
         id: string;
-        name: string;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
         code: string;
         email: string;
         role: import("@prisma/client").$Enums.user_role;
+        is_active: boolean;
+        name: string;
         phone: string | null;
         avatar_url: string | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
         message: string;
         user: {
             id: string;
-            name: string;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
             code: string;
             email: string;
             role: import("@prisma/client").$Enums.user_role;
+            is_active: boolean;
+            name: string;
             phone: string | null;
             avatar_url: string | null;
+            created_at: Date;
+            updated_at: Date;
         };
+    }>;
+    changePassword(userId: string, dto: ChangePasswordDto): Promise<{
+        message: string;
     }>;
 }
