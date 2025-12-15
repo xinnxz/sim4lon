@@ -89,7 +89,7 @@ export default function PaymentRecordPage() {
           items: items,
           totalAmount: apiOrder.total_amount,
           status: apiOrder.current_status,
-          date: new Date(apiOrder.created_at).toISOString().split('T')[0]
+          date: apiOrder.created_at  // Keep full datetime for time display
         })
         setError(null)
       } catch (err: any) {

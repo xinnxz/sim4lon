@@ -255,60 +255,69 @@ export default function DetailEditPangkalanContent() {
               </CardHeader>
               <CardContent>
                 {orders.length > 0 ? (
-                  <div className="w-full overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="min-w-[100px]">Kode</TableHead>
-                          <TableHead className="min-w-[110px]">Tanggal</TableHead>
-                          <TableHead className="min-w-[150px]">Item</TableHead>
-                          <TableHead className="min-w-[130px] text-right">Total</TableHead>
-                          <TableHead className="min-w-[110px]">Status</TableHead>
-                          <TableHead className="min-w-[80px]">Aksi</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {orders.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell className="font-medium font-mono text-primary">
-                              {order.code || `ORD-${order.id.slice(0, 4).toUpperCase()}`}
-                            </TableCell>
-                            <TableCell className="text-foreground text-sm">
-                              {formatDate(order.created_at)}
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {order.order_items && order.order_items.length > 0 ? (
-                                <div className="space-y-0.5">
-                                  {order.order_items.map((item, idx) => (
-                                    <div key={idx} className="text-foreground">
-                                      {item.label || item.lpg_type} × {item.qty}
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : '-'}
-                            </TableCell>
-                            <TableCell className="text-right font-semibold text-foreground">
-                              {formatCurrency(order.total_amount)}
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="status"
-                                className={statusColors[order.current_status] || 'bg-gray-100 text-gray-700'}
-                              >
-                                {statusLabels[order.current_status] || order.current_status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <a href={`/detail-pesanan?id=${order.id}`}>
-                                <Button variant="ghost" size="sm">
-                                  <SafeIcon name="Eye" className="h-4 w-4" />
-                                </Button>
-                              </a>
-                            </TableCell>
+                  <div className="w-full">
+                    {/* Scrollable container with max-height for ~10 rows */}
+                    <div className="overflow-auto max-h-[480px] border rounded-lg">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-background z-10">
+                          <TableRow>
+                            <TableHead className="min-w-[100px]">Kode</TableHead>
+                            <TableHead className="min-w-[110px]">Tanggal</TableHead>
+                            <TableHead className="min-w-[150px]">Item</TableHead>
+                            <TableHead className="min-w-[130px] text-right">Total</TableHead>
+                            <TableHead className="min-w-[110px]">Status</TableHead>
+                            <TableHead className="min-w-[80px]">Aksi</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {orders.slice(0, 10).map((order) => (
+                            <TableRow key={order.id}>
+                              <TableCell className="font-medium font-mono text-primary">
+                                {order.code || `ORD-${order.id.slice(0, 4).toUpperCase()}`}
+                              </TableCell>
+                              <TableCell className="text-foreground text-sm">
+                                {formatDate(order.created_at)}
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {order.order_items && order.order_items.length > 0 ? (
+                                  <div className="space-y-0.5">
+                                    {order.order_items.map((item, idx) => (
+                                      <div key={idx} className="text-foreground">
+                                        {item.label || item.lpg_type} × {item.qty}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : '-'}
+                              </TableCell>
+                              <TableCell className="text-right font-semibold text-foreground">
+                                {formatCurrency(order.total_amount)}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant="status"
+                                  className={statusColors[order.current_status] || 'bg-gray-100 text-gray-700'}
+                                >
+                                  {statusLabels[order.current_status] || order.current_status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <a href={`/detail-pesanan?id=${order.id}`}>
+                                  <Button variant="ghost" size="sm">
+                                    <SafeIcon name="Eye" className="h-4 w-4" />
+                                  </Button>
+                                </a>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {/* Show indicator if more orders available */}
+                    {orders.length > 10 && (
+                      <p className="text-xs text-muted-foreground text-center mt-2">
+                        Menampilkan 10 dari {orders.length} pesanan
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
@@ -335,7 +344,7 @@ export default function DetailEditPangkalanContent() {
         onOpenChange={setShowDeleteModal}
         onConfirm={handleDelete}
         title="Hapus Pangkalan"
-        description={`Apakah Anda yakin ingin menghapus pangkalan "${pangkalan?.name}"? Pangkalan akan disembunyikan dari daftar, tetapi riwayat pesanan tetap tersimpan.`}
+        description={`Apakah Anda yakin ingin menghapus pangkalan "${pangkalan?.name}"? Tindakan ini tidak dapat dikembalikan!`}
         confirmText="Ya, Hapus"
         cancelText="Batal"
         isDangerous={true}

@@ -1,22 +1,37 @@
+/**
+ * StockChart - Chart Tren Stok DINAMIS per Produk LPG
+ * 
+ * PENJELASAN:
+ * Chart ini menampilkan tren stok 7 hari terakhir untuk SEMUA produk LPG aktif.
+ * Otomatis handle produk baru tanpa perlu update code.
+ * Warna line diambil dari product.color di database.
+ */
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useState, useEffect } from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { dashboardApi } from '@/lib/api'
 
-const data = [
-  { day: 'Sen', stock: 2200 },
-  { day: 'Sel', stock: 2100 },
-  { day: 'Rab', stock: 1900 },
-  { day: 'Kam', stock: 1800 },
-  { day: 'Jum', stock: 1700 },
-  { day: 'Sab', stock: 1600 },
-  { day: 'Min', stock: 1500 }
-]
+interface ProductInfo {
+  id: string
+  name: string
+  color: string
+}
 
-const CustomTooltip = ({ active, payload }: any) => {
+interface ChartResponse {
+  products: ProductInfo[]
+  data: Record<string, any>[]
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background border border-border rounded-lg shadow-lg p-3 backdrop-blur-sm">
-        <p className="text-sm font-semibold text-foreground">{payload[0].payload.day}</p>
-        <p className="text-sm text-accent font-bold">{payload[0].value} Unit</p>
+        <p className="text-sm font-semibold text-foreground mb-2">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {entry.name}: <span className="font-bold">{entry.value} Unit</span>
+          </p>
+        ))}
       </div>
     )
   }
@@ -28,48 +43,100 @@ interface StockChartProps {
 }
 
 export default function StockChart({ isVisible = true }: StockChartProps) {
+  const [chartData, setChartData] = useState<ChartResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        const response = await dashboardApi.getStockChart()
+        setChartData(response as ChartResponse)
+        setError(null)
+      } catch (err) {
+        console.error('Failed to fetch stock chart:', err)
+        setError('Gagal memuat data')
+        setChartData(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Memuat data...</div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-destructive">{error}</div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!chartData || chartData.data.length === 0 || chartData.products.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-muted-foreground">Belum ada data stok</div>
+      </div>
+    )
+  }
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart 
-        data={data} 
+      <LineChart
+        data={chartData.data}
         margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
         className="drop-shadow-sm"
       >
-        <defs>
-          <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.8}/>
-            <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
-          </linearGradient>
-        </defs>
-        <CartesianGrid 
-          strokeDasharray="3 3" 
-          stroke="hsl(var(--border))" 
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="hsl(var(--border))"
           opacity={0.5}
           vertical={false}
         />
-        <XAxis 
-          dataKey="day" 
+        <XAxis
+          dataKey="day"
           stroke="hsl(var(--muted-foreground))"
           style={{ fontSize: '12px' }}
         />
-        <YAxis 
+        <YAxis
           stroke="hsl(var(--muted-foreground))"
           style={{ fontSize: '12px' }}
-          formatter={(value) => `${value}`}
+          tickFormatter={(value) => `${value}`}
         />
         <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--accent))', strokeWidth: 2, opacity: 0.3 }} />
-        <Line 
-          type="monotone" 
-          dataKey="stock" 
-          stroke="hsl(var(--accent))" 
-          strokeWidth={3}
-          dot={{ fill: 'hsl(var(--accent))', r: 5, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
-          activeDot={{ r: 7, strokeWidth: 2 }}
-          isAnimationActive={isVisible}
-          animationBegin={0}
-          animationDuration={800}
-          animationEasing="ease-in-out"
+        <Legend
+          wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
         />
+        {/* Dynamic Lines - one per product */}
+        {chartData.products.map((product, index) => (
+          <Line
+            key={product.id}
+            type="monotone"
+            dataKey={product.id}
+            name={product.name}
+            stroke={product.color}
+            strokeWidth={2}
+            dot={{ fill: product.color, r: 3, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+            activeDot={{ r: 5, strokeWidth: 2 }}
+            isAnimationActive={isVisible}
+            animationBegin={index * 100}
+            animationDuration={800}
+            animationEasing="ease-in-out"
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   )

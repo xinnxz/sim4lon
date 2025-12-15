@@ -1,16 +1,12 @@
 import { lpg_category } from '@prisma/client';
-export declare class LpgPriceDto {
-    label: string;
-    price: number;
-    is_default?: boolean;
-}
 export declare class CreateLpgProductDto {
     name: string;
     size_kg: number;
     category: lpg_category;
     color?: string;
     description?: string;
-    prices?: LpgPriceDto[];
+    selling_price: number;
+    cost_price: number;
 }
 export declare class UpdateLpgProductDto {
     name?: string;
@@ -18,7 +14,14 @@ export declare class UpdateLpgProductDto {
     category?: lpg_category;
     color?: string;
     description?: string;
+    selling_price?: number;
+    cost_price?: number;
     is_active?: boolean;
+}
+export declare class LpgPriceDto {
+    label: string;
+    price: number;
+    is_default?: boolean;
 }
 export declare class CreateLpgPriceDto {
     label: string;

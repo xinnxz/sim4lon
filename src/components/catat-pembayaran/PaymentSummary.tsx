@@ -101,9 +101,12 @@ export default function PaymentSummary({ order }: PaymentSummaryProps) {
           <p className="text-sm font-medium flex items-center gap-2">
             <SafeIcon name="Calendar" className="h-4 w-4 text-muted-foreground" />
             {new Date(order.date).toLocaleDateString('id-ID', {
+              weekday: 'long',
               year: 'numeric',
               month: 'long',
-              day: 'numeric'
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
             })}
           </p>
         </div>

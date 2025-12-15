@@ -1,124 +1,247 @@
-"use client";
+/**
+ * EditProfilAdminForm - Form Edit Profil dengan Avatar Upload & Crop
+ * 
+ * PENJELASAN:
+ * Form ini fetch profil dari API dan update menggunakan authApi.updateProfile()
+ * Termasuk fitur upload foto profil dengan cropping menggunakan react-image-crop
+ */
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import SafeIcon from "@/components/common/SafeIcon";
+'use client'
 
-// Mock admin profile data
-const mockAdminProfile = {
-  id: "admin-001",
-  name: "Luthfi Alfaridz",
-  email: "budi.santoso@sim4lon.com",
-  phone: "+62812345678",
-  role: "Administrator",
-  joinDate: "2024-01-15",
-  department: "Sistem Informasi",
-};
+import { useState, useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { toast } from 'sonner'
+import SafeIcon from '@/components/common/SafeIcon'
+import AvatarCropperModal from '@/components/profil-admin/AvatarCropperModal'
+import { authApi, uploadApi, type UserProfile } from '@/lib/api'
+
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000'
 
 interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  department: string;
+  name: string
+  phone: string
+  avatar_url: string | null
+}
+
+interface FormErrors {
+  name?: string
+  phone?: string
 }
 
 export default function EditProfilAdminForm() {
-  const [formData, setFormData] = useState<FormData>({
-    name: mockAdminProfile.name,
-    email: mockAdminProfile.email,
-    phone: mockAdminProfile.phone,
-    department: mockAdminProfile.department,
-  });
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [formData, setFormData] = useState<FormData>({ name: '', phone: '', avatar_url: null })
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({})
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  // Cropper state
+  const [cropperOpen, setCropperOpen] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string>('')
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null) // Local blob preview
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true)
+        const data = await authApi.getProfile()
+        setProfile(data)
+        setFormData({
+          name: data.name || '',
+          phone: data.phone || '',
+          avatar_url: data.avatar_url,
+        })
+      } catch (err) {
+        console.error('Failed to fetch profile:', err)
+        toast.error('Gagal memuat profil')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfile()
+  }, [])
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const newErrors: FormErrors = {}
 
     if (!formData.name.trim()) {
-      newErrors.name = "Nama harus diisi";
+      newErrors.name = 'Nama harus diisi'
+    } else if (formData.name.length < 2) {
+      newErrors.name = 'Nama minimal 2 karakter'
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email harus diisi";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Format email tidak valid";
+    if (formData.phone && !/^(\+62|0)[0-9]{9,12}$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Format nomor telepon tidak valid (contoh: 08xxx atau +62xxx)'
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Nomor telepon harus diisi";
-    } else if (
-      !/^(\+62|0)[0-9]{9,12}$/.test(formData.phone.replace(/\s/g, ""))
-    ) {
-      newErrors.phone = "Format nomor telepon tidak valid";
-    }
-
-    if (!formData.department.trim()) {
-      newErrors.department = "Departemen harus diisi";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error for this field when user starts typing
-    if (errors[name as keyof FormData]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }))
     }
-  };
+  }
+
+  // Handle file selection - open cropper
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
+      toast.error('Hanya file gambar yang diperbolehkan (JPEG, PNG, GIF, WebP)')
+      return
+    }
+
+    // Validate file size (max 5MB for source - will be compressed after crop)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ukuran file maksimal 5MB')
+      return
+    }
+
+    // Read file and open cropper
+    const reader = new FileReader()
+    reader.onload = () => {
+      setSelectedImage(reader.result as string)
+      setCropperOpen(true)
+    }
+    reader.readAsDataURL(file)
+
+    // Clear input to allow re-selecting same file
+    e.target.value = ''
+  }
+
+  // Handle cropped image - show preview immediately then upload
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    console.log('handleCropComplete called with blob:', croppedBlob.size, 'bytes')
+
+    // Create local preview URL immediately
+    const localPreviewUrl = URL.createObjectURL(croppedBlob)
+    console.log('Local preview URL created:', localPreviewUrl)
+    setAvatarPreview(localPreviewUrl)
+
+    setIsUploading(true)
+    try {
+      // Convert blob to File
+      const file = new File([croppedBlob], 'avatar.jpg', { type: 'image/jpeg' })
+      console.log('File created:', file.name, file.size, 'bytes')
+
+      const result = await uploadApi.uploadAvatar(file)
+      console.log('Upload result:', result)
+      setFormData(prev => ({ ...prev, avatar_url: result.url }))
+      toast.success('Foto profil berhasil diupload')
+    } catch (error: any) {
+      console.error('Upload error:', error)
+      toast.error(error.message || 'Gagal mengupload foto')
+      // Clear preview on error
+      setAvatarPreview(null)
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!validateForm()) {
-      toast.error("Mohon periksa kembali data yang Anda masukkan");
-      return;
+      toast.error('Mohon periksa kembali data yang Anda masukkan')
+      return
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Send null explicitly if avatar was removed, undefined if unchanged
+      await authApi.updateProfile({
+        name: formData.name,
+        phone: formData.phone || undefined,
+        avatar_url: formData.avatar_url === null ? null : formData.avatar_url || undefined,
+      })
 
-    setIsLoading(false);
-    toast.success("Profil berhasil diperbarui");
+      toast.success('Profil berhasil diperbarui')
 
-    // Redirect after success
-    setTimeout(() => {
-      window.location.href = "./profil-admin.html";
-    }, 1500);
-  };
+      setTimeout(() => {
+        window.location.href = '/profil-admin'
+      }, 1000)
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal memperbarui profil')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const handleCancel = () => {
-    window.location.href = "./profil-admin.html";
-  };
+    window.location.href = '/profil-admin'
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+  }
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  const getAvatarUrl = (url: string | null) => {
+    if (!url) return undefined
+    if (url.startsWith('http')) return url
+    // Backend serves at /api/upload/avatars, but returns /upload/avatars in URL
+    return `${API_BASE_URL}/api${url}`
+  }
+
+  // Loading state - maintain height to prevent footer jump
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto min-h-[400px] flex items-center justify-center">
+        <Card className="shadow-card w-full">
+          <CardContent className="p-8 flex items-center justify-center">
+            <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-2xl mx-auto min-h-[400px] flex items-center justify-center">
+        <Card className="shadow-card w-full">
+          <CardContent className="p-8 text-center">
+            <SafeIcon name="AlertCircle" className="h-12 w-12 mx-auto mb-4 text-destructive" />
+            <p className="text-destructive">Gagal memuat profil</p>
+            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+              Coba Lagi
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
-    <div
-      className="space-y-6 animate-fadeInUp"
-      style={{ margin: "0px 120px 0px 120px" }}
-    >
+    <div className="max-w-2xl mx-auto space-y-6 animate-fadeInUp">
       {/* Page Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -127,24 +250,86 @@ export default function EditProfilAdminForm() {
             className="h-5 w-5 text-muted-foreground cursor-pointer hover:text-foreground"
             onClick={handleCancel}
           />
-          <h1 className="text-3xl font-bold text-foreground">
-            Edit Profil Admin
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground">Edit Profil</h1>
         </div>
-        <p className="text-muted-foreground">
-          Perbarui informasi profil pribadi Anda
-        </p>
+        <p className="text-muted-foreground">Perbarui informasi dan foto profil Anda</p>
       </div>
 
       <Separator />
+
+      {/* Avatar Upload Card */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle>Foto Profil</CardTitle>
+          <CardDescription>
+            Pilih dan crop foto profil Anda (maks. 5MB, format: JPEG, PNG, GIF, WebP)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            {/* Avatar Preview */}
+            <div className="relative group">
+              <Avatar className="h-28 w-28 border-4 border-primary/20">
+                <AvatarImage src={avatarPreview || getAvatarUrl(formData.avatar_url)} alt={formData.name} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
+                  {getInitials(formData.name || 'U')}
+                </AvatarFallback>
+              </Avatar>
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                  <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-white" />
+                </div>
+              )}
+            </div>
+
+            {/* Upload Controls */}
+            <div className="flex-1 space-y-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading || isSubmitting}
+                  className="w-full sm:w-auto"
+                >
+                  <SafeIcon name="Camera" className="mr-2 h-4 w-4" />
+                  Pilih Foto
+                </Button>
+                {formData.avatar_url && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, avatar_url: null }))
+                      setAvatarPreview(null)
+                    }}
+                    disabled={isSubmitting || isUploading}
+                    className="text-destructive hover:text-destructive ml-2"
+                  >
+                    <SafeIcon name="Trash2" className="mr-1 h-4 w-4" />
+                    Hapus
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Form Card */}
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle>Informasi Profil</CardTitle>
           <CardDescription>
-            Ubah data pribadi Anda di bawah ini. Pastikan semua informasi
-            akurat.
+            Ubah data pribadi Anda di bawah ini
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -161,8 +346,8 @@ export default function EditProfilAdminForm() {
                 placeholder="Masukkan nama lengkap"
                 value={formData.name}
                 onChange={handleChange}
-                disabled={isLoading}
-                className={errors.name ? "border-destructive" : ""}
+                disabled={isSubmitting}
+                className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -172,43 +357,29 @@ export default function EditProfilAdminForm() {
               )}
             </div>
 
-            {/* Email Field */}
+            {/* Email Field - Read Only */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Masukkan email"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={isLoading}
-                className={errors.email ? "border-destructive" : ""}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive flex items-center gap-1">
-                  <SafeIcon name="AlertCircle" className="h-4 w-4" />
-                  {errors.email}
-                </p>
-              )}
+              <Label className="text-sm font-medium text-muted-foreground">Email</Label>
+              <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
+                {profile.email}
+              </div>
+              <p className="text-xs text-muted-foreground">Email tidak dapat diubah</p>
             </div>
 
             {/* Phone Field */}
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-sm font-medium">
-                Nomor Telepon <span className="text-destructive">*</span>
+                Nomor Telepon
               </Label>
               <Input
                 id="phone"
                 name="phone"
                 type="tel"
-                placeholder="Contoh: +62812345678 atau 08123456789"
+                placeholder="Contoh: 08123456789 atau +6281234567890"
                 value={formData.phone}
                 onChange={handleChange}
-                disabled={isLoading}
-                className={errors.phone ? "border-destructive" : ""}
+                disabled={isSubmitting}
+                className={errors.phone ? 'border-destructive' : ''}
               />
               {errors.phone && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -218,52 +389,18 @@ export default function EditProfilAdminForm() {
               )}
             </div>
 
-            {/* Department Field */}
-            <div className="space-y-2">
-              <Label htmlFor="department" className="text-sm font-medium">
-                Departemen <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="department"
-                name="department"
-                type="text"
-                placeholder="Masukkan departemen"
-                value={formData.department}
-                onChange={handleChange}
-                disabled={isLoading}
-                className={errors.department ? "border-destructive" : ""}
-              />
-              {errors.department && (
-                <p className="text-sm text-destructive flex items-center gap-1">
-                  <SafeIcon name="AlertCircle" className="h-4 w-4" />
-                  {errors.department}
-                </p>
-              )}
-            </div>
-
             {/* Read-only Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Role
-                </Label>
+                <Label className="text-sm font-medium text-muted-foreground">Role</Label>
                 <div className="px-3 py-2 bg-muted rounded-md text-sm">
-                  {mockAdminProfile.role}
+                  {profile.role === 'ADMIN' ? 'Administrator' : 'Operator'}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  Tanggal Bergabung
-                </Label>
+                <Label className="text-sm font-medium text-muted-foreground">Bergabung</Label>
                 <div className="px-3 py-2 bg-muted rounded-md text-sm">
-                  {new Date(mockAdminProfile.joinDate).toLocaleDateString(
-                    "id-ID",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}
+                  {formatDate(profile.created_at)}
                 </div>
               </div>
             </div>
@@ -274,7 +411,7 @@ export default function EditProfilAdminForm() {
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="flex-1"
               >
                 <SafeIcon name="X" className="mr-2 h-4 w-4" />
@@ -282,15 +419,12 @@ export default function EditProfilAdminForm() {
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting || isUploading}
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <>
-                    <SafeIcon
-                      name="Loader2"
-                      className="mr-2 h-4 w-4 animate-spin"
-                    />
+                    <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
                     Menyimpan...
                   </>
                 ) : (
@@ -305,27 +439,13 @@ export default function EditProfilAdminForm() {
         </CardContent>
       </Card>
 
-      {/* Info Box */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <SafeIcon
-              name="Info"
-              className="h-5 w-5 text-primary shrink-0 mt-0.5"
-            />
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                Informasi Penting
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Untuk mengubah kata sandi, silakan kunjungi halaman Ubah
-                Password. Perubahan profil akan langsung berlaku setelah
-                disimpan.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Avatar Cropper Modal */}
+      <AvatarCropperModal
+        open={cropperOpen}
+        onOpenChange={setCropperOpen}
+        imageSrc={selectedImage}
+        onCropComplete={handleCropComplete}
+      />
     </div>
-  );
+  )
 }

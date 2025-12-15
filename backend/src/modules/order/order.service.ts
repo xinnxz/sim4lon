@@ -193,33 +193,102 @@ export class OrderService {
             },
         });
 
+        // STOCK DEDUCTION: Kurangi stok saat order dibuat
+        // Gunakan dto.items untuk akses lpg_product_id (untuk dynamic products)
+        for (let i = 0; i < dto.items.length; i++) {
+            const dtoItem = dto.items[i];
+            const orderItem = order.order_items[i];
+
+            await this.prisma.stock_histories.create({
+                data: {
+                    lpg_type: orderItem.lpg_type,
+                    lpg_product_id: dtoItem.lpg_product_id || null,  // Dynamic product ID
+                    movement_type: 'KELUAR',
+                    qty: orderItem.qty,
+                    note: `Order ${order.code} - ${orderItem.label || orderItem.lpg_type}`,
+                },
+            });
+        }
+
         return order;
     }
 
     async update(id: string, dto: UpdateOrderDto) {
-        await this.findOne(id);
+        const existingOrder = await this.findOne(id);
 
-        const order = await this.prisma.orders.update({
-            where: { id },
-            data: {
-                ...dto,
-                updated_at: new Date(),
-            },
-            include: {
-                pangkalans: {
-                    select: { id: true, code: true, name: true, region: true, address: true, phone: true },
-                },
-                drivers: {
-                    select: { id: true, code: true, name: true, phone: true },
-                },
-                order_items: true,
-                timeline_tracks: {
-                    orderBy: { created_at: 'desc' },
-                },
-            },
-        });
+        // Destructure items from dto, rest is basic fields
+        const { items, ...orderData } = dto;
 
-        return order;
+        // If items are provided, recalculate totals and update items
+        if (items && items.length > 0) {
+            const PPN_RATE = 0.12;
+            let subtotal = 0;
+            let totalTax = 0;
+
+            // Map lpg_type helper (same as create)
+            const mapStringToLpgType = (strType: string): any => {
+                const normalized = strType.toLowerCase().trim();
+                const mapping: Record<string, string> = {
+                    '3kg': 'kg3', '12kg': 'kg12', '50kg': 'kg50',
+                    'kg3': 'kg3', 'kg12': 'kg12', 'kg50': 'kg50',
+                    '3': 'kg3', '12': 'kg12', '50': 'kg50',
+                };
+                return mapping[normalized] || 'kg12';
+            };
+
+            const orderItemsData = items.map((item) => {
+                const itemSubtotal = item.price_per_unit * item.qty;
+                const isTaxable = item.is_taxable ?? false;
+                const itemTax = isTaxable ? Math.round(itemSubtotal * PPN_RATE) : 0;
+
+                subtotal += itemSubtotal;
+                totalTax += itemTax;
+
+                return {
+                    order_id: id,
+                    lpg_type: mapStringToLpgType(item.lpg_type),
+                    label: item.label,
+                    price_per_unit: item.price_per_unit,
+                    qty: item.qty,
+                    sub_total: itemSubtotal,
+                    is_taxable: isTaxable,
+                    tax_amount: itemTax,
+                };
+            });
+
+            const totalAmount = subtotal + totalTax;
+
+            // Delete old items, create new items, update order (sequential)
+            await this.prisma.order_items.deleteMany({ where: { order_id: id } });
+            await this.prisma.order_items.createMany({ data: orderItemsData });
+            await this.prisma.orders.update({
+                where: { id },
+                data: {
+                    pangkalan_id: orderData.pangkalan_id,
+                    driver_id: orderData.driver_id,
+                    note: orderData.note,
+                    subtotal: subtotal,
+                    tax_amount: totalTax,
+                    total_amount: totalAmount,
+                    updated_at: new Date(),
+                },
+            });
+        } else {
+            // No items update, just update basic fields
+            await this.prisma.orders.update({
+                where: { id },
+                data: {
+                    pangkalan_id: orderData.pangkalan_id,
+                    driver_id: orderData.driver_id,
+                    note: orderData.note,
+                    current_status: orderData.current_status,
+                    updated_at: new Date(),
+                },
+            });
+        }
+
+        // Return updated order with all relations
+        return this.findOne(id);
     }
 
     async updateStatus(id: string, dto: UpdateOrderStatusDto) {
@@ -251,6 +320,33 @@ export class OrderService {
             },
         });
 
+        // STOCK RESTORATION: Kembalikan stok jika order dibatalkan
+        if (dto.status === 'BATAL') {
+            // Lookup original stock_histories untuk order ini dan gunakan lpg_product_id yang sama
+            const orderNote = `Order ${updated.code}`;
+
+            for (const item of updated.order_items) {
+                // Find original KELUAR record to get lpg_product_id
+                const originalStock = await this.prisma.stock_histories.findFirst({
+                    where: {
+                        note: { contains: orderNote },
+                        lpg_type: item.lpg_type,
+                        movement_type: 'KELUAR'
+                    }
+                });
+
+                await this.prisma.stock_histories.create({
+                    data: {
+                        lpg_type: item.lpg_type,
+                        lpg_product_id: originalStock?.lpg_product_id || null,  // Copy from original
+                        movement_type: 'MASUK',  // MASUK = stock kembali
+                        qty: item.qty,
+                        note: `Batal Order ${updated.code} - ${item.label || item.lpg_type}`,
+                    },
+                });
+            }
+        }
+
         return updated;
     }
 
@@ -272,7 +368,7 @@ export class OrderService {
         const validTransitions: Record<status_pesanan, status_pesanan[]> = {
             DRAFT: ['MENUNGGU_PEMBAYARAN', 'BATAL'],
             MENUNGGU_PEMBAYARAN: ['DIPROSES', 'BATAL'],
-            DIPROSES: ['SIAP_KIRIM', 'DIKIRIM', 'BATAL'], // Allow direct to DIKIRIM when driver assigned
+            DIPROSES: ['SIAP_KIRIM', 'DIKIRIM', 'BATAL'],
             SIAP_KIRIM: ['DIKIRIM', 'BATAL'],
             DIKIRIM: ['SELESAI', 'BATAL'],
             SELESAI: [],
@@ -285,4 +381,50 @@ export class OrderService {
             );
         }
     }
+
+    /**
+     * Get order statistics by status
+     * @param todayOnly - If true, only count today's orders
+     */
+    async getStats(todayOnly: boolean = false) {
+        const where: any = { deleted_at: null };
+
+        // If todayOnly, filter by created_at >= start of today
+        if (todayOnly) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            where.created_at = { gte: today };
+        }
+
+        // Count by each status
+        const [
+            total,
+            menungguPembayaran,
+            diproses,
+            siapKirim,
+            dikirim,
+            selesai,
+            batal,
+        ] = await Promise.all([
+            this.prisma.orders.count({ where }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'MENUNGGU_PEMBAYARAN' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'DIPROSES' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'SIAP_KIRIM' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'DIKIRIM' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'SELESAI' } }),
+            this.prisma.orders.count({ where: { ...where, current_status: 'BATAL' } }),
+        ]);
+
+        return {
+            total,
+            menunggu_pembayaran: menungguPembayaran,
+            diproses,
+            siap_kirim: siapKirim,
+            dikirim,
+            selesai,
+            batal,
+            today_only: todayOnly,
+        };
+    }
 }
+

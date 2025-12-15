@@ -28,10 +28,12 @@ export declare class DashboardController {
         }[];
     }>;
     getStockChart(): Promise<{
-        data: {
-            day: string;
-            stock: number;
+        products: {
+            id: string;
+            name: string;
+            color: string;
         }[];
+        data: Record<string, any>[];
     }>;
     getProfitChart(): Promise<{
         data: {

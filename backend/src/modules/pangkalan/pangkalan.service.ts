@@ -77,6 +77,7 @@ export class PangkalanService {
                 region: dto.region,
                 pic_name: dto.pic_name,
                 phone: dto.phone,
+                email: dto.email,  // Email for invoices
                 capacity: dto.capacity,
                 note: dto.note,
             },

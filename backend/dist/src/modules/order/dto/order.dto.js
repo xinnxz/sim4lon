@@ -16,6 +16,7 @@ const client_1 = require("@prisma/client");
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 class OrderItemDto {
     lpg_type;
+    lpg_product_id;
     label;
     price_per_unit;
     qty;
@@ -27,6 +28,11 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], OrderItemDto.prototype, "lpg_type", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], OrderItemDto.prototype, "lpg_product_id", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -80,6 +86,7 @@ class UpdateOrderDto {
     driver_id;
     note;
     current_status;
+    items;
 }
 exports.UpdateOrderDto = UpdateOrderDto;
 __decorate([
@@ -104,6 +111,13 @@ __decorate([
     (0, class_validator_1.IsEnum)(client_1.status_pesanan),
     __metadata("design:type", String)
 ], UpdateOrderDto.prototype, "current_status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => OrderItemDto),
+    __metadata("design:type", Array)
+], UpdateOrderDto.prototype, "items", void 0);
 class UpdateOrderStatusDto {
     status;
     description;

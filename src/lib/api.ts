@@ -106,6 +106,7 @@ export interface LoginResponse {
 
 export interface UserProfile {
     id: string;
+    code: string;
     email: string;
     name: string;
     phone: string | null;
@@ -133,11 +134,55 @@ export const authApi = {
         return apiRequest<UserProfile>('/auth/profile');
     },
 
+    async updateProfile(data: { name?: string; phone?: string; avatar_url?: string | null }): Promise<{ message: string; user: UserProfile }> {
+        return apiRequest('/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
     logout(): void {
         removeToken();
         if (typeof window !== 'undefined') {
             window.location.href = '/login';
         }
+    },
+};
+
+// ============================================================
+// UPLOAD API
+// ============================================================
+
+export interface UploadResponse {
+    message: string;
+    filename: string;
+    url: string;
+}
+
+export const uploadApi = {
+    /**
+     * Upload avatar image (max 2MB, images only)
+     */
+    async uploadAvatar(file: File): Promise<UploadResponse> {
+        const token = getToken();
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/upload/avatar`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Upload gagal');
+        }
+
+        return data;
     },
 };
 
@@ -221,6 +266,12 @@ export const pangkalanApi = {
 // DRIVERS API
 // ============================================================
 
+
+
+
+
+
+
 export interface Driver {
     id: string;
     name: string;
@@ -288,7 +339,8 @@ export interface LpgPrice {
     id: string;
     lpg_product_id: string;
     label: string;
-    price: number;
+    price: number;              // Harga jual
+    cost_price?: number | null; // Harga beli (untuk hitung profit)
     is_default: boolean;
     created_at: string;
     updated_at: string;
@@ -301,8 +353,10 @@ export interface LpgProduct {
     category: LpgCategory;
     color: string | null;
     description: string | null;
+    selling_price: number;          // Harga jual default
+    cost_price?: number | null;     // Harga beli (untuk profit)
     is_active: boolean;
-    prices: LpgPrice[];
+    prices: LpgPrice[];             // Deprecated, keep for backward compat
     created_at: string;
     updated_at: string;
 }
@@ -339,7 +393,7 @@ export const lpgProductsApi = {
     },
 
     /**
-     * Create new LPG product
+     * Create new LPG product (simplified pricing)
      */
     async create(data: {
         name: string;
@@ -347,7 +401,8 @@ export const lpgProductsApi = {
         category: LpgCategory;
         color?: string;
         description?: string;
-        prices?: { label: string; price: number; is_default?: boolean }[];
+        selling_price: number;  // Harga jual
+        cost_price: number;     // Harga beli (wajib)
     }): Promise<LpgProduct> {
         return apiRequest('/lpg-products', {
             method: 'POST',
@@ -364,6 +419,8 @@ export const lpgProductsApi = {
         category?: LpgCategory;
         color?: string;
         description?: string;
+        selling_price?: number;  // Harga jual
+        cost_price?: number;     // Harga beli
         is_active?: boolean;
     }): Promise<LpgProduct> {
         return apiRequest(`/lpg-products/${id}`, {
@@ -603,7 +660,8 @@ export interface SalesChartData {
 }
 
 export interface StockChartData {
-    data: { day: string; stock: number }[];
+    products: { id: string; name: string; color: string }[];
+    data: Record<string, any>[];
 }
 
 export interface ProfitChartData {
@@ -868,7 +926,30 @@ export const ordersApi = {
             method: 'DELETE',
         });
     },
+
+    /**
+     * Get order statistics by status
+     * @param todayOnly - If true, only count today's orders
+     */
+    async getStats(todayOnly: boolean = false): Promise<OrderStats> {
+        const params = todayOnly ? '?today=true' : '';
+        return apiRequest(`/orders/stats${params}`);
+    },
 };
+
+/**
+ * Order Stats response interface
+ */
+export interface OrderStats {
+    total: number;
+    menunggu_pembayaran: number;
+    diproses: number;
+    siap_kirim: number;
+    dikirim: number;
+    selesai: number;
+    batal: number;
+    today_only: boolean;
+}
 
 // ============================================================
 // PAYMENT API
@@ -1005,3 +1086,4 @@ export const paymentApi = {
         });
     },
 };
+

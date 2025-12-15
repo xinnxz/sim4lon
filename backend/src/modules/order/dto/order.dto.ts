@@ -10,12 +10,17 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
  * 
  * PENJELASAN:
  * - lpg_type sekarang string (bukan enum) untuk support dynamic products
+ * - lpg_product_id untuk tracking stok dynamic products
  * - Contoh: "3kg", "12kg", "50kg", atau ukuran custom lainnya
  */
 export class OrderItemDto {
     @IsString()
     @IsNotEmpty()
     lpg_type: string;  // Changed from enum to string for dynamic products
+
+    @IsOptional()
+    @IsString()
+    lpg_product_id?: string;  // ID dari lpg_products table untuk stock tracking
 
     @IsOptional()
     @IsString()
@@ -71,6 +76,12 @@ export class UpdateOrderDto {
     @IsOptional()
     @IsEnum(status_pesanan)
     current_status?: status_pesanan;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => OrderItemDto)
+    items?: OrderItemDto[];
 }
 
 export class UpdateOrderStatusDto {

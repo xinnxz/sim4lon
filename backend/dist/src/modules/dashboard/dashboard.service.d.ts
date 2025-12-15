@@ -30,11 +30,14 @@ export declare class DashboardService {
         }[];
     }>;
     getStockChart(): Promise<{
-        data: {
-            day: string;
-            stock: number;
+        products: {
+            id: string;
+            name: string;
+            color: string;
         }[];
+        data: Record<string, any>[];
     }>;
+    private mapColorName;
     getProfitChart(): Promise<{
         data: {
             day: string;

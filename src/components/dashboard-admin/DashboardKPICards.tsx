@@ -154,7 +154,7 @@ export default function DashboardKPICards() {
 
   const kpiData: KPICardData[] = [
     {
-      title: 'Total Pesanan Hari Ini',
+      title: 'Total Pesanan',
       value: formatNumber(stats?.todayOrders || 0),
       change: 'Hari ini',
       changeType: 'positive',
@@ -172,7 +172,7 @@ export default function DashboardKPICards() {
       iconColor: 'text-amber-600'
     },
     {
-      title: 'Pesanan Selesai Hari Ini',
+      title: 'Pesanan Selesai',
       value: formatNumber(stats?.completedOrders || 0),
       change: 'Hari ini',
       changeType: 'positive',

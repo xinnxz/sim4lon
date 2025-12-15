@@ -177,13 +177,14 @@ export class DashboardService {
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
 
-            // Sum total_amount from orders for this day
+            // Sum total_amount from orders for this day (exclude cancelled orders)
             const salesData = await this.prisma.client.orders.aggregate({
                 where: {
                     created_at: {
                         gte: date,
                         lt: nextDay,
                     },
+                    current_status: { not: 'BATAL' },  // Exclude cancelled orders
                 },
                 _sum: {
                     total_amount: true,
@@ -200,17 +201,46 @@ export class DashboardService {
     }
 
     /**
-     * Get stock trend for chart (last 7 days)
+     * Get stock trend for chart (last 7 days) - DYNAMIC PRODUCTS
      * 
-     * Data format: [{ day: "Sen", stock: 2200 }, ...]
+     * Data format: {
+     *   products: [{ id, name, color }, ...],
+     *   days: [{ day: "Sen", [productId]: stockQty, ... }, ...]
+     * }
      */
     async getStockChart() {
-        const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        const result: { day: string; stock: number }[] = [];
+        const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
-        // Get current stock first
-        const currentStock = await this.getStockSummary();
-        let runningStock = currentStock.kg3 + currentStock.kg12 + currentStock.kg50;
+        // Get all active products
+        const products = await this.prisma.lpg_products.findMany({
+            where: {
+                is_active: true,
+                deleted_at: null
+            },
+            orderBy: { size_kg: 'asc' }
+        });
+
+        // Get current stock for each product
+        const currentStockData = await this.prisma.client.stock_histories.groupBy({
+            by: ['lpg_product_id', 'movement_type'],
+            where: {
+                lpg_product_id: { not: null }
+            },
+            _sum: { qty: true }
+        });
+
+        // Build current stock map per product
+        const productStockMap: Record<string, number> = {};
+        products.forEach(p => {
+            const productData = currentStockData.filter(s => s.lpg_product_id === p.id);
+            const inQty = productData.find(s => s.movement_type === 'MASUK')?._sum.qty || 0;
+            const outQty = productData.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
+            productStockMap[p.id] = inQty - outQty;
+        });
+
+        // Build days array with stock per product (going backwards)
+        const days: Record<string, any>[] = [];
+        const runningStock = { ...productStockMap };
 
         for (let i = 0; i < 7; i++) {
             const date = new Date();
@@ -220,39 +250,93 @@ export class DashboardService {
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
 
-            // Get movements for this day
-            const movements = await this.prisma.client.stock_histories.findMany({
-                where: {
-                    timestamp: {
-                        gte: date,
-                        lt: nextDay,
-                    },
-                },
-            });
-
-            // Calculate stock at end of this day (going backwards)
             if (i === 0) {
-                result.unshift({
-                    day: days[date.getDay()],
-                    stock: runningStock,
+                // Today - use current stock
+                const dayData: Record<string, any> = { day: dayNames[date.getDay()] };
+                products.forEach(p => {
+                    dayData[p.id] = runningStock[p.id] || 0;
                 });
+                days.unshift(dayData);
             } else {
-                // Reverse the movements to get previous day's stock
-                movements.forEach((m) => {
-                    if (m.movement_type === 'MASUK') {
-                        runningStock -= m.qty;
-                    } else {
-                        runningStock += m.qty;
+                // Get movements for this day
+                const movements = await this.prisma.client.stock_histories.findMany({
+                    where: {
+                        timestamp: { gte: date, lt: nextDay },
+                        lpg_product_id: { not: null }
                     }
                 });
-                result.unshift({
-                    day: days[date.getDay()],
-                    stock: runningStock,
+
+                // Reverse movements to get previous day's stock
+                movements.forEach((m) => {
+                    if (m.lpg_product_id && runningStock[m.lpg_product_id] !== undefined) {
+                        if (m.movement_type === 'MASUK') {
+                            runningStock[m.lpg_product_id] -= m.qty;
+                        } else {
+                            runningStock[m.lpg_product_id] += m.qty;
+                        }
+                    }
                 });
+
+                const dayData: Record<string, any> = { day: dayNames[date.getDay()] };
+                products.forEach(p => {
+                    dayData[p.id] = runningStock[p.id] || 0;
+                });
+                days.unshift(dayData);
             }
         }
 
-        return { data: result };
+        // Color palette for products without color
+        const colorPalette = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+
+        return {
+            products: products.map((p, index) => ({
+                id: p.id,
+                name: p.name,
+                color: this.mapColorName(p.color) || colorPalette[index % colorPalette.length]
+            })),
+            data: days
+        };
+    }
+
+    /**
+     * Map color name to hex color (based on Pertamina LPG colors)
+     * - hijau/green = 3kg Elpiji subsidi
+     * - biru/blue = 12kg Elpiji  
+     * - ungu/purple = Bright Gas 5.5kg
+     * - pink = Bright Gas 12kg
+     * - merah/red = 50kg
+     */
+    private mapColorName(colorName: string | null): string | null {
+        if (!colorName) return null;
+        const colorMap: Record<string, string> = {
+            // 3kg Elpiji - Hijau terang
+            'hijau': '#22c55e',
+            'green': '#22c55e',
+            'standard': '#22c55e',  // Default 3kg warna hijau
+
+            // 12kg Elpiji - Biru langit
+            'biru': '#38bdf8',
+            'blue': '#38bdf8',
+
+            // Bright Gas 5.5kg - Ungu
+            'ungu': '#a855f7',
+            'purple': '#a855f7',
+            'violet': '#a855f7',
+
+            // Bright Gas 12kg - Pink magenta
+            'pink': '#ec4899',
+            'magenta': '#ec4899',
+
+            // 50kg - Merah
+            'merah': '#dc2626',
+            'red': '#dc2626',
+
+            // Extras
+            'kuning': '#eab308',
+            'yellow': '#eab308',
+            'orange': '#f97316',
+        };
+        return colorMap[colorName.toLowerCase()] || null;
     }
 
     /**
@@ -315,7 +399,7 @@ export class DashboardService {
                     id: 'desc',
                 },
             },
-            take: 5,
+            take: 3,
         });
 
         // Get pangkalan names

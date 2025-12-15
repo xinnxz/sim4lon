@@ -1,6 +1,7 @@
 import { status_pesanan } from '@prisma/client';
 export declare class OrderItemDto {
     lpg_type: string;
+    lpg_product_id?: string;
     label?: string;
     price_per_unit: number;
     qty: number;
@@ -17,6 +18,7 @@ export declare class UpdateOrderDto {
     driver_id?: string;
     note?: string;
     current_status?: status_pesanan;
+    items?: OrderItemDto[];
 }
 export declare class UpdateOrderStatusDto {
     status: status_pesanan;

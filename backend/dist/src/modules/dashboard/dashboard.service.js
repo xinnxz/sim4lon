@@ -134,6 +134,7 @@ let DashboardService = class DashboardService {
                         gte: date,
                         lt: nextDay,
                     },
+                    current_status: { not: 'BATAL' },
                 },
                 _sum: {
                     total_amount: true,
@@ -147,46 +148,98 @@ let DashboardService = class DashboardService {
         return { data: result };
     }
     async getStockChart() {
-        const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        const result = [];
-        const currentStock = await this.getStockSummary();
-        let runningStock = currentStock.kg3 + currentStock.kg12 + currentStock.kg50;
+        const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const products = await this.prisma.lpg_products.findMany({
+            where: {
+                is_active: true,
+                deleted_at: null
+            },
+            orderBy: { size_kg: 'asc' }
+        });
+        const currentStockData = await this.prisma.client.stock_histories.groupBy({
+            by: ['lpg_product_id', 'movement_type'],
+            where: {
+                lpg_product_id: { not: null }
+            },
+            _sum: { qty: true }
+        });
+        const productStockMap = {};
+        products.forEach(p => {
+            const productData = currentStockData.filter(s => s.lpg_product_id === p.id);
+            const inQty = productData.find(s => s.movement_type === 'MASUK')?._sum.qty || 0;
+            const outQty = productData.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
+            productStockMap[p.id] = inQty - outQty;
+        });
+        const days = [];
+        const runningStock = { ...productStockMap };
         for (let i = 0; i < 7; i++) {
             const date = new Date();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
-            const movements = await this.prisma.client.stock_histories.findMany({
-                where: {
-                    timestamp: {
-                        gte: date,
-                        lt: nextDay,
-                    },
-                },
-            });
             if (i === 0) {
-                result.unshift({
-                    day: days[date.getDay()],
-                    stock: runningStock,
+                const dayData = { day: dayNames[date.getDay()] };
+                products.forEach(p => {
+                    dayData[p.id] = runningStock[p.id] || 0;
                 });
+                days.unshift(dayData);
             }
             else {
+                const movements = await this.prisma.client.stock_histories.findMany({
+                    where: {
+                        timestamp: { gte: date, lt: nextDay },
+                        lpg_product_id: { not: null }
+                    }
+                });
                 movements.forEach((m) => {
-                    if (m.movement_type === 'MASUK') {
-                        runningStock -= m.qty;
-                    }
-                    else {
-                        runningStock += m.qty;
+                    if (m.lpg_product_id && runningStock[m.lpg_product_id] !== undefined) {
+                        if (m.movement_type === 'MASUK') {
+                            runningStock[m.lpg_product_id] -= m.qty;
+                        }
+                        else {
+                            runningStock[m.lpg_product_id] += m.qty;
+                        }
                     }
                 });
-                result.unshift({
-                    day: days[date.getDay()],
-                    stock: runningStock,
+                const dayData = { day: dayNames[date.getDay()] };
+                products.forEach(p => {
+                    dayData[p.id] = runningStock[p.id] || 0;
                 });
+                days.unshift(dayData);
             }
         }
-        return { data: result };
+        const colorPalette = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+        return {
+            products: products.map((p, index) => ({
+                id: p.id,
+                name: p.name,
+                color: this.mapColorName(p.color) || colorPalette[index % colorPalette.length]
+            })),
+            data: days
+        };
+    }
+    mapColorName(colorName) {
+        if (!colorName)
+            return null;
+        const colorMap = {
+            'hijau': '#22c55e',
+            'green': '#22c55e',
+            'standard': '#22c55e',
+            'biru': '#38bdf8',
+            'blue': '#38bdf8',
+            'ungu': '#a855f7',
+            'purple': '#a855f7',
+            'violet': '#a855f7',
+            'pink': '#ec4899',
+            'magenta': '#ec4899',
+            'merah': '#dc2626',
+            'red': '#dc2626',
+            'kuning': '#eab308',
+            'yellow': '#eab308',
+            'orange': '#f97316',
+        };
+        return colorMap[colorName.toLowerCase()] || null;
     }
     async getProfitChart() {
         const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
@@ -229,7 +282,7 @@ let DashboardService = class DashboardService {
                     id: 'desc',
                 },
             },
-            take: 5,
+            take: 3,
         });
         const result = await Promise.all(pangkalanOrders.map(async (item) => {
             const pangkalan = await this.prisma.client.pangkalans.findUnique({

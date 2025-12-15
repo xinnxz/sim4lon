@@ -9,38 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateLpgPriceDto = exports.UpdateLpgProductDto = exports.CreateLpgProductDto = exports.LpgPriceDto = void 0;
+exports.CreateLpgPriceDto = exports.LpgPriceDto = exports.UpdateLpgProductDto = exports.CreateLpgProductDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const client_1 = require("@prisma/client");
-class LpgPriceDto {
-    label;
-    price;
-    is_default;
-}
-exports.LpgPriceDto = LpgPriceDto;
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], LpgPriceDto.prototype, "label", void 0);
-__decorate([
-    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], LpgPriceDto.prototype, "price", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], LpgPriceDto.prototype, "is_default", void 0);
 class CreateLpgProductDto {
     name;
     size_kg;
     category;
     color;
     description;
-    prices;
+    selling_price;
+    cost_price;
 }
 exports.CreateLpgProductDto = CreateLpgProductDto;
 __decorate([
@@ -68,18 +48,25 @@ __decorate([
     __metadata("design:type", String)
 ], CreateLpgProductDto.prototype, "description", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    (0, class_transformer_1.Type)(() => LpgPriceDto),
-    __metadata("design:type", Array)
-], CreateLpgProductDto.prototype, "prices", void 0);
+    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateLpgProductDto.prototype, "selling_price", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateLpgProductDto.prototype, "cost_price", void 0);
 class UpdateLpgProductDto {
     name;
     size_kg;
     category;
     color;
     description;
+    selling_price;
+    cost_price;
     is_active;
 }
 exports.UpdateLpgProductDto = UpdateLpgProductDto;
@@ -112,9 +99,44 @@ __decorate([
 ], UpdateLpgProductDto.prototype, "description", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], UpdateLpgProductDto.prototype, "selling_price", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value != null ? parseFloat(value) : undefined),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], UpdateLpgProductDto.prototype, "cost_price", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateLpgProductDto.prototype, "is_active", void 0);
+class LpgPriceDto {
+    label;
+    price;
+    is_default;
+}
+exports.LpgPriceDto = LpgPriceDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], LpgPriceDto.prototype, "label", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], LpgPriceDto.prototype, "price", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], LpgPriceDto.prototype, "is_default", void 0);
 class CreateLpgPriceDto {
     label;
     price;

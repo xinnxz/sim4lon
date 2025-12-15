@@ -58,8 +58,8 @@ export default function LpgProductsManager() {
         category: 'NON_SUBSIDI' as LpgCategory,
         color: '',
         description: '',
-        priceLabel: 'Harga Retail',
-        priceValue: '',
+        sellingPrice: '',   // Harga jual
+        costPrice: '',      // Harga beli
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -93,8 +93,8 @@ export default function LpgProductsManager() {
             category: 'NON_SUBSIDI',
             color: '',
             description: '',
-            priceLabel: 'Harga Retail',
-            priceValue: '',
+            sellingPrice: '',
+            costPrice: '',
         })
         setEditingProduct(null)
     }
@@ -106,22 +106,29 @@ export default function LpgProductsManager() {
 
     const openEditForm = (product: LpgProduct) => {
         setEditingProduct(product)
-        const defaultPrice = product.prices.find(p => p.is_default) || product.prices[0]
+        // Fallback to old prices[] array for existing products
+        const sellingPrice = product.selling_price || product.prices?.[0]?.price || 0;
+        const costPrice = product.cost_price || product.prices?.[0]?.cost_price;
         setFormData({
             name: product.name,
             size_kg: String(product.size_kg),
             category: product.category,
             color: product.color || '',
             description: product.description || '',
-            priceLabel: defaultPrice?.label || 'Harga Retail',
-            priceValue: defaultPrice ? formatPriceInput(String(defaultPrice.price)) : '',
+            sellingPrice: sellingPrice ? formatPriceInput(String(sellingPrice)) : '',
+            costPrice: costPrice ? formatPriceInput(String(costPrice)) : '',
         })
         setShowForm(true)
     }
 
-    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSellingPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatPriceInput(e.target.value)
-        setFormData({ ...formData, priceValue: formatted })
+        setFormData({ ...formData, sellingPrice: formatted })
+    }
+
+    const handleCostPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPriceInput(e.target.value)
+        setFormData({ ...formData, costPrice: formatted })
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -131,10 +138,17 @@ export default function LpgProductsManager() {
             return
         }
 
-        // Validate price is required for new products
-        const priceNumber = parseCurrency(formData.priceValue)
-        if (!editingProduct && priceNumber <= 0) {
-            toast.error('Harga wajib diisi dan harus lebih dari 0')
+        // Validate selling price is required
+        const sellingPrice = parseCurrency(formData.sellingPrice)
+        if (sellingPrice <= 0) {
+            toast.error('Harga jual wajib diisi dan harus lebih dari 0')
+            return
+        }
+
+        // Validate cost price is required
+        const costPrice = parseCurrency(formData.costPrice)
+        if (costPrice <= 0) {
+            toast.error('Harga beli wajib diisi dan harus lebih dari 0')
             return
         }
 
@@ -147,6 +161,8 @@ export default function LpgProductsManager() {
                     category: formData.category,
                     color: formData.color || undefined,
                     description: formData.description || undefined,
+                    selling_price: sellingPrice,
+                    cost_price: costPrice || undefined,
                 })
                 toast.success(`Produk "${formData.name}" berhasil diperbarui`)
             } else {
@@ -156,11 +172,8 @@ export default function LpgProductsManager() {
                     category: formData.category,
                     color: formData.color || undefined,
                     description: formData.description || undefined,
-                    prices: [{
-                        label: formData.priceLabel || 'Harga Retail',
-                        price: priceNumber,
-                        is_default: true,
-                    }],
+                    selling_price: sellingPrice,
+                    cost_price: costPrice || undefined,
                 })
                 toast.success(`Produk "${formData.name}" berhasil ditambahkan`)
             }
@@ -197,11 +210,26 @@ export default function LpgProductsManager() {
         }
     }
 
+    // Get color hex from color name for display
+    const getColorHex = (colorName: string | null): string => {
+        if (!colorName) return '#6b7280';  // gray default
+        const colorMap: Record<string, string> = {
+            'hijau': '#22c55e',
+            'biru': '#38bdf8',
+            'ungu': '#a855f7',
+            'pink': '#ec4899',
+            'merah': '#dc2626',
+            'kuning': '#eab308',
+            'orange': '#f97316',
+        };
+        return colorMap[colorName.toLowerCase()] || '#6b7280';
+    }
+
     const getCategoryBadge = (category: LpgCategory) => {
         if (category === 'SUBSIDI') {
-            return <Badge className="bg-green-100 text-green-700 border-green-200">Subsidi</Badge>
+            return <Badge variant="outline" className="text-muted-foreground">Subsidi</Badge>
         }
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Non-Subsidi</Badge>
+        return <Badge variant="outline" className="text-muted-foreground">Non-Subsidi</Badge>
     }
 
     if (isLoading) {
@@ -288,13 +316,23 @@ export default function LpgProductsManager() {
                                     </select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="color">Warna Tabung</Label>
-                                    <Input
+                                    <Label htmlFor="color">Warna Grafik *</Label>
+                                    <select
                                         id="color"
                                         value={formData.color}
                                         onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                                        placeholder="hijau, biru, pink, merah"
-                                    />
+                                        className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                                        required
+                                    >
+                                        <option value="">Pilih Warna</option>
+                                        <option value="hijau">🟢 Hijau</option>
+                                        <option value="biru">🔵 Biru</option>
+                                        <option value="ungu">🟣 Ungu</option>
+                                        <option value="pink">🩷 Pink</option>
+                                        <option value="merah">🔴 Merah</option>
+                                        <option value="kuning">🟡 Kuning</option>
+                                        <option value="orange">🟠 Orange</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -308,41 +346,43 @@ export default function LpgProductsManager() {
                                 />
                             </div>
 
-                            {/* Price fields */}
+                            {/* Price fields - simplified */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="priceLabel">
-                                        Label Harga {!editingProduct && '*'}
-                                    </Label>
-                                    <Input
-                                        id="priceLabel"
-                                        value={formData.priceLabel}
-                                        onChange={(e) => setFormData({ ...formData, priceLabel: e.target.value })}
-                                        placeholder="Harga Retail"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="priceValue">
-                                        Harga (Rp) {!editingProduct && '*'}
+                                    <Label htmlFor="sellingPrice">
+                                        Harga Jual (Rp) *
                                     </Label>
                                     <div className="relative">
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                                             Rp
                                         </span>
                                         <Input
-                                            id="priceValue"
+                                            id="sellingPrice"
                                             type="text"
-                                            value={formData.priceValue}
-                                            onChange={handlePriceChange}
+                                            value={formData.sellingPrice}
+                                            onChange={handleSellingPriceChange}
                                             placeholder="18.000"
                                             className="pl-10"
                                         />
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        {editingProduct
-                                            ? 'Kosongkan untuk tidak mengubah harga.'
-                                            : 'Contoh: 18.000 atau 180.000'}
-                                    </p>
+                                </div>
+                                <div>
+                                    <Label htmlFor="costPrice">
+                                        Harga Beli (Rp) *
+                                    </Label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                                            Rp
+                                        </span>
+                                        <Input
+                                            id="costPrice"
+                                            type="text"
+                                            value={formData.costPrice}
+                                            onChange={handleCostPriceChange}
+                                            placeholder="15.000"
+                                            className="pl-10"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -384,14 +424,22 @@ export default function LpgProductsManager() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {products.map((product) => (
-                        <Card key={product.id} className="border-2 flex flex-col h-full">
+                        <Card key={product.id} className="border-2 flex flex-col h-full overflow-hidden" style={{ borderLeftWidth: '4px', borderLeftColor: getColorHex(product.color) }}>
                             <CardHeader className="pb-2 flex-shrink-0">
                                 <div className="flex items-start justify-between gap-2">
-                                    <div className="min-w-0 flex-1">
-                                        <CardTitle className="text-base truncate">{product.name}</CardTitle>
-                                        <CardDescription className="text-xs mt-1">
-                                            {product.size_kg} kg • {product.color || 'Standard'}
-                                        </CardDescription>
+                                    <div className="min-w-0 flex-1 flex items-start gap-2">
+                                        {/* Color indicator dot */}
+                                        <div
+                                            className="w-3 h-3 rounded-full shrink-0 mt-1"
+                                            style={{ backgroundColor: getColorHex(product.color) }}
+                                            title={`Warna: ${product.color || 'Standard'}`}
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <CardTitle className="text-base truncate">{product.name}</CardTitle>
+                                            <CardDescription className="text-xs mt-1">
+                                                {product.size_kg} kg
+                                            </CardDescription>
+                                        </div>
                                     </div>
                                     {getCategoryBadge(product.category)}
                                 </div>
@@ -406,20 +454,30 @@ export default function LpgProductsManager() {
                                     )}
                                 </div>
 
-                                {/* Prices - fixed height area */}
-                                <div className="h-14 mb-3">
-                                    {product.prices.length > 0 ? (
-                                        <div className="space-y-1">
-                                            {product.prices.slice(0, 2).map((price) => (
-                                                <div key={price.id} className="flex justify-between items-center text-sm">
-                                                    <span className="text-muted-foreground text-xs truncate max-w-[100px]">{price.label}</span>
-                                                    <span className="font-semibold">{formatCurrency(Number(price.price))}</span>
+                                {/* Prices - with fallback for old products */}
+                                <div className="h-14 mb-3 space-y-1">
+                                    {(() => {
+                                        // Use selling_price if available, fallback to old prices[] array
+                                        const sellingPrice = product.selling_price
+                                            || (product.prices?.[0]?.price)
+                                            || 0;
+                                        const costPrice = product.cost_price
+                                            || (product.prices?.[0]?.cost_price);
+                                        return (
+                                            <>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground text-xs">Harga Jual</span>
+                                                    <span className="font-semibold">{formatCurrency(Number(sellingPrice))}</span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-xs text-amber-600 italic">Belum ada harga</p>
-                                    )}
+                                                {costPrice && (
+                                                    <div className="flex justify-between items-center text-sm">
+                                                        <span className="text-muted-foreground text-xs">Harga Beli</span>
+                                                        <span className="text-muted-foreground">{formatCurrency(Number(costPrice))}</span>
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </div>
 
                                 {/* Actions - always at bottom */}

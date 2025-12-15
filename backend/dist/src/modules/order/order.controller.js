@@ -26,6 +26,10 @@ let OrderController = class OrderController {
     findAll(page, limit, status, pangkalanId, driverId) {
         return this.orderService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, status, pangkalanId, driverId);
     }
+    getStats(today) {
+        const todayOnly = today === 'true';
+        return this.orderService.getStats(todayOnly);
+    }
     findOne(id) {
         return this.orderService.findOne(id);
     }
@@ -54,6 +58,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], OrderController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('stats'),
+    __param(0, (0, common_1.Query)('today')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], OrderController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
