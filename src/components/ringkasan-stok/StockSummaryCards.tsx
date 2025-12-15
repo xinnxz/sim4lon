@@ -257,174 +257,221 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
     )
   }
 
+  // Calculate total stock across all products
+  const totalStock = products.reduce((sum, p) => sum + (p.stock.current || 0), 0)
+  const totalSubsidi = products.filter(p => p.category === 'SUBSIDI').reduce((sum, p) => sum + (p.stock.current || 0), 0)
+  const totalNonSubsidi = products.filter(p => p.category === 'NON_SUBSIDI').reduce((sum, p) => sum + (p.stock.current || 0), 0)
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {products.map((product, index) => {
-        const isEditing = editingCard === product.id
-        const minStock = product.category === 'SUBSIDI' ? 100 : 50
-        const status = getStatusFromStock(product.stock.current, minStock)
-        // Use selling_price directly, fallback to old prices[] for backward compat
-        const displayPrice = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+    <div className="space-y-6">
+      {/* Total Stock Summary Section */}
+      <Card className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-primary/20">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Total Keseluruhan */}
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/20">
+                <SafeIcon name="Package" className="h-7 w-7 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Stok Keseluruhan</p>
+                <p className="text-3xl font-bold text-foreground">{totalStock.toLocaleString('id-ID')} <span className="text-lg font-normal text-muted-foreground">unit</span></p>
+              </div>
+            </div>
 
-        return (
-          <div
-            key={product.id}
-            className="animate-fadeInUp"
-            style={{ animationDelay: `${0.1 + index * 0.05}s` }}
-          >
-            <Card
-              className={`border shadow-soft hover:shadow-card transition-all duration-300 overflow-hidden ${isEditing ? 'ring-2 ring-primary' : ''}`}
-              style={{ borderLeftWidth: '4px', borderLeftColor: getColorHex(product.color) }}
+            {/* Breakdown by Category */}
+            <div className="flex gap-6 md:gap-8">
+              <div className="text-center md:text-right">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Subsidi</p>
+                <p className="text-xl font-bold text-green-600">{totalSubsidi.toLocaleString('id-ID')}</p>
+                <p className="text-xs text-muted-foreground">unit</p>
+              </div>
+              <div className="h-12 w-px bg-border hidden md:block" />
+              <div className="text-center md:text-right">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Non-Subsidi</p>
+                <p className="text-xl font-bold text-blue-600">{totalNonSubsidi.toLocaleString('id-ID')}</p>
+                <p className="text-xs text-muted-foreground">unit</p>
+              </div>
+              <div className="h-12 w-px bg-border hidden md:block" />
+              <div className="text-center md:text-right">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Jenis Produk</p>
+                <p className="text-xl font-bold text-foreground">{products.length}</p>
+                <p className="text-xs text-muted-foreground">produk aktif</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Product Stock Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {products.map((product, index) => {
+          const isEditing = editingCard === product.id
+          const minStock = product.category === 'SUBSIDI' ? 100 : 50
+          const status = getStatusFromStock(product.stock.current, minStock)
+          // Use selling_price directly, fallback to old prices[] for backward compat
+          const displayPrice = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+
+          return (
+            <div
+              key={product.id}
+              className="animate-fadeInUp"
+              style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-base font-bold truncate">{product.name}</CardTitle>
-                    <div className="text-muted-foreground text-xs">
-                      {product.size_kg} kg
-                    </div>
-                  </div>
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50"
-                  >
-                    <SafeIcon name="Cylinder" className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Current Stock - Large Display */}
-                <div className="text-center py-2">
-                  <span className={`text-4xl font-bold ${product.stock.current < 0 ? 'text-destructive' : 'text-foreground'}`}>
-                    {product.stock.current}
-                  </span>
-                  <span className="text-lg text-muted-foreground ml-2">unit</span>
-                </div>
-
-                {/* Price & Category */}
-                <div className="flex justify-between items-center text-xs">
-                  <Badge variant="outline" className="text-muted-foreground">
-                    {getCategoryLabel(product.category)}
-                  </Badge>
-                  {displayPrice > 0 && (
-                    <span className="font-semibold">{formatPrice(Number(displayPrice))}</span>
-                  )}
-                </div>
-
-
-                {/* Edit Mode */}
-                {isEditing ? (
-                  <div className="space-y-3 pt-2 border-t">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Jumlah</label>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-10 w-10 p-0 select-none"
-                          onClick={handleDecrement}
-                          onMouseDown={() => startHold('decrement')}
-                          onMouseUp={stopHold}
-                          onMouseLeave={stopHold}
-                          onTouchStart={() => startHold('decrement')}
-                          onTouchEnd={stopHold}
-                          disabled={!editQuantity || parseInt(editQuantity) <= 0}
-                        >
-                          <SafeIcon name="Minus" className="h-4 w-4" />
-                        </Button>
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          value={editQuantity}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '')
-                            setEditQuantity(val)
-                          }}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          placeholder="0"
-                          className="h-10 text-center text-lg font-semibold flex-1"
-                          autoFocus
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-10 w-10 p-0 select-none"
-                          onClick={handleIncrement}
-                          onMouseDown={() => startHold('increment')}
-                          onMouseUp={stopHold}
-                          onMouseLeave={stopHold}
-                          onTouchStart={() => startHold('increment')}
-                          onTouchEnd={stopHold}
-                        >
-                          <SafeIcon name="Plus" className="h-4 w-4" />
-                        </Button>
+              <Card
+                className={`border shadow-soft hover:shadow-card transition-all duration-300 overflow-hidden ${isEditing ? 'ring-2 ring-primary' : ''}`}
+                style={{ borderLeftWidth: '4px', borderLeftColor: getColorHex(product.color) }}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base font-bold truncate">{product.name}</CardTitle>
+                      <div className="text-muted-foreground text-xs">
+                        {product.size_kg} kg
                       </div>
                     </div>
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50"
+                    >
+                      <SafeIcon name="Cylinder" className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Current Stock - Large Display */}
+                  <div className="text-center py-2">
+                    <span className={`text-4xl font-bold ${product.stock.current < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                      {product.stock.current}
+                    </span>
+                    <span className="text-lg text-muted-foreground ml-2">unit</span>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                  {/* Price & Category */}
+                  <div className="flex justify-between items-center text-xs">
+                    <Badge variant="outline" className="text-muted-foreground">
+                      {getCategoryLabel(product.category)}
+                    </Badge>
+                    {displayPrice > 0 && (
+                      <span className="font-semibold">{formatPrice(Number(displayPrice))}</span>
+                    )}
+                  </div>
+
+
+                  {/* Edit Mode */}
+                  {isEditing ? (
+                    <div className="space-y-3 pt-2 border-t">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Jumlah</label>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-10 w-10 p-0 select-none"
+                            onClick={handleDecrement}
+                            onMouseDown={() => startHold('decrement')}
+                            onMouseUp={stopHold}
+                            onMouseLeave={stopHold}
+                            onTouchStart={() => startHold('decrement')}
+                            onTouchEnd={stopHold}
+                            disabled={!editQuantity || parseInt(editQuantity) <= 0}
+                          >
+                            <SafeIcon name="Minus" className="h-4 w-4" />
+                          </Button>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={editQuantity}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '')
+                              setEditQuantity(val)
+                            }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                            placeholder="0"
+                            className="h-10 text-center text-lg font-semibold flex-1"
+                            autoFocus
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-10 w-10 p-0 select-none"
+                            onClick={handleIncrement}
+                            onMouseDown={() => startHold('increment')}
+                            onMouseUp={stopHold}
+                            onMouseLeave={stopHold}
+                            onTouchStart={() => startHold('increment')}
+                            onTouchEnd={stopHold}
+                          >
+                            <SafeIcon name="Plus" className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => handleSubmit(product, 'KELUAR')}
+                          disabled={isSubmitting || !editQuantity}
+                        >
+                          {isSubmitting ? (
+                            <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <SafeIcon name="Minus" className="h-4 w-4 mr-1" />
+                              Keluar
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handleSubmit(product, 'MASUK')}
+                          disabled={isSubmitting || !editQuantity}
+                        >
+                          {isSubmitting ? (
+                            <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <SafeIcon name="Plus" className="h-4 w-4 mr-1" />
+                              Masuk
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
                       <Button
+                        variant="ghost"
                         size="sm"
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                        onClick={() => handleSubmit(product, 'KELUAR')}
-                        disabled={isSubmitting || !editQuantity}
+                        className="w-full text-muted-foreground"
+                        onClick={handleCancelEdit}
+                        disabled={isSubmitting}
                       >
-                        {isSubmitting ? (
-                          <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <SafeIcon name="Minus" className="h-4 w-4 mr-1" />
-                            Keluar
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleSubmit(product, 'MASUK')}
-                        disabled={isSubmitting || !editQuantity}
-                      >
-                        {isSubmitting ? (
-                          <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <SafeIcon name="Plus" className="h-4 w-4 mr-1" />
-                            Masuk
-                          </>
-                        )}
+                        Batal
                       </Button>
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full text-muted-foreground"
-                      onClick={handleCancelEdit}
-                      disabled={isSubmitting}
-                    >
-                      Batal
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center pt-2 border-t">
-                    {getStatusBadge(status)}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => handleEdit(product.id)}
-                    >
-                      <SafeIcon name="Pencil" className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )
-      })}
+                  ) : (
+                    <div className="flex justify-between items-center pt-2 border-t">
+                      {getStatusBadge(status)}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => handleEdit(product.id)}
+                      >
+                        <SafeIcon name="Pencil" className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
