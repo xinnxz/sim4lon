@@ -11,9 +11,9 @@ export declare class DriverController {
         } & {
             id: string;
             code: string;
-            is_active: boolean;
             name: string;
             phone: string | null;
+            is_active: boolean;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
@@ -34,9 +34,9 @@ export declare class DriverController {
     } & {
         id: string;
         code: string;
-        is_active: boolean;
         name: string;
         phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -46,9 +46,9 @@ export declare class DriverController {
     create(dto: CreateDriverDto): Promise<{
         id: string;
         code: string;
-        is_active: boolean;
         name: string;
         phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -58,9 +58,9 @@ export declare class DriverController {
     update(id: string, dto: UpdateDriverDto): Promise<{
         id: string;
         code: string;
-        is_active: boolean;
         name: string;
         phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;

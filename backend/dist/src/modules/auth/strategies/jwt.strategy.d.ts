@@ -15,9 +15,9 @@ export declare class JwtStrategy extends JwtStrategy_base {
     validate(payload: JwtPayload): Promise<{
         id: string;
         email: string;
+        name: string;
         role: import("@prisma/client").$Enums.user_role;
         is_active: boolean;
-        name: string;
     }>;
 }
 export {};

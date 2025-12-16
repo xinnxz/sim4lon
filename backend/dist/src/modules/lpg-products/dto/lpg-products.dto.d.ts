@@ -18,13 +18,3 @@ export declare class UpdateLpgProductDto {
     cost_price?: number;
     is_active?: boolean;
 }
-export declare class LpgPriceDto {
-    label: string;
-    price: number;
-    is_default?: boolean;
-}
-export declare class CreateLpgPriceDto {
-    label: string;
-    price: number;
-    is_default?: boolean;
-}

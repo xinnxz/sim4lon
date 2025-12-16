@@ -42,15 +42,6 @@ let LpgProductsController = class LpgProductsController {
     remove(id) {
         return this.lpgProductsService.remove(id);
     }
-    addPrice(productId, dto) {
-        return this.lpgProductsService.addPrice(productId, dto);
-    }
-    updatePrice(priceId, dto) {
-        return this.lpgProductsService.updatePrice(priceId, dto);
-    }
-    removePrice(priceId) {
-        return this.lpgProductsService.removePrice(priceId);
-    }
 };
 exports.LpgProductsController = LpgProductsController;
 __decorate([
@@ -101,35 +92,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], LpgProductsController.prototype, "remove", null);
-__decorate([
-    (0, common_1.Post)(':productId/prices'),
-    (0, common_1.UseGuards)(guards_1.RolesGuard),
-    (0, decorators_1.Roles)(client_1.user_role.ADMIN),
-    __param(0, (0, common_1.Param)('productId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, dto_1.CreateLpgPriceDto]),
-    __metadata("design:returntype", void 0)
-], LpgProductsController.prototype, "addPrice", null);
-__decorate([
-    (0, common_1.Put)('prices/:priceId'),
-    (0, common_1.UseGuards)(guards_1.RolesGuard),
-    (0, decorators_1.Roles)(client_1.user_role.ADMIN),
-    __param(0, (0, common_1.Param)('priceId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, dto_1.CreateLpgPriceDto]),
-    __metadata("design:returntype", void 0)
-], LpgProductsController.prototype, "updatePrice", null);
-__decorate([
-    (0, common_1.Delete)('prices/:priceId'),
-    (0, common_1.UseGuards)(guards_1.RolesGuard),
-    (0, decorators_1.Roles)(client_1.user_role.ADMIN),
-    __param(0, (0, common_1.Param)('priceId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], LpgProductsController.prototype, "removePrice", null);
 exports.LpgProductsController = LpgProductsController = __decorate([
     (0, common_1.Controller)('lpg-products'),
     (0, common_1.UseGuards)(guards_1.JwtAuthGuard),

@@ -23,18 +23,12 @@ let LpgProductsService = class LpgProductsService {
                 deleted_at: null,
                 ...(includeInactive ? {} : { is_active: true }),
             },
-            include: {
-                prices: true,
-            },
             orderBy: { size_kg: 'asc' },
         });
     }
     async findOne(id) {
         const product = await this.prisma.lpg_products.findUnique({
             where: { id },
-            include: {
-                prices: true,
-            },
         });
         if (!product || product.deleted_at) {
             throw new common_1.NotFoundException('Produk tidak ditemukan');
@@ -81,9 +75,6 @@ let LpgProductsService = class LpgProductsService {
                 selling_price: dto.selling_price,
                 cost_price: dto.cost_price,
             },
-            include: {
-                prices: true,
-            },
         });
     }
     async update(id, dto) {
@@ -101,9 +92,6 @@ let LpgProductsService = class LpgProductsService {
                 is_active: dto.is_active,
                 updated_at: new Date(),
             },
-            include: {
-                prices: true,
-            },
         });
     }
     async remove(id) {
@@ -113,46 +101,6 @@ let LpgProductsService = class LpgProductsService {
             data: { deleted_at: new Date() },
         });
         return { message: 'Produk berhasil dihapus' };
-    }
-    async addPrice(productId, dto) {
-        await this.findOne(productId);
-        return this.prisma.lpg_prices.create({
-            data: {
-                lpg_product_id: productId,
-                label: dto.label,
-                price: dto.price,
-                is_default: dto.is_default || false,
-            },
-        });
-    }
-    async updatePrice(priceId, dto) {
-        const price = await this.prisma.lpg_prices.findUnique({
-            where: { id: priceId },
-        });
-        if (!price) {
-            throw new common_1.NotFoundException('Harga tidak ditemukan');
-        }
-        return this.prisma.lpg_prices.update({
-            where: { id: priceId },
-            data: {
-                label: dto.label,
-                price: dto.price,
-                is_default: dto.is_default,
-                updated_at: new Date(),
-            },
-        });
-    }
-    async removePrice(priceId) {
-        const price = await this.prisma.lpg_prices.findUnique({
-            where: { id: priceId },
-        });
-        if (!price) {
-            throw new common_1.NotFoundException('Harga tidak ditemukan');
-        }
-        await this.prisma.lpg_prices.delete({
-            where: { id: priceId },
-        });
-        return { message: 'Harga berhasil dihapus' };
     }
 };
 exports.LpgProductsService = LpgProductsService;

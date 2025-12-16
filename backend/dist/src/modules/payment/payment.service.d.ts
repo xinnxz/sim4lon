@@ -50,9 +50,9 @@ export declare class PaymentService {
                 id: string;
                 code: string;
                 email: string | null;
-                is_active: boolean;
                 name: string;
                 phone: string | null;
+                is_active: boolean;
                 created_at: Date;
                 updated_at: Date;
                 deleted_at: Date | null;
@@ -67,9 +67,9 @@ export declare class PaymentService {
                 created_at: Date;
                 updated_at: Date;
                 order_id: string;
-                label: string | null;
                 tax_amount: import("@prisma/client/runtime/library").Decimal;
                 lpg_type: import("@prisma/client").$Enums.lpg_type;
+                label: string | null;
                 price_per_unit: import("@prisma/client/runtime/library").Decimal;
                 qty: number;
                 sub_total: import("@prisma/client/runtime/library").Decimal | null;

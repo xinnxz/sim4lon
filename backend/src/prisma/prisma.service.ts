@@ -51,7 +51,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     get activity_logs() { return this._client.activity_logs; }
     // New: Dynamic LPG Products
     get lpg_products() { return this._client.lpg_products; }
-    get lpg_prices() { return this._client.lpg_prices; }
 
     async onModuleInit() {
         await this._client.$connect();

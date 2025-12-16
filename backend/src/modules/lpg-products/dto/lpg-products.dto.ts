@@ -79,33 +79,3 @@ export class UpdateLpgProductDto {
     @IsBoolean()
     is_active?: boolean;
 }
-
-// DEPRECATED: Keep for backward compatibility
-export class LpgPriceDto {
-    @IsString()
-    label: string;
-
-    @Transform(({ value }) => parseFloat(value))
-    @IsNumber()
-    @Min(0)
-    price: number;
-
-    @IsOptional()
-    @IsBoolean()
-    is_default?: boolean;
-}
-
-// DEPRECATED: Keep for backward compatibility  
-export class CreateLpgPriceDto {
-    @IsString()
-    label: string;
-
-    @Transform(({ value }) => parseFloat(value))
-    @IsNumber()
-    @Min(0)
-    price: number;
-
-    @IsOptional()
-    @IsBoolean()
-    is_default?: boolean;
-}

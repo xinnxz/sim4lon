@@ -1,3 +1,19 @@
+// ============================================================
+// SIM4LON DATABASE SCHEMA
+// Sistem Informasi Manajemen Distribusi LPG
+// ============================================================
+//
+// SCHEMA VERSION: 2.0 (Cleaned up)
+// LAST UPDATED: 2025-12-16
+//
+// TABLES:
+//   Core:      users, pangkalans, drivers
+//   Orders:    orders, order_items, timeline_tracks
+//   Payments:  invoices, payment_records, order_payment_details
+//   Products:  lpg_products (lpg_prices deprecated)
+//   Tracking:  stock_histories, activity_logs
+// ============================================================
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
@@ -9,44 +25,206 @@ datasource db {
   extensions = [uuid_ossp(map: "uuid-ossp"), pgcrypto]
 }
 
-model activity_logs {
-  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id        String?         @db.Uuid
-  order_id       String?         @db.Uuid
-  type           String          @db.VarChar(50)
-  title          String          @db.VarChar(255)
-  description    String?
-  pangkalan_name String?         @db.VarChar(255)
-  detail_numeric Decimal?        @db.Decimal(15, 2)
-  icon_name      String?         @db.VarChar(50)
-  order_status   status_pesanan?
-  timestamp      DateTime        @default(now()) @db.Timestamptz(6)
-  created_at     DateTime        @default(now()) @db.Timestamptz(6)
-  orders         orders?         @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_order")
-  users          users?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_user")
+// ============================================================
+// CORE TABLES
+// ============================================================
 
-  @@index([timestamp(sort: Desc)], map: "idx_activity_timestamp")
-  @@index([type], map: "idx_activity_type")
+/// User account for admin and operator login
+model users {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String            @unique @db.VarChar(20)  /// Display code: USR-001
+  email           String            @unique @db.VarChar(255)
+  password        String            @db.VarChar(255)
+  name            String            @db.VarChar(255)
+  phone           String?           @db.VarChar(20)
+  avatar_url      String?
+  role            user_role         @default(OPERATOR)
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
+  
+  // Relations
+  activity_logs   activity_logs[]
+  payment_records payment_records[]
+  stock_histories stock_histories[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([role], map: "idx_users_role")
 }
 
-model drivers {
+/// LPG Distribution Agent / Pangkalan
+model pangkalans {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String    @unique @db.VarChar(20)  // DRV-001 format for display
+  code       String    @unique @db.VarChar(20)  /// Display code: PKL-001
   name       String    @db.VarChar(255)
+  address    String
+  region     String?   @db.VarChar(100)
+  pic_name   String?   @db.VarChar(255)     /// Person In Charge name
   phone      String?   @db.VarChar(20)
-  vehicle_id String?   @db.VarChar(20)
-  is_active  Boolean   @default(true)
+  email      String?   @db.VarChar(255)     /// For sending invoices
+  capacity   Int?                            /// Storage capacity in units
   note       String?
+  is_active  Boolean   @default(true)
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime  @default(now()) @db.Timestamptz(6)
   deleted_at DateTime? @db.Timestamptz(6)
+  
+  // Relations
   orders     orders[]
+
+  @@index([region], map: "idx_pangkalans_region")
+  @@index([is_active], map: "idx_pangkalans_active")
 }
 
+/// Delivery driver information
+model drivers {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String    @unique @db.VarChar(20)  /// Display code: DRV-001
+  name       String    @db.VarChar(255)
+  phone      String?   @db.VarChar(20)
+  vehicle_id String?   @db.VarChar(20)      /// License plate number
+  note       String?
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  
+  // Relations
+  orders     orders[]
+
+  @@index([is_active], map: "idx_drivers_active")
+}
+
+// ============================================================
+// PRODUCT & STOCK TABLES
+// ============================================================
+
+/// LPG Product catalog with direct pricing
+model lpg_products {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String            @db.VarChar(100)     /// e.g., "Elpiji 3kg Hijau"
+  size_kg         Decimal           @db.Decimal(5, 2)    /// Weight: 3.00, 12.00, 50.00
+  category        lpg_category      @default(NON_SUBSIDI)
+  color           String?           @db.VarChar(50)      /// hijau, biru, pink
+  description     String?
+  selling_price   Decimal           @default(0) @db.Decimal(15, 2)  /// Harga jual
+  cost_price      Decimal?          @db.Decimal(15, 2)   /// Harga beli (untuk profit margin)
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
+  
+  // Relations
+  stock_histories stock_histories[]
+
+  @@index([category], map: "idx_lpg_products_category")
+  @@index([is_active], map: "idx_lpg_products_active")
+}
+
+/// Stock movement history (MASUK/KELUAR)
+model stock_histories {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lpg_product_id      String?             @db.Uuid  /// Reference to product
+  lpg_type            lpg_type?           /// @deprecated - Legacy field for backward compat
+  movement_type       stock_movement_type /// MASUK or KELUAR
+  qty                 Int                 /// Quantity moved
+  note                String?
+  recorded_by_user_id String?             @db.Uuid
+  timestamp           DateTime            @default(now()) @db.Timestamptz(6)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  lpg_product         lpg_products?       @relation(fields: [lpg_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_lpg_product")
+  users               users?              @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_user")
+
+  @@index([lpg_product_id], map: "idx_stock_product")
+  @@index([lpg_type], map: "idx_stock_type")
+  @@index([movement_type], map: "idx_stock_movement")
+  @@index([timestamp(sort: Desc)], map: "idx_stock_timestamp")
+}
+
+// ============================================================
+// ORDER TABLES
+// ============================================================
+
+/// Main order/pesanan record
+model orders {
+  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                  String                 @unique @db.VarChar(20)  /// Display: ORD-0001
+  pangkalan_id          String                 @db.Uuid
+  driver_id             String?                @db.Uuid
+  order_date            DateTime               @default(dbgenerated("CURRENT_DATE")) @db.Date
+  current_status        status_pesanan         @default(DRAFT)
+  subtotal              Decimal                @default(0) @db.Decimal(15, 2)  /// Before tax
+  tax_amount            Decimal                @default(0) @db.Decimal(15, 2)  /// PPN 12% for non-subsidi
+  total_amount          Decimal                @default(0) @db.Decimal(15, 2)  /// subtotal + tax
+  note                  String?
+  created_at            DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?              @db.Timestamptz(6)
+  
+  // Relations
+  pangkalans            pangkalans             @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_pangkalan")
+  drivers               drivers?               @relation(fields: [driver_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_driver")
+  order_items           order_items[]
+  order_payment_details order_payment_details?
+  invoices              invoices[]
+  payment_records       payment_records[]
+  timeline_tracks       timeline_tracks[]
+  activity_logs         activity_logs[]
+
+  @@index([current_status], map: "idx_orders_status")
+  @@index([pangkalan_id], map: "idx_orders_pangkalan")
+  @@index([order_date], map: "idx_orders_date")
+  @@index([created_at(sort: Desc)], map: "idx_orders_created")
+}
+
+/// Individual item in an order
+model order_items {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id       String   @db.Uuid
+  lpg_type       lpg_type /// Product type enum
+  label          String?  @db.VarChar(50)       /// Display name
+  price_per_unit Decimal  @db.Decimal(15, 2)
+  qty            Int
+  sub_total      Decimal? @db.Decimal(15, 2)
+  is_taxable     Boolean  @default(false)       /// true for NON_SUBSIDI (12% PPN)
+  tax_amount     Decimal  @default(0) @db.Decimal(15, 2)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  orders         orders   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_order_items_order")
+
+  @@index([order_id], map: "idx_order_items_order")
+}
+
+/// Order status timeline tracking
+model timeline_tracks {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id    String         @db.Uuid
+  status      status_pesanan /// Status at this point
+  description String?
+  note        String?
+  created_at  DateTime       @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  orders      orders         @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_timeline_orders")
+
+  @@index([order_id], map: "idx_timeline_order")
+  @@index([order_id, created_at(sort: Desc)], map: "idx_timeline_created")
+}
+
+// ============================================================
+// PAYMENT TABLES
+// ============================================================
+
+/// Invoice generated from order
 model invoices {
   id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id        String            @db.Uuid
-  invoice_number  String?           @unique @db.VarChar(50)
+  invoice_number  String?           @unique @db.VarChar(50)  /// INV-2024-0001
   invoice_date    DateTime          @default(dbgenerated("CURRENT_DATE")) @db.Date
   due_date        DateTime?         @db.Date
   billing_address String?
@@ -55,88 +233,37 @@ model invoices {
   tax_rate        Decimal?          @default(0) @db.Decimal(5, 2)
   tax_amount      Decimal?          @default(0) @db.Decimal(15, 2)
   grand_total     Decimal           @db.Decimal(15, 2)
-  payment_status  String?           @default("UNPAID") @db.VarChar(50)
+  payment_status  String?           @default("UNPAID") @db.VarChar(50)  /// UNPAID, PARTIAL, PAID
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   updated_at      DateTime          @default(now()) @db.Timestamptz(6)
   deleted_at      DateTime?         @db.Timestamptz(6)
+  
+  // Relations
   orders          orders            @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoices_order")
   payment_records payment_records[]
+
+  @@index([order_id], map: "idx_invoices_order")
+  @@index([payment_status], map: "idx_invoices_status")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model order_items {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  order_id       String   @db.Uuid
-  lpg_type       lpg_type
-  label          String?  @db.VarChar(50)
-  price_per_unit Decimal  @db.Decimal(15, 2)
-  qty            Int
-  sub_total      Decimal? @db.Decimal(15, 2)
-  is_taxable     Boolean  @default(false)  // true jika NON_SUBSIDI (kena PPN 12%)
-  tax_amount     Decimal  @default(0) @db.Decimal(15, 2)  // PPN per item
-  created_at     DateTime @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime @default(now()) @db.Timestamptz(6)
-  orders         orders   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_order_items_order")
-
-  @@index([order_id], map: "idx_order_items_order")
-}
-
+/// Quick payment summary per order (one-to-one)
 model order_payment_details {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id       String          @unique @db.Uuid
   is_paid        Boolean         @default(false)
-  is_dp          Boolean         @default(false)
+  is_dp          Boolean         @default(false)  /// Down payment flag
   payment_method payment_method?
   amount_paid    Decimal?        @default(0) @db.Decimal(15, 2)
   payment_date   DateTime?       @db.Timestamptz(6)
-  proof_url      String?
+  proof_url      String?                          /// Payment proof image
   created_at     DateTime        @default(now()) @db.Timestamptz(6)
   updated_at     DateTime        @default(now()) @db.Timestamptz(6)
+  
+  // Relations
   orders         orders          @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_payment_details_order")
 }
 
-model orders {
-  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code                  String                 @unique @db.VarChar(20)  // ORD-0001 format for display
-  pangkalan_id          String                 @db.Uuid
-  driver_id             String?                @db.Uuid
-  order_date            DateTime               @default(dbgenerated("CURRENT_DATE")) @db.Date
-  current_status        status_pesanan         @default(DRAFT)
-  subtotal              Decimal                @default(0) @db.Decimal(15, 2)  // Total sebelum pajak
-  tax_amount            Decimal                @default(0) @db.Decimal(15, 2)  // Total PPN (12% dari non-subsidi)
-  total_amount          Decimal                @default(0) @db.Decimal(15, 2)  // Subtotal + Tax
-  note                  String?
-  created_at            DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime               @default(now()) @db.Timestamptz(6)
-  deleted_at            DateTime?              @db.Timestamptz(6)
-  activity_logs         activity_logs[]
-  invoices              invoices[]
-  order_items           order_items[]
-  order_payment_details order_payment_details?
-  drivers               drivers?               @relation(fields: [driver_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_driver")
-  pangkalans            pangkalans             @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_pangkalan")
-  payment_records       payment_records[]
-  timeline_tracks       timeline_tracks[]
-}
-
-model pangkalans {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String    @unique @db.VarChar(20)  // PKL-001 format for display
-  name       String    @db.VarChar(255)
-  address    String
-  region     String?   @db.VarChar(100)
-  pic_name   String?   @db.VarChar(255)
-  phone      String?   @db.VarChar(20)
-  email      String?   @db.VarChar(255)  // Email untuk kirim invoice/dokumen
-  capacity   Int?
-  note       String?
-  is_active  Boolean   @default(true)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at DateTime? @db.Timestamptz(6)
-  orders     orders[]
-}
-
+/// Individual payment transaction records
 model payment_records {
   id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id            String?        @db.Uuid
@@ -148,129 +275,86 @@ model payment_records {
   recorded_by_user_id String         @db.Uuid
   note                String?
   created_at          DateTime       @default(now()) @db.Timestamptz(6)
-  invoices            invoices?      @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_invoice")
+  
+  // Relations
   orders              orders?        @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_order")
+  invoices            invoices?      @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_invoice")
   users               users          @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_user")
+
+  @@index([order_id], map: "idx_payment_records_order")
+  @@index([payment_time(sort: Desc)], map: "idx_payment_records_time")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model stock_histories {
-  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  lpg_type            lpg_type?           // Keep for backward compatibility
-  lpg_product_id      String?             @db.Uuid // New: reference to dynamic product
-  movement_type       stock_movement_type
-  qty                 Int
-  note                String?
-  recorded_by_user_id String?             @db.Uuid
-  timestamp           DateTime            @default(now()) @db.Timestamptz(6)
-  created_at          DateTime            @default(now()) @db.Timestamptz(6)
-  users               users?              @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_user")
-  lpg_product         lpg_products?       @relation(fields: [lpg_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_lpg_product")
+// ============================================================
+// ACTIVITY TRACKING
+// ============================================================
 
-  @@index([timestamp(sort: Desc)], map: "idx_stock_timestamp")
-  @@index([lpg_type], map: "idx_stock_type")
-  @@index([lpg_product_id], map: "idx_stock_product")
+/// System activity logs for audit trail
+model activity_logs {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String?         @db.Uuid
+  order_id       String?         @db.Uuid
+  type           String          @db.VarChar(50)      /// order_created, stock_updated, etc.
+  title          String          @db.VarChar(255)
+  description    String?
+  pangkalan_name String?         @db.VarChar(255)     /// Denormalized for display
+  detail_numeric Decimal?        @db.Decimal(15, 2)
+  icon_name      String?         @db.VarChar(50)      /// Lucide icon name
+  order_status   status_pesanan?
+  timestamp      DateTime        @default(now()) @db.Timestamptz(6)
+  created_at     DateTime        @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  users          users?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_user")
+  orders         orders?         @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_order")
+
+  @@index([type], map: "idx_activity_type")
+  @@index([timestamp(sort: Desc)], map: "idx_activity_timestamp")
+  @@index([user_id], map: "idx_activity_user")
 }
 
-// Dynamic LPG Products Management
-model lpg_products {
-  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name            String            @db.VarChar(100)
-  size_kg         Decimal           @db.Decimal(5, 2) // e.g., 3.00, 5.50, 12.00, 50.00
-  category        lpg_category      @default(NON_SUBSIDI)
-  color           String?           @db.VarChar(50) // e.g., "hijau", "biru", "pink"
-  description     String?
-  selling_price   Decimal           @default(0) @db.Decimal(15, 2)  // Harga jual default
-  cost_price      Decimal?          @db.Decimal(15, 2)              // Harga beli (untuk profit)
-  is_active       Boolean           @default(true)
-  created_at      DateTime          @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
-  deleted_at      DateTime?         @db.Timestamptz(6)
-  prices          lpg_prices[]      // Keep for backward compat, akan di-deprecate
-  stock_histories stock_histories[]
+// ============================================================
+// ENUMS
+// ============================================================
 
-  @@index([category], map: "idx_lpg_products_category")
-  @@index([is_active], map: "idx_lpg_products_active")
+/// User role for access control
+enum user_role {
+  ADMIN     /// Full access
+  OPERATOR  /// Limited access
 }
 
-// Multiple prices per product (e.g., retail, wholesale, different brands)
-model lpg_prices {
-  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  lpg_product_id String       @db.Uuid
-  label          String       @db.VarChar(100) // e.g., "Harga Retail", "Harga Grosir"
-  price          Decimal      @db.Decimal(15, 2)  // Harga jual
-  cost_price     Decimal?     @db.Decimal(15, 2)  // Harga beli (untuk hitung profit)
-  is_default     Boolean      @default(false)
-  created_at     DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime     @default(now()) @db.Timestamptz(6)
-  lpg_product    lpg_products @relation(fields: [lpg_product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_prices_product")
-
-  @@index([lpg_product_id], map: "idx_lpg_prices_product")
+/// LPG product category
+enum lpg_category {
+  SUBSIDI      /// Government subsidized (3kg hijau)
+  NON_SUBSIDI  /// Commercial (12kg, 50kg)
 }
 
-model timeline_tracks {
-  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  order_id    String         @db.Uuid
-  status      status_pesanan
-  description String?
-  note        String?
-  created_at  DateTime       @default(now()) @db.Timestamptz(6)
-  orders      orders         @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_timeline_orders")
-
-  @@index([order_id, created_at(sort: Desc)], map: "idx_timeline_created")
-  @@index([order_id], map: "idx_timeline_order")
-}
-
-model users {
-  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code            String            @unique @db.VarChar(20)  // USR-001 format for display
-  email           String            @unique @db.VarChar(255)
-  password        String            @db.VarChar(255)
-  role            user_role         @default(OPERATOR)
-  is_active       Boolean           @default(true)
-  name            String            @db.VarChar(255)
-  phone           String?           @db.VarChar(20)
-  avatar_url      String?
-  created_at      DateTime          @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
-  deleted_at      DateTime?         @db.Timestamptz(6)
-  activity_logs   activity_logs[]
-  payment_records payment_records[]
-  stock_histories stock_histories[]
-}
-
+/// @deprecated - Legacy LPG type enum, use lpg_products instead
 enum lpg_type {
   kg3  @map("3kg")
   kg12 @map("12kg")
   kg50 @map("50kg")
 }
 
-enum payment_method {
-  TUNAI
-  TRANSFER
-}
-
+/// Order status workflow
 enum status_pesanan {
-  DRAFT
-  MENUNGGU_PEMBAYARAN
-  DIPROSES
-  SIAP_KIRIM
-  DIKIRIM
-  SELESAI
-  BATAL
+  DRAFT               /// Newly created
+  MENUNGGU_PEMBAYARAN /// Awaiting payment
+  DIPROSES            /// Being processed
+  SIAP_KIRIM          /// Ready for delivery
+  DIKIRIM             /// Out for delivery
+  SELESAI             /// Completed
+  BATAL               /// Cancelled
 }
 
+/// Payment method options
+enum payment_method {
+  TUNAI    /// Cash
+  TRANSFER /// Bank transfer
+}
+
+/// Stock movement direction
 enum stock_movement_type {
-  MASUK
-  KELUAR
-}
-
-enum user_role {
-  ADMIN
-  OPERATOR
-}
-
-enum lpg_category {
-  SUBSIDI
-  NON_SUBSIDI
+  MASUK   /// Stock in
+  KELUAR  /// Stock out
 }

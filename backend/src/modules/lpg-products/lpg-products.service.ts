@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
-import { CreateLpgProductDto, UpdateLpgProductDto, CreateLpgPriceDto } from './dto';
+import { CreateLpgProductDto, UpdateLpgProductDto } from './dto';
 
 @Injectable()
 export class LpgProductsService {
@@ -15,9 +15,6 @@ export class LpgProductsService {
                 deleted_at: null,
                 ...(includeInactive ? {} : { is_active: true }),
             },
-            include: {
-                prices: true,  // Keep for backward compat
-            },
             orderBy: { size_kg: 'asc' },
         });
     }
@@ -28,9 +25,6 @@ export class LpgProductsService {
     async findOne(id: string) {
         const product = await this.prisma.lpg_products.findUnique({
             where: { id },
-            include: {
-                prices: true,
-            },
         });
 
         if (!product || product.deleted_at) {
@@ -94,9 +88,6 @@ export class LpgProductsService {
                 selling_price: dto.selling_price,
                 cost_price: dto.cost_price,
             },
-            include: {
-                prices: true,
-            },
         });
     }
 
@@ -119,9 +110,6 @@ export class LpgProductsService {
                 is_active: dto.is_active,
                 updated_at: new Date(),
             },
-            include: {
-                prices: true,
-            },
         });
     }
 
@@ -137,65 +125,5 @@ export class LpgProductsService {
         });
 
         return { message: 'Produk berhasil dihapus' };
-    }
-
-    // ==================== LEGACY PRICE METHODS (DEPRECATED) ====================
-
-    /**
-     * @deprecated Use selling_price directly on product
-     */
-    async addPrice(productId: string, dto: CreateLpgPriceDto) {
-        await this.findOne(productId);
-
-        return this.prisma.lpg_prices.create({
-            data: {
-                lpg_product_id: productId,
-                label: dto.label,
-                price: dto.price,
-                is_default: dto.is_default || false,
-            },
-        });
-    }
-
-    /**
-     * @deprecated Use selling_price directly on product
-     */
-    async updatePrice(priceId: string, dto: CreateLpgPriceDto) {
-        const price = await this.prisma.lpg_prices.findUnique({
-            where: { id: priceId },
-        });
-
-        if (!price) {
-            throw new NotFoundException('Harga tidak ditemukan');
-        }
-
-        return this.prisma.lpg_prices.update({
-            where: { id: priceId },
-            data: {
-                label: dto.label,
-                price: dto.price,
-                is_default: dto.is_default,
-                updated_at: new Date(),
-            },
-        });
-    }
-
-    /**
-     * @deprecated Use selling_price directly on product
-     */
-    async removePrice(priceId: string) {
-        const price = await this.prisma.lpg_prices.findUnique({
-            where: { id: priceId },
-        });
-
-        if (!price) {
-            throw new NotFoundException('Harga tidak ditemukan');
-        }
-
-        await this.prisma.lpg_prices.delete({
-            where: { id: priceId },
-        });
-
-        return { message: 'Harga berhasil dihapus' };
     }
 }
