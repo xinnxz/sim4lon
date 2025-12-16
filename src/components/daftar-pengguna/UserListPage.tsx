@@ -64,6 +64,9 @@ export default function UserListPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
+  // State untuk current user (untuk self-protection)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
   // State untuk filter dan search
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
@@ -75,6 +78,23 @@ export default function UserListPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
+
+  /**
+   * Fetch current user ID saat component mount
+   * Ini untuk self-protection: user tidak bisa edit/hapus dirinya sendiri
+   */
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const { authApi } = await import('@/lib/api')
+        const profile = await authApi.getProfile()
+        setCurrentUserId(profile.id)
+      } catch (error) {
+        console.error('Failed to get current user:', error)
+      }
+    }
+    fetchCurrentUser()
+  }, [])
 
   /**
    * Fetch data user dari API
@@ -298,65 +318,90 @@ export default function UserListPage() {
                 </TableHeader>
                 <TableBody>
                   {userList.length > 0 ? (
-                    userList.map((user) => (
-                      <TableRow key={user.id} className="hover:bg-muted/50">
-                        <TableCell className="font-mono text-sm text-primary">
-                          {(user as any).code || '-'}
-                        </TableCell>
-                        <TableCell className="font-medium">{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.phone || '-'}</TableCell>
-                        <TableCell>
-                          <Badge className={roleBadgeColors[user.role]}>
-                            {roleLabels[user.role]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                            {user.is_active ? 'Aktif' : 'Nonaktif'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <SafeIcon name="MoreVertical" className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditClick(user)}>
-                                <SafeIcon name="Edit" className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              {user.is_active ? (
-                                <DropdownMenuItem
-                                  className="text-orange-600"
-                                  onClick={() => handleStatusToggleClick(user)}
-                                >
-                                  <SafeIcon name="Ban" className="mr-2 h-4 w-4" />
-                                  Nonaktifkan
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem
-                                  className="text-green-600"
-                                  onClick={() => handleStatusToggleClick(user)}
-                                >
-                                  <SafeIcon name="Check" className="mr-2 h-4 w-4" />
-                                  Aktifkan
-                                </DropdownMenuItem>
+                    userList.map((user) => {
+                      const isCurrentUser = user.id === currentUserId
+                      return (
+                        <TableRow
+                          key={user.id}
+                          className={`hover:bg-muted/50 ${isCurrentUser ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
+                        >
+                          <TableCell className="font-mono text-sm text-primary">
+                            {(user as any).code || '-'}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {user.name}
+                              {isCurrentUser && (
+                                <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+                                  Anda
+                                </Badge>
                               )}
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteClick(user)}
-                              >
-                                <SafeIcon name="Trash2" className="mr-2 h-4 w-4" />
-                                Hapus
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                            </div>
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.phone || '-'}</TableCell>
+                          <TableCell>
+                            <Badge className={roleBadgeColors[user.role]}>
+                              {roleLabels[user.role]}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.is_active ? 'default' : 'secondary'}>
+                              {user.is_active ? 'Aktif' : 'Nonaktif'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <SafeIcon name="MoreVertical" className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {/* Self-protection: User tidak bisa edit/hapus akun sendiri */}
+                                {isCurrentUser ? (
+                                  <DropdownMenuItem disabled className="text-muted-foreground cursor-not-allowed">
+                                    <SafeIcon name="ShieldAlert" className="mr-2 h-4 w-4" />
+                                    Tidak dapat mengubah akun sendiri
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleEditClick(user)}>
+                                      <SafeIcon name="Edit" className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    {user.is_active ? (
+                                      <DropdownMenuItem
+                                        className="text-orange-600"
+                                        onClick={() => handleStatusToggleClick(user)}
+                                      >
+                                        <SafeIcon name="Ban" className="mr-2 h-4 w-4" />
+                                        Nonaktifkan
+                                      </DropdownMenuItem>
+                                    ) : (
+                                      <DropdownMenuItem
+                                        className="text-green-600"
+                                        onClick={() => handleStatusToggleClick(user)}
+                                      >
+                                        <SafeIcon name="Check" className="mr-2 h-4 w-4" />
+                                        Aktifkan
+                                      </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuItem
+                                      className="text-destructive"
+                                      onClick={() => handleDeleteClick(user)}
+                                    >
+                                      <SafeIcon name="Trash2" className="mr-2 h-4 w-4" />
+                                      Hapus
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
                   ) : (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8">

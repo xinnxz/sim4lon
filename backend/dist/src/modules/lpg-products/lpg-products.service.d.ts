@@ -8,9 +8,9 @@ export declare class LpgProductsService {
             id: string;
             created_at: Date;
             updated_at: Date;
-            cost_price: import("@prisma/client/runtime/client").Decimal | null;
+            cost_price: import("@prisma/client/runtime/library").Decimal | null;
             label: string;
-            price: import("@prisma/client/runtime/client").Decimal;
+            price: import("@prisma/client/runtime/library").Decimal;
             is_default: boolean;
             lpg_product_id: string;
         }[];
@@ -22,20 +22,20 @@ export declare class LpgProductsService {
         updated_at: Date;
         deleted_at: Date | null;
         description: string | null;
-        size_kg: import("@prisma/client/runtime/client").Decimal;
+        size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        selling_price: import("@prisma/client/runtime/client").Decimal;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        selling_price: import("@prisma/client/runtime/library").Decimal;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
     })[]>;
     findOne(id: string): Promise<{
         prices: {
             id: string;
             created_at: Date;
             updated_at: Date;
-            cost_price: import("@prisma/client/runtime/client").Decimal | null;
+            cost_price: import("@prisma/client/runtime/library").Decimal | null;
             label: string;
-            price: import("@prisma/client/runtime/client").Decimal;
+            price: import("@prisma/client/runtime/library").Decimal;
             is_default: boolean;
             lpg_product_id: string;
         }[];
@@ -47,11 +47,11 @@ export declare class LpgProductsService {
         updated_at: Date;
         deleted_at: Date | null;
         description: string | null;
-        size_kg: import("@prisma/client/runtime/client").Decimal;
+        size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        selling_price: import("@prisma/client/runtime/client").Decimal;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        selling_price: import("@prisma/client/runtime/library").Decimal;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
     }>;
     getStockSummary(): Promise<{
         stock: {
@@ -63,9 +63,9 @@ export declare class LpgProductsService {
             id: string;
             created_at: Date;
             updated_at: Date;
-            cost_price: import("@prisma/client/runtime/client").Decimal | null;
+            cost_price: import("@prisma/client/runtime/library").Decimal | null;
             label: string;
-            price: import("@prisma/client/runtime/client").Decimal;
+            price: import("@prisma/client/runtime/library").Decimal;
             is_default: boolean;
             lpg_product_id: string;
         }[];
@@ -76,20 +76,20 @@ export declare class LpgProductsService {
         updated_at: Date;
         deleted_at: Date | null;
         description: string | null;
-        size_kg: import("@prisma/client/runtime/client").Decimal;
+        size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        selling_price: import("@prisma/client/runtime/client").Decimal;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        selling_price: import("@prisma/client/runtime/library").Decimal;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
     }[]>;
     create(dto: CreateLpgProductDto): Promise<{
         prices: {
             id: string;
             created_at: Date;
             updated_at: Date;
-            cost_price: import("@prisma/client/runtime/client").Decimal | null;
+            cost_price: import("@prisma/client/runtime/library").Decimal | null;
             label: string;
-            price: import("@prisma/client/runtime/client").Decimal;
+            price: import("@prisma/client/runtime/library").Decimal;
             is_default: boolean;
             lpg_product_id: string;
         }[];
@@ -101,20 +101,20 @@ export declare class LpgProductsService {
         updated_at: Date;
         deleted_at: Date | null;
         description: string | null;
-        size_kg: import("@prisma/client/runtime/client").Decimal;
+        size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        selling_price: import("@prisma/client/runtime/client").Decimal;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        selling_price: import("@prisma/client/runtime/library").Decimal;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
     }>;
     update(id: string, dto: UpdateLpgProductDto): Promise<{
         prices: {
             id: string;
             created_at: Date;
             updated_at: Date;
-            cost_price: import("@prisma/client/runtime/client").Decimal | null;
+            cost_price: import("@prisma/client/runtime/library").Decimal | null;
             label: string;
-            price: import("@prisma/client/runtime/client").Decimal;
+            price: import("@prisma/client/runtime/library").Decimal;
             is_default: boolean;
             lpg_product_id: string;
         }[];
@@ -126,11 +126,11 @@ export declare class LpgProductsService {
         updated_at: Date;
         deleted_at: Date | null;
         description: string | null;
-        size_kg: import("@prisma/client/runtime/client").Decimal;
+        size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        selling_price: import("@prisma/client/runtime/client").Decimal;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        selling_price: import("@prisma/client/runtime/library").Decimal;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
     }>;
     remove(id: string): Promise<{
         message: string;
@@ -139,9 +139,9 @@ export declare class LpgProductsService {
         id: string;
         created_at: Date;
         updated_at: Date;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         label: string;
-        price: import("@prisma/client/runtime/client").Decimal;
+        price: import("@prisma/client/runtime/library").Decimal;
         is_default: boolean;
         lpg_product_id: string;
     }>;
@@ -149,9 +149,9 @@ export declare class LpgProductsService {
         id: string;
         created_at: Date;
         updated_at: Date;
-        cost_price: import("@prisma/client/runtime/client").Decimal | null;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         label: string;
-        price: import("@prisma/client/runtime/client").Decimal;
+        price: import("@prisma/client/runtime/library").Decimal;
         is_default: boolean;
         lpg_product_id: string;
     }>;

@@ -22,7 +22,7 @@ export declare class ActivityService {
             type: string;
             title: string;
             description: string | null;
-            detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
+            detail_numeric: import("@prisma/client/runtime/library").Decimal | null;
             icon_name: string | null;
             order_status: import("@prisma/client").$Enums.status_pesanan | null;
             timestamp: Date;
@@ -43,7 +43,7 @@ export declare class ActivityService {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/library").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;
@@ -68,7 +68,7 @@ export declare class ActivityService {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/library").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;
@@ -93,7 +93,7 @@ export declare class ActivityService {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/library").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;
@@ -115,7 +115,7 @@ export declare class ActivityService {
         type: string;
         title: string;
         description: string | null;
-        detail_numeric: import("@prisma/client/runtime/client").Decimal | null;
+        detail_numeric: import("@prisma/client/runtime/library").Decimal | null;
         icon_name: string | null;
         order_status: import("@prisma/client").$Enums.status_pesanan | null;
         timestamp: Date;
