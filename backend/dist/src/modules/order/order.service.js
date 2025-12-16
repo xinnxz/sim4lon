@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../prisma");
+const activity_service_1 = require("../activity/activity.service");
 let OrderService = class OrderService {
     prisma;
-    constructor(prisma) {
+    activityService;
+    constructor(prisma, activityService) {
         this.prisma = prisma;
+        this.activityService = activityService;
     }
     async findAll(page = 1, limit = 10, status, pangkalanId, driverId) {
         const skip = (page - 1) * limit;
@@ -171,6 +174,18 @@ let OrderService = class OrderService {
                 },
             });
         }
+        const totalQty = order.order_items.reduce((sum, item) => sum + item.qty, 0);
+        const pangkalanName = order.pangkalans?.name || 'Unknown';
+        await this.activityService.create({
+            type: 'order_created',
+            title: 'Pesanan Baru Dibuat',
+            description: `Pesanan untuk ${pangkalanName} - ${totalQty} tabung`,
+            order_id: order.id,
+            pangkalan_name: pangkalanName,
+            detail_numeric: totalQty,
+            icon_name: 'ShoppingCart',
+            order_status: 'DRAFT',
+        });
         return order;
     }
     async update(id, dto) {
@@ -282,6 +297,36 @@ let OrderService = class OrderService {
                 });
             }
         }
+        const pangkalanName = updated.pangkalans?.name || 'Unknown';
+        const totalQty = updated.order_items.reduce((sum, item) => sum + item.qty, 0);
+        let activityType = 'order_status_updated';
+        let activityTitle = 'Status Pesanan Diperbarui';
+        let activityIcon = 'RefreshCw';
+        if (dto.status === 'SELESAI') {
+            activityType = 'order_completed';
+            activityTitle = 'Pesanan Selesai';
+            activityIcon = 'CheckCircle';
+        }
+        else if (dto.status === 'BATAL') {
+            activityType = 'order_cancelled';
+            activityTitle = 'Pesanan Dibatalkan';
+            activityIcon = 'XCircle';
+        }
+        else if (dto.status === 'DIKIRIM') {
+            activityType = 'order_delivered';
+            activityTitle = 'Pesanan Dikirim';
+            activityIcon = 'Truck';
+        }
+        await this.activityService.create({
+            type: activityType,
+            title: activityTitle,
+            description: `${pangkalanName} - ${totalQty} tabung (${updated.code})`,
+            order_id: updated.id,
+            pangkalan_name: pangkalanName,
+            detail_numeric: totalQty,
+            icon_name: activityIcon,
+            order_status: dto.status,
+        });
         return updated;
     }
     async remove(id) {
@@ -337,6 +382,7 @@ let OrderService = class OrderService {
 exports.OrderService = OrderService;
 exports.OrderService = OrderService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_1.PrismaService,
+        activity_service_1.ActivityService])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map
