@@ -16,9 +16,8 @@ async function seedLpgProducts() {
             category: 'SUBSIDI',
             color: 'hijau',
             description: 'Tabung LPG subsidi pemerintah untuk rumah tangga miskin dan usaha mikro',
-            prices: [
-                { label: 'HET (Harga Eceran Tertinggi)', price: 18000, is_default: true },
-            ],
+            selling_price: 18000,
+            cost_price: 16000,
         },
         {
             name: 'Elpiji 12kg',
@@ -26,10 +25,8 @@ async function seedLpgProducts() {
             category: 'NON_SUBSIDI',
             color: 'biru',
             description: 'Tabung LPG non-subsidi untuk rumah tangga menengah',
-            prices: [
-                { label: 'Harga Retail', price: 180000, is_default: true },
-                { label: 'Harga Grosir', price: 175000, is_default: false },
-            ],
+            selling_price: 180000,
+            cost_price: 165000,
         },
         {
             name: 'Bright Gas 5.5kg',
@@ -37,9 +34,8 @@ async function seedLpgProducts() {
             category: 'NON_SUBSIDI',
             color: 'pink',
             description: 'Tabung Bright Gas dengan valve double spindle, lebih aman',
-            prices: [
-                { label: 'Harga Retail', price: 85000, is_default: true },
-            ],
+            selling_price: 85000,
+            cost_price: 78000,
         },
         {
             name: 'Bright Gas 12kg',
@@ -47,10 +43,8 @@ async function seedLpgProducts() {
             category: 'NON_SUBSIDI',
             color: 'ungu',
             description: 'Tabung Bright Gas ukuran besar dengan valve double spindle',
-            prices: [
-                { label: 'Harga Retail', price: 195000, is_default: true },
-                { label: 'Harga UMKM', price: 190000, is_default: false },
-            ],
+            selling_price: 195000,
+            cost_price: 180000,
         },
         {
             name: 'Elpiji 50kg',
@@ -58,10 +52,8 @@ async function seedLpgProducts() {
             category: 'NON_SUBSIDI',
             color: 'biru',
             description: 'Tabung LPG industri untuk restoran, hotel, dan pabrik',
-            prices: [
-                { label: 'Harga Industri', price: 750000, is_default: true },
-                { label: 'Harga Kontrak', price: 720000, is_default: false },
-            ],
+            selling_price: 750000,
+            cost_price: 700000,
         },
     ];
     let created = 0;
@@ -82,13 +74,11 @@ async function seedLpgProducts() {
                 category: product.category,
                 color: product.color,
                 description: product.description,
-                prices: {
-                    create: product.prices,
-                },
+                selling_price: product.selling_price,
+                cost_price: product.cost_price,
             },
-            include: { prices: true },
         });
-        console.log(`✅ Created "${result.name}" with ${result.prices.length} price(s)`);
+        console.log(`✅ Created "${result.name}" @ Rp ${result.selling_price}`);
         created++;
     }
     console.log('');

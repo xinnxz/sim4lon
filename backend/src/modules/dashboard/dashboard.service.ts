@@ -118,12 +118,6 @@ export class DashboardService {
                 is_active: true,
                 deleted_at: null
             },
-            include: {
-                prices: {
-                    where: { is_default: true },
-                    take: 1
-                }
-            },
             orderBy: { size_kg: 'asc' }
         });
 
@@ -150,7 +144,7 @@ export class DashboardService {
                 size_kg: Number(product.size_kg),
                 category: product.category,
                 color: product.color,
-                price: product.prices[0] ? Number(product.prices[0].price) : 0,
+                price: Number(product.selling_price) || 0,  // Use selling_price directly
                 stock: {
                     in: inQty,
                     out: outQty,

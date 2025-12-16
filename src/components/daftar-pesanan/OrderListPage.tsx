@@ -228,11 +228,10 @@ export default function OrderListPage() {
             <p className="text-xs text-muted-foreground mt-1">pesanan</p>
           </CardContent>
         </Tilt3DCard>
-
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-
+              Menunggu Pembayaran
             </CardTitle>
           </CardHeader>
           <CardContent>

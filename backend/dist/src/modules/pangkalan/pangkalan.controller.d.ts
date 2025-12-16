@@ -12,9 +12,9 @@ export declare class PangkalanController {
             id: string;
             code: string;
             email: string | null;
-            is_active: boolean;
             name: string;
             phone: string | null;
+            is_active: boolean;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
@@ -39,9 +39,9 @@ export declare class PangkalanController {
         id: string;
         code: string;
         email: string | null;
-        is_active: boolean;
         name: string;
         phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -55,9 +55,9 @@ export declare class PangkalanController {
         id: string;
         code: string;
         email: string | null;
-        is_active: boolean;
         name: string;
         phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -71,9 +71,9 @@ export declare class PangkalanController {
         id: string;
         code: string;
         email: string | null;
-        is_active: boolean;
         name: string;
         phone: string | null;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;

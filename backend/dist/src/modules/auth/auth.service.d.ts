@@ -11,8 +11,8 @@ export declare class AuthService {
             id: string;
             code: string;
             email: string;
-            role: import("@prisma/client").$Enums.user_role;
             name: string;
+            role: import("@prisma/client").$Enums.user_role;
             created_at: Date;
         };
     }>;
@@ -30,11 +30,11 @@ export declare class AuthService {
         id: string;
         code: string;
         email: string;
-        role: import("@prisma/client").$Enums.user_role;
-        is_active: boolean;
         name: string;
         phone: string | null;
         avatar_url: string | null;
+        role: import("@prisma/client").$Enums.user_role;
+        is_active: boolean;
         created_at: Date;
         updated_at: Date;
     }>;
@@ -44,11 +44,11 @@ export declare class AuthService {
             id: string;
             code: string;
             email: string;
-            role: import("@prisma/client").$Enums.user_role;
-            is_active: boolean;
             name: string;
             phone: string | null;
             avatar_url: string | null;
+            role: import("@prisma/client").$Enums.user_role;
+            is_active: boolean;
             created_at: Date;
             updated_at: Date;
         };

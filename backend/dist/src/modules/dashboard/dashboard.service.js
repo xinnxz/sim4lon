@@ -83,12 +83,6 @@ let DashboardService = class DashboardService {
                 is_active: true,
                 deleted_at: null
             },
-            include: {
-                prices: {
-                    where: { is_default: true },
-                    take: 1
-                }
-            },
             orderBy: { size_kg: 'asc' }
         });
         const stockData = await this.prisma.client.stock_histories.groupBy({
@@ -110,7 +104,7 @@ let DashboardService = class DashboardService {
                 size_kg: Number(product.size_kg),
                 category: product.category,
                 color: product.color,
-                price: product.prices[0] ? Number(product.prices[0].price) : 0,
+                price: Number(product.selling_price) || 0,
                 stock: {
                     in: inQty,
                     out: outQty,

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { LpgProductsService } from './lpg-products.service';
-import { CreateLpgProductDto, UpdateLpgProductDto, CreateLpgPriceDto } from './dto';
+import { CreateLpgProductDto, UpdateLpgProductDto } from './dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/decorators';
 import { user_role } from '@prisma/client';
@@ -62,43 +62,5 @@ export class LpgProductsController {
     @Roles(user_role.ADMIN)
     remove(@Param('id') id: string) {
         return this.lpgProductsService.remove(id);
-    }
-
-    // ==================== PRICES ====================
-
-    /**
-     * Add price variant to product (Admin only)
-     */
-    @Post(':productId/prices')
-    @UseGuards(RolesGuard)
-    @Roles(user_role.ADMIN)
-    addPrice(
-        @Param('productId') productId: string,
-        @Body() dto: CreateLpgPriceDto,
-    ) {
-        return this.lpgProductsService.addPrice(productId, dto);
-    }
-
-    /**
-     * Update price variant (Admin only)
-     */
-    @Put('prices/:priceId')
-    @UseGuards(RolesGuard)
-    @Roles(user_role.ADMIN)
-    updatePrice(
-        @Param('priceId') priceId: string,
-        @Body() dto: CreateLpgPriceDto,
-    ) {
-        return this.lpgProductsService.updatePrice(priceId, dto);
-    }
-
-    /**
-     * Delete price variant (Admin only)
-     */
-    @Delete('prices/:priceId')
-    @UseGuards(RolesGuard)
-    @Roles(user_role.ADMIN)
-    removePrice(@Param('priceId') priceId: string) {
-        return this.lpgProductsService.removePrice(priceId);
     }
 }

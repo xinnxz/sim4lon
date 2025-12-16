@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateLpgPriceDto = exports.LpgPriceDto = exports.UpdateLpgProductDto = exports.CreateLpgProductDto = void 0;
+exports.UpdateLpgProductDto = exports.CreateLpgProductDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const client_1 = require("@prisma/client");
@@ -116,46 +116,4 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateLpgProductDto.prototype, "is_active", void 0);
-class LpgPriceDto {
-    label;
-    price;
-    is_default;
-}
-exports.LpgPriceDto = LpgPriceDto;
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], LpgPriceDto.prototype, "label", void 0);
-__decorate([
-    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], LpgPriceDto.prototype, "price", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], LpgPriceDto.prototype, "is_default", void 0);
-class CreateLpgPriceDto {
-    label;
-    price;
-    is_default;
-}
-exports.CreateLpgPriceDto = CreateLpgPriceDto;
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateLpgPriceDto.prototype, "label", void 0);
-__decorate([
-    (0, class_transformer_1.Transform)(({ value }) => parseFloat(value)),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], CreateLpgPriceDto.prototype, "price", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateLpgPriceDto.prototype, "is_default", void 0);
 //# sourceMappingURL=lpg-products.dto.js.map
