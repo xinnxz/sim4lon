@@ -232,7 +232,7 @@ export default function OrderListPage() {
         <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Menunggu Bayar
+
             </CardTitle>
           </CardHeader>
           <CardContent>
