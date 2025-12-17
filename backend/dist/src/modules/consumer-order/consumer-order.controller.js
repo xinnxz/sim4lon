@@ -37,6 +37,10 @@ let ConsumerOrderController = class ConsumerOrderController {
         const pangkalanId = req.user.pangkalan_id;
         return this.consumerOrderService.getRecentSales(pangkalanId, limit ? parseInt(limit, 10) : 5);
     }
+    getChartData(req) {
+        const pangkalanId = req.user.pangkalan_id;
+        return this.consumerOrderService.getChartData(pangkalanId);
+    }
     findOne(id, req) {
         const pangkalanId = req.user.pangkalan_id;
         return this.consumerOrderService.findOne(id, pangkalanId);
@@ -84,6 +88,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ConsumerOrderController.prototype, "getRecentSales", null);
+__decorate([
+    (0, common_1.Get)('chart-data'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ConsumerOrderController.prototype, "getChartData", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

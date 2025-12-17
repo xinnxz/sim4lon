@@ -1317,6 +1317,8 @@ export interface Consumer {
     id: string;
     pangkalan_id: string;
     name: string;
+    nik: string | null;      // NIK for subsidy verification (16 digits)
+    kk: string | null;       // Nomor KK for household ID (16 digits)
     phone: string | null;
     address: string | null;
     note: string | null;
@@ -1352,7 +1354,7 @@ export const consumersApi = {
         return apiRequest('/consumers/stats');
     },
 
-    async create(data: { name: string; phone?: string; address?: string; note?: string }): Promise<Consumer> {
+    async create(data: { name: string; nik?: string; kk?: string; phone?: string; address?: string; note?: string }): Promise<Consumer> {
         return apiRequest('/consumers', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -1406,8 +1408,6 @@ export interface ConsumerOrderStats {
     margin_kotor: number;     // Penjualan - Modal
     total_pengeluaran: number; // Total pengeluaran hari ini
     laba_bersih: number;      // Margin Kotor - Pengeluaran
-    unpaid_count: number;
-    unpaid_total: number;
 }
 
 export const consumerOrdersApi = {
@@ -1470,5 +1470,68 @@ export const consumerOrdersApi = {
     async delete(id: string): Promise<{ message: string }> {
         return apiRequest(`/consumer-orders/${id}`, { method: 'DELETE' });
     },
+
+    async getChartData(): Promise<ChartDataPoint[]> {
+        return apiRequest('/consumer-orders/chart-data');
+    },
 };
 
+// Chart data point for 7-day trend
+export interface ChartDataPoint {
+    day: string;
+    date: string;
+    penjualan: number;
+    modal: number;
+    pengeluaran: number;
+    laba: number;
+}
+
+// Pangkalan Stock types
+export interface StockLevel {
+    id: string;
+    lpg_type: LpgType;
+    qty: number;
+    warning_level: number;
+    critical_level: number;
+    status: 'AMAN' | 'RENDAH' | 'KRITIS';
+    updated_at: string;
+}
+
+export interface StockLevelsResponse {
+    stocks: StockLevel[];
+    summary: {
+        total: number;
+        hasWarning: boolean;
+        hasCritical: boolean;
+    };
+}
+
+// Pangkalan Stock API
+export const pangkalanStockApi = {
+    async getStockLevels(): Promise<StockLevelsResponse> {
+        return apiRequest('/pangkalan-stocks');
+    },
+
+    async receiveStock(data: {
+        lpg_type: LpgType;
+        qty: number;
+        note?: string;
+        movement_date?: string;
+    }): Promise<{ message: string; newQty: number }> {
+        return apiRequest('/pangkalan-stocks/receive', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async adjustStock(data: {
+        lpg_type: LpgType;
+        actual_qty: number;
+        note?: string;
+    }): Promise<{ message: string; oldQty: number; newQty: number; difference: number }> {
+        return apiRequest('/pangkalan-stocks/adjust', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+};

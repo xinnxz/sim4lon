@@ -190,7 +190,7 @@ async function main() {
             const qty = getRandomQty(lpgType);
             const pricePerUnit = consumer.prices[lpgType] || DEFAULT_PRICES.RUMAH_TANGGA[lpgType];
             const total = qty * pricePerUnit;
-            const paymentStatus = Math.random() > 0.2 ? 'LUNAS' : 'HUTANG';
+            const paymentStatus = 'LUNAS';
             const orderTime = new Date(orderDate);
             orderTime.setHours(7 + Math.floor(Math.random() * 12));
             orderTime.setMinutes(Math.floor(Math.random() * 60));
@@ -205,7 +205,6 @@ async function main() {
                     lpg_type: lpgType,
                     qty,
                     price_per_unit: pricePerUnit,
-                    cost_price: COST_PRICES[lpgType] || 16000,
                     total_amount: total,
                     payment_status: paymentStatus,
                     sale_date: orderTime,
@@ -223,6 +222,38 @@ async function main() {
         });
         console.log(`   ${dateStr}: ${ordersPerDay} transaksi, ${dayQty} tabung, Rp ${dayRevenue.toLocaleString('id-ID')}`);
     }
+    console.log('📦 Creating initial stock levels...\n');
+    const stockLevels = [
+        { lpg_type: 'kg3', qty: 150, warning_level: 30, critical_level: 15 },
+        { lpg_type: 'kg5', qty: 30, warning_level: 10, critical_level: 5 },
+        { lpg_type: 'kg12', qty: 45, warning_level: 15, critical_level: 8 },
+        { lpg_type: 'kg50', qty: 12, warning_level: 5, critical_level: 2 },
+    ];
+    for (const stock of stockLevels) {
+        await prisma.pangkalan_stocks.upsert({
+            where: {
+                pangkalan_id_lpg_type: {
+                    pangkalan_id: pangkalan.id,
+                    lpg_type: stock.lpg_type,
+                },
+            },
+            update: {
+                qty: stock.qty,
+                warning_level: stock.warning_level,
+                critical_level: stock.critical_level,
+            },
+            create: {
+                pangkalan_id: pangkalan.id,
+                lpg_type: stock.lpg_type,
+                qty: stock.qty,
+                warning_level: stock.warning_level,
+                critical_level: stock.critical_level,
+            },
+        });
+        console.log(`   ✓ ${stock.lpg_type}: ${stock.qty} tabung`);
+    }
+    const totalStockQty = stockLevels.reduce((sum, s) => sum + s.qty, 0);
+    console.log(`\n✅ ${stockLevels.length} LPG types seeded (Total: ${totalStockQty} tabung)\n`);
     console.log('\n═══════════════════════════════════════════════════════');
     console.log('  SEED DATA COMPLETE');
     console.log('═══════════════════════════════════════════════════════');
@@ -230,6 +261,7 @@ async function main() {
     console.log(`  Orders        : ${totalOrders} transaksi`);
     console.log(`  Total Qty     : ${totalQty} tabung`);
     console.log(`  Revenue       : Rp ${totalRevenue.toLocaleString('id-ID')}`);
+    console.log(`  Stock         : ${totalStockQty} tabung`);
     console.log('───────────────────────────────────────────────────────');
     console.log(`  LPG 3kg       : ${lpgCount.kg3} tabung`);
     console.log(`  LPG 5.5kg     : ${lpgCount.kg5} tabung`);

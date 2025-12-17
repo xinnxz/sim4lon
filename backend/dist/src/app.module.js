@@ -27,6 +27,8 @@ const notification_module_1 = require("./modules/notification/notification.modul
 const reports_module_1 = require("./modules/reports/reports.module");
 const consumer_module_1 = require("./modules/consumer/consumer.module");
 const consumer_order_module_1 = require("./modules/consumer-order/consumer-order.module");
+const pangkalan_stock_module_1 = require("./modules/pangkalan-stock/pangkalan-stock.module");
+const expense_module_1 = require("./modules/expense/expense.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -52,6 +54,8 @@ exports.AppModule = AppModule = __decorate([
             reports_module_1.ReportsModule,
             consumer_module_1.ConsumerModule,
             consumer_order_module_1.ConsumerOrderModule,
+            pangkalan_stock_module_1.PangkalanStockModule,
+            expense_module_1.ExpenseModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

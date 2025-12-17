@@ -407,6 +407,8 @@ model consumers {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   pangkalan_id String   @db.Uuid
   name         String   @db.VarChar(255)
+  nik          String?  @db.VarChar(16) /// NIK for subsidy verification
+  kk           String?  @db.VarChar(16) /// Nomor KK for household identification
   phone        String?  @db.VarChar(20)
   address      String?
   note         String?
@@ -499,8 +501,7 @@ enum stock_movement_type {
   KELUAR /// Stock out
 }
 
-/// Consumer payment status
+/// Consumer payment status - always LUNAS (no debt feature)
 enum consumer_payment_status {
   LUNAS /// Paid in full
-  HUTANG /// Credit/debt - not yet paid
 }

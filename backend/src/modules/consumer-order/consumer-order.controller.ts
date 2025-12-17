@@ -75,6 +75,16 @@ export class ConsumerOrderController {
     }
 
     /**
+     * Get chart data for 7-day trend
+     * GET /consumer-orders/chart-data
+     */
+    @Get('chart-data')
+    getChartData(@Req() req: any) {
+        const pangkalanId = req.user.pangkalan_id;
+        return this.consumerOrderService.getChartData(pangkalanId);
+    }
+
+    /**
      * Get single consumer order
      * GET /consumer-orders/:id
      */

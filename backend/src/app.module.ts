@@ -18,6 +18,8 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { ConsumerModule } from './modules/consumer/consumer.module';
 import { ConsumerOrderModule } from './modules/consumer-order/consumer-order.module';
+import { PangkalanStockModule } from './modules/pangkalan-stock/pangkalan-stock.module';
+import { ExpenseModule } from './modules/expense/expense.module';
 
 @Module({
     imports: [
@@ -41,9 +43,10 @@ import { ConsumerOrderModule } from './modules/consumer-order/consumer-order.mod
         // Pangkalan consumer management (SAAS multi-tenant)
         ConsumerModule,
         ConsumerOrderModule,
+        PangkalanStockModule,
+        ExpenseModule,
     ],
     controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule { }
-

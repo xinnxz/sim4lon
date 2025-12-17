@@ -18,6 +18,8 @@ export declare class ConsumerService {
             updated_at: Date;
             note: string | null;
             address: string | null;
+            nik: string | null;
+            kk: string | null;
         })[];
         meta: {
             total: number;
@@ -40,6 +42,8 @@ export declare class ConsumerService {
         updated_at: Date;
         note: string | null;
         address: string | null;
+        nik: string | null;
+        kk: string | null;
     }>;
     create(pangkalanId: string, dto: CreateConsumerDto): Promise<{
         id: string;
@@ -51,6 +55,8 @@ export declare class ConsumerService {
         updated_at: Date;
         note: string | null;
         address: string | null;
+        nik: string | null;
+        kk: string | null;
     }>;
     update(id: string, pangkalanId: string, dto: UpdateConsumerDto): Promise<{
         id: string;
@@ -62,6 +68,8 @@ export declare class ConsumerService {
         updated_at: Date;
         note: string | null;
         address: string | null;
+        nik: string | null;
+        kk: string | null;
     }>;
     remove(id: string, pangkalanId: string): Promise<{
         message: string;

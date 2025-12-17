@@ -6,7 +6,7 @@
  * │           HEADER (fixed)            │
  * ├──────────┬──────────────────────────┤
  * │ SIDEBAR  │       CONTENT            │
- * │          │                          │
+ * │          │     (with padding)       │
  * │          │                          │
  * └──────────┴──────────────────────────┘
  */
@@ -23,7 +23,7 @@ interface PangkalanSidebarLayoutProps {
 
 export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLayoutProps) {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-slate-50">
             {/* Fixed Header */}
             <PangkalanHeaderSimple />
 
@@ -33,7 +33,12 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
             >
                 <PangkalanSidebar />
                 <SidebarInset className="flex-1">
-                    {children}
+                    {/* Content wrapper with proper padding */}
+                    <main className="p-2 lg:p-8">
+                        <div className="max-w-7x1 mx-auto">
+                            {children}
+                        </div>
+                    </main>
                 </SidebarInset>
             </SidebarProvider>
         </div>
