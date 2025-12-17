@@ -36,10 +36,13 @@ export default function LoginForm() {
           const user = await authApi.getProfile()
 
           // Token valid, redirect ke dashboard berdasarkan role
-          const redirectUrl = user.role === 'ADMIN'
-            ? '/dashboard-admin'
-            : '/dashboard-operator'
-          window.location.href = redirectUrl
+          const dashboardRoutes: Record<string, string> = {
+            'ADMIN': '/dashboard-admin',
+            'OPERATOR': '/dashboard-admin',
+            'PANGKALAN': '/pangkalan/dashboard',
+          };
+          const redirectUrl = dashboardRoutes[user.role] || '/dashboard-admin';
+          window.location.href = redirectUrl;
         } catch (error) {
           // Token tidak valid, hapus dan biarkan user login ulang
           removeToken()
@@ -76,9 +79,12 @@ export default function LoginForm() {
       toast.success('Login berhasil! Mengalihkan ke dashboard...')
 
       // Redirect based on role
-      const redirectUrl = response.user.role === 'ADMIN'
-        ? '/dashboard-admin'
-        : '/dashboard-operator'
+      const dashboardRoutes: Record<string, string> = {
+        'ADMIN': '/dashboard-admin',
+        'OPERATOR': '/dashboard-admin',
+        'PANGKALAN': '/pangkalan/dashboard',
+      };
+      const redirectUrl = dashboardRoutes[response.user.role] || '/dashboard-admin';
 
       window.location.href = redirectUrl
     } catch (err: any) {

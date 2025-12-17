@@ -8,12 +8,6 @@ export declare class OrderService {
     constructor(prisma: PrismaService, activityService: ActivityService);
     findAll(page?: number, limit?: number, status?: status_pesanan, pangkalanId?: string, driverId?: string): Promise<{
         data: ({
-            drivers: {
-                id: string;
-                code: string;
-                name: string;
-                phone: string | null;
-            } | null;
             pangkalans: {
                 id: string;
                 code: string;
@@ -22,6 +16,12 @@ export declare class OrderService {
                 address: string;
                 region: string | null;
             };
+            drivers: {
+                id: string;
+                code: string;
+                name: string;
+                phone: string | null;
+            } | null;
             order_items: {
                 id: string;
                 created_at: Date;
@@ -50,11 +50,11 @@ export declare class OrderService {
         } & {
             id: string;
             code: string;
+            pangkalan_id: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
-            pangkalan_id: string;
             driver_id: string | null;
             order_date: Date;
             current_status: import("@prisma/client").$Enums.status_pesanan;
@@ -70,18 +70,6 @@ export declare class OrderService {
         };
     }>;
     findOne(id: string): Promise<{
-        drivers: {
-            id: string;
-            code: string;
-            name: string;
-            phone: string | null;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            vehicle_id: string | null;
-            note: string | null;
-        } | null;
         pangkalans: {
             id: string;
             code: string;
@@ -98,6 +86,18 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
         };
+        drivers: {
+            id: string;
+            code: string;
+            name: string;
+            phone: string | null;
+            is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            vehicle_id: string | null;
+            note: string | null;
+        } | null;
         order_items: {
             id: string;
             created_at: Date;
@@ -131,6 +131,7 @@ export declare class OrderService {
             order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
             sub_total: import("@prisma/client/runtime/library").Decimal;
+            payment_status: string | null;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
@@ -138,7 +139,6 @@ export declare class OrderService {
             billed_to_name: string | null;
             tax_rate: import("@prisma/client/runtime/library").Decimal | null;
             grand_total: import("@prisma/client/runtime/library").Decimal;
-            payment_status: string | null;
         }[];
         timeline_tracks: {
             id: string;
@@ -151,11 +151,11 @@ export declare class OrderService {
     } & {
         id: string;
         code: string;
+        pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
-        pangkalan_id: string;
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
@@ -204,11 +204,11 @@ export declare class OrderService {
     } & {
         id: string;
         code: string;
+        pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
-        pangkalan_id: string;
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
@@ -217,18 +217,6 @@ export declare class OrderService {
         total_amount: import("@prisma/client/runtime/library").Decimal;
     }>;
     update(id: string, dto: UpdateOrderDto): Promise<{
-        drivers: {
-            id: string;
-            code: string;
-            name: string;
-            phone: string | null;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            vehicle_id: string | null;
-            note: string | null;
-        } | null;
         pangkalans: {
             id: string;
             code: string;
@@ -245,6 +233,18 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
         };
+        drivers: {
+            id: string;
+            code: string;
+            name: string;
+            phone: string | null;
+            is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            vehicle_id: string | null;
+            note: string | null;
+        } | null;
         order_items: {
             id: string;
             created_at: Date;
@@ -278,6 +278,7 @@ export declare class OrderService {
             order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
             sub_total: import("@prisma/client/runtime/library").Decimal;
+            payment_status: string | null;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
@@ -285,7 +286,6 @@ export declare class OrderService {
             billed_to_name: string | null;
             tax_rate: import("@prisma/client/runtime/library").Decimal | null;
             grand_total: import("@prisma/client/runtime/library").Decimal;
-            payment_status: string | null;
         }[];
         timeline_tracks: {
             id: string;
@@ -298,11 +298,11 @@ export declare class OrderService {
     } & {
         id: string;
         code: string;
+        pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
-        pangkalan_id: string;
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;
@@ -311,18 +311,6 @@ export declare class OrderService {
         total_amount: import("@prisma/client/runtime/library").Decimal;
     }>;
     updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<{
-        drivers: {
-            id: string;
-            code: string;
-            name: string;
-            phone: string | null;
-            is_active: boolean;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            vehicle_id: string | null;
-            note: string | null;
-        } | null;
         pangkalans: {
             id: string;
             code: string;
@@ -339,6 +327,18 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
         };
+        drivers: {
+            id: string;
+            code: string;
+            name: string;
+            phone: string | null;
+            is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            vehicle_id: string | null;
+            note: string | null;
+        } | null;
         order_items: {
             id: string;
             created_at: Date;
@@ -363,11 +363,11 @@ export declare class OrderService {
     } & {
         id: string;
         code: string;
+        pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
-        pangkalan_id: string;
         driver_id: string | null;
         order_date: Date;
         current_status: import("@prisma/client").$Enums.status_pesanan;

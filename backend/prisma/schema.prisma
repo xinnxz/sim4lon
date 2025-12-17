@@ -39,18 +39,21 @@ model users {
   phone           String?           @db.VarChar(20)
   avatar_url      String?
   role            user_role         @default(OPERATOR)
+  pangkalan_id    String?           @db.Uuid  /// Link to pangkalan for PANGKALAN role
   is_active       Boolean           @default(true)
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   updated_at      DateTime          @default(now()) @db.Timestamptz(6)
   deleted_at      DateTime?         @db.Timestamptz(6)
   
   // Relations
+  pangkalans      pangkalans?       @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_pangkalan")
   activity_logs   activity_logs[]
   payment_records payment_records[]
   stock_histories stock_histories[]
 
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
+  @@index([pangkalan_id], map: "idx_users_pangkalan")
 }
 
 /// LPG Distribution Agent / Pangkalan
@@ -71,7 +74,10 @@ model pangkalans {
   deleted_at DateTime? @db.Timestamptz(6)
   
   // Relations
-  orders     orders[]
+  orders          orders[]
+  users           users[]               /// Users linked to this pangkalan
+  consumers       consumers[]           /// Consumers of this pangkalan
+  consumer_orders consumer_orders[]     /// Consumer orders for this pangkalan
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
@@ -314,6 +320,57 @@ model activity_logs {
 }
 
 // ============================================================
+// PANGKALAN CONSUMER MANAGEMENT (SAAS Multi-Tenant)
+// ============================================================
+
+/// Consumer/customer of a pangkalan (warung, ibu-ibu, etc.)
+model consumers {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id    String            @db.Uuid
+  name            String            @db.VarChar(255)
+  phone           String?           @db.VarChar(20)
+  address         String?
+  note            String?
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  pangkalans      pangkalans        @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumers_pangkalan")
+  consumer_orders consumer_orders[]
+
+  @@index([pangkalan_id], map: "idx_consumers_pangkalan")
+  @@index([is_active], map: "idx_consumers_active")
+}
+
+/// Consumer order - sales from pangkalan to end consumers
+model consumer_orders {
+  id                String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code              String                    @unique @db.VarChar(20)  /// Display: PORD-0001
+  pangkalan_id      String                    @db.Uuid
+  consumer_id       String?                   @db.Uuid
+  consumer_name     String?                   @db.VarChar(255)         /// For walk-in customers
+  lpg_type          lpg_type
+  qty               Int
+  price_per_unit    Decimal                   @db.Decimal(15, 2)
+  total_amount      Decimal                   @db.Decimal(15, 2)
+  payment_status    consumer_payment_status   @default(LUNAS)
+  note              String?
+  sale_date         DateTime                  @default(now()) @db.Timestamptz(6)
+  created_at        DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime                  @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  pangkalans        pangkalans                @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_orders_pangkalan")
+  consumers         consumers?                @relation(fields: [consumer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_orders_consumer")
+
+  @@index([pangkalan_id], map: "idx_consumer_orders_pangkalan")
+  @@index([consumer_id], map: "idx_consumer_orders_consumer")
+  @@index([sale_date(sort: Desc)], map: "idx_consumer_orders_date")
+  @@index([payment_status], map: "idx_consumer_orders_status")
+}
+
+// ============================================================
 // ENUMS
 // ============================================================
 
@@ -321,6 +378,7 @@ model activity_logs {
 enum user_role {
   ADMIN     /// Full access
   OPERATOR  /// Limited access
+  PANGKALAN /// Pangkalan owner - access to own data only
 }
 
 /// LPG product category
@@ -331,9 +389,10 @@ enum lpg_category {
 
 /// @deprecated - Legacy LPG type enum, use lpg_products instead
 enum lpg_type {
-  kg3  @map("3kg")
-  kg12 @map("12kg")
-  kg50 @map("50kg")
+  kg3   @map("3kg")
+  kg55  @map("5.5kg")
+  kg12  @map("12kg")
+  kg50  @map("50kg")
 }
 
 /// Order status workflow
@@ -357,4 +416,10 @@ enum payment_method {
 enum stock_movement_type {
   MASUK   /// Stock in
   KELUAR  /// Stock out
+}
+
+/// Consumer payment status
+enum consumer_payment_status {
+  LUNAS   /// Paid in full
+  HUTANG  /// Credit/debt - not yet paid
 }

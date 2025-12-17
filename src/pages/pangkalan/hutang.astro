@@ -1,0 +1,18 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PangkalanSidebarLayout from '@/components/pangkalan/PangkalanSidebarLayout.tsx'
+import AdminFooter from '@/components/common/AdminFooter.tsx'
+import HutangPage from '@/components/pangkalan/HutangPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="Hutang - SIM4LON Pangkalan">
+  <ProtectedDashboard client:load allowedRoles={['PANGKALAN']}>
+    <PangkalanSidebarLayout client:load>
+      <main class="flex-1 flex flex-col">
+        <HutangPage client:idle />
+        <AdminFooter />
+      </main>
+    </PangkalanSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>

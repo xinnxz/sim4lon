@@ -16,6 +16,8 @@ import { LpgProductsModule } from './modules/lpg-products/lpg-products.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { ConsumerModule } from './modules/consumer/consumer.module';
+import { ConsumerOrderModule } from './modules/consumer-order/consumer-order.module';
 
 @Module({
     imports: [
@@ -36,8 +38,12 @@ import { ReportsModule } from './modules/reports/reports.module';
         UploadModule,
         NotificationModule,
         ReportsModule,
+        // Pangkalan consumer management (SAAS multi-tenant)
+        ConsumerModule,
+        ConsumerOrderModule,
     ],
     controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule { }
+

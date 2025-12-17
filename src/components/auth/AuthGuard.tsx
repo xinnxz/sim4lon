@@ -32,11 +32,23 @@ const CACHE_DURATION_MS = 5 * 60 * 1000 // 5 minutes
 interface AuthGuardProps {
     children: ReactNode
     /** Roles yang diizinkan mengakses halaman ini. Kosong = semua role boleh */
-    allowedRoles?: ('ADMIN' | 'OPERATOR')[]
+    allowedRoles?: ('ADMIN' | 'OPERATOR' | 'PANGKALAN')[]
     /** URL redirect jika tidak authorized (default: /login) */
     redirectTo?: string
     /** Force re-fetch profile dari API */
     forceRefresh?: boolean
+}
+
+/**
+ * Get dashboard URL based on user role
+ */
+function getDashboardByRole(role: string): string {
+    const dashboardRoutes: Record<string, string> = {
+        'ADMIN': '/dashboard-admin',
+        'OPERATOR': '/dashboard-admin',
+        'PANGKALAN': '/pangkalan/dashboard',
+    };
+    return dashboardRoutes[role] || '/dashboard-admin';
 }
 
 /**
@@ -116,14 +128,12 @@ export function AuthGuard({
             if (!forceRefresh && cachedProfile) {
                 // Cek role jika ada restriction
                 if (allowedRoles.length > 0 && !allowedRoles.includes(cachedProfile.role)) {
-                    const correctDashboard = cachedProfile.role === 'ADMIN'
-                        ? '/dashboard-admin'
-                        : '/dashboard-operator'
-                    window.location.href = correctDashboard
-                    return
+                    const correctDashboard = getDashboardByRole(cachedProfile.role);
+                    window.location.href = correctDashboard;
+                    return;
                 }
                 // Already set in initial state, nothing more to do
-                return
+                return;
             }
 
             try {
@@ -135,11 +145,9 @@ export function AuthGuard({
 
                 // Step 5: Cek role jika ada restriction
                 if (allowedRoles.length > 0 && !allowedRoles.includes(userProfile.role)) {
-                    const correctDashboard = userProfile.role === 'ADMIN'
-                        ? '/dashboard-admin'
-                        : '/dashboard-operator'
-                    window.location.href = correctDashboard
-                    return
+                    const correctDashboard = getDashboardByRole(userProfile.role);
+                    window.location.href = correctDashboard;
+                    return;
                 }
 
                 // Step 6: Semua OK, user authorized

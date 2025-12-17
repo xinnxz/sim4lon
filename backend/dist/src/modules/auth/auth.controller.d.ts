@@ -22,6 +22,12 @@ export declare class AuthController {
             email: string;
             name: string;
             role: import("@prisma/client").$Enums.user_role;
+            pangkalan_id: string | null;
+            pangkalan: {
+                id: string;
+                code: string;
+                name: string;
+            } | null;
         };
     }>;
     getProfile(userId: string): Promise<{
@@ -32,9 +38,17 @@ export declare class AuthController {
         phone: string | null;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;
+        pangkalan_id: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
+        pangkalans: {
+            id: string;
+            code: string;
+            name: string;
+            phone: string | null;
+            address: string;
+        } | null;
     }>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
         message: string;

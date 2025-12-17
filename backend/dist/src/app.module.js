@@ -25,6 +25,8 @@ const lpg_products_module_1 = require("./modules/lpg-products/lpg-products.modul
 const upload_module_1 = require("./modules/upload/upload.module");
 const notification_module_1 = require("./modules/notification/notification.module");
 const reports_module_1 = require("./modules/reports/reports.module");
+const consumer_module_1 = require("./modules/consumer/consumer.module");
+const consumer_order_module_1 = require("./modules/consumer-order/consumer-order.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -48,6 +50,8 @@ exports.AppModule = AppModule = __decorate([
             upload_module_1.UploadModule,
             notification_module_1.NotificationModule,
             reports_module_1.ReportsModule,
+            consumer_module_1.ConsumerModule,
+            consumer_order_module_1.ConsumerOrderModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

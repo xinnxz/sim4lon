@@ -19,6 +19,8 @@ export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
     get stock_histories(): import("@prisma/client").Prisma.stock_historiesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get activity_logs(): import("@prisma/client").Prisma.activity_logsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get lpg_products(): import("@prisma/client").Prisma.lpg_productsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get consumers(): import("@prisma/client").Prisma.consumersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get consumer_orders(): import("@prisma/client").Prisma.consumer_ordersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
 }

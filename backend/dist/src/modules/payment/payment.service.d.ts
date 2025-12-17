@@ -78,11 +78,11 @@ export declare class PaymentService {
         } & {
             id: string;
             code: string;
+            pangkalan_id: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
-            pangkalan_id: string;
             driver_id: string | null;
             order_date: Date;
             current_status: import("@prisma/client").$Enums.status_pesanan;
@@ -98,6 +98,7 @@ export declare class PaymentService {
             order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
             sub_total: import("@prisma/client/runtime/library").Decimal;
+            payment_status: string | null;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
@@ -105,7 +106,6 @@ export declare class PaymentService {
             billed_to_name: string | null;
             tax_rate: import("@prisma/client/runtime/library").Decimal | null;
             grand_total: import("@prisma/client/runtime/library").Decimal;
-            payment_status: string | null;
         } | null;
     } & {
         id: string;
@@ -127,11 +127,11 @@ export declare class PaymentService {
         orders: {
             id: string;
             code: string;
+            pangkalan_id: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
-            pangkalan_id: string;
             driver_id: string | null;
             order_date: Date;
             current_status: import("@prisma/client").$Enums.status_pesanan;
@@ -147,6 +147,7 @@ export declare class PaymentService {
             order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
             sub_total: import("@prisma/client/runtime/library").Decimal;
+            payment_status: string | null;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
@@ -154,7 +155,6 @@ export declare class PaymentService {
             billed_to_name: string | null;
             tax_rate: import("@prisma/client/runtime/library").Decimal | null;
             grand_total: import("@prisma/client/runtime/library").Decimal;
-            payment_status: string | null;
         } | null;
     } & {
         id: string;
