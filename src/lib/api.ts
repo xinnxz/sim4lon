@@ -100,7 +100,13 @@ export interface LoginResponse {
         id: string;
         email: string;
         name: string;
-        role: 'ADMIN' | 'OPERATOR';
+        role: 'ADMIN' | 'OPERATOR' | 'PANGKALAN';
+        pangkalan_id?: string | null;
+        pangkalan?: {
+            id: string;
+            code: string;
+            name: string;
+        } | null;
     };
 }
 
@@ -110,9 +116,17 @@ export interface UserProfile {
     email: string;
     name: string;
     phone: string | null;
-    role: 'ADMIN' | 'OPERATOR';
+    role: 'ADMIN' | 'OPERATOR' | 'PANGKALAN';
     avatar_url: string | null;
     is_active: boolean;
+    pangkalan_id?: string | null;
+    pangkalans?: {
+        id: string;
+        code: string;
+        name: string;
+        address: string;
+        phone: string | null;
+    } | null;
     created_at: string;
     updated_at: string;
 }
@@ -756,7 +770,7 @@ export const stockApi = {
 // USERS API
 // ============================================================
 
-export type UserRole = 'ADMIN' | 'OPERATOR';
+export type UserRole = 'ADMIN' | 'OPERATOR' | 'PANGKALAN';
 
 export interface User {
     id: string;
@@ -1292,6 +1306,165 @@ export const paymentApi = {
             method: 'PUT',
             body: JSON.stringify(dto),
         });
+    },
+};
+
+// ============================================================
+// CONSUMER API (Pangkalan Dashboard)
+// ============================================================
+
+export interface Consumer {
+    id: string;
+    pangkalan_id: string;
+    name: string;
+    phone: string | null;
+    address: string | null;
+    note: string | null;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    _count?: {
+        consumer_orders: number;
+    };
+}
+
+export interface ConsumerStats {
+    total: number;
+    active: number;
+    inactive: number;
+}
+
+export const consumersApi = {
+    async getAll(page = 1, limit = 10, search?: string): Promise<PaginatedResponse<Consumer>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        if (search) params.append('search', search);
+        return apiRequest(`/consumers?${params.toString()}`);
+    },
+
+    async getById(id: string): Promise<Consumer> {
+        return apiRequest(`/consumers/${id}`);
+    },
+
+    async getStats(): Promise<ConsumerStats> {
+        return apiRequest('/consumers/stats');
+    },
+
+    async create(data: { name: string; phone?: string; address?: string; note?: string }): Promise<Consumer> {
+        return apiRequest('/consumers', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<Consumer>): Promise<Consumer> {
+        return apiRequest(`/consumers/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string): Promise<{ message: string }> {
+        return apiRequest(`/consumers/${id}`, { method: 'DELETE' });
+    },
+};
+
+// ============================================================
+// CONSUMER ORDER API (Pangkalan Dashboard)
+// ============================================================
+
+export type ConsumerPaymentStatus = 'LUNAS' | 'HUTANG';
+
+export interface ConsumerOrder {
+    id: string;
+    code: string;
+    pangkalan_id: string;
+    consumer_id: string | null;
+    consumer_name: string | null;
+    lpg_type: LpgType;
+    qty: number;
+    price_per_unit: number;
+    total_amount: number;
+    payment_status: ConsumerPaymentStatus;
+    note: string | null;
+    sale_date: string;
+    created_at: string;
+    consumers?: {
+        id: string;
+        name: string;
+        phone: string | null;
+    } | null;
+}
+
+export interface ConsumerOrderStats {
+    total_orders: number;
+    total_qty: number;
+    total_revenue: number;
+    unpaid_count: number;
+    unpaid_total: number;
+}
+
+export const consumerOrdersApi = {
+    async getAll(
+        page = 1,
+        limit = 10,
+        options?: {
+            startDate?: string;
+            endDate?: string;
+            paymentStatus?: ConsumerPaymentStatus;
+            consumerId?: string;
+        }
+    ): Promise<PaginatedResponse<ConsumerOrder>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        if (options?.startDate) params.append('startDate', options.startDate);
+        if (options?.endDate) params.append('endDate', options.endDate);
+        if (options?.paymentStatus) params.append('paymentStatus', options.paymentStatus);
+        if (options?.consumerId) params.append('consumerId', options.consumerId);
+        return apiRequest(`/consumer-orders?${params.toString()}`);
+    },
+
+    async getById(id: string): Promise<ConsumerOrder> {
+        return apiRequest(`/consumer-orders/${id}`);
+    },
+
+    async getStats(todayOnly = false): Promise<ConsumerOrderStats> {
+        const params = todayOnly ? '?today=true' : '';
+        return apiRequest(`/consumer-orders/stats${params}`);
+    },
+
+    async getRecent(limit = 5): Promise<ConsumerOrder[]> {
+        return apiRequest(`/consumer-orders/recent?limit=${limit}`);
+    },
+
+    async create(data: {
+        consumer_id?: string;
+        consumer_name?: string;
+        lpg_type: LpgType;
+        qty: number;
+        price_per_unit: number;
+        payment_status?: ConsumerPaymentStatus;
+        note?: string;
+    }): Promise<ConsumerOrder> {
+        return apiRequest('/consumer-orders', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<ConsumerOrder>): Promise<ConsumerOrder> {
+        return apiRequest(`/consumer-orders/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string): Promise<{ message: string }> {
+        return apiRequest(`/consumer-orders/${id}`, { method: 'DELETE' });
     },
 };
 

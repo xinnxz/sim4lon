@@ -56,9 +56,18 @@ export class AuthService {
 
     async login(dto: LoginDto) {
 
-        // Find user by email
+        // Find user by email with pangkalan info
         const user = await this.prisma.users.findUnique({
             where: { email: dto.email },
+            include: {
+                pangkalans: {
+                    select: {
+                        id: true,
+                        code: true,
+                        name: true,
+                    },
+                },
+            },
         });
 
         if (!user) {
@@ -77,11 +86,12 @@ export class AuthService {
             throw new UnauthorizedException('Email atau password salah');
         }
 
-        // Generate JWT token
+        // Generate JWT token with pangkalan_id for SAAS multi-tenant
         const payload = {
             sub: user.id,
             email: user.email,
             role: user.role,
+            pangkalan_id: user.pangkalan_id,  // Include for PANGKALAN role
         };
 
         const accessToken = this.jwtService.sign(payload);
@@ -94,6 +104,8 @@ export class AuthService {
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                pangkalan_id: user.pangkalan_id,
+                pangkalan: user.pangkalans,  // Include pangkalan info for dashboard
             },
         };
     }
@@ -110,8 +122,18 @@ export class AuthService {
                 role: true,
                 avatar_url: true,
                 is_active: true,
+                pangkalan_id: true,
                 created_at: true,
                 updated_at: true,
+                pangkalans: {
+                    select: {
+                        id: true,
+                        code: true,
+                        name: true,
+                        address: true,
+                        phone: true,
+                    },
+                },
             },
         });
 

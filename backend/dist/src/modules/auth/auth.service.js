@@ -90,6 +90,15 @@ let AuthService = class AuthService {
     async login(dto) {
         const user = await this.prisma.users.findUnique({
             where: { email: dto.email },
+            include: {
+                pangkalans: {
+                    select: {
+                        id: true,
+                        code: true,
+                        name: true,
+                    },
+                },
+            },
         });
         if (!user) {
             throw new common_1.UnauthorizedException('Email atau password salah');
@@ -105,6 +114,7 @@ let AuthService = class AuthService {
             sub: user.id,
             email: user.email,
             role: user.role,
+            pangkalan_id: user.pangkalan_id,
         };
         const accessToken = this.jwtService.sign(payload);
         return {
@@ -115,6 +125,8 @@ let AuthService = class AuthService {
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                pangkalan_id: user.pangkalan_id,
+                pangkalan: user.pangkalans,
             },
         };
     }
@@ -130,8 +142,18 @@ let AuthService = class AuthService {
                 role: true,
                 avatar_url: true,
                 is_active: true,
+                pangkalan_id: true,
                 created_at: true,
                 updated_at: true,
+                pangkalans: {
+                    select: {
+                        id: true,
+                        code: true,
+                        name: true,
+                        address: true,
+                        phone: true,
+                    },
+                },
             },
         });
         if (!user) {

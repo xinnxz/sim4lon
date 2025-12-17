@@ -127,10 +127,19 @@ export default defineConfig({
   },
   compressHTML: false,
   vite: {
-    base: "./",
+    // Use absolute base path to avoid nested route issues
+    base: "/",
     resolve: {
       alias: {
         "@": "/src",
+      },
+    },
+    // Force clear cache on startup to avoid stale module issues
+    cacheDir: "node_modules/.vite",
+    server: {
+      // Disable module pre-bundling caching issues
+      warmup: {
+        clientFiles: [],
       },
     },
     build: {
@@ -154,7 +163,8 @@ export default defineConfig({
       treeShaking: true,
     },
     optimizeDeps: {
-      force: false,
+      // Disable persistent caching to avoid stale imports
+      force: true,
       include: ["tslib"],
     },
     ssr: {
@@ -162,3 +172,4 @@ export default defineConfig({
     },
   },
 });
+

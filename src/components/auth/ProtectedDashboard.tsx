@@ -17,7 +17,7 @@ import { AuthGuard } from './AuthGuard'
 interface ProtectedDashboardProps {
     children: ReactNode
     /** Roles yang diizinkan. Kosong = semua role */
-    allowedRoles?: ('ADMIN' | 'OPERATOR')[]
+    allowedRoles?: ('ADMIN' | 'OPERATOR' | 'PANGKALAN')[]
 }
 
 export function ProtectedDashboard({ children, allowedRoles }: ProtectedDashboardProps) {
