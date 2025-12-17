@@ -2,7 +2,7 @@
  * CatatPenjualanPage - Form Catat Penjualan Simple
  * 
  * LPG Types: 3kg, 5.5kg, 12kg, 50kg
- * Note: API uses kg3, kg55, kg12, kg50 (Prisma enum values)
+ * Note: API uses kg3, kg5, kg12, kg50 (Prisma enum values)
  * 
  * Alur:
  * 1. Pilih LPG → 2. Jumlah → 3. Nama (opsional) → 4. Bayar → 5. Simpan
@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 // value = Prisma enum value (untuk API), display = untuk tampilan
 const LPG_OPTIONS = [
     { value: 'kg3', display: '3 kg', price: 20000, label: 'LPG 3 kg', color: 'bg-green-500' },
-    { value: 'kg55', display: '5.5 kg', price: 60000, label: 'LPG 5.5 kg', color: 'bg-cyan-500' },
+    { value: 'kg5', display: '5.5 kg', price: 60000, label: 'LPG 5.5 kg', color: 'bg-cyan-500' },
     { value: 'kg12', display: '12 kg', price: 180000, label: 'LPG 12 kg', color: 'bg-blue-500' },
     { value: 'kg50', display: '50 kg', price: 700000, label: 'LPG 50 kg', color: 'bg-red-500' },
 ]

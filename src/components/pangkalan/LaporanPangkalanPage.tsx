@@ -258,11 +258,35 @@ export default function LaporanPangkalanPage() {
                                     <XAxis dataKey="tanggal" stroke="#64748B" fontSize={12} />
                                     <YAxis stroke="#64748B" fontSize={12} tickFormatter={formatCurrencyShort} />
                                     <Tooltip
-                                        formatter={(value: number, name: string) => [
-                                            formatCurrency(value),
-                                            name === 'penjualan' ? 'Penjualan' : 'Modal'
-                                        ]}
-                                        contentStyle={{ backgroundColor: '#1E293B', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                        content={({ active, payload, label }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0]?.payload as any
+                                                return (
+                                                    <div className="bg-slate-800 text-white p-3 rounded-lg shadow-lg border border-slate-700 min-w-[200px]">
+                                                        <p className="font-bold text-sm mb-2 border-b border-slate-600 pb-1">{label}</p>
+                                                        <div className="space-y-1 text-xs">
+                                                            <div className="flex justify-between">
+                                                                <span className="text-slate-300">📦 Qty:</span>
+                                                                <span className="font-medium">{data?.qty || 0} tabung</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-blue-300">💰 Penjualan:</span>
+                                                                <span className="font-medium text-blue-400">{formatCurrency(data?.penjualan || 0)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-slate-300">🏷️ Modal:</span>
+                                                                <span className="font-medium">{formatCurrency(data?.modal || 0)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between pt-1 border-t border-slate-600">
+                                                                <span className="text-green-300">✨ Margin Kotor:</span>
+                                                                <span className="font-bold text-green-400">{formatCurrency(data?.marginKotor || 0)}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                            return null
+                                        }}
                                     />
                                     <Legend />
                                     <Bar dataKey="penjualan" name="Penjualan" fill="#3B82F6" radius={[4, 4, 0, 0]} />
@@ -287,12 +311,55 @@ export default function LaporanPangkalanPage() {
                                     <XAxis dataKey="tanggal" stroke="#64748B" fontSize={12} />
                                     <YAxis stroke="#64748B" fontSize={12} tickFormatter={formatCurrencyShort} />
                                     <Tooltip
-                                        formatter={(value: number) => [formatCurrency(value), 'Laba Bersih']}
-                                        contentStyle={{ backgroundColor: '#1E293B', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                        content={({ active, payload, label }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0]?.payload as any
+                                                return (
+                                                    <div className="bg-slate-800 text-white p-3 rounded-lg shadow-lg border border-slate-700 min-w-[200px]">
+                                                        <p className="font-bold text-sm mb-2 border-b border-slate-600 pb-1">{label}</p>
+                                                        <div className="space-y-1 text-xs">
+                                                            <div className="flex justify-between">
+                                                                <span className="text-slate-300">📦 Qty:</span>
+                                                                <span className="font-medium">{data?.qty || 0} tabung</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-emerald-300">💚 Margin Kotor:</span>
+                                                                <span className="font-medium text-emerald-400">{formatCurrency(data?.marginKotor || 0)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span className="text-orange-300">💸 Pengeluaran:</span>
+                                                                <span className="font-medium text-orange-400">{formatCurrency(data?.pengeluaran || 0)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between pt-1 border-t border-slate-600">
+                                                                <span className="text-green-300">✨ Laba Bersih:</span>
+                                                                <span className="font-bold text-green-400">{formatCurrency(data?.labaBersih || 0)}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                            return null
+                                        }}
                                     />
-                                    <Line type="monotone" dataKey="labaBersih" stroke="#22C55E" strokeWidth={3} dot={{ fill: '#22C55E', r: 5 }} />
+                                    <Line type="monotone" dataKey="marginKotor" name="Margin Kotor" stroke="#10B981" strokeWidth={2} dot={{ r: 3, fill: '#10B981' }} />
+                                    <Line type="monotone" dataKey="pengeluaran" name="Pengeluaran" stroke="#F97316" strokeWidth={2} dot={{ r: 3, fill: '#F97316' }} strokeDasharray="5 5" />
+                                    <Line type="monotone" dataKey="labaBersih" name="Laba Bersih" stroke="#22C55E" strokeWidth={3} dot={{ fill: '#22C55E', r: 4 }} />
                                 </LineChart>
                             </ResponsiveContainer>
+                        </div>
+                        <div className="flex justify-center gap-4 mt-3">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                                <span className="text-sm text-slate-600">Margin Kotor</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-orange-500" />
+                                <span className="text-sm text-slate-600">Pengeluaran</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-green-500" />
+                                <span className="text-sm text-slate-600">Laba Bersih</span>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

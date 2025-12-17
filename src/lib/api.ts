@@ -1402,6 +1402,10 @@ export interface ConsumerOrderStats {
     total_orders: number;
     total_qty: number;
     total_revenue: number;
+    total_modal: number;      // Total modal (qty * cost_price)
+    margin_kotor: number;     // Penjualan - Modal
+    total_pengeluaran: number; // Total pengeluaran hari ini
+    laba_bersih: number;      // Margin Kotor - Pengeluaran
     unpaid_count: number;
     unpaid_total: number;
 }

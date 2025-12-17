@@ -250,27 +250,54 @@ export class ConsumerOrderService {
             };
         }
 
-        // Get aggregates
-        const [totalOrders, totalQty, totalRevenue, unpaidCount, unpaidTotal] = await Promise.all([
-            // Total orders
-            this.prisma.consumer_orders.count({
-                where: { pangkalan_id: pangkalanId, ...dateFilter },
-            }),
-            // Total quantity sold
-            this.prisma.consumer_orders.aggregate({
-                where: { pangkalan_id: pangkalanId, ...dateFilter },
-                _sum: { qty: true },
-            }),
-            // Total revenue
-            this.prisma.consumer_orders.aggregate({
-                where: { pangkalan_id: pangkalanId, ...dateFilter },
-                _sum: { total_amount: true },
-            }),
-            // Unpaid orders count
+        // Get all orders for the period to calculate modal
+        const orders = await this.prisma.consumer_orders.findMany({
+            where: { pangkalan_id: pangkalanId, ...dateFilter },
+            select: {
+                qty: true,
+                price_per_unit: true,
+                cost_price: true,
+                total_amount: true,
+            },
+        });
+
+        // Calculate totals
+        let totalQty = 0;
+        let totalRevenue = 0;
+        let totalModal = 0;
+        for (const order of orders) {
+            totalQty += order.qty;
+            totalRevenue += Number(order.total_amount);
+            totalModal += order.qty * Number(order.cost_price);
+        }
+
+        const marginKotor = totalRevenue - totalModal;
+
+        // Get expenses for the period
+        const expenseFilter: any = { pangkalan_id: pangkalanId };
+        if (todayOnly) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            expenseFilter.expense_date = {
+                gte: today,
+                lt: tomorrow,
+            };
+        }
+
+        const expenseSum = await this.prisma.expenses.aggregate({
+            where: expenseFilter,
+            _sum: { amount: true },
+        });
+        const totalPengeluaran = Number(expenseSum._sum.amount || 0);
+        const labaBersih = marginKotor - totalPengeluaran;
+
+        // Unpaid stats (always total, not date-filtered)
+        const [unpaidCount, unpaidTotal] = await Promise.all([
             this.prisma.consumer_orders.count({
                 where: { pangkalan_id: pangkalanId, payment_status: 'HUTANG' },
             }),
-            // Unpaid total
             this.prisma.consumer_orders.aggregate({
                 where: { pangkalan_id: pangkalanId, payment_status: 'HUTANG' },
                 _sum: { total_amount: true },
@@ -278,9 +305,13 @@ export class ConsumerOrderService {
         ]);
 
         return {
-            total_orders: totalOrders,
-            total_qty: totalQty._sum.qty || 0,
-            total_revenue: Number(totalRevenue._sum.total_amount || 0),
+            total_orders: orders.length,
+            total_qty: totalQty,
+            total_revenue: totalRevenue,
+            total_modal: totalModal,
+            margin_kotor: marginKotor,
+            total_pengeluaran: totalPengeluaran,
+            laba_bersih: labaBersih,
             unpaid_count: unpaidCount,
             unpaid_total: Number(unpaidTotal._sum.total_amount || 0),
         };

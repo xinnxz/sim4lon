@@ -21,6 +21,10 @@ export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
     get lpg_products(): import("@prisma/client").Prisma.lpg_productsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get consumers(): import("@prisma/client").Prisma.consumersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get consumer_orders(): import("@prisma/client").Prisma.consumer_ordersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get consumer_pricing(): import("@prisma/client").Prisma.consumer_pricingDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get expenses(): import("@prisma/client").Prisma.expensesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get pangkalan_stocks(): import("@prisma/client").Prisma.pangkalan_stocksDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get pangkalan_stock_movements(): import("@prisma/client").Prisma.pangkalan_stock_movementsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
 }
