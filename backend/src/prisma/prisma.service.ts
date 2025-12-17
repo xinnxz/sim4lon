@@ -54,6 +54,13 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     // New: Consumer & Consumer Orders (Pangkalan SAAS)
     get consumers() { return this._client.consumers; }
     get consumer_orders() { return this._client.consumer_orders; }
+    // New: Consumer Pricing
+    get consumer_pricing() { return this._client.consumer_pricing; }
+    // New: Expenses (Pengeluaran)
+    get expenses() { return this._client.expenses; }
+    // New: Pangkalan Stock Management
+    get pangkalan_stocks() { return this._client.pangkalan_stocks; }
+    get pangkalan_stock_movements() { return this._client.pangkalan_stock_movements; }
 
     async onModuleInit() {
         await this._client.$connect();

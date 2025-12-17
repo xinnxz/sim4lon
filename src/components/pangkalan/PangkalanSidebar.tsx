@@ -48,6 +48,11 @@ const menuItems = [
         icon: 'Users',
     },
     {
+        name: 'Pengeluaran',
+        href: '/pangkalan/pengeluaran',
+        icon: 'Wallet',
+    },
+    {
         name: 'Laporan',
         href: '/pangkalan/laporan',
         icon: 'FileText',
@@ -88,8 +93,8 @@ export default function PangkalanSidebar() {
                                         <a
                                             href={item.href}
                                             className={`flex items-center gap-3 px-3 h-11 rounded-lg transition-colors ${active
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-blue-950'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-blue-950'
                                                 }`}
                                         >
                                             <SafeIcon name={item.icon} className="h-5 w-5" />
