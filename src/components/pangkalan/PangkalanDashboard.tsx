@@ -1,12 +1,13 @@
 /**
- * PangkalanDashboard - Dashboard Core untuk Pangkalan
+ * PangkalanDashboard - Enhanced Dashboard with Consistent Laporan-style UI
  * 
- * FOKUS: Penjualan + Laba + Stok
- * 
- * Layout:
- * - 4 Stats Cards
- * - Line Chart (Trend) + Pie Chart (Stok)
- * - Target vs Realisasi + Recent Sales
+ * Features:
+ * - Gradient cards with shadows and hover effects
+ * - Area chart for trend visualization
+ * - Pie chart for stock breakdown
+ * - Recent sales list with clean styling
+ * - Responsive grid layout
+ * - Custom tooltips
  */
 
 'use client'
@@ -14,11 +15,12 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
-import { authApi, consumerOrdersApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats } from '@/lib/api'
+import { authApi, consumerOrdersApi, pangkalanStockApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint } from '@/lib/api'
 import {
-    LineChart,
-    Line,
+    AreaChart,
+    Area,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -27,68 +29,83 @@ import {
     PieChart,
     Pie,
     Cell,
+    Legend,
 } from 'recharts'
 
-// Mock chart data - Trend 7 hari (will be updated with API data)
-const salesChartData = [
-    { day: 'Sen', penjualan: 3042000, modal: 2704000, pengeluaran: 50000, laba: 288000 },
-    { day: 'Sel', penjualan: 2844000, modal: 2528000, pengeluaran: 45000, laba: 271000 },
-    { day: 'Rab', penjualan: 3456000, modal: 3072000, pengeluaran: 60000, laba: 324000 },
-    { day: 'Kam', penjualan: 2160000, modal: 1920000, pengeluaran: 30000, laba: 210000 },
-    { day: 'Jum', penjualan: 3780000, modal: 3360000, pengeluaran: 55000, laba: 365000 },
-    { day: 'Sab', penjualan: 4500000, modal: 4000000, pengeluaran: 70000, laba: 430000 },
-    { day: 'Min', penjualan: 2700000, modal: 2400000, pengeluaran: 40000, laba: 260000 },
-]
+// LPG type config
+const lpgTypeConfig: Record<string, { name: string; color: string }> = {
+    'kg3': { name: '3 kg', color: '#22C55E' },
+    'kg5': { name: '5.5 kg', color: '#06B6D4' },
+    'kg12': { name: '12 kg', color: '#3B82F6' },
+    'kg50': { name: '50 kg', color: '#F59E0B' },
+}
 
-// Stok per LPG
-const stockData = [
-    { name: '3 kg', value: 150, color: '#22C55E' },
-    { name: '5.5 kg', value: 30, color: '#06B6D4' },
-    { name: '12 kg', value: 45, color: '#3B82F6' },
-    { name: '50 kg', value: 12, color: '#F59E0B' },
-]
-
-const totalStock = stockData.reduce((sum, item) => sum + item.value, 0)
+// Custom tooltip component
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-slate-900/95 backdrop-blur-sm px-4 py-3 rounded-xl shadow-2xl border border-slate-700">
+                <p className="text-white font-semibold text-sm mb-2">{label}</p>
+                {payload.map((item: any, index: number) => (
+                    <div key={index} className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                        <span className="text-slate-300">{item.name}:</span>
+                        <span className="text-white font-medium">
+                            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.value)}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+    return null
+}
 
 export default function PangkalanDashboard() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [stats, setStats] = useState<ConsumerOrderStats | null>(null)
     const [recentSales, setRecentSales] = useState<ConsumerOrder[]>([])
+    const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+    const [stockData, setStockData] = useState<Array<{ name: string; value: number; color: string }>>([])
+    const [totalStock, setTotalStock] = useState(0)
     const [isLoading, setIsLoading] = useState(true)
-
-    // Now using API data for all stats - dynamic prices!
-    const todayQty = stats?.total_qty || 0
-    const todayTransaksi = stats?.total_orders || 0
-    const todayPenjualan = stats?.total_revenue || 0
-    const todayLabaBersih = stats?.laba_bersih || 0
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true)
+                setError(null)
+
                 const profileData = await authApi.getProfile()
                 setProfile(profileData)
 
-                const [statsData, recentData] = await Promise.all([
+                const [statsData, recentData, chartDataFromApi, stockResponse] = await Promise.all([
                     consumerOrdersApi.getStats(true),
                     consumerOrdersApi.getRecent(5),
+                    consumerOrdersApi.getChartData(),
+                    pangkalanStockApi.getStockLevels(),
                 ])
+
                 setStats(statsData)
                 setRecentSales(recentData)
-            } catch (error) {
-                console.error('Failed to fetch data:', error)
-                setStats({
-                    total_orders: 0,
-                    total_qty: 0,
-                    total_revenue: 0,
-                    total_modal: 0,
-                    margin_kotor: 0,
-                    total_pengeluaran: 0,
-                    laba_bersih: 0,
-                    unpaid_count: 0,
-                    unpaid_total: 0
-                })
-                setRecentSales([])
+                if (chartDataFromApi && chartDataFromApi.length > 0) {
+                    setChartData(chartDataFromApi)
+                }
+
+                // Convert stock API response to pie chart format
+                if (stockResponse && stockResponse.stocks) {
+                    const pieData = stockResponse.stocks.map(stock => ({
+                        name: lpgTypeConfig[stock.lpg_type]?.name || stock.lpg_type,
+                        value: stock.qty,
+                        color: lpgTypeConfig[stock.lpg_type]?.color || '#94A3B8',
+                    }))
+                    setStockData(pieData)
+                    setTotalStock(stockResponse.summary.total)
+                }
+            } catch (err: any) {
+                console.error('Failed to fetch dashboard data:', err)
+                setError(err?.message || 'Failed to load data')
             } finally {
                 setIsLoading(false)
             }
@@ -110,146 +127,221 @@ export default function PangkalanDashboard() {
         return value.toString()
     }
 
+    const formatDate = (dateStr: string) => {
+        return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+    }
+
+    const formatTime = (dateStr: string) => {
+        return new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+    }
+
+    // Prepare chart data with formatted dates
+    const enhancedChartData = chartData.map(day => ({
+        ...day,
+        name: formatDate(day.date),
+    }))
+
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-screen">
+            <div className="flex items-center justify-center min-h-[500px]">
                 <div className="text-center">
-                    <SafeIcon name="Loader2" className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
-                    <p className="text-slate-500">Memuat dashboard...</p>
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <SafeIcon name="LayoutDashboard" className="h-6 w-6 text-blue-600" />
+                        </div>
+                    </div>
+                    <p className="text-slate-500 mt-4 font-medium">Memuat dashboard...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px]">
+                <div className="text-center max-w-md">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <SafeIcon name="AlertTriangle" className="h-8 w-8 text-red-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Gagal Memuat Data</h3>
+                    <p className="text-slate-500 mb-4">{error}</p>
+                    <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+                        <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
+                        Coba Lagi
+                    </Button>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div className="space-y-8 pb-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-                    <p className="text-slate-500">Selamat datang, {profile?.name?.split(' ')[0]}</p>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+                    <p className="text-slate-500 mt-1 flex items-center gap-2">
+                        <SafeIcon name="Sparkles" className="h-4 w-4 text-amber-500" />
+                        Selamat datang, {profile?.name?.split(' ')[0] || 'Pak'}
+                    </p>
                 </div>
-                <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 shadow-lg">
-                    <a href="/pangkalan/penjualan/catat">
-                        <SafeIcon name="Plus" className="mr-2 h-5 w-5" />
-                        Catat Penjualan
-                    </a>
+                <Button
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                    onClick={() => window.location.href = '/pangkalan/penjualan/catat'}
+                >
+                    <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
+                    Catat Penjualan
                 </Button>
             </div>
 
-            {/* Core Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
-                    <CardHeader className="pb-2">
+            {/* Stats Cards */}
+            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                {/* Penjualan Hari Ini */}
+                <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <CardHeader className="pb-2 relative">
                         <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="TrendingUp" className="h-4 w-4" />
+                            <SafeIcon name="Banknote" className="h-4 w-4" />
                             Penjualan Hari Ini
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold">{formatCurrency(todayPenjualan)}</div>
-                        <p className="text-blue-100 text-sm mt-1">{todayQty} tabung terjual</p>
+                    <CardContent className="relative">
+                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(stats?.total_revenue || 0)}</p>
+                        <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
+                            <SafeIcon name="Flame" className="h-3.5 w-3.5" />
+                            {stats?.total_qty || 0} tabung terjual
+                        </p>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
-                    <CardHeader className="pb-2">
+                {/* Laba Bersih */}
+                <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <CardHeader className="pb-2 relative">
                         <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
                             <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
-                            Laba Bersih Hari Ini
+                            Laba Bersih (Profit)
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold">{formatCurrency(todayLabaBersih)}</div>
-                        <p className="text-green-100 text-sm mt-1">Setelah pengeluaran</p>
+                    <CardContent className="relative">
+                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(stats?.laba_bersih || 0)}</p>
+                        <p className="text-green-100 text-sm mt-2">Hari ini</p>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-800 shadow-lg">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-500 flex items-center gap-2">
-                            <SafeIcon name="Receipt" className="h-4 w-4" />
+                {/* Total Transaksi */}
+                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <CardHeader className="pb-2 relative">
+                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
+                                <SafeIcon name="Receipt" className="h-4 w-4 text-purple-600" />
+                            </div>
                             Total Transaksi
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-slate-900 dark:text-white">{todayTransaksi}</div>
-                        <p className="text-slate-500 text-sm mt-1">Transaksi hari ini</p>
+                    <CardContent className="relative">
+                        <p className="text-2xl lg:text-3xl font-bold text-slate-900">{stats?.total_orders || 0}</p>
+                        <p className="text-slate-500 text-sm mt-2">Transaksi hari ini</p>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-800 shadow-lg">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-500 flex items-center gap-2">
-                            <SafeIcon name="Package" className="h-4 w-4" />
+                {/* Total Stok */}
+                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <CardHeader className="pb-2 relative">
+                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
+                                <SafeIcon name="Package" className="h-4 w-4 text-amber-600" />
+                            </div>
                             Total Stok
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-cyan-600">{totalStock} <span className="text-lg font-normal">tabung</span></div>
-                        <p className="text-slate-500 text-sm mt-1">4 tipe LPG</p>
+                    <CardContent className="relative">
+                        <p className="text-2xl lg:text-3xl font-bold text-slate-900">{totalStock} <span className="text-lg font-normal text-slate-500">tabung</span></p>
+                        <p className="text-slate-500 text-sm mt-2">{stockData.length} tipe LPG</p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Charts Row 1: Trend + Stok */}
+            {/* Charts Row */}
             <div className="grid gap-6 lg:grid-cols-3">
-                <Card className="lg:col-span-2 bg-white dark:bg-slate-800 shadow-lg">
-                    <CardHeader>
-                        <CardTitle>Trend Penjualan, Modal, Pengeluaran & Laba</CardTitle>
-                        <CardDescription>7 hari terakhir • Laba Bersih = (Penjualan - Modal) - Pengeluaran</CardDescription>
+                {/* Area Chart - Trend 7 Hari */}
+                <Card className="lg:col-span-2 bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <SafeIcon name="TrendingUp" className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    Trend Penjualan, Modal, Pengeluaran & Laba
+                                </CardTitle>
+                                <CardDescription className="mt-1">7 hari terakhir • Laba Bersih = (Penjualan - Modal) - Pengeluaran</CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-6">
                         <div className="h-[280px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={salesChartData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                                    <XAxis dataKey="day" stroke="#64748B" fontSize={12} />
-                                    <YAxis stroke="#64748B" fontSize={12} tickFormatter={formatCurrencyShort} />
-                                    <Tooltip
-                                        content={({ active, payload, label }) => {
-                                            if (active && payload && payload.length) {
-                                                const data = payload[0]?.payload as any
-                                                const marginKotor = (data?.penjualan || 0) - (data?.modal || 0)
-                                                return (
-                                                    <div className="bg-slate-800 text-white p-3 rounded-lg shadow-lg border border-slate-700 min-w-[200px]">
-                                                        <p className="font-bold text-sm mb-2 border-b border-slate-600 pb-1">{label}</p>
-                                                        <div className="space-y-1 text-xs">
-                                                            <div className="flex justify-between">
-                                                                <span className="text-blue-300">💰 Penjualan:</span>
-                                                                <span className="font-medium text-blue-400">{formatCurrency(data?.penjualan || 0)}</span>
-                                                            </div>
-                                                            <div className="flex justify-between">
-                                                                <span className="text-orange-300">🏷️ Modal:</span>
-                                                                <span className="font-medium text-orange-400">{formatCurrency(data?.modal || 0)}</span>
-                                                            </div>
-                                                            <div className="flex justify-between">
-                                                                <span className="text-slate-300">📊 Margin Kotor:</span>
-                                                                <span className="font-medium">{formatCurrency(marginKotor)}</span>
-                                                            </div>
-                                                            <div className="flex justify-between">
-                                                                <span className="text-red-300">💸 Pengeluaran:</span>
-                                                                <span className="font-medium text-red-400">{formatCurrency(data?.pengeluaran || 0)}</span>
-                                                            </div>
-                                                            <div className="flex justify-between pt-1 border-t border-slate-600">
-                                                                <span className="text-green-300">✨ Laba Bersih:</span>
-                                                                <span className="font-bold text-green-400">{formatCurrency(data?.laba || 0)}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            }
-                                            return null
-                                        }}
+                                <AreaChart data={enhancedChartData}>
+                                    <defs>
+                                        <linearGradient id="penjualanGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="labaGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#22C55E" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#22C55E" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#64748B" fontSize={12} tickFormatter={formatCurrencyShort} tickLine={false} axisLine={false} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="penjualan"
+                                        name="Penjualan"
+                                        stroke="#3B82F6"
+                                        strokeWidth={2}
+                                        fill="url(#penjualanGradient)"
+                                        dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff' }}
                                     />
-                                    <Line type="monotone" dataKey="penjualan" name="Penjualan" stroke="#3B82F6" strokeWidth={2} dot={{ r: 3 }} />
-                                    <Line type="monotone" dataKey="modal" name="Modal" stroke="#F97316" strokeWidth={2} dot={{ r: 3 }} />
-                                    <Line type="monotone" dataKey="pengeluaran" name="Pengeluaran" stroke="#EF4444" strokeWidth={2} dot={{ r: 3 }} strokeDasharray="5 5" />
-                                    <Line type="monotone" dataKey="laba" name="Laba Bersih" stroke="#22C55E" strokeWidth={3} dot={{ r: 4 }} />
-                                </LineChart>
+                                    <Area
+                                        type="monotone"
+                                        dataKey="modal"
+                                        name="Modal"
+                                        stroke="#F97316"
+                                        strokeWidth={2}
+                                        fill="transparent"
+                                        dot={{ r: 3, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="pengeluaran"
+                                        name="Pengeluaran"
+                                        stroke="#EF4444"
+                                        strokeWidth={2}
+                                        strokeDasharray="5 5"
+                                        fill="transparent"
+                                        dot={{ r: 3, fill: '#EF4444', strokeWidth: 2, stroke: '#fff' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="laba"
+                                        name="Laba Bersih"
+                                        stroke="#22C55E"
+                                        strokeWidth={3}
+                                        fill="url(#labaGradient)"
+                                        dot={{ r: 5, fill: '#22C55E', strokeWidth: 3, stroke: '#fff' }}
+                                    />
+                                </AreaChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="flex justify-center gap-3 mt-3 flex-wrap">
+                        {/* Legend */}
+                        <div className="flex flex-wrap justify-center gap-6 mt-4 pt-4 border-t border-slate-100">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-blue-500" />
                                 <span className="text-sm text-slate-600">Penjualan</span>
@@ -259,7 +351,7 @@ export default function PangkalanDashboard() {
                                 <span className="text-sm text-slate-600">Modal</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500" />
+                                <div className="w-3 h-0.5 bg-red-500" style={{ borderTop: '2px dashed #EF4444' }} />
                                 <span className="text-sm text-slate-600">Pengeluaran</span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -270,29 +362,51 @@ export default function PangkalanDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-slate-800 shadow-lg">
-                    <CardHeader>
-                        <CardTitle>Stok per Tipe</CardTitle>
+                {/* Pie Chart - Stok per Tipe */}
+                <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                <SafeIcon name="PieChart" className="h-4 w-4 text-emerald-600" />
+                            </div>
+                            Stok per Tipe
+                        </CardTitle>
                         <CardDescription>Total: {totalStock} tabung</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="h-[160px]">
+                    <CardContent className="pt-6">
+                        <div className="h-[200px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={stockData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value">
+                                    <Pie
+                                        data={stockData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={50}
+                                        outerRadius={80}
+                                        dataKey="value"
+                                        strokeWidth={3}
+                                        stroke="#fff"
+                                    >
                                         {stockData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
-                                    <Tooltip formatter={(value: number) => [`${value} tabung`, 'Stok']} />
+                                    <Tooltip
+                                        formatter={(value: number) => [`${value} tabung`, 'Stok']}
+                                        contentStyle={{ backgroundColor: '#1E293B', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 mt-3">
-                            {stockData.map((item) => (
-                                <div key={item.name} className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                                    <span className="text-sm text-slate-600">{item.name}: {item.value}</span>
+                        {/* Stock items */}
+                        <div className="space-y-2 mt-4">
+                            {stockData.map((item, index) => (
+                                <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                        <span className="font-medium text-slate-700">{item.name}</span>
+                                    </div>
+                                    <span className="font-bold text-slate-900">{item.value}</span>
                                 </div>
                             ))}
                         </div>
@@ -300,105 +414,66 @@ export default function PangkalanDashboard() {
                 </Card>
             </div>
 
-            {/* Charts Row 2: Target vs Realisasi + Recent Sales */}
-            <div className="grid gap-6 lg:grid-cols-2">
-                {/* Target vs Realisasi */}
-                <Card className="bg-white dark:bg-slate-800 shadow-lg">
-                    <CardHeader>
-                        <CardTitle>Target vs Realisasi</CardTitle>
-                        <CardDescription>Pencapaian bulan ini</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {/* Target Penjualan */}
+            {/* Recent Sales */}
+            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center justify-between">
                         <div>
-                            <div className="flex justify-between text-sm mb-2">
-                                <span className="text-slate-600">Target Penjualan</span>
-                                <span className="font-semibold">15.8jt / 25jt</span>
-                            </div>
-                            <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all"
-                                    style={{ width: '63%' }}
-                                />
-                            </div>
-                            <p className="text-xs text-slate-500 mt-1">63% tercapai</p>
+                            <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                    <SafeIcon name="Clock" className="h-4 w-4 text-amber-600" />
+                                </div>
+                                Penjualan Terakhir
+                            </CardTitle>
+                            <CardDescription className="mt-1">5 transaksi terbaru hari ini</CardDescription>
                         </div>
-
-                        {/* Target Laba */}
-                        <div>
-                            <div className="flex justify-between text-sm mb-2">
-                                <span className="text-slate-600">Target Laba</span>
-                                <span className="font-semibold text-green-600">1.76jt / 2.5jt</span>
-                            </div>
-                            <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all"
-                                    style={{ width: '70%' }}
-                                />
-                            </div>
-                            <p className="text-xs text-slate-500 mt-1">70% tercapai</p>
-                        </div>
-
-                        {/* Target Tabung */}
-                        <div>
-                            <div className="flex justify-between text-sm mb-2">
-                                <span className="text-slate-600">Target Tabung</span>
-                                <span className="font-semibold">880 / 1.200</span>
-                            </div>
-                            <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-full transition-all"
-                                    style={{ width: '73%' }}
-                                />
-                            </div>
-                            <p className="text-xs text-slate-500 mt-1">73% tercapai • sisa 17 hari</p>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Recent Sales */}
-                <Card className="bg-white dark:bg-slate-800 shadow-lg">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Penjualan Terbaru</CardTitle>
-                            <CardDescription>5 transaksi terakhir</CardDescription>
-                        </div>
-                        <Button asChild variant="outline" size="sm">
-                            <a href="/pangkalan/penjualan">Semua</a>
+                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" asChild>
+                            <a href="/pangkalan/penjualan">Lihat Semua →</a>
                         </Button>
-                    </CardHeader>
-                    <CardContent>
-                        {recentSales.length === 0 ? (
-                            <div className="text-center py-10 text-slate-500">
-                                <SafeIcon name="ShoppingCart" className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                                <p>Belum ada penjualan</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {recentSales.slice(0, 5).map((sale) => (
-                                    <div key={sale.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <SafeIcon name="User" className="h-5 w-5 text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-900 dark:text-white text-sm">
-                                                    {sale.consumers?.name || sale.consumer_name || 'Walk-in'}
-                                                </p>
-                                                <p className="text-xs text-slate-500">{sale.qty} tabung</p>
-                                            </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                    {recentSales.length === 0 ? (
+                        <div className="text-center py-12">
+                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                            <p className="text-slate-400">Belum ada penjualan hari ini</p>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-4"
+                                onClick={() => window.location.href = '/pangkalan/penjualan/catat'}
+                            >
+                                <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
+                                Catat Penjualan Pertama
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-slate-100">
+                            {recentSales.map((sale, index) => (
+                                <div key={sale.id} className={`flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+                                            <SafeIcon name="Flame" className="h-5 w-5 text-blue-600" />
                                         </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-green-600">+{formatCurrency(Number(sale.total_amount))}</p>
-                                            <p className="text-xs text-slate-500">penjualan</p>
+                                        <div>
+                                            <p className="font-semibold text-slate-900">
+                                                {sale.consumers?.name || sale.consumer_name || 'Walk-in Customer'}
+                                            </p>
+                                            <p className="text-sm text-slate-500">
+                                                {sale.qty} × {lpgTypeConfig[sale.lpg_type]?.name || sale.lpg_type}
+                                            </p>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-slate-900">{formatCurrency(sale.total_amount)}</p>
+                                        <p className="text-xs text-slate-400">{formatTime(sale.sale_date)}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     )
 }

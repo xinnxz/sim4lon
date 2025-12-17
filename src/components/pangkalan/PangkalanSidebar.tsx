@@ -33,9 +33,9 @@ const menuItems = [
         icon: 'LayoutDashboard',
     },
     {
-        name: 'Riwayat Penjualan',
+        name: 'Penjualan',
         href: '/pangkalan/penjualan',
-        icon: 'History',
+        icon: 'ShoppingBag',
     },
     {
         name: 'Stok LPG',

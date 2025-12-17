@@ -18,6 +18,8 @@ export declare class ConsumerController {
             updated_at: Date;
             note: string | null;
             address: string | null;
+            nik: string | null;
+            kk: string | null;
         })[];
         meta: {
             total: number;
@@ -45,6 +47,8 @@ export declare class ConsumerController {
         updated_at: Date;
         note: string | null;
         address: string | null;
+        nik: string | null;
+        kk: string | null;
     }>;
     create(dto: CreateConsumerDto, req: any): Promise<{
         id: string;
@@ -56,6 +60,8 @@ export declare class ConsumerController {
         updated_at: Date;
         note: string | null;
         address: string | null;
+        nik: string | null;
+        kk: string | null;
     }>;
     update(id: string, dto: UpdateConsumerDto, req: any): Promise<{
         id: string;
@@ -67,6 +73,8 @@ export declare class ConsumerController {
         updated_at: Date;
         note: string | null;
         address: string | null;
+        nik: string | null;
+        kk: string | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

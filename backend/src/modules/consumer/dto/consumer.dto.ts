@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, MaxLength, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, MaxLength, IsUUID, Length } from 'class-validator';
 
 /**
  * DTO untuk membuat consumer baru
@@ -8,6 +8,16 @@ export class CreateConsumerDto {
     @IsString()
     @MaxLength(255)
     name: string;
+
+    @IsOptional()
+    @IsString()
+    @Length(16, 16, { message: 'NIK harus 16 digit' })
+    nik?: string;
+
+    @IsOptional()
+    @IsString()
+    @Length(16, 16, { message: 'Nomor KK harus 16 digit' })
+    kk?: string;
 
     @IsOptional()
     @IsString()
@@ -31,6 +41,16 @@ export class UpdateConsumerDto {
     @IsString()
     @MaxLength(255)
     name?: string;
+
+    @IsOptional()
+    @IsString()
+    @Length(16, 16, { message: 'NIK harus 16 digit' })
+    nik?: string;
+
+    @IsOptional()
+    @IsString()
+    @Length(16, 16, { message: 'Nomor KK harus 16 digit' })
+    kk?: string;
 
     @IsOptional()
     @IsString()

@@ -13,6 +13,8 @@ exports.UpdateConsumerDto = exports.CreateConsumerDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateConsumerDto {
     name;
+    nik;
+    kk;
     phone;
     address;
     note;
@@ -23,6 +25,18 @@ __decorate([
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateConsumerDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(16, 16, { message: 'NIK harus 16 digit' }),
+    __metadata("design:type", String)
+], CreateConsumerDto.prototype, "nik", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(16, 16, { message: 'Nomor KK harus 16 digit' }),
+    __metadata("design:type", String)
+], CreateConsumerDto.prototype, "kk", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -41,6 +55,8 @@ __decorate([
 ], CreateConsumerDto.prototype, "note", void 0);
 class UpdateConsumerDto {
     name;
+    nik;
+    kk;
     phone;
     address;
     note;
@@ -53,6 +69,18 @@ __decorate([
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], UpdateConsumerDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(16, 16, { message: 'NIK harus 16 digit' }),
+    __metadata("design:type", String)
+], UpdateConsumerDto.prototype, "nik", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(16, 16, { message: 'Nomor KK harus 16 digit' }),
+    __metadata("design:type", String)
+], UpdateConsumerDto.prototype, "kk", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

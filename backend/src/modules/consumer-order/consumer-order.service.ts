@@ -240,23 +240,34 @@ export class ConsumerOrderService {
         // Build date filter
         const dateFilter: any = {};
         if (todayOnly) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Use fixed timezone offset for WIB (UTC+7)
+            const now = new Date();
+            // Get start of today in WIB timezone
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
+
             dateFilter.sale_date = {
                 gte: today,
                 lt: tomorrow,
             };
         }
 
+        // Fixed cost prices per LPG type (harga beli dari agen)
+        const COST_PRICES: Record<string, number> = {
+            'kg3': 16000,
+            'kg5': 52000,
+            'kg12': 142000,
+            'kg50': 590000,
+        };
+
         // Get all orders for the period to calculate modal
         const orders = await this.prisma.consumer_orders.findMany({
             where: { pangkalan_id: pangkalanId, ...dateFilter },
             select: {
                 qty: true,
+                lpg_type: true,
                 price_per_unit: true,
-                cost_price: true,
                 total_amount: true,
             },
         });
@@ -268,7 +279,9 @@ export class ConsumerOrderService {
         for (const order of orders) {
             totalQty += order.qty;
             totalRevenue += Number(order.total_amount);
-            totalModal += order.qty * Number(order.cost_price);
+            // Use fixed cost price based on LPG type
+            const costPrice = COST_PRICES[order.lpg_type] || 16000;
+            totalModal += order.qty * costPrice;
         }
 
         const marginKotor = totalRevenue - totalModal;
@@ -293,17 +306,7 @@ export class ConsumerOrderService {
         const totalPengeluaran = Number(expenseSum._sum.amount || 0);
         const labaBersih = marginKotor - totalPengeluaran;
 
-        // Unpaid stats (always total, not date-filtered)
-        const [unpaidCount, unpaidTotal] = await Promise.all([
-            this.prisma.consumer_orders.count({
-                where: { pangkalan_id: pangkalanId, payment_status: 'HUTANG' },
-            }),
-            this.prisma.consumer_orders.aggregate({
-                where: { pangkalan_id: pangkalanId, payment_status: 'HUTANG' },
-                _sum: { total_amount: true },
-            }),
-        ]);
-
+        // All orders are LUNAS (no hutang/debt feature)
         return {
             total_orders: orders.length,
             total_qty: totalQty,
@@ -312,8 +315,6 @@ export class ConsumerOrderService {
             margin_kotor: marginKotor,
             total_pengeluaran: totalPengeluaran,
             laba_bersih: labaBersih,
-            unpaid_count: unpaidCount,
-            unpaid_total: Number(unpaidTotal._sum.total_amount || 0),
         };
     }
 
@@ -336,5 +337,90 @@ export class ConsumerOrderService {
         });
 
         return orders;
+    }
+
+    /**
+     * Get chart data for 7 days trend with penjualan, modal, pengeluaran, laba
+     */
+    async getChartData(pangkalanId: string) {
+        const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const result: Array<{
+            day: string;
+            date: string;
+            penjualan: number;
+            modal: number;
+            pengeluaran: number;
+            laba: number;
+        }> = [];
+
+        // Get data for last 7 days
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            date.setHours(0, 0, 0, 0);
+
+            const nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            // Get all orders for this day
+            const orders = await this.prisma.consumer_orders.findMany({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    sale_date: {
+                        gte: date,
+                        lt: nextDay,
+                    },
+                },
+                select: {
+                    qty: true,
+                    lpg_type: true,
+                    total_amount: true,
+                },
+            });
+
+            // Fixed cost prices for modal calculation
+            const COST_PRICES: Record<string, number> = {
+                'kg3': 16000,
+                'kg5': 52000,
+                'kg12': 142000,
+                'kg50': 590000,
+            };
+
+            // Calculate totals
+            let penjualan = 0;
+            let modal = 0;
+            for (const order of orders) {
+                penjualan += Number(order.total_amount);
+                const costPrice = COST_PRICES[order.lpg_type] || 16000;
+                modal += order.qty * costPrice;
+            }
+
+            // Get expenses for this day
+            const expenseSum = await this.prisma.expenses.aggregate({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    expense_date: {
+                        gte: date,
+                        lt: nextDay,
+                    },
+                },
+                _sum: { amount: true },
+            });
+            const pengeluaran = Number(expenseSum._sum.amount || 0);
+
+            const marginKotor = penjualan - modal;
+            const laba = marginKotor - pengeluaran;
+
+            result.push({
+                day: dayNames[date.getDay()],
+                date: date.toISOString().split('T')[0],
+                penjualan,
+                modal,
+                pengeluaran,
+                laba,
+            });
+        }
+
+        return result;
     }
 }
