@@ -8,12 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var ConsumerOrderService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConsumerOrderService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
-let ConsumerOrderService = class ConsumerOrderService {
+let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
     prisma;
+    logger = new common_1.Logger(ConsumerOrderService_1.name);
     constructor(prisma) {
         this.prisma = prisma;
     }
@@ -81,46 +83,70 @@ let ConsumerOrderService = class ConsumerOrderService {
         return order;
     }
     async create(pangkalanId, dto) {
-        if (!dto.consumer_id && !dto.consumer_name) {
-            throw new common_1.BadRequestException('Harus mengisi consumer_id atau consumer_name');
-        }
-        if (dto.consumer_id) {
-            const consumer = await this.prisma.consumers.findFirst({
-                where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
-            });
-            if (!consumer) {
-                throw new common_1.NotFoundException('Pelanggan tidak ditemukan');
+        this.logger.log(`[CREATE] Starting - pangkalanId: ${pangkalanId}`);
+        this.logger.log(`[CREATE] DTO received: ${JSON.stringify(dto)}`);
+        try {
+            if (!dto.consumer_id && !dto.consumer_name) {
+                this.logger.warn('[CREATE] Validation failed - no consumer_id or consumer_name');
+                throw new common_1.BadRequestException('Harus mengisi consumer_id atau consumer_name');
             }
-        }
-        const orderCount = await this.prisma.consumer_orders.count({
-            where: { pangkalan_id: pangkalanId },
-        });
-        const orderCode = `PORD-${String(orderCount + 1).padStart(4, '0')}`;
-        const totalAmount = dto.qty * dto.price_per_unit;
-        const order = await this.prisma.consumer_orders.create({
-            data: {
+            if (dto.consumer_id) {
+                this.logger.log(`[CREATE] Verifying consumer_id: ${dto.consumer_id}`);
+                const consumer = await this.prisma.consumers.findFirst({
+                    where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
+                });
+                if (!consumer) {
+                    this.logger.warn('[CREATE] Consumer not found or not owned');
+                    throw new common_1.NotFoundException('Pelanggan tidak ditemukan');
+                }
+                this.logger.log(`[CREATE] Consumer verified: ${consumer.name}`);
+            }
+            const orderCount = await this.prisma.consumer_orders.count({
+                where: { pangkalan_id: pangkalanId },
+            });
+            const orderCode = `PORD-${String(orderCount + 1).padStart(4, '0')}`;
+            this.logger.log(`[CREATE] Generated order code: ${orderCode}`);
+            const totalAmount = dto.qty * dto.price_per_unit;
+            this.logger.log(`[CREATE] Total amount: ${totalAmount}`);
+            const COST_PRICES = {
+                'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
+                '3kg': 16000, '5kg': 52000, '12kg': 142000, '50kg': 590000,
+            };
+            const costPrice = COST_PRICES[dto.lpg_type] || 16000;
+            const createData = {
                 code: orderCode,
                 pangkalan_id: pangkalanId,
-                consumer_id: dto.consumer_id,
-                consumer_name: dto.consumer_name,
+                consumer_id: dto.consumer_id || null,
+                consumer_name: dto.consumer_name || null,
                 lpg_type: dto.lpg_type,
                 qty: dto.qty,
                 price_per_unit: dto.price_per_unit,
+                cost_price: costPrice,
                 total_amount: totalAmount,
                 payment_status: dto.payment_status || 'LUNAS',
-                note: dto.note,
-            },
-            include: {
-                consumers: {
-                    select: {
-                        id: true,
-                        name: true,
-                        phone: true,
+                note: dto.note || null,
+            };
+            this.logger.log(`[CREATE] Prisma create data: ${JSON.stringify(createData)}`);
+            const order = await this.prisma.consumer_orders.create({
+                data: createData,
+                include: {
+                    consumers: {
+                        select: {
+                            id: true,
+                            name: true,
+                            phone: true,
+                        },
                     },
                 },
-            },
-        });
-        return order;
+            });
+            this.logger.log(`[CREATE] Success - order ID: ${order.id}`);
+            return order;
+        }
+        catch (error) {
+            this.logger.error(`[CREATE] Error: ${error.message}`);
+            this.logger.error(`[CREATE] Stack: ${error.stack}`);
+            throw error;
+        }
     }
     async update(id, pangkalanId, dto) {
         await this.findOne(id, pangkalanId);
@@ -311,7 +337,7 @@ let ConsumerOrderService = class ConsumerOrderService {
     }
 };
 exports.ConsumerOrderService = ConsumerOrderService;
-exports.ConsumerOrderService = ConsumerOrderService = __decorate([
+exports.ConsumerOrderService = ConsumerOrderService = ConsumerOrderService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], ConsumerOrderService);

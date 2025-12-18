@@ -33,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
                 name: true,
                 role: true,
                 is_active: true,
+                pangkalan_id: true, // For PANGKALAN role multi-tenant access
             },
         });
 
