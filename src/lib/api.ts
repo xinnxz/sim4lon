@@ -1511,10 +1511,43 @@ export interface StockLevelsResponse {
     };
 }
 
+/**
+ * Stock Movement type for pangkalan stock movements history
+ */
+export interface PangkalanStockMovement {
+    id: string;
+    pangkalan_id: string;
+    lpg_type: string;
+    movement_type: 'IN' | 'OUT';
+    qty: number;
+    source: string | null;
+    reference_id: string | null;
+    note: string | null;
+    movement_date: string;
+    created_at: string;
+}
+
 // Pangkalan Stock API
 export const pangkalanStockApi = {
     async getStockLevels(): Promise<StockLevelsResponse> {
         return apiRequest('/pangkalan-stocks');
+    },
+
+    /**
+     * Get stock movement history
+     */
+    async getMovements(options?: {
+        startDate?: string;
+        endDate?: string;
+        limit?: number;
+        lpgType?: string;
+    }): Promise<PangkalanStockMovement[]> {
+        const params = new URLSearchParams();
+        if (options?.startDate) params.append('startDate', options.startDate);
+        if (options?.endDate) params.append('endDate', options.endDate);
+        if (options?.limit) params.append('limit', options.limit.toString());
+        if (options?.lpgType) params.append('lpgType', options.lpgType);
+        return apiRequest(`/pangkalan-stocks/movements?${params.toString()}`);
     },
 
     async receiveStock(data: {
