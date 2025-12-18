@@ -198,16 +198,23 @@ export default function OrderListPage() {
   })
 
   return (
-    <div className="flex-1 space-y-6 p-6">
-      {/* Header */}
+    <div className="flex-1 space-y-6 p-6 dashboard-gradient-bg min-h-screen">
+      {/* Header with Premium Styling */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Daftar Pesanan</h1>
-          <p className="text-muted-foreground mt-1">
-            Kelola semua pesanan masuk dengan mudah
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gradient-primary">Daftar Pesanan</h1>
+            <p className="text-muted-foreground/80 mt-1">
+              Kelola semua pesanan masuk dengan mudah
+            </p>
+          </div>
         </div>
-        <Button asChild className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+        <Button
+          asChild
+          className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
+          style={{ boxShadow: '0 4px 15px -3px rgba(22, 163, 74, 0.4)' }}
+        >
           <a href="/buat-pesanan">
             <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
             Buat Pesanan
@@ -215,117 +222,140 @@ export default function OrderListPage() {
         </Button>
       </div>
 
-      {/* Summary Stats - Hari Ini */}
+      {/* Summary Stats - Hari Ini with Tilt3D + Premium Styling */}
       <div className="grid gap-4 sm:grid-cols-5">
-        <Tilt3DCard className="animate-fadeInUp">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Hari Ini
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{isLoadingStats ? '-' : stats?.total || 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">pesanan</p>
-          </CardContent>
-        </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Menunggu Pembayaran
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-yellow-600">{isLoadingStats ? '-' : stats?.menunggu_pembayaran || 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
-          </CardContent>
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-5 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Hari Ini</p>
+                <p className="text-3xl font-bold mt-2">{isLoadingStats ? '-' : stats?.total || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">pesanan</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200" style={{ boxShadow: '0 4px 12px -2px rgba(0,0,0,0.1)' }}>
+                <SafeIcon name="ShoppingCart" className="h-5 w-5 text-gray-600" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300" />
+          </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Diproses
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-blue-600">{isLoadingStats ? '-' : stats?.diproses || 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
-          </CardContent>
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-5 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menunggu Bayar</p>
+                <p className="text-3xl font-bold mt-2 text-amber-600">{isLoadingStats ? '-' : stats?.menunggu_pembayaran || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200" style={{ boxShadow: '0 4px 12px -2px rgba(245,158,11,0.3)' }}>
+                <SafeIcon name="Clock" className="h-5 w-5 text-amber-600" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
+          </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Dikirim
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-indigo-600">{isLoadingStats ? '-' : stats?.dikirim || 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
-          </CardContent>
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-5 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Diproses</p>
+                <p className="text-3xl font-bold mt-2 text-blue-600">{isLoadingStats ? '-' : stats?.diproses || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
+                <SafeIcon name="RefreshCw" className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+          </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Selesai
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-green-600">{isLoadingStats ? '-' : stats?.selesai || 0}</p>
-            <p className="text-xs text-muted-foreground mt-1">hari ini</p>
-          </CardContent>
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-5 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dikirim</p>
+                <p className="text-3xl font-bold mt-2 text-indigo-600">{isLoadingStats ? '-' : stats?.dikirim || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200" style={{ boxShadow: '0 4px 12px -2px rgba(99,102,241,0.3)' }}>
+                <SafeIcon name="Truck" className="h-5 w-5 text-indigo-600" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-300" />
+          </div>
+        </Tilt3DCard>
+
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-5 relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Selesai</p>
+                <p className="text-3xl font-bold mt-2 text-green-600">{isLoadingStats ? '-' : stats?.selesai || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
+                <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+          </div>
         </Tilt3DCard>
       </div>
 
-      {/* Filters Card */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Filter & Pencarian</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-            {/* Search Input */}
-            <div className="relative sm:col-span-2">
-              <SafeIcon
-                name="Search"
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                placeholder="Cari ID pesanan, pangkalan, atau jenis LPG..."
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="DRAFT">Draft</SelectItem>
-                <SelectItem value="MENUNGGU_PEMBAYARAN">Menunggu Pembayaran</SelectItem>
-                <SelectItem value="DIPROSES">Diproses</SelectItem>
-                <SelectItem value="DIKIRIM">Sedang Dikirim</SelectItem>
-                <SelectItem value="SELESAI">Selesai</SelectItem>
-                <SelectItem value="BATAL">Dibatalkan</SelectItem>
-              </SelectContent>
-            </Select>
+      {/* Filters Card with Glass Effect */}
+      <div className="glass-card rounded-2xl p-5">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-primary" />
+          Filter & Pencarian
+        </h3>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+          {/* Search Input */}
+          <div className="relative sm:col-span-2">
+            <SafeIcon
+              name="Search"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              placeholder="Cari ID pesanan, pangkalan, atau jenis LPG..."
+              className="pl-10 h-11 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Orders Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Pesanan</CardTitle>
-          <CardDescription>
+          {/* Status Filter */}
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
+            <SelectTrigger className="h-11 bg-background/50 border-border/50">
+              <SelectValue placeholder="Filter Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="DRAFT">Draft</SelectItem>
+              <SelectItem value="MENUNGGU_PEMBAYARAN">Menunggu Pembayaran</SelectItem>
+              <SelectItem value="DIPROSES">Diproses</SelectItem>
+              <SelectItem value="DIKIRIM">Sedang Dikirim</SelectItem>
+              <SelectItem value="SELESAI">Selesai</SelectItem>
+              <SelectItem value="BATAL">Dibatalkan</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Orders Table with Premium Card */}
+      <div className="chart-card-premium rounded-2xl overflow-hidden">
+        <div className="p-5 border-b border-border/50">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <h3 className="text-lg font-semibold">Daftar Pesanan</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
             Total {filteredOrders.length} pesanan ditampilkan
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div className="p-5">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
@@ -426,8 +456,8 @@ export default function OrderListPage() {
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

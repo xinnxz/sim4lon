@@ -139,25 +139,43 @@ export default function StockChart({ isVisible = true }: StockChartProps) {
         margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
         className="drop-shadow-sm"
       >
+        <defs>
+          <filter id="lineGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke="hsl(var(--border))"
-          opacity={0.5}
+          opacity={0.4}
           vertical={false}
         />
         <XAxis
           dataKey="day"
           stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '11px', fontWeight: 500 }}
+          axisLine={{ stroke: 'hsl(var(--border))' }}
+          tickLine={false}
         />
         <YAxis
           stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '11px', fontWeight: 500 }}
           tickFormatter={(value) => `${value}`}
+          axisLine={false}
+          tickLine={false}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--accent))', strokeWidth: 2, opacity: 0.3 }} />
+        <Tooltip
+          content={<CustomTooltip />}
+          cursor={{ stroke: 'hsl(var(--accent))', strokeWidth: 2, strokeDasharray: '5 5', opacity: 0.4 }}
+        />
         <Legend
-          wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+          wrapperStyle={{ fontSize: '10px', paddingTop: '12px' }}
+          iconType="circle"
+          iconSize={8}
         />
         {/* Dynamic Lines - one per product */}
         {chartData.products.map((product, index) => (
@@ -167,13 +185,24 @@ export default function StockChart({ isVisible = true }: StockChartProps) {
             dataKey={product.id}
             name={product.name}
             stroke={product.color}
-            strokeWidth={2}
-            dot={{ fill: product.color, r: 3, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
-            activeDot={{ r: 5, strokeWidth: 2 }}
+            strokeWidth={2.5}
+            dot={{
+              fill: product.color,
+              r: 4,
+              strokeWidth: 2,
+              stroke: 'hsl(var(--background))',
+            }}
+            activeDot={{
+              r: 7,
+              strokeWidth: 3,
+              stroke: 'hsl(var(--background))',
+              fill: product.color,
+              filter: 'url(#lineGlow)'
+            }}
             isAnimationActive={isVisible}
-            animationBegin={index * 100}
-            animationDuration={800}
-            animationEasing="ease-in-out"
+            animationBegin={index * 150}
+            animationDuration={1000}
+            animationEasing="ease-out"
           />
         ))}
       </LineChart>

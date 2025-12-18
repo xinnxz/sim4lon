@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardApi } from '@/lib/api'
 
 interface ChartDataPoint {
@@ -129,48 +129,80 @@ export default function SalesChart({ isVisible = true }: SalesChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart
+      <AreaChart
         data={data}
         margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
         className="drop-shadow-sm"
       >
         <defs>
           <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+            <stop offset="5%" stopColor="hsl(152 100% 35%)" stopOpacity={0.4} />
+            <stop offset="50%" stopColor="hsl(152 100% 40%)" stopOpacity={0.15} />
+            <stop offset="95%" stopColor="hsl(152 100% 45%)" stopOpacity={0.02} />
           </linearGradient>
+          <linearGradient id="strokeSales" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="hsl(152 100% 35%)" />
+            <stop offset="50%" stopColor="hsl(152 90% 40%)" />
+            <stop offset="100%" stopColor="hsl(48 100% 50%)" />
+          </linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke="hsl(var(--border))"
-          opacity={0.5}
+          opacity={0.4}
           vertical={false}
         />
         <XAxis
           dataKey="day"
           stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '11px', fontWeight: 500 }}
+          axisLine={{ stroke: 'hsl(var(--border))' }}
+          tickLine={false}
         />
         <YAxis
           stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '12px' }}
-          tickFormatter={(value) => `Rp${(value / 1000000).toFixed(0)}Jt`}
+          style={{ fontSize: '11px', fontWeight: 500 }}
+          tickFormatter={(value) => `${(value / 1000000).toFixed(0)}Jt`}
+          axisLine={false}
+          tickLine={false}
         />
-        <Tooltip content={<CustomTooltip allData={data} />} cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, opacity: 0.3 }} />
-        <Line
+        <Tooltip
+          content={<CustomTooltip allData={data} />}
+          cursor={{ stroke: 'hsl(152 100% 40%)', strokeWidth: 2, strokeDasharray: '5 5', opacity: 0.5 }}
+        />
+        <Area
           type="monotone"
           dataKey="sales"
-          stroke="hsl(var(--primary))"
+          stroke="url(#strokeSales)"
           strokeWidth={3}
-          dot={{ fill: 'hsl(var(--primary))', r: 5, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
-          activeDot={{ r: 7, strokeWidth: 2 }}
+          fill="url(#colorSales)"
+          dot={{
+            fill: 'hsl(152 100% 40%)',
+            r: 5,
+            strokeWidth: 3,
+            stroke: 'hsl(var(--background))',
+            filter: 'url(#glow)'
+          }}
+          activeDot={{
+            r: 8,
+            strokeWidth: 3,
+            stroke: 'hsl(var(--background))',
+            fill: 'hsl(152 100% 35%)',
+            filter: 'url(#glow)'
+          }}
           isAnimationActive={isVisible}
           animationBegin={0}
-          animationDuration={800}
-          animationEasing="ease-in-out"
-          fillOpacity={1}
+          animationDuration={1000}
+          animationEasing="ease-out"
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   )
 }

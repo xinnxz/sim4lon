@@ -11,13 +11,16 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
   <ProtectedDashboard client:load>
     <AdminHeader client:load />
     <AppSidebarLayout client:load headerHeight="64px">
-      <main class="flex-1 flex flex-col">
+      <main class="flex-1 flex flex-col dashboard-gradient-bg">
         <div class="flex-1 overflow-auto">
           <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Page Header */}
-            <div class="mb-6 animate-fadeInDown">
-              <h1 class="text-3xl font-bold text-foreground">Laporan</h1>
-              <p class="text-muted-foreground mt-2">Laporan penjualan, pembayaran, dan stok</p>
+            {/* Page Header with Premium Styling */}
+            <div class="mb-6 flex items-center gap-3">
+              <div class="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent"></div>
+              <div>
+                <h1 class="text-3xl font-bold text-gradient-primary">Laporan</h1>
+                <p class="text-muted-foreground/80 mt-1">Laporan penjualan, pembayaran, dan stok</p>
+              </div>
             </div>
 
             {/* Reports Content */}

@@ -462,158 +462,159 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             {/* Filter Bar */}
-            <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-4">
-                    <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                        {/* Period Filter */}
-                        <div className="flex flex-wrap gap-3 items-center">
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50">
-                                <SafeIcon name="Calendar" className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium text-foreground">Periode</span>
-                            </div>
-                            <Select value={datePreset} onValueChange={handlePresetChange}>
-                                <SelectTrigger className="w-[180px] bg-background border-border/50 hover:border-primary/50 transition-colors">
-                                    <SelectValue placeholder="Pilih periode" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="today">
-                                        <div className="flex items-center gap-2">
-                                            <SafeIcon name="Clock" className="h-3.5 w-3.5 text-muted-foreground" />
-                                            Hari Ini
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="7days">
-                                        <div className="flex items-center gap-2">
-                                            <SafeIcon name="Calendar" className="h-3.5 w-3.5 text-muted-foreground" />
-                                            7 Hari Terakhir
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="30days">
-                                        <div className="flex items-center gap-2">
-                                            <SafeIcon name="Calendar" className="h-3.5 w-3.5 text-muted-foreground" />
-                                            30 Hari Terakhir
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="month">
-                                        <div className="flex items-center gap-2">
-                                            <SafeIcon name="CalendarDays" className="h-3.5 w-3.5 text-muted-foreground" />
-                                            Bulan Ini
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="year">
-                                        <div className="flex items-center gap-2">
-                                            <SafeIcon name="CalendarRange" className="h-3.5 w-3.5 text-muted-foreground" />
-                                            Tahun Ini
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="custom">
-                                        <div className="flex items-center gap-2">
-                                            <SafeIcon name="Settings2" className="h-3.5 w-3.5 text-muted-foreground" />
-                                            Custom
-                                        </div>
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
+            <div className="glass-card rounded-2xl p-5">
+                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                    {/* Period Filter */}
+                    <div className="flex flex-wrap gap-3 items-center">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50">
+                            <SafeIcon name="Calendar" className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">Periode</span>
+                        </div>
+                        <Select value={datePreset} onValueChange={handlePresetChange}>
+                            <SelectTrigger className="w-[180px] bg-background border-border/50 hover:border-primary/50 transition-colors">
+                                <SelectValue placeholder="Pilih periode" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="today">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="Clock" className="h-3.5 w-3.5 text-muted-foreground" />
+                                        Hari Ini
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="7days">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="Calendar" className="h-3.5 w-3.5 text-muted-foreground" />
+                                        7 Hari Terakhir
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="30days">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="Calendar" className="h-3.5 w-3.5 text-muted-foreground" />
+                                        30 Hari Terakhir
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="month">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="CalendarDays" className="h-3.5 w-3.5 text-muted-foreground" />
+                                        Bulan Ini
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="year">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="CalendarRange" className="h-3.5 w-3.5 text-muted-foreground" />
+                                        Tahun Ini
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="custom">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="Settings2" className="h-3.5 w-3.5 text-muted-foreground" />
+                                        Custom
+                                    </div>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                            {datePreset === 'custom' && (
-                                <div className="flex gap-2 items-center bg-muted/30 p-2 rounded-lg border border-border/50">
-                                    <Input
-                                        type="date"
-                                        value={customStart}
-                                        onChange={(e) => setCustomStart(e.target.value)}
-                                        className="w-[140px] h-9 bg-background"
-                                    />
-                                    <SafeIcon name="ArrowRight" className="h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        type="date"
-                                        value={customEnd}
-                                        onChange={(e) => setCustomEnd(e.target.value)}
-                                        className="w-[140px] h-9 bg-background"
-                                    />
-                                    <Button size="sm" onClick={handleCustomDateApply} className="h-9">
-                                        <SafeIcon name="Check" className="h-4 w-4 mr-1" />
-                                        Terapkan
-                                    </Button>
-                                </div>
-                            )}
-
-                            {/* Refresh Button */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={fetchReports}
-                                disabled={isLoading}
-                                className="h-9 w-9 hover:bg-primary/10 hover:text-primary"
-                            >
-                                <SafeIcon
-                                    name="RefreshCw"
-                                    className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                        {datePreset === 'custom' && (
+                            <div className="flex gap-2 items-center bg-muted/30 p-2 rounded-lg border border-border/50">
+                                <Input
+                                    type="date"
+                                    value={customStart}
+                                    onChange={(e) => setCustomStart(e.target.value)}
+                                    className="w-[140px] h-9 bg-background"
                                 />
-                            </Button>
-                        </div>
+                                <SafeIcon name="ArrowRight" className="h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="date"
+                                    value={customEnd}
+                                    onChange={(e) => setCustomEnd(e.target.value)}
+                                    className="w-[140px] h-9 bg-background"
+                                />
+                                <Button size="sm" onClick={handleCustomDateApply} className="h-9">
+                                    <SafeIcon name="Check" className="h-4 w-4 mr-1" />
+                                    Terapkan
+                                </Button>
+                            </div>
+                        )}
 
-                        {/* Export Buttons */}
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading}
-                                onClick={handleExportPDF}
-                                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
-                            >
-                                <SafeIcon name="FileText" className="h-4 w-4 mr-2" />
-                                Export PDF
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading}
-                                onClick={handleExportExcel}
-                                className="border-green-200 text-green-600 hover:bg-green-50 hover:text-green-700 hover:border-green-300 transition-colors"
-                            >
-                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2" />
-                                Export Excel
-                            </Button>
-                        </div>
+                        {/* Refresh Button */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={fetchReports}
+                            disabled={isLoading}
+                            className="h-9 w-9 hover:bg-primary/10 hover:text-primary"
+                        >
+                            <SafeIcon
+                                name="RefreshCw"
+                                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                            />
+                        </Button>
                     </div>
-                </CardContent>
-            </Card>
 
-            {/* Tabs */}
+                    {/* Export Buttons */}
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isLoading}
+                            onClick={handleExportPDF}
+                            className="border-red-300 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 hover:border-red-400 transition-all shadow-sm hover:shadow-md"
+                        >
+                            <SafeIcon name="FileText" className="h-4 w-4 mr-2" />
+                            Export PDF
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isLoading}
+                            onClick={handleExportExcel}
+                            className="border-green-300 text-green-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 hover:text-green-700 hover:border-green-400 transition-all shadow-sm hover:shadow-md"
+                        >
+                            <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2" />
+                            Export Excel
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Tabs with Glass Effect */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList className="inline-flex h-auto gap-1 rounded-xl bg-slate-200/80 p-1.5 border border-slate-300 shadow-sm">
+                <TabsList className="inline-flex h-auto gap-1.5 rounded-2xl glass-card p-2 shadow-lg" style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.1)' }}>
                     <TabsTrigger
                         value="sales"
-                        className="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 text-slate-600 data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-green-200 hover:bg-green-50 hover:text-green-700"
+                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-slate-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-green-50 hover:text-green-700"
+                        style={{ boxShadow: activeTab === 'sales' ? '0 4px 15px -3px rgba(34,197,94,0.4)' : 'none' }}
                     >
                         <SafeIcon name="ShoppingCart" className="h-4 w-4" />
                         <span>Penjualan</span>
                         {salesData && salesData.summary.total_orders > 0 && (
-                            <Badge variant="secondary" className="ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium bg-green-200/20 text-green-800">
+                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'sales' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-800'}`}>
                                 {salesData.summary.total_orders}
                             </Badge>
                         )}
                     </TabsTrigger>
                     <TabsTrigger
                         value="payments"
-                        className="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 text-slate-600 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-slate-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-blue-50 hover:text-blue-700"
+                        style={{ boxShadow: activeTab === 'payments' ? '0 4px 15px -3px rgba(59,130,246,0.4)' : 'none' }}
                     >
                         <SafeIcon name="CreditCard" className="h-4 w-4" />
                         <span>Pembayaran</span>
                         {paymentsData && paymentsData.summary.total_payments > 0 && (
-                            <Badge variant="secondary" className="ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium bg-blue-200/20 text-blue-800">
+                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'payments' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'}`}>
                                 {paymentsData.summary.total_payments}
                             </Badge>
                         )}
                     </TabsTrigger>
                     <TabsTrigger
                         value="stock"
-                        className="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 text-slate-600 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-800 data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-orange-200 hover:bg-orange-50 hover:text-orange-700"
+                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-slate-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-orange-50 hover:text-orange-700"
+                        style={{ boxShadow: activeTab === 'stock' ? '0 4px 15px -3px rgba(249,115,22,0.4)' : 'none' }}
                     >
                         <SafeIcon name="Package" className="h-4 w-4" />
                         <span>Stok</span>
                         {stockData && stockData.summary.movement_count > 0 && (
-                            <Badge variant="secondary" className="ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium bg-orange-200/20 text-orange-800">
+                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'stock' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-800'}`}>
                                 {stockData.summary.movement_count}
                             </Badge>
                         )}
@@ -624,90 +625,97 @@ export default function ReportsPage() {
                 <TabsContent value="sales" className="space-y-4">
                     {/* Summary Cards */}
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="animate-fadeInUp">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Total Pesanan</CardTitle>
-                                    <div className="p-2 rounded-lg bg-blue-50">
-                                        <SafeIcon name="ShoppingCart" className="h-4 w-4 text-blue-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp">
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pesanan</p>
+                                        <p className="text-3xl font-bold text-primary mt-2">
+                                            {isLoading ? '...' : salesData?.summary.total_orders || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Pesanan dalam periode</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : salesData?.summary.total_orders || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
+                                        <SafeIcon name="ShoppingCart" className="h-5 w-5 text-blue-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Pesanan dalam periode</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Total Pendapatan</CardTitle>
-                                    <div className="p-2 rounded-lg bg-green-50">
-                                        <SafeIcon name="TrendingUp" className="h-4 w-4 text-green-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
+                                        <p className="text-3xl font-bold text-primary mt-2">
+                                            {isLoading ? '...' : formatCurrency(salesData?.summary.total_revenue || 0)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Revenue keseluruhan</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : formatCurrency(salesData?.summary.total_revenue || 0)}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
+                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-green-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Revenue keseluruhan</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Rata-rata Pesanan</CardTitle>
-                                    <div className="p-2 rounded-lg bg-purple-50">
-                                        <SafeIcon name="Calculator" className="h-4 w-4 text-purple-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rata-rata Pesanan</p>
+                                        <p className="text-3xl font-bold text-primary mt-2">
+                                            {isLoading ? '...' : formatCurrency(salesData?.summary.average_order || 0)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Per transaksi</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : formatCurrency(salesData?.summary.average_order || 0)}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200" style={{ boxShadow: '0 4px 12px -2px rgba(139,92,246,0.3)' }}>
+                                        <SafeIcon name="Calculator" className="h-5 w-5 text-purple-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Per transaksi</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Pertumbuhan</CardTitle>
-                                    <div className={`p-2 rounded-lg ${growthPercentage >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                                        <SafeIcon name={growthPercentage >= 0 ? "TrendingUp" : "TrendingDown"} className={`h-4 w-4 ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pertumbuhan</p>
+                                        <p className={`text-3xl font-bold mt-2 ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {isLoading ? '...' : `${growthPercentage >= 0 ? '+' : ''}${growthPercentage.toFixed(1)}%`}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Vs target harian</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className={`text-2xl font-bold ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {isLoading ? '...' : `${growthPercentage >= 0 ? '+' : ''}${growthPercentage.toFixed(1)}%`}
+                                    <div className={`p-3 rounded-xl bg-gradient-to-br ${growthPercentage >= 0 ? 'from-green-100 to-green-200' : 'from-red-100 to-red-200'}`} style={{ boxShadow: growthPercentage >= 0 ? '0 4px 12px -2px rgba(34,197,94,0.3)' : '0 4px 12px -2px rgba(239,68,68,0.3)' }}>
+                                        <SafeIcon name={growthPercentage >= 0 ? "TrendingUp" : "TrendingDown"} className={`h-5 w-5 ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Vs target harian</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${growthPercentage >= 0 ? 'from-green-300 via-green-500 to-green-300' : 'from-red-300 via-red-500 to-red-300'}`} />
+                            </div>
                         </Tilt3DCard>
                     </div>
 
                     {/* Sales Charts */}
                     <div className="grid gap-4 md:grid-cols-2">
                         {/* Line Chart - Trend Penjualan */}
-                        <Card className="border-border/50">
-                            <CardHeader className="pb-2">
+                        <div className="chart-card-premium rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                            <div className="p-5 border-b border-border/50">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <CardTitle className="text-lg">Tren Penjualan</CardTitle>
-                                        <CardDescription>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                            <h3 className="text-lg font-semibold">Tren Penjualan</h3>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground mt-1">
                                             Total pendapatan per hari dalam periode ini
-                                        </CardDescription>
+                                        </p>
                                     </div>
                                     {/* Edit Target Button */}
                                     {!isEditingTarget ? (
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="text-xs gap-1"
+                                            className="text-xs gap-1 border-primary/30 hover:border-primary/50 hover:bg-primary/5"
                                             onClick={() => {
                                                 setTempTarget(String(dailySalesTarget))
                                                 setIsEditingTarget(true)
@@ -722,6 +730,13 @@ export default function ReportsPage() {
                                                 type="text"
                                                 value={tempTarget}
                                                 onChange={(e) => setTempTarget(e.target.value.replace(/\D/g, ''))}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        handleSaveTarget()
+                                                    } else if (e.key === 'Escape') {
+                                                        setIsEditingTarget(false)
+                                                    }
+                                                }}
                                                 className="w-32 h-8 text-sm"
                                                 placeholder="Rp"
                                                 autoFocus
@@ -735,8 +750,8 @@ export default function ReportsPage() {
                                         </div>
                                     )}
                                 </div>
-                            </CardHeader>
-                            <CardContent>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="h-[300px] flex items-center justify-center">
                                         <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -750,49 +765,85 @@ export default function ReportsPage() {
                                 ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <LineChart data={salesChartData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                            <defs>
+                                                <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                                </linearGradient>
+                                                <filter id="salesGlow" height="300%">
+                                                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                                    <feMerge>
+                                                        <feMergeNode in="coloredBlur" />
+                                                        <feMergeNode in="SourceGraphic" />
+                                                    </feMerge>
+                                                </filter>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                                            <XAxis
+                                                dataKey="date"
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
                                             <YAxis
                                                 tickFormatter={(value) => `${(value / 1000000).toFixed(1)}Jt`}
-                                                tick={{ fontSize: 12 }}
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
                                             />
                                             <Tooltip
                                                 formatter={(value: number, name: string) => [formatCurrency(value), name]}
                                                 labelFormatter={(label) => `Tanggal: ${label}`}
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                    padding: '12px 16px'
+                                                }}
+                                                labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
                                             />
-                                            <Legend />
+                                            <Legend
+                                                wrapperStyle={{ paddingTop: '20px' }}
+                                                iconType="circle"
+                                            />
                                             <Line
                                                 type="monotone"
                                                 dataKey="total"
                                                 name="Penjualan Aktual"
-                                                stroke={CHART_COLORS.primary}
-                                                strokeWidth={2}
-                                                dot={{ fill: CHART_COLORS.primary, strokeWidth: 2 }}
+                                                stroke="#22c55e"
+                                                strokeWidth={3}
+                                                dot={{ fill: '#22c55e', strokeWidth: 2, r: 4, stroke: '#fff' }}
+                                                activeDot={{ r: 6, fill: '#22c55e', stroke: '#fff', strokeWidth: 3, filter: 'url(#salesGlow)' }}
                                             />
                                             <Line
                                                 type="monotone"
                                                 dataKey="target"
                                                 name="Target Penjualan"
-                                                stroke={CHART_COLORS.secondary}
+                                                stroke="#f59e0b"
                                                 strokeWidth={2}
-                                                strokeDasharray="5 5"
-                                                dot={{ fill: CHART_COLORS.secondary, strokeWidth: 2, r: 3 }}
+                                                strokeDasharray="8 4"
+                                                dot={{ fill: '#f59e0b', strokeWidth: 2, r: 3, stroke: '#fff' }}
+                                                activeDot={{ r: 5, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
                                             />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
                         {/* Pie Chart - Status Pesanan */}
-                        <Card className="border-border/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg">Status Pesanan</CardTitle>
-                                <CardDescription>
+                        <div className="chart-card-premium rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+                            <div className="p-5 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                                    <h3 className="text-lg font-semibold">Status Pesanan</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Distribusi pesanan berdasarkan status
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                                </p>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="h-[300px] flex items-center justify-center">
                                         <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -806,27 +857,47 @@ export default function ReportsPage() {
                                 ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <PieChart>
+                                            <defs>
+                                                <filter id="pieShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
+                                                </filter>
+                                            </defs>
                                             <Pie
                                                 data={salesByStatusData}
                                                 cx="50%"
                                                 cy="50%"
-                                                innerRadius={60}
-                                                outerRadius={100}
-                                                paddingAngle={4}
+                                                innerRadius={65}
+                                                outerRadius={105}
+                                                paddingAngle={3}
                                                 dataKey="value"
                                                 label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                                                labelLine={{ stroke: '#6b7280', strokeWidth: 1 }}
+                                                labelLine={{ stroke: '#94a3b8', strokeWidth: 1 }}
+                                                style={{ filter: 'url(#pieShadow)' }}
                                             >
                                                 {salesByStatusData.map((_, index) => (
-                                                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={PIE_COLORS[index % PIE_COLORS.length]}
+                                                        stroke="#fff"
+                                                        strokeWidth={2}
+                                                    />
                                                 ))}
                                             </Pie>
-                                            <Tooltip formatter={(value: number) => [value, 'Pesanan']} />
+                                            <Tooltip
+                                                formatter={(value: number) => [value, 'Pesanan']}
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                    padding: '12px 16px'
+                                                }}
+                                            />
                                         </PieChart>
                                     </ResponsiveContainer>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Sales Table */}
@@ -943,86 +1014,93 @@ export default function ReportsPage() {
                 <TabsContent value="payments" className="space-y-4">
                     {/* Summary Cards */}
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="animate-fadeInUp">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Jumlah Pembayaran</CardTitle>
-                                    <div className="p-2 rounded-lg bg-blue-50">
-                                        <SafeIcon name="Receipt" className="h-4 w-4 text-blue-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp">
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Jumlah Pembayaran</p>
+                                        <p className="text-3xl font-bold text-primary mt-2">
+                                            {isLoading ? '...' : paymentsData?.summary.total_payments || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Total transaksi</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : paymentsData?.summary.total_payments || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
+                                        <SafeIcon name="Receipt" className="h-5 w-5 text-blue-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Total transaksi</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Total Diterima</CardTitle>
-                                    <div className="p-2 rounded-lg bg-green-50">
-                                        <SafeIcon name="DollarSign" className="h-4 w-4 text-green-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Diterima</p>
+                                        <p className="text-3xl font-bold text-green-600 mt-2">
+                                            {isLoading ? '...' : formatCurrency(paymentsData?.summary.total_amount || 0)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Pembayaran diterima</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : formatCurrency(paymentsData?.summary.total_amount || 0)}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
+                                        <SafeIcon name="DollarSign" className="h-5 w-5 text-green-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Pembayaran diterima</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Rata-rata Pembayaran</CardTitle>
-                                    <div className="p-2 rounded-lg bg-purple-50">
-                                        <SafeIcon name="Calculator" className="h-4 w-4 text-purple-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rata-rata Pembayaran</p>
+                                        <p className="text-3xl font-bold text-primary mt-2">
+                                            {isLoading ? '...' : formatCurrency(paymentsData?.summary.average_payment || 0)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Per transaksi</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : formatCurrency(paymentsData?.summary.average_payment || 0)}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200" style={{ boxShadow: '0 4px 12px -2px rgba(139,92,246,0.3)' }}>
+                                        <SafeIcon name="Calculator" className="h-5 w-5 text-purple-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Per transaksi</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Metode Terbanyak</CardTitle>
-                                    <div className="p-2 rounded-lg bg-orange-50">
-                                        <SafeIcon name="CreditCard" className="h-4 w-4 text-orange-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Metode Terbanyak</p>
+                                        <p className="text-3xl font-bold text-orange-600 mt-2">
+                                            {isLoading ? '...' :
+                                                Object.entries(paymentsData?.summary.method_breakdown || {})
+                                                    .sort(([, a], [, b]) => b.count - a.count)[0]?.[0] || '-'
+                                            }
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Metode populer</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' :
-                                            Object.entries(paymentsData?.summary.method_breakdown || {})
-                                                .sort(([, a], [, b]) => b.count - a.count)[0]?.[0] || '-'
-                                        }
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200" style={{ boxShadow: '0 4px 12px -2px rgba(249,115,22,0.3)' }}>
+                                        <SafeIcon name="CreditCard" className="h-5 w-5 text-orange-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Metode populer</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
+                            </div>
                         </Tilt3DCard>
                     </div>
 
                     {/* Payment Charts */}
                     <div className="grid gap-4 md:grid-cols-2">
                         {/* Line Chart - Trend Pembayaran */}
-                        <Card className="border-border/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg">Tren Pembayaran</CardTitle>
-                                <CardDescription>
+                        <div className="chart-card-premium rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                            <div className="p-5 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                    <h3 className="text-lg font-semibold">Tren Pembayaran</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Total pembayaran per hari dalam periode ini
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                                </p>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="h-[300px] flex items-center justify-center">
                                         <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -1036,40 +1114,71 @@ export default function ReportsPage() {
                                 ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <LineChart data={paymentChartData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                            <defs>
+                                                <filter id="paymentGlow" height="300%">
+                                                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                                    <feMerge>
+                                                        <feMergeNode in="coloredBlur" />
+                                                        <feMergeNode in="SourceGraphic" />
+                                                    </feMerge>
+                                                </filter>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                                            <XAxis
+                                                dataKey="date"
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
                                             <YAxis
                                                 tickFormatter={(value) => `${(value / 1000000).toFixed(1)}Jt`}
-                                                tick={{ fontSize: 12 }}
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
                                             />
                                             <Tooltip
                                                 formatter={(value: number) => [formatCurrency(value), 'Jumlah']}
                                                 labelFormatter={(label) => `Tanggal: ${label}`}
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                    padding: '12px 16px'
+                                                }}
+                                                labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
                                             />
-                                            <Legend />
+                                            <Legend
+                                                wrapperStyle={{ paddingTop: '20px' }}
+                                                iconType="circle"
+                                            />
                                             <Line
                                                 type="monotone"
                                                 dataKey="amount"
                                                 name="Pembayaran"
-                                                stroke={CHART_COLORS.accent}
-                                                strokeWidth={2}
-                                                dot={{ fill: CHART_COLORS.accent, strokeWidth: 2 }}
+                                                stroke="#3b82f6"
+                                                strokeWidth={3}
+                                                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4, stroke: '#fff' }}
+                                                activeDot={{ r: 6, fill: '#3b82f6', stroke: '#fff', strokeWidth: 3, filter: 'url(#paymentGlow)' }}
                                             />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
                         {/* Bar Chart - Metode Pembayaran */}
-                        <Card className="border-border/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg">Metode Pembayaran</CardTitle>
-                                <CardDescription>
+                        <div className="chart-card-premium rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+                            <div className="p-5 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                                    <h3 className="text-lg font-semibold">Metode Pembayaran</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Distribusi jumlah & total per metode
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                                </p>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="h-[300px] flex items-center justify-center">
                                         <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -1083,28 +1192,60 @@ export default function ReportsPage() {
                                 ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <BarChart data={paymentMethodData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                                            <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                                            <defs>
+                                                <linearGradient id="barGreen" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor="#22c55e" stopOpacity={1} />
+                                                    <stop offset="100%" stopColor="#16a34a" stopOpacity={0.8} />
+                                                </linearGradient>
+                                                <linearGradient id="barOrange" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={1} />
+                                                    <stop offset="100%" stopColor="#d97706" stopOpacity={0.8} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                                            <XAxis
+                                                dataKey="name"
+                                                tick={{ fontSize: 11, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
+                                            <YAxis
+                                                yAxisId="left"
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
                                             <YAxis
                                                 yAxisId="right"
                                                 orientation="right"
                                                 tickFormatter={(v) => `${v}Jt`}
-                                                tick={{ fontSize: 12 }}
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
                                             />
                                             <Tooltip
                                                 formatter={(value: number, name: string) =>
                                                     name === 'Total (Juta)' ? [`Rp ${(value).toFixed(1)}M`, name] : [value, name]
                                                 }
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                    padding: '12px 16px'
+                                                }}
                                             />
-                                            <Legend />
-                                            <Bar yAxisId="left" dataKey="count" name="Jumlah" fill={CHART_COLORS.primary} />
-                                            <Bar yAxisId="right" dataKey="amount" name="Total (Juta)" fill={CHART_COLORS.secondary} />
+                                            <Legend
+                                                wrapperStyle={{ paddingTop: '20px' }}
+                                                iconType="circle"
+                                            />
+                                            <Bar yAxisId="left" dataKey="count" name="Jumlah" fill="url(#barGreen)" radius={[4, 4, 0, 0]} />
+                                            <Bar yAxisId="right" dataKey="amount" name="Total (Juta)" fill="url(#barOrange)" radius={[4, 4, 0, 0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Payments Table */}
@@ -1221,99 +1362,107 @@ export default function ReportsPage() {
                 <TabsContent value="stock" className="space-y-4">
                     {/* Summary Cards */}
                     <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-                        <Tilt3DCard className="animate-fadeInUp">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Total Masuk</CardTitle>
-                                    <div className="p-2 rounded-lg bg-green-50">
-                                        <SafeIcon name="ArrowDownCircle" className="h-4 w-4 text-green-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp">
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Masuk</p>
+                                        <p className="text-3xl font-bold text-green-600 mt-2">
+                                            +{isLoading ? '...' : stockData?.summary.total_in || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Stok masuk</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-green-600">
-                                        +{isLoading ? '...' : stockData?.summary.total_in || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
+                                        <SafeIcon name="ArrowDownCircle" className="h-5 w-5 text-green-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Stok masuk</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Total Keluar</CardTitle>
-                                    <div className="p-2 rounded-lg bg-red-50">
-                                        <SafeIcon name="ArrowUpCircle" className="h-4 w-4 text-red-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Keluar</p>
+                                        <p className="text-3xl font-bold text-red-600 mt-2">
+                                            -{isLoading ? '...' : stockData?.summary.total_out || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Stok keluar</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-red-600">
-                                        -{isLoading ? '...' : stockData?.summary.total_out || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-red-100 to-red-200" style={{ boxShadow: '0 4px 12px -2px rgba(239,68,68,0.3)' }}>
+                                        <SafeIcon name="ArrowUpCircle" className="h-5 w-5 text-red-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Stok keluar</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-300 via-red-500 to-red-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Perubahan Bersih</CardTitle>
-                                    <div className="p-2 rounded-lg bg-blue-50">
-                                        <SafeIcon name="TrendingUp" className="h-4 w-4 text-blue-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Perubahan Bersih</p>
+                                        <p className={`text-3xl font-bold mt-2 ${(stockData?.summary.net_change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {isLoading ? '...' : (stockData?.summary.net_change || 0) >= 0 ? '+' : ''}{stockData?.summary.net_change || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Selisih masuk/keluar</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className={`text-2xl font-bold ${(stockData?.summary.net_change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {isLoading ? '...' : (stockData?.summary.net_change || 0) >= 0 ? '+' : ''}{stockData?.summary.net_change || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
+                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-blue-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Selisih masuk/keluar</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Saldo Akhir</CardTitle>
-                                    <div className="p-2 rounded-lg bg-purple-50">
-                                        <SafeIcon name="Package" className="h-4 w-4 text-purple-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Saldo Akhir</p>
+                                        <p className="text-3xl font-bold text-primary mt-2">
+                                            {isLoading ? '...' : stockData?.summary.current_balance || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Stok saat ini</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : stockData?.summary.current_balance || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200" style={{ boxShadow: '0 4px 12px -2px rgba(139,92,246,0.3)' }}>
+                                        <SafeIcon name="Package" className="h-5 w-5 text-purple-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Stok saat ini</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
+                            </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-semibold text-foreground/70">Jumlah Transaksi</CardTitle>
-                                    <div className="p-2 rounded-lg bg-orange-50">
-                                        <SafeIcon name="Activity" className="h-4 w-4 text-orange-600" />
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                            <div className="p-5 relative">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Jumlah Transaksi</p>
+                                        <p className="text-3xl font-bold text-orange-600 mt-2">
+                                            {isLoading ? '...' : stockData?.summary.movement_count || 0}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">Pergerakan stok</p>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-primary">
-                                        {isLoading ? '...' : stockData?.summary.movement_count || 0}
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200" style={{ boxShadow: '0 4px 12px -2px rgba(249,115,22,0.3)' }}>
+                                        <SafeIcon name="Activity" className="h-5 w-5 text-orange-600" />
                                     </div>
-                                    <p className="text-xs text-foreground/60 mt-1">Pergerakan stok</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
+                            </div>
                         </Tilt3DCard>
                     </div>
 
                     {/* Stock Charts */}
                     <div className="grid gap-4 md:grid-cols-2">
                         {/* Line Chart - Trend Stok */}
-                        <Card className="border-border/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg">Grafik Pergerakan Stok</CardTitle>
-                                <CardDescription>
+                        <div className="chart-card-premium rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+                            <div className="p-5 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                    <h3 className="text-lg font-semibold">Grafik Pergerakan Stok</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Stok masuk dan keluar per hari dalam periode ini
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                                </p>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="h-[300px] flex items-center justify-center">
                                         <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -1327,42 +1476,83 @@ export default function ReportsPage() {
                                 ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <LineChart data={stockChartData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                                            <YAxis tick={{ fontSize: 12 }} />
-                                            <Tooltip />
-                                            <Legend />
+                                            <defs>
+                                                <filter id="stockGlowGreen" height="300%">
+                                                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                                    <feMerge>
+                                                        <feMergeNode in="coloredBlur" />
+                                                        <feMergeNode in="SourceGraphic" />
+                                                    </feMerge>
+                                                </filter>
+                                                <filter id="stockGlowOrange" height="300%">
+                                                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                                    <feMerge>
+                                                        <feMergeNode in="coloredBlur" />
+                                                        <feMergeNode in="SourceGraphic" />
+                                                    </feMerge>
+                                                </filter>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                                            <XAxis
+                                                dataKey="date"
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
+                                            <YAxis
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                    padding: '12px 16px'
+                                                }}
+                                            />
+                                            <Legend
+                                                wrapperStyle={{ paddingTop: '20px' }}
+                                                iconType="circle"
+                                            />
                                             <Line
                                                 type="monotone"
                                                 dataKey="masuk"
                                                 name="Masuk"
-                                                stroke={CHART_COLORS.primary}
-                                                strokeWidth={2}
-                                                dot={{ fill: CHART_COLORS.primary, strokeWidth: 2 }}
+                                                stroke="#22c55e"
+                                                strokeWidth={3}
+                                                dot={{ fill: '#22c55e', strokeWidth: 2, r: 4, stroke: '#fff' }}
+                                                activeDot={{ r: 6, fill: '#22c55e', stroke: '#fff', strokeWidth: 3, filter: 'url(#stockGlowGreen)' }}
                                             />
                                             <Line
                                                 type="monotone"
                                                 dataKey="keluar"
                                                 name="Keluar"
-                                                stroke={CHART_COLORS.secondary}
-                                                strokeWidth={2}
-                                                dot={{ fill: CHART_COLORS.secondary, strokeWidth: 2 }}
+                                                stroke="#f59e0b"
+                                                strokeWidth={3}
+                                                dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4, stroke: '#fff' }}
+                                                activeDot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 3, filter: 'url(#stockGlowOrange)' }}
                                             />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
                         {/* Bar Chart - Stok per Produk */}
-                        <Card className="border-border/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg">Pemakaian Berdasarkan Jenis</CardTitle>
-                                <CardDescription>
+                        <div className="chart-card-premium rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
+                            <div className="p-5 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+                                    <h3 className="text-lg font-semibold">Pemakaian Berdasarkan Jenis</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     Distribusi stok masuk/keluar per produk
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                                </p>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="h-[300px] flex items-center justify-center">
                                         <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -1376,18 +1566,51 @@ export default function ReportsPage() {
                                 ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <BarChart data={stockByProductData} layout="vertical">
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis type="number" tick={{ fontSize: 12 }} />
-                                            <YAxis dataKey="product" type="category" tick={{ fontSize: 11 }} width={100} />
-                                            <Tooltip />
-                                            <Legend />
-                                            <Bar dataKey="masuk" name="Masuk" fill={CHART_COLORS.primary} />
-                                            <Bar dataKey="keluar" name="Keluar" fill={CHART_COLORS.secondary} />
+                                            <defs>
+                                                <linearGradient id="stockBarGreen" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8} />
+                                                    <stop offset="100%" stopColor="#16a34a" stopOpacity={1} />
+                                                </linearGradient>
+                                                <linearGradient id="stockBarOrange" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
+                                                    <stop offset="100%" stopColor="#d97706" stopOpacity={1} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
+                                            <XAxis
+                                                type="number"
+                                                tick={{ fontSize: 12, fill: '#6b7280' }}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
+                                            <YAxis
+                                                dataKey="product"
+                                                type="category"
+                                                tick={{ fontSize: 11, fill: '#6b7280' }}
+                                                width={100}
+                                                axisLine={{ stroke: '#e5e7eb' }}
+                                                tickLine={{ stroke: '#e5e7eb' }}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                                                    padding: '12px 16px'
+                                                }}
+                                            />
+                                            <Legend
+                                                wrapperStyle={{ paddingTop: '20px' }}
+                                                iconType="circle"
+                                            />
+                                            <Bar dataKey="masuk" name="Masuk" fill="url(#stockBarGreen)" radius={[0, 4, 4, 0]} />
+                                            <Bar dataKey="keluar" name="Keluar" fill="url(#stockBarOrange)" radius={[0, 4, 4, 0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Stock Table */}

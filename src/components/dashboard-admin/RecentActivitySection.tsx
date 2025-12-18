@@ -88,14 +88,17 @@ export default function RecentActivitySection() {
   }, [])
 
   return (
-    <Card className="h-full flex flex-col shadow-enterprise">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>
+    <Card className="h-full flex flex-col chart-card-premium border-0">
+      <CardHeader className="pb-4 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>
+        </div>
         <CardDescription className="text-xs sm:text-sm">
           Pantau aktivitas sistem secara real-time
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 flex-1 flex flex-col">
+      <CardContent className="space-y-4 flex-1 flex flex-col pt-4">
         <div className="space-y-3 max-h-96 overflow-y-auto flex-1">
           {isLoading ? (
             // Loading skeleton
