@@ -366,6 +366,44 @@ export class OrderService {
             }
         }
 
+        // PANGKALAN STOCK SYNC: Tambah stok pangkalan saat order selesai
+        // Best practice: otomatis update inventory pangkalan ketika pesanan dari agen sudah SELESAI
+        if (dto.status === 'SELESAI') {
+            for (const item of updated.order_items) {
+                // Upsert pangkalan_stocks (buat jika belum ada, update jika sudah)
+                await this.prisma.pangkalan_stocks.upsert({
+                    where: {
+                        pangkalan_id_lpg_type: {
+                            pangkalan_id: updated.pangkalan_id,
+                            lpg_type: item.lpg_type,
+                        }
+                    },
+                    create: {
+                        pangkalan_id: updated.pangkalan_id,
+                        lpg_type: item.lpg_type,
+                        qty: item.qty,
+                    },
+                    update: {
+                        qty: { increment: item.qty },
+                        updated_at: new Date(),
+                    },
+                });
+
+                // Catat riwayat pergerakan stok pangkalan
+                await this.prisma.pangkalan_stock_movements.create({
+                    data: {
+                        pangkalan_id: updated.pangkalan_id,
+                        lpg_type: item.lpg_type,
+                        movement_type: 'IN',
+                        qty: item.qty,
+                        source: 'ORDER',
+                        reference_id: updated.id,
+                        note: `Stok masuk dari Order ${updated.code} - ${item.label || item.lpg_type}`,
+                    },
+                });
+            }
+        }
+
         // ACTIVITY LOG: Catat perubahan status
         const pangkalanName = updated.pangkalans?.name || 'Unknown';
         const totalQty = updated.order_items.reduce((sum, item) => sum + item.qty, 0);

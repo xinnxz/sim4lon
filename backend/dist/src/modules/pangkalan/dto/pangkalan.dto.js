@@ -20,6 +20,8 @@ class CreatePangkalanDto {
     email;
     capacity;
     note;
+    login_email;
+    login_password;
 }
 exports.CreatePangkalanDto = CreatePangkalanDto;
 __decorate([
@@ -61,6 +63,17 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePangkalanDto.prototype, "note", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'Format email login tidak valid' }),
+    __metadata("design:type", String)
+], CreatePangkalanDto.prototype, "login_email", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(6, { message: 'Password minimal 6 karakter' }),
+    __metadata("design:type", String)
+], CreatePangkalanDto.prototype, "login_password", void 0);
 class UpdatePangkalanDto {
     name;
     address;

@@ -49,6 +49,9 @@ let PrismaService = class PrismaService {
     get pangkalan_stocks() { return this._client.pangkalan_stocks; }
     get pangkalan_stock_movements() { return this._client.pangkalan_stock_movements; }
     get lpg_prices() { return this._client.lpg_prices; }
+    $transaction(fn) {
+        return this._client.$transaction(fn);
+    }
     async onModuleInit() {
         await this._client.$connect();
         console.log('✅ Database connected');

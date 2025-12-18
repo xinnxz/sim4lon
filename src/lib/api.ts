@@ -426,6 +426,31 @@ export interface Pangkalan {
     is_active: boolean;
     created_at: string;
     updated_at: string;
+    // User terkait dengan pangkalan ini (akun login)
+    users?: {
+        id: string;
+        email: string;
+        name: string;
+        is_active: boolean;
+    }[];
+}
+
+/**
+ * Payload untuk membuat pangkalan baru.
+ * Termasuk field untuk membuat akun login (login_email, login_password).
+ */
+export interface CreatePangkalanPayload {
+    name: string;
+    address: string;
+    region?: string;
+    pic_name?: string;
+    phone?: string;
+    email?: string | null;  // Email untuk invoice
+    capacity?: number;
+    note?: string;
+    // Akun login
+    login_email?: string;
+    login_password?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -465,7 +490,7 @@ export const pangkalanApi = {
         return apiRequest(`/pangkalans/${id}`);
     },
 
-    async create(data: Partial<Pangkalan>): Promise<Pangkalan> {
+    async create(data: CreatePangkalanPayload): Promise<Pangkalan> {
         return apiRequest('/pangkalans', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -1338,6 +1363,9 @@ export interface ConsumerStats {
     total: number;
     active: number;
     inactive: number;
+    rumahTangga: number;  // Count of RUMAH_TANGGA consumers
+    warung: number;       // Count of WARUNG consumers
+    withNik: number;      // Count of consumers with NIK verified
 }
 
 export const consumersApi = {

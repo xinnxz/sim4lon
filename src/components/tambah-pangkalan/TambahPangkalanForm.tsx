@@ -76,6 +76,16 @@ const pangkalanSchema = z.object({
   note: z.string()
     .max(500, 'Catatan maksimal 500 karakter')
     .optional(),
+  // Field untuk akun login
+  login_email: z.string()
+    .email('Format email login tidak valid'),
+  login_password: z.string()
+    .min(6, 'Password minimal 6 karakter'),
+  confirm_password: z.string()
+    .min(6, 'Konfirmasi password harus diisi'),
+}).refine((data) => data.login_password === data.confirm_password, {
+  message: 'Konfirmasi password tidak cocok',
+  path: ['confirm_password'],
 })
 
 type PangkalanFormValues = z.infer<typeof pangkalanSchema>
@@ -101,6 +111,9 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
       email: '',
       capacity: '',
       note: '',
+      login_email: '',
+      login_password: '',
+      confirm_password: '',
     },
   })
 
@@ -129,6 +142,9 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
         email: values.email || null,
         capacity: capacityNum,
         note: values.note || '',
+        // Akun login
+        login_email: values.login_email,
+        login_password: values.login_password,
       })
 
       toast.success('Pangkalan berhasil ditambahkan!')
@@ -402,6 +418,81 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                   </FormItem>
                 )}
               />
+
+              {/* === Section Akun Login === */}
+              <div className="pt-6 mt-6 border-t">
+                <div className="flex items-center gap-2 mb-4">
+                  <SafeIcon name="Key" className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold">Akun Login Pangkalan</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Buat akun untuk login ke dashboard pangkalan
+                </p>
+
+                {/* Email Login */}
+                <FormField
+                  control={form.control}
+                  name="login_email"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      <FormLabel className="text-base font-semibold">Email Login *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Contoh: pangkalan@email.com"
+                          {...field}
+                          disabled={isSubmitting}
+                          type="email"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Email untuk login ke dashboard pangkalan
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Password */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="login_password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold">Password *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Minimal 6 karakter"
+                            {...field}
+                            disabled={isSubmitting}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="confirm_password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold">Konfirmasi Password *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ulangi password"
+                            {...field}
+                            disabled={isSubmitting}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
 
               {/* Form Actions */}
               <div className="flex gap-3 pt-6 border-t">

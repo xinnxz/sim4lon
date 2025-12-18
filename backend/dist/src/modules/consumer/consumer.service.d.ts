@@ -20,6 +20,7 @@ export declare class ConsumerService {
             address: string | null;
             nik: string | null;
             kk: string | null;
+            consumer_type: import("@prisma/client").$Enums.consumer_type;
         })[];
         meta: {
             total: number;
@@ -44,6 +45,7 @@ export declare class ConsumerService {
         address: string | null;
         nik: string | null;
         kk: string | null;
+        consumer_type: import("@prisma/client").$Enums.consumer_type;
     }>;
     create(pangkalanId: string, dto: CreateConsumerDto): Promise<{
         id: string;
@@ -57,6 +59,7 @@ export declare class ConsumerService {
         address: string | null;
         nik: string | null;
         kk: string | null;
+        consumer_type: import("@prisma/client").$Enums.consumer_type;
     }>;
     update(id: string, pangkalanId: string, dto: UpdateConsumerDto): Promise<{
         id: string;
@@ -70,6 +73,7 @@ export declare class ConsumerService {
         address: string | null;
         nik: string | null;
         kk: string | null;
+        consumer_type: import("@prisma/client").$Enums.consumer_type;
     }>;
     remove(id: string, pangkalanId: string): Promise<{
         message: string;
@@ -78,5 +82,8 @@ export declare class ConsumerService {
         total: number;
         active: number;
         inactive: number;
+        rumahTangga: number;
+        warung: number;
+        withNik: number;
     }>;
 }

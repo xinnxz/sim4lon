@@ -20,6 +20,7 @@ export declare class ConsumerController {
             address: string | null;
             nik: string | null;
             kk: string | null;
+            consumer_type: import("@prisma/client").$Enums.consumer_type;
         })[];
         meta: {
             total: number;
@@ -32,6 +33,9 @@ export declare class ConsumerController {
         total: number;
         active: number;
         inactive: number;
+        rumahTangga: number;
+        warung: number;
+        withNik: number;
     }>;
     findOne(id: string, req: any): Promise<{
         _count: {
@@ -49,6 +53,7 @@ export declare class ConsumerController {
         address: string | null;
         nik: string | null;
         kk: string | null;
+        consumer_type: import("@prisma/client").$Enums.consumer_type;
     }>;
     create(dto: CreateConsumerDto, req: any): Promise<{
         id: string;
@@ -62,6 +67,7 @@ export declare class ConsumerController {
         address: string | null;
         nik: string | null;
         kk: string | null;
+        consumer_type: import("@prisma/client").$Enums.consumer_type;
     }>;
     update(id: string, dto: UpdateConsumerDto, req: any): Promise<{
         id: string;
@@ -75,6 +81,7 @@ export declare class ConsumerController {
         address: string | null;
         nik: string | null;
         kk: string | null;
+        consumer_type: import("@prisma/client").$Enums.consumer_type;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

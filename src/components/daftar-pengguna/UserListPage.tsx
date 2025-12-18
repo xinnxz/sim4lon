@@ -107,9 +107,10 @@ export default function UserListPage() {
       const response = await usersApi.getAll(currentPage, 10, searchTerm || undefined)
 
       // Filter by role locally (backend doesn't have role filter)
-      let filteredData = response.data
+      // Exclude PANGKALAN users - they are managed in Pangkalan page
+      let filteredData = response.data.filter(u => u.role !== 'PANGKALAN')
       if (roleFilter !== 'all') {
-        filteredData = response.data.filter(u => u.role === roleFilter)
+        filteredData = filteredData.filter(u => u.role === roleFilter)
       }
 
       setUserList(filteredData)

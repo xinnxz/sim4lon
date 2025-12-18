@@ -313,7 +313,8 @@ export default function CreateOrderForm() {
     if (lpgProducts.length === 0) return
     const newId = String(Math.max(...formData.items.map(i => parseInt(i.id)), 0) + 1)
     const defaultProduct = lpgProducts[0]
-    const defaultPrice = defaultProduct.prices?.find(p => p.is_default)?.price || defaultProduct.prices?.[0]?.price || 0
+    // Use selling_price directly, fallback to old prices[] for backward compat
+    const defaultPrice = defaultProduct.selling_price || defaultProduct.prices?.find(p => p.is_default)?.price || defaultProduct.prices?.[0]?.price || 0
     // NON_SUBSIDI products are taxable (12% PPN)
     const isTaxable = defaultProduct.category === 'NON_SUBSIDI'
 
@@ -567,7 +568,8 @@ export default function CreateOrderForm() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {lpgProducts.map(product => {
-                                    const price = product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+                                    // Use selling_price directly, fallback to old prices[]
+                                    const price = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
                                     const stock = product.stock?.current || 0
                                     const isOutOfStock = stock <= 0
                                     return (

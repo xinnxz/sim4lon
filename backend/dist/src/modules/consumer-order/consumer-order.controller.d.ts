@@ -86,6 +86,7 @@ export declare class ConsumerOrderController {
             address: string | null;
             nik: string | null;
             kk: string | null;
+            consumer_type: import("@prisma/client").$Enums.consumer_type;
         } | null;
     } & {
         id: string;

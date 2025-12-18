@@ -63,7 +63,7 @@ export default function StokPangkalanPage() {
     const [activeTab, setActiveTab] = useState<TabType>('stock')
     const [isReceiveOpen, setIsReceiveOpen] = useState(false)
     const [isOrderOpen, setIsOrderOpen] = useState(false)
-    const [receiveData, setReceiveData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
+    const [receiveData, setReceiveData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '', movementType: 'IN' as 'IN' | 'OUT' })
     const [orderData, setOrderData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [agen, setAgen] = useState<Agen | null>(null)
@@ -249,19 +249,30 @@ export default function StokPangkalanPage() {
             toast.error('Jumlah harus lebih dari 0')
             return
         }
+
+        // Cek stok cukup jika mengurangi
+        if (receiveData.movementType === 'OUT') {
+            const currentStock = stocks.find(s => s.lpg_type === receiveData.lpgType)
+            if (!currentStock || currentStock.qty < receiveData.qty) {
+                toast.error(`Stok tidak cukup! Stok saat ini: ${currentStock?.qty || 0} tabung`)
+                return
+            }
+        }
+
         try {
             setIsSubmitting(true)
             await pangkalanStockApi.receiveStock({
                 lpg_type: receiveData.lpgType,
-                qty: receiveData.qty,
-                note: receiveData.note || undefined,
+                qty: receiveData.movementType === 'OUT' ? -receiveData.qty : receiveData.qty, // Negatif untuk keluar
+                note: receiveData.note || `Koreksi stok ${receiveData.movementType === 'IN' ? 'masuk' : 'keluar'} (manual)`,
             })
-            toast.success(`Berhasil terima ${receiveData.qty} tabung ${LPG_CONFIG[receiveData.lpgType]?.name}`)
+            const action = receiveData.movementType === 'IN' ? 'ditambahkan' : 'dikurangi'
+            toast.success(`Berhasil ${action} ${receiveData.qty} tabung ${LPG_CONFIG[receiveData.lpgType]?.name}`)
             setIsReceiveOpen(false)
-            setReceiveData({ lpgType: '3kg', qty: 0, note: '' })
+            setReceiveData({ lpgType: 'kg3' as LpgType, qty: 0, note: '', movementType: 'IN' })
             fetchData()
         } catch (error: any) {
-            toast.error(error.message || 'Gagal mencatat penerimaan stok')
+            toast.error(error.message || 'Gagal mencatat koreksi stok')
         } finally {
             setIsSubmitting(false)
         }
@@ -430,7 +441,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                         <DialogTrigger asChild>
                             <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg shadow-green-500/25">
                                 <SafeIcon name="PackagePlus" className="h-4 w-4 mr-2" />
-                                Terima Stok
+                                Koreksi Stok
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-md">
@@ -439,13 +450,41 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                     <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
                                         <SafeIcon name="PackagePlus" className="h-5 w-5 text-green-600" />
                                     </div>
-                                    Terima Stok dari Agen
+                                    Koreksi Stok Manual
                                 </DialogTitle>
                                 <DialogDescription>
-                                    Catat penerimaan LPG dari agen
+                                    Catat penyesuaian stok (selisih opname atau sumber lain)
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
+                                {/* Movement Type Selector */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Jenis Koreksi</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setReceiveData({ ...receiveData, movementType: 'IN' })}
+                                            className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'IN'
+                                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                                    : 'border-slate-200 hover:border-slate-300'
+                                                }`}
+                                        >
+                                            <SafeIcon name="Plus" className="h-4 w-4" />
+                                            <span className="font-medium">Tambah</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setReceiveData({ ...receiveData, movementType: 'OUT' })}
+                                            className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'OUT'
+                                                    ? 'border-red-500 bg-red-50 text-red-700'
+                                                    : 'border-slate-200 hover:border-slate-300'
+                                                }`}
+                                        >
+                                            <SafeIcon name="Minus" className="h-4 w-4" />
+                                            <span className="font-medium">Kurangi</span>
+                                        </button>
+                                    </div>
+                                </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Tipe LPG</label>
                                     <Select value={receiveData.lpgType} onValueChange={(v) => setReceiveData({ ...receiveData, lpgType: v as LpgType })}>
@@ -634,8 +673,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         <SafeIcon name="PackagePlus" className="h-6 w-6 text-green-600" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="font-semibold text-slate-900">Terima Stok</p>
-                                        <p className="text-sm text-slate-500">Catat penerimaan dari agen</p>
+                                        <p className="font-semibold text-slate-900">Koreksi Stok</p>
+                                        <p className="text-sm text-slate-500">Penyesuaian manual (opname)</p>
                                     </div>
                                 </button>
 
@@ -656,34 +695,34 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                         </CardContent>
                     </Card>
 
-                    {/* Info Banner - Agen Integration */}
-                    <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-lg rounded-2xl">
+                    {/* Info Banner - Auto-Sync Aktif */}
+                    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg rounded-2xl">
                         <CardContent className="p-6">
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <SafeIcon name="Lightbulb" className="h-6 w-6 text-blue-600" />
+                                <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <SafeIcon name="CheckCircle" className="h-6 w-6 text-green-600" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-slate-900 mb-1">Integrasi dengan Agen</h3>
+                                    <h3 className="font-semibold text-slate-900 mb-1">Stok Terintegrasi dengan Agen</h3>
                                     <p className="text-sm text-slate-600 mb-3">
-                                        Segera hadir! Fitur integrasi langsung dengan sistem agen untuk:
+                                        Stok otomatis bertambah saat pesanan dari agen berstatus <strong>SELESAI</strong>
                                     </p>
                                     <div className="grid gap-2 sm:grid-cols-2">
                                         <div className="flex items-center gap-2 text-sm text-slate-700">
                                             <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                            <span>Pesan LPG langsung ke agen</span>
+                                            <span>Stok masuk otomatis dari pesanan</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-700">
                                             <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                            <span>Tracking status pengiriman</span>
+                                            <span>Riwayat pergerakan tercatat</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-700">
                                             <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                            <span>Riwayat pembelian otomatis</span>
+                                            <span>Sumber: ORDER (dari agen)</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-700">
                                             <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                            <span>Notifikasi real-time</span>
+                                            <span>Koreksi manual tetap tersedia</span>
                                         </div>
                                     </div>
                                 </div>

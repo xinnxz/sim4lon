@@ -64,6 +64,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     // New: LPG Price Settings
     get lpg_prices() { return this._client.lpg_prices; }
 
+    // Transaction support
+    $transaction<T>(fn: Parameters<typeof this._client.$transaction>[0]): ReturnType<typeof this._client.$transaction> {
+        return this._client.$transaction(fn as any);
+    }
+
     async onModuleInit() {
         await this._client.$connect();
         console.log('✅ Database connected');
