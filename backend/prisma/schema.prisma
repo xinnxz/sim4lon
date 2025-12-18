@@ -410,6 +410,14 @@ model activity_logs {
   @@index([user_id], map: "idx_activity_user")
 }
 
+/// Consumer type enum - Rumah Tangga or Warung
+enum consumer_type {
+  /// Konsumen rumah tangga (perorangan)
+  RUMAH_TANGGA
+  /// Usaha mikro (warung, toko)
+  WARUNG
+}
+
 /// Consumer/customer of a pangkalan (warung, ibu-ibu, etc.)
 model consumers {
   id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -419,6 +427,8 @@ model consumers {
   nik              String?            @db.VarChar(16)
   /// Nomor KK for household identification
   kk               String?            @db.VarChar(16)
+  /// Consumer type: RUMAH_TANGGA or WARUNG
+  consumer_type    consumer_type      @default(RUMAH_TANGGA)
   phone            String?            @db.VarChar(20)
   address          String?
   note             String?
@@ -431,6 +441,7 @@ model consumers {
 
   @@index([pangkalan_id], map: "idx_consumers_pangkalan")
   @@index([is_active], map: "idx_consumers_active")
+  @@index([consumer_type], map: "idx_consumers_type")
 }
 
 /// Consumer order - sales from pangkalan to end consumers

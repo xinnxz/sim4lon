@@ -60,12 +60,25 @@ export default function KonsumenListPage() {
         note: '',
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    // Stats from API - untuk menampilkan jumlah yang benar
+    const [stats, setStats] = useState({
+        total: 0,
+        active: 0,
+        inactive: 0,
+        rumahTangga: 0,
+        warung: 0,
+        withNik: 0,
+    })
 
     const fetchConsumers = async () => {
         try {
             setIsLoading(true)
-            const response = await consumersApi.getAll(page, 10, search || undefined)
-            // Filter by type if needed
+            // Fetch consumers dan stats secara paralel
+            const [response, statsData] = await Promise.all([
+                consumersApi.getAll(page, 10, search || undefined),
+                consumersApi.getStats(),
+            ])
+            // Filter by type if needed (client-side for current page)
             let filtered = response.data
             if (typeFilter !== 'all') {
                 filtered = response.data.filter(c => c.consumer_type === typeFilter)
@@ -73,6 +86,8 @@ export default function KonsumenListPage() {
             setConsumers(filtered)
             setTotalPages(response.meta.totalPages)
             setTotal(response.meta.total)
+            // Set stats dari API
+            setStats(statsData)
         } catch (error) {
             console.error('Failed to fetch consumers:', error)
             toast.error('Gagal memuat data konsumen')
@@ -168,11 +183,7 @@ export default function KonsumenListPage() {
         }
     }
 
-    // Count by type
-    const countByType = {
-        rumahTangga: consumers.filter(c => c.consumer_type === 'RUMAH_TANGGA').length,
-        warung: consumers.filter(c => c.consumer_type === 'WARUNG').length,
-    }
+    // Stats sekarang diambil dari API (stats state), bukan dari data per halaman
 
     if (isLoading && consumers.length === 0) {
         return (
@@ -387,7 +398,7 @@ export default function KonsumenListPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="relative">
-                        <p className="text-3xl font-bold text-slate-900">{countByType.rumahTangga}</p>
+                        <p className="text-3xl font-bold text-slate-900">{stats.rumahTangga}</p>
                         <p className="text-slate-500 text-sm mt-2">Konsumen RT</p>
                     </CardContent>
                 </Card>
@@ -404,7 +415,7 @@ export default function KonsumenListPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="relative">
-                        <p className="text-3xl font-bold text-slate-900">{countByType.warung}</p>
+                        <p className="text-3xl font-bold text-slate-900">{stats.warung}</p>
                         <p className="text-slate-500 text-sm mt-2">Usaha mikro</p>
                     </CardContent>
                 </Card>
@@ -421,7 +432,7 @@ export default function KonsumenListPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="relative">
-                        <p className="text-3xl font-bold text-slate-900">{consumers.filter(c => c.nik).length}</p>
+                        <p className="text-3xl font-bold text-slate-900">{stats.withNik}</p>
                         <p className="text-slate-500 text-sm mt-2">Sudah input NIK</p>
                     </CardContent>
                 </Card>

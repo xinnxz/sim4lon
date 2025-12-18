@@ -7,6 +7,8 @@ export declare class CreatePangkalanDto {
     email?: string;
     capacity?: number;
     note?: string;
+    login_email?: string;
+    login_password?: string;
 }
 export declare class UpdatePangkalanDto {
     name?: string;

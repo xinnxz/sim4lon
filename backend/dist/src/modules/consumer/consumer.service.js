@@ -75,6 +75,9 @@ let ConsumerService = class ConsumerService {
             data: {
                 pangkalan_id: pangkalanId,
                 name: dto.name,
+                nik: dto.nik,
+                kk: dto.kk,
+                consumer_type: dto.consumer_type || 'RUMAH_TANGGA',
                 phone: dto.phone,
                 address: dto.address,
                 note: dto.note,
@@ -111,18 +114,33 @@ let ConsumerService = class ConsumerService {
         return { message: 'Pelanggan berhasil dihapus' };
     }
     async getStats(pangkalanId) {
-        const [total, active] = await Promise.all([
+        const [total, active, rumahTangga, warung, withNik] = await Promise.all([
             this.prisma.consumers.count({
                 where: { pangkalan_id: pangkalanId },
             }),
             this.prisma.consumers.count({
                 where: { pangkalan_id: pangkalanId, is_active: true },
             }),
+            this.prisma.consumers.count({
+                where: { pangkalan_id: pangkalanId, consumer_type: 'RUMAH_TANGGA' },
+            }),
+            this.prisma.consumers.count({
+                where: { pangkalan_id: pangkalanId, consumer_type: 'WARUNG' },
+            }),
+            this.prisma.consumers.count({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    nik: { not: null }
+                },
+            }),
         ]);
         return {
             total,
             active,
             inactive: total - active,
+            rumahTangga,
+            warung,
+            withNik,
         };
     }
 };

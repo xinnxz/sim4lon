@@ -270,6 +270,7 @@ export default function PangkalanListPage() {
                   <TableRow className="bg-muted/50">
                     <TableHead className="font-semibold w-24">Kode</TableHead>
                     <TableHead className="font-semibold">Nama Pangkalan</TableHead>
+                    <TableHead className="font-semibold">Email Login</TableHead>
                     <TableHead className="font-semibold">Alamat</TableHead>
                     <TableHead className="font-semibold">Wilayah</TableHead>
                     <TableHead className="font-semibold">Telepon</TableHead>
@@ -287,6 +288,13 @@ export default function PangkalanListPage() {
                         </TableCell>
                         <TableCell className="font-medium">
                           {pangkalan.name}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {pangkalan.users && pangkalan.users.length > 0 ? (
+                            <span className="text-blue-600">{pangkalan.users[0].email}</span>
+                          ) : (
+                            <span className="text-muted-foreground italic">Belum ada akun</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
                           {pangkalan.address}

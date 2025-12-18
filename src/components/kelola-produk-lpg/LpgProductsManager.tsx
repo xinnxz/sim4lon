@@ -292,16 +292,19 @@ export default function LpgProductsManager() {
                                 </div>
                                 <div>
                                     <Label htmlFor="size_kg">Ukuran (kg) *</Label>
-                                    <Input
+                                    <select
                                         id="size_kg"
-                                        type="number"
-                                        step="0.1"
-                                        min="0.1"
                                         value={formData.size_kg}
                                         onChange={(e) => setFormData({ ...formData, size_kg: e.target.value })}
-                                        placeholder="3"
+                                        className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                                         required
-                                    />
+                                    >
+                                        <option value="">Pilih Ukuran</option>
+                                        <option value="3">3 kg</option>
+                                        <option value="5.5">5.5 kg</option>
+                                        <option value="12">12 kg</option>
+                                        <option value="50">50 kg</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <Label htmlFor="category">Kategori *</Label>

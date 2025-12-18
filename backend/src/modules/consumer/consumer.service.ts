@@ -90,12 +90,16 @@ export class ConsumerService {
 
     /**
      * Create new consumer for a pangkalan
+     * Menyimpan data konsumen baru termasuk consumer_type, nik, dan kk
      */
     async create(pangkalanId: string, dto: CreateConsumerDto) {
         const consumer = await this.prisma.consumers.create({
             data: {
                 pangkalan_id: pangkalanId,
                 name: dto.name,
+                nik: dto.nik,
+                kk: dto.kk,
+                consumer_type: dto.consumer_type || 'RUMAH_TANGGA',
                 phone: dto.phone,
                 address: dto.address,
                 note: dto.note,
@@ -156,14 +160,30 @@ export class ConsumerService {
 
     /**
      * Get consumer stats for dashboard
+     * Menghitung total, aktif, tidak aktif, dan per jenis (RUMAH_TANGGA/WARUNG)
      */
     async getStats(pangkalanId: string) {
-        const [total, active] = await Promise.all([
+        const [total, active, rumahTangga, warung, withNik] = await Promise.all([
             this.prisma.consumers.count({
                 where: { pangkalan_id: pangkalanId },
             }),
             this.prisma.consumers.count({
                 where: { pangkalan_id: pangkalanId, is_active: true },
+            }),
+            // Count by consumer_type RUMAH_TANGGA
+            this.prisma.consumers.count({
+                where: { pangkalan_id: pangkalanId, consumer_type: 'RUMAH_TANGGA' },
+            }),
+            // Count by consumer_type WARUNG
+            this.prisma.consumers.count({
+                where: { pangkalan_id: pangkalanId, consumer_type: 'WARUNG' },
+            }),
+            // Count consumers with NIK verified
+            this.prisma.consumers.count({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    nik: { not: null }
+                },
             }),
         ]);
 
@@ -171,6 +191,9 @@ export class ConsumerService {
             total,
             active,
             inactive: total - active,
+            rumahTangga,   // Jumlah konsumen Rumah Tangga
+            warung,        // Jumlah konsumen Warung
+            withNik,       // Jumlah konsumen dengan NIK terverifikasi
         };
     }
 }
