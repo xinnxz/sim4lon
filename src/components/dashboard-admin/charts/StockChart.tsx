@@ -1,8 +1,9 @@
 /**
- * StockChart - Chart Tren Stok DINAMIS per Produk LPG
+ * StockChart - Chart PEMAKAIAN Stok DINAMIS per Produk LPG
  * 
  * PENJELASAN:
- * Chart ini menampilkan tren stok 7 hari terakhir untuk SEMUA produk LPG aktif.
+ * Chart ini menampilkan PEMAKAIAN stok (yang keluar/dijual) 7 hari terakhir.
+ * Bukan level stok, tapi berapa banyak yang terjual per hari.
  * Otomatis handle produk baru tanpa perlu update code.
  * Warna line diambil dari product.color di database.
  */
@@ -24,14 +25,52 @@ interface ChartResponse {
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
+    // Fungsi untuk menentukan level pemakaian
+    const getUsageLevel = (qty: number) => {
+      if (qty <= 0) return { text: 'TIDAK ADA', color: 'text-gray-500 bg-gray-100' }
+      if (qty >= 50) return { text: 'TINGGI', color: 'text-green-600 bg-green-100' }
+      if (qty >= 20) return { text: 'SEDANG', color: 'text-blue-600 bg-blue-100' }
+      return { text: 'RENDAH', color: 'text-yellow-600 bg-yellow-100' }
+    }
+
+    // Hitung total pemakaian
+    const totalUsage = payload.reduce((sum: number, entry: any) => sum + (entry.value || 0), 0)
+
     return (
-      <div className="bg-background border border-border rounded-lg shadow-lg p-3 backdrop-blur-sm">
-        <p className="text-sm font-semibold text-foreground mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: <span className="font-bold">{entry.value} Unit</span>
-          </p>
-        ))}
+      <div className="bg-background border border-border rounded-lg shadow-lg p-4 backdrop-blur-sm min-w-[220px]">
+        <p className="text-sm font-bold text-foreground mb-3 border-b pb-2">📦 Pemakaian - {label}</p>
+
+        {/* Usage per product */}
+        <div className="space-y-2">
+          {payload.map((entry: any, index: number) => {
+            const level = getUsageLevel(entry.value)
+            return (
+              <div key={index} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="text-xs text-foreground truncate max-w-[100px]">{entry.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold" style={{ color: entry.color }}>
+                    {entry.value} Unit
+                  </span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${level.color}`}>
+                    {level.text}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Total summary */}
+        <div className="border-t mt-3 pt-2 flex justify-between items-center">
+          <span className="text-xs text-muted-foreground">Total Pemakaian:</span>
+          <span className="text-sm font-bold text-foreground">{totalUsage} Unit</span>
+        </div>
       </div>
     )
   }

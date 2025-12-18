@@ -7,8 +7,8 @@ export declare class PangkalanController {
         data: ({
             users: {
                 id: string;
-                name: string;
                 email: string;
+                name: string;
                 is_active: boolean;
             }[];
             _count: {
@@ -17,19 +17,19 @@ export declare class PangkalanController {
         } & {
             id: string;
             code: string;
-            name: string;
-            address: string;
-            region: string | null;
-            pic_name: string | null;
-            phone: string | null;
             email: string | null;
-            capacity: number | null;
-            note: string | null;
-            agen_id: string | null;
+            name: string;
+            phone: string | null;
             is_active: boolean;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            note: string | null;
+            address: string;
+            region: string | null;
+            pic_name: string | null;
+            capacity: number | null;
+            agen_id: string | null;
         })[];
         meta: {
             total: number;
@@ -41,8 +41,8 @@ export declare class PangkalanController {
     findOne(id: string): Promise<{
         users: {
             id: string;
-            name: string;
             email: string;
+            name: string;
             is_active: boolean;
         }[];
         _count: {
@@ -51,25 +51,25 @@ export declare class PangkalanController {
     } & {
         id: string;
         code: string;
-        name: string;
-        address: string;
-        region: string | null;
-        pic_name: string | null;
-        phone: string | null;
         email: string | null;
-        capacity: number | null;
-        note: string | null;
-        agen_id: string | null;
+        name: string;
+        phone: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        note: string | null;
+        address: string;
+        region: string | null;
+        pic_name: string | null;
+        capacity: number | null;
+        agen_id: string | null;
     }>;
     create(dto: CreatePangkalanDto): Promise<{
         users: {
             id: string;
-            name: string;
             email: string;
+            name: string;
             is_active: boolean;
         }[];
         _count: {
@@ -78,36 +78,36 @@ export declare class PangkalanController {
     } & {
         id: string;
         code: string;
-        name: string;
-        address: string;
-        region: string | null;
-        pic_name: string | null;
-        phone: string | null;
         email: string | null;
-        capacity: number | null;
-        note: string | null;
-        agen_id: string | null;
+        name: string;
+        phone: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        note: string | null;
+        address: string;
+        region: string | null;
+        pic_name: string | null;
+        capacity: number | null;
+        agen_id: string | null;
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
         id: string;
         code: string;
-        name: string;
-        address: string;
-        region: string | null;
-        pic_name: string | null;
-        phone: string | null;
         email: string | null;
-        capacity: number | null;
-        note: string | null;
-        agen_id: string | null;
+        name: string;
+        phone: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        note: string | null;
+        address: string;
+        region: string | null;
+        pic_name: string | null;
+        capacity: number | null;
+        agen_id: string | null;
     }>;
     remove(id: string): Promise<{
         message: string;

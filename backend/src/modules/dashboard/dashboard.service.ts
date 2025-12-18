@@ -195,11 +195,15 @@ export class DashboardService {
     }
 
     /**
-     * Get stock trend for chart (last 7 days) - DYNAMIC PRODUCTS
+     * Get stock CONSUMPTION/USAGE data for chart (last 7 days) - DYNAMIC PRODUCTS
+     * 
+     * PENJELASAN:
+     * Chart ini menampilkan PEMAKAIAN stok (movement KELUAR) per hari.
+     * Bukan level stok, tapi berapa banyak yang keluar/terjual per hari.
      * 
      * Data format: {
      *   products: [{ id, name, color }, ...],
-     *   days: [{ day: "Sen", [productId]: stockQty, ... }, ...]
+     *   data: [{ day: "Sen", [productId]: consumedQty, ... }, ...]
      * }
      */
     async getStockChart() {
@@ -214,29 +218,10 @@ export class DashboardService {
             orderBy: { size_kg: 'asc' }
         });
 
-        // Get current stock for each product
-        const currentStockData = await this.prisma.client.stock_histories.groupBy({
-            by: ['lpg_product_id', 'movement_type'],
-            where: {
-                lpg_product_id: { not: null }
-            },
-            _sum: { qty: true }
-        });
-
-        // Build current stock map per product
-        const productStockMap: Record<string, number> = {};
-        products.forEach(p => {
-            const productData = currentStockData.filter(s => s.lpg_product_id === p.id);
-            const inQty = productData.find(s => s.movement_type === 'MASUK')?._sum.qty || 0;
-            const outQty = productData.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
-            productStockMap[p.id] = inQty - outQty;
-        });
-
-        // Build days array with stock per product (going backwards)
+        // Build days array with consumption per product
         const days: Record<string, any>[] = [];
-        const runningStock = { ...productStockMap };
 
-        for (let i = 0; i < 7; i++) {
+        for (let i = 6; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
@@ -244,39 +229,26 @@ export class DashboardService {
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
 
-            if (i === 0) {
-                // Today - use current stock
-                const dayData: Record<string, any> = { day: dayNames[date.getDay()] };
-                products.forEach(p => {
-                    dayData[p.id] = runningStock[p.id] || 0;
-                });
-                days.unshift(dayData);
-            } else {
-                // Get movements for this day
-                const movements = await this.prisma.client.stock_histories.findMany({
-                    where: {
-                        timestamp: { gte: date, lt: nextDay },
-                        lpg_product_id: { not: null }
-                    }
-                });
+            // Get KELUAR (consumption) movements for this day grouped by product
+            const movements = await this.prisma.client.stock_histories.groupBy({
+                by: ['lpg_product_id'],
+                where: {
+                    timestamp: { gte: date, lt: nextDay },
+                    lpg_product_id: { not: null },
+                    movement_type: 'KELUAR'  // Only count consumption/usage
+                },
+                _sum: { qty: true }
+            });
 
-                // Reverse movements to get previous day's stock
-                movements.forEach((m) => {
-                    if (m.lpg_product_id && runningStock[m.lpg_product_id] !== undefined) {
-                        if (m.movement_type === 'MASUK') {
-                            runningStock[m.lpg_product_id] -= m.qty;
-                        } else {
-                            runningStock[m.lpg_product_id] += m.qty;
-                        }
-                    }
-                });
+            const dayData: Record<string, any> = { day: dayNames[date.getDay()] };
 
-                const dayData: Record<string, any> = { day: dayNames[date.getDay()] };
-                products.forEach(p => {
-                    dayData[p.id] = runningStock[p.id] || 0;
-                });
-                days.unshift(dayData);
-            }
+            // Initialize all products with 0
+            products.forEach(p => {
+                const movement = movements.find(m => m.lpg_product_id === p.id);
+                dayData[p.id] = movement?._sum.qty || 0;
+            });
+
+            days.push(dayData);
         }
 
         // Color palette for products without color
@@ -336,12 +308,42 @@ export class DashboardService {
     /**
      * Get profit data for chart (last 7 days)
      * 
-     * Profit dihitung dari total_amount orders
-     * (simplified - dalam real app perlu kalkulasi cost)
+     * PENJELASAN PERHITUNGAN PROFIT:
+     * Profit = Total Penjualan - Total Modal
+     * - Untuk setiap order SELESAI, kita ambil semua order_items
+     * - Profit per item = (price_per_unit - cost_price) * qty
+     * - cost_price diambil dari lpg_products based on lpg_type
      */
     async getProfitChart() {
         const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        const result: { day: string; profit: number }[] = [];
+        const result: {
+            day: string;
+            profit: number;
+            totalSales: number;
+            totalCost: number;
+            orderCount: number;
+        }[] = [];
+
+        // Get cost prices for each LPG type from lpg_products
+        const products = await this.prisma.lpg_products.findMany({
+            where: { is_active: true, deleted_at: null }
+        });
+
+        // Map lpg_type enum to cost_price
+        const costPriceMap: Record<string, number> = {};
+        products.forEach(p => {
+            // Map size_kg to lpg_type enum format (3kg, 5.5kg, 12kg, 50kg)
+            const sizeKg = Number(p.size_kg);
+            let lpgTypeKey = '';
+            if (sizeKg === 3) lpgTypeKey = 'kg3';
+            else if (sizeKg === 5.5) lpgTypeKey = 'kg5';
+            else if (sizeKg === 12) lpgTypeKey = 'kg12';
+            else if (sizeKg === 50) lpgTypeKey = 'kg50';
+
+            if (lpgTypeKey) {
+                costPriceMap[lpgTypeKey] = Number(p.cost_price) || 0;
+            }
+        });
 
         for (let i = 6; i >= 0; i--) {
             const date = new Date();
@@ -351,7 +353,8 @@ export class DashboardService {
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
 
-            const salesData = await this.prisma.client.orders.aggregate({
+            // Get completed orders for this day with their items
+            const orders = await this.prisma.client.orders.findMany({
                 where: {
                     created_at: {
                         gte: date,
@@ -359,18 +362,34 @@ export class DashboardService {
                     },
                     current_status: 'SELESAI',
                 },
-                _sum: {
-                    total_amount: true,
-                },
+                include: {
+                    order_items: true
+                }
             });
 
-            // Simplified profit calculation (10% of sales)
-            const totalAmount = salesData._sum?.total_amount || 0;
-            const profit = Number(totalAmount) * 0.1;
+            let totalSales = 0;
+            let totalCost = 0;
+
+            // Calculate profit for each order
+            orders.forEach(order => {
+                order.order_items.forEach(item => {
+                    const sellingPrice = Number(item.price_per_unit) || 0;
+                    const costPrice = costPriceMap[item.lpg_type] || 0;
+                    const qty = item.qty || 0;
+
+                    totalSales += sellingPrice * qty;
+                    totalCost += costPrice * qty;
+                });
+            });
+
+            const profit = totalSales - totalCost;
 
             result.push({
                 day: days[date.getDay()],
-                profit,
+                profit: profit > 0 ? profit : 0,
+                totalSales,
+                totalCost,
+                orderCount: orders.length
             });
         }
 
