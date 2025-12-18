@@ -7,7 +7,7 @@ export declare class PangkalanStockService {
     getStockLevels(pangkalanId: string): Promise<{
         stocks: {
             id: string;
-            lpg_type: import("@prisma/client").$Enums.lpg_type;
+            lpg_type: string;
             qty: number;
             warning_level: number;
             critical_level: number;

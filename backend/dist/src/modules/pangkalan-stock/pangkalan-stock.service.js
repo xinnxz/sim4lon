@@ -40,7 +40,7 @@ let PangkalanStockService = class PangkalanStockService {
                 stock.qty <= stock.warning_level ? 'RENDAH' : 'AMAN';
             return {
                 id: stock.id,
-                lpg_type: stock.lpg_type,
+                lpg_type: (0, dto_1.toFrontendFormat)(stock.lpg_type),
                 qty: stock.qty,
                 warning_level: stock.warning_level,
                 critical_level: stock.critical_level,

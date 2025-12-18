@@ -48,12 +48,14 @@ import EditUserModal from './EditUserModal'
 
 const roleLabels: Record<UserRole, string> = {
   ADMIN: 'Administrator',
-  OPERATOR: 'Operator Lapangan'
+  OPERATOR: 'Operator Lapangan',
+  PANGKALAN: 'Pangkalan'
 }
 
 const roleBadgeColors: Record<UserRole, string> = {
   ADMIN: 'bg-purple-500/20 text-purple-600',
-  OPERATOR: 'bg-blue-500/20 text-blue-600'
+  OPERATOR: 'bg-blue-500/20 text-blue-600',
+  PANGKALAN: 'bg-green-500/20 text-green-600'
 }
 
 export default function UserListPage() {

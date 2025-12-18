@@ -39,10 +39,10 @@ import { toast } from 'sonner'
 
 // LPG type config
 const LPG_CONFIG: Record<string, { name: string; color: string; gradient: string }> = {
-    'kg3': { name: 'LPG 3 kg', color: '#22C55E', gradient: 'from-green-500 to-emerald-600' },
-    'kg5': { name: 'LPG 5.5 kg', color: '#06B6D4', gradient: 'from-cyan-500 to-teal-600' },
-    'kg12': { name: 'LPG 12 kg', color: '#3B82F6', gradient: 'from-blue-500 to-indigo-600' },
-    'kg50': { name: 'LPG 50 kg', color: '#F59E0B', gradient: 'from-amber-500 to-orange-600' },
+    '3kg': { name: 'LPG 3 kg', color: '#22C55E', gradient: 'from-green-500 to-emerald-600' },
+    '5kg': { name: 'LPG 5.5 kg', color: '#ff82c5', gradient: 'from-pink-400 to-pink-600' },
+    '12kg': { name: 'LPG 12 kg', color: '#3B82F6', gradient: 'from-blue-500 to-indigo-600' },
+    '50kg': { name: 'LPG 50 kg', color: '#ef0e0e', gradient: 'from-red-500 to-red-600' },
 }
 
 export default function StokPangkalanPage() {
@@ -52,8 +52,8 @@ export default function StokPangkalanPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [isReceiveOpen, setIsReceiveOpen] = useState(false)
     const [isOrderOpen, setIsOrderOpen] = useState(false)
-    const [receiveData, setReceiveData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
-    const [orderData, setOrderData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
+    const [receiveData, setReceiveData] = useState({ lpgType: '3kg' as LpgType, qty: 0, note: '' })
+    const [orderData, setOrderData] = useState({ lpgType: '3kg' as LpgType, qty: 0, note: '' })
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const fetchData = async () => {
@@ -98,7 +98,7 @@ export default function StokPangkalanPage() {
             })
             toast.success(`Berhasil terima ${receiveData.qty} tabung ${LPG_CONFIG[receiveData.lpgType]?.name}`)
             setIsReceiveOpen(false)
-            setReceiveData({ lpgType: 'kg3', qty: 0, note: '' })
+            setReceiveData({ lpgType: '3kg', qty: 0, note: '' })
             fetchData()
         } catch (error: any) {
             toast.error(error.message || 'Gagal mencatat penerimaan stok')
@@ -115,7 +115,7 @@ export default function StokPangkalanPage() {
         // Future: API integration with agen
         toast.success(`Pesanan ${orderData.qty} tabung ${LPG_CONFIG[orderData.lpgType]?.name} berhasil dikirim ke Agen! (Coming Soon)`)
         setIsOrderOpen(false)
-        setOrderData({ lpgType: 'kg3', qty: 0, note: '' })
+        setOrderData({ lpgType: '3kg', qty: 0, note: '' })
     }
 
     if (isLoading) {
@@ -345,7 +345,7 @@ export default function StokPangkalanPage() {
                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div
                                             className={`h-full rounded-full transition-all ${stock.status === 'KRITIS' ? 'bg-red-500' :
-                                                    stock.status === 'RENDAH' ? 'bg-orange-500' : 'bg-green-500'
+                                                stock.status === 'RENDAH' ? 'bg-orange-500' : 'bg-green-500'
                                                 }`}
                                             style={{ width: `${Math.min(100, (stock.qty / stock.warning_level) * 50)}%` }}
                                         />

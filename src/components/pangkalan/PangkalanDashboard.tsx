@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
-import { authApi, consumerOrdersApi, pangkalanStockApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint } from '@/lib/api'
+import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory } from '@/lib/api'
 import {
     AreaChart,
     Area,
@@ -32,12 +32,17 @@ import {
     Legend,
 } from 'recharts'
 
-// LPG type config
+// LPG type config - support both formats (3kg from new standard, kg3 from legacy)
 const lpgTypeConfig: Record<string, { name: string; color: string }> = {
+    '3kg': { name: '3 kg', color: '#22C55E' },
+    '5kg': { name: '5.5 kg', color: '#ff82c5ff' },
+    '12kg': { name: '12 kg', color: '#3B82F6' },
+    '50kg': { name: '50 kg', color: '#ef0e0eff' },
+    // Legacy format support
     'kg3': { name: '3 kg', color: '#22C55E' },
-    'kg5': { name: '5.5 kg', color: '#06B6D4' },
+    'kg5': { name: '5.5 kg', color: '#ff82c5ff' },
     'kg12': { name: '12 kg', color: '#3B82F6' },
-    'kg50': { name: '50 kg', color: '#F59E0B' },
+    'kg50': { name: '50 kg', color: '#ef0e0eff' },
 }
 
 // Custom tooltip component
@@ -61,6 +66,59 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null
 }
 
+// Custom pie chart tooltip - with core stock info
+const PieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+        const data = payload[0]
+        const total = payload[0]?.payload?.total || 0
+        const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : '0'
+
+        // Determine stock status
+        const qty = data.value
+        let status = { text: 'Aman', color: 'text-green-600', bg: 'bg-green-100' }
+        if (qty <= 10) {
+            status = { text: 'Kritis!', color: 'text-red-600', bg: 'bg-red-100' }
+        } else if (qty <= 30) {
+            status = { text: 'Menipis', color: 'text-orange-600', bg: 'bg-orange-100' }
+        }
+
+        return (
+            <div className="bg-white px-4 py-3 rounded-xl shadow-2xl border border-slate-200 min-w-[160px]">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.payload.color }} />
+                    <span className="font-semibold text-slate-900">{data.payload.name}</span>
+                </div>
+                <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                        <span className="text-lg font-bold text-slate-800">{data.value} tabung</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-slate-500 text-sm">Proporsi:</span>
+                        <span className="font-semibold text-slate-700">{percentage}%</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-1 border-t border-slate-100 mt-2">
+                        <span className="text-slate-500 text-sm">Status:</span>
+                        <span className={`text-sm font-semibold px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+                            {status.text}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+    return null
+}
+
+// Expense categories config
+const EXPENSE_CATEGORIES: Record<string, { label: string; color: string }> = {
+    'OPERASIONAL': { label: 'Operasional', color: '#64748B' },
+    'TRANSPORT': { label: 'Transport', color: '#F97316' },
+    'SEWA': { label: 'Sewa', color: '#A855F7' },
+    'LISTRIK': { label: 'Listrik/Air', color: '#EAB308' },
+    'GAJI': { label: 'Gaji', color: '#3B82F6' },
+    'LAINNYA': { label: 'Lainnya', color: '#6B7280' },
+}
+
 export default function PangkalanDashboard() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [stats, setStats] = useState<ConsumerOrderStats | null>(null)
@@ -68,8 +126,20 @@ export default function PangkalanDashboard() {
     const [chartData, setChartData] = useState<ChartDataPoint[]>([])
     const [stockData, setStockData] = useState<Array<{ name: string; value: number; color: string }>>([])
     const [totalStock, setTotalStock] = useState(0)
+    const [expenseSummary, setExpenseSummary] = useState<{ total: number; byCategory: Array<{ name: string; value: number; color: string }> }>({ total: 0, byCategory: [] })
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    // Hide footer during loading
+    useEffect(() => {
+        const footer = document.getElementById('app-footer')
+        if (footer) {
+            footer.style.display = isLoading ? 'none' : ''
+        }
+        return () => {
+            if (footer) footer.style.display = ''
+        }
+    }, [isLoading])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,11 +150,17 @@ export default function PangkalanDashboard() {
                 const profileData = await authApi.getProfile()
                 setProfile(profileData)
 
-                const [statsData, recentData, chartDataFromApi, stockResponse] = await Promise.all([
+                // Get current month date range for expenses
+                const now = new Date()
+                const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+                const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+
+                const [statsData, recentData, chartDataFromApi, stockResponse, expenseData] = await Promise.all([
                     consumerOrdersApi.getStats(true),
                     consumerOrdersApi.getRecent(5),
                     consumerOrdersApi.getChartData(),
                     pangkalanStockApi.getStockLevels(),
+                    expensesApi.getAll(startDate, endDate),
                 ])
 
                 setStats(statsData)
@@ -95,13 +171,30 @@ export default function PangkalanDashboard() {
 
                 // Convert stock API response to pie chart format
                 if (stockResponse && stockResponse.stocks) {
+                    const total = stockResponse.summary.total
                     const pieData = stockResponse.stocks.map(stock => ({
                         name: lpgTypeConfig[stock.lpg_type]?.name || stock.lpg_type,
                         value: stock.qty,
                         color: lpgTypeConfig[stock.lpg_type]?.color || '#94A3B8',
+                        total: total, // Include total for percentage calculation
                     }))
                     setStockData(pieData)
-                    setTotalStock(stockResponse.summary.total)
+                    setTotalStock(total)
+                }
+
+                // Process expense data for pie chart
+                if (expenseData && expenseData.length > 0) {
+                    const total = expenseData.reduce((sum, e) => sum + Number(e.amount), 0)
+                    const byCategory: Record<string, number> = {}
+                    expenseData.forEach(e => {
+                        byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount)
+                    })
+                    const pieData = Object.entries(byCategory).map(([cat, amount]) => ({
+                        name: EXPENSE_CATEGORIES[cat]?.label || cat,
+                        value: amount,
+                        color: EXPENSE_CATEGORIES[cat]?.color || '#6B7280',
+                    }))
+                    setExpenseSummary({ total, byCategory: pieData })
                 }
             } catch (err: any) {
                 console.error('Failed to fetch dashboard data:', err)
@@ -391,10 +484,7 @@ export default function PangkalanDashboard() {
                                             <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
-                                    <Tooltip
-                                        formatter={(value: number) => [`${value} tabung`, 'Stok']}
-                                        contentStyle={{ backgroundColor: '#1E293B', border: 'none', borderRadius: '8px', color: '#fff' }}
-                                    />
+                                    <Tooltip content={<PieTooltip />} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
@@ -414,7 +504,114 @@ export default function PangkalanDashboard() {
                 </Card>
             </div>
 
-            {/* Recent Sales */}
+            {/* Pengeluaran Summary Card */}
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* Pengeluaran Breakdown */}
+                <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                        <SafeIcon name="Wallet" className="h-4 w-4 text-red-600" />
+                                    </div>
+                                    Pengeluaran Bulan Ini
+                                </CardTitle>
+                                <CardDescription className="mt-1">Total: {formatCurrency(expenseSummary.total)}</CardDescription>
+                            </div>
+                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" asChild>
+                                <a href="/pangkalan/pengeluaran">Kelola →</a>
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        {expenseSummary.byCategory.length === 0 ? (
+                            <div className="text-center py-8">
+                                <SafeIcon name="Wallet" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                <p className="text-slate-400">Belum ada pengeluaran bulan ini</p>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-6">
+                                <div className="h-[150px] w-[150px] flex-shrink-0">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={expenseSummary.byCategory}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={40}
+                                                outerRadius={65}
+                                                dataKey="value"
+                                                strokeWidth={2}
+                                                stroke="#fff"
+                                            >
+                                                {expenseSummary.byCategory.map((entry, index) => (
+                                                    <Cell key={`expense-cell-${index}`} fill={entry.color} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip content={<PieTooltip />} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    {expenseSummary.byCategory.slice(0, 4).map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                                <span className="text-sm text-slate-700">{item.name}</span>
+                                            </div>
+                                            <span className="text-sm font-bold text-slate-900">{formatCurrency(item.value)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Quick Stats Summary */}
+                <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                <SafeIcon name="TrendingUp" className="h-4 w-4 text-purple-600" />
+                            </div>
+                            Ringkasan Bulan Ini
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 pt-6">
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <SafeIcon name="ArrowUpRight" className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <span className="text-slate-700">Total Penjualan</span>
+                            </div>
+                            <span className="text-xl font-bold text-blue-600">{formatCurrency(stats?.total_revenue || 0)}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-red-50 border border-red-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                                    <SafeIcon name="ArrowDownRight" className="h-5 w-5 text-red-600" />
+                                </div>
+                                <span className="text-slate-700">Total Pengeluaran</span>
+                            </div>
+                            <span className="text-xl font-bold text-red-600">-{formatCurrency(expenseSummary.total)}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                                    <SafeIcon name="Banknote" className="h-5 w-5 text-green-600" />
+                                </div>
+                                <span className="font-medium text-green-700">Laba Bersih</span>
+                            </div>
+                            <span className="text-xl font-bold text-green-600">{formatCurrency((stats?.laba_bersih || 0) - expenseSummary.total)}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Recent Sales - Now at the bottom */}
             <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
                 <CardHeader className="border-b border-slate-100 bg-slate-50/50">
                     <div className="flex items-center justify-between">

@@ -1,4 +1,9 @@
-import { IsString, IsOptional, IsBoolean, MaxLength, IsUUID, Length } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, MaxLength, IsUUID, Length, IsIn } from 'class-validator';
+
+/**
+ * Consumer type enum
+ */
+export type ConsumerType = 'RUMAH_TANGGA' | 'WARUNG';
 
 /**
  * DTO untuk membuat consumer baru
@@ -18,6 +23,10 @@ export class CreateConsumerDto {
     @IsString()
     @Length(16, 16, { message: 'Nomor KK harus 16 digit' })
     kk?: string;
+
+    @IsOptional()
+    @IsIn(['RUMAH_TANGGA', 'WARUNG'], { message: 'Jenis harus RUMAH_TANGGA atau WARUNG' })
+    consumer_type?: ConsumerType;
 
     @IsOptional()
     @IsString()
@@ -51,6 +60,10 @@ export class UpdateConsumerDto {
     @IsString()
     @Length(16, 16, { message: 'Nomor KK harus 16 digit' })
     kk?: string;
+
+    @IsOptional()
+    @IsIn(['RUMAH_TANGGA', 'WARUNG'], { message: 'Jenis harus RUMAH_TANGGA atau WARUNG' })
+    consumer_type?: ConsumerType;
 
     @IsOptional()
     @IsString()

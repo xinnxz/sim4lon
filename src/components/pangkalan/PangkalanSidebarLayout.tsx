@@ -23,7 +23,7 @@ interface PangkalanSidebarLayoutProps {
 
 export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLayoutProps) {
     return (
-        <div className="min-h-screen flex flex-col bg-slate-50">
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
             {/* Fixed Header */}
             <PangkalanHeaderSimple />
 
@@ -44,3 +44,4 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
         </div>
     )
 }
+
