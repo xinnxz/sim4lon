@@ -9,10 +9,10 @@ export declare class PangkalanService {
                 orders: number;
             };
         } & {
-            name: string;
             id: string;
             code: string;
             email: string | null;
+            name: string;
             phone: string | null;
             is_active: boolean;
             created_at: Date;
@@ -23,6 +23,7 @@ export declare class PangkalanService {
             region: string | null;
             pic_name: string | null;
             capacity: number | null;
+            agen_id: string | null;
         })[];
         meta: {
             total: number;
@@ -36,10 +37,10 @@ export declare class PangkalanService {
             orders: number;
         };
     } & {
-        name: string;
         id: string;
         code: string;
         email: string | null;
+        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
@@ -50,12 +51,13 @@ export declare class PangkalanService {
         region: string | null;
         pic_name: string | null;
         capacity: number | null;
+        agen_id: string | null;
     }>;
     create(dto: CreatePangkalanDto): Promise<{
-        name: string;
         id: string;
         code: string;
         email: string | null;
+        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
@@ -66,12 +68,13 @@ export declare class PangkalanService {
         region: string | null;
         pic_name: string | null;
         capacity: number | null;
+        agen_id: string | null;
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
-        name: string;
         id: string;
         code: string;
         email: string | null;
+        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
@@ -82,6 +85,7 @@ export declare class PangkalanService {
         region: string | null;
         pic_name: string | null;
         capacity: number | null;
+        agen_id: string | null;
     }>;
     remove(id: string): Promise<{
         message: string;

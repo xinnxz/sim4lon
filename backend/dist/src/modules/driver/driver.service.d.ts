@@ -9,16 +9,16 @@ export declare class DriverService {
                 orders: number;
             };
         } & {
-            name: string;
             id: string;
             code: string;
+            name: string;
             phone: string | null;
             is_active: boolean;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            note: string | null;
             vehicle_id: string | null;
+            note: string | null;
         })[];
         meta: {
             total: number;
@@ -32,40 +32,40 @@ export declare class DriverService {
             orders: number;
         };
     } & {
-        name: string;
         id: string;
         code: string;
+        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        note: string | null;
         vehicle_id: string | null;
+        note: string | null;
     }>;
     create(dto: CreateDriverDto): Promise<{
-        name: string;
         id: string;
         code: string;
+        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        note: string | null;
         vehicle_id: string | null;
+        note: string | null;
     }>;
     update(id: string, dto: UpdateDriverDto): Promise<{
-        name: string;
         id: string;
         code: string;
+        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        note: string | null;
         vehicle_id: string | null;
+        note: string | null;
     }>;
     remove(id: string): Promise<{
         message: string;

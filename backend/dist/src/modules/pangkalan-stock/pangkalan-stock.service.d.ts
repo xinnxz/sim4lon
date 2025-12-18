@@ -37,8 +37,8 @@ export declare class PangkalanStockService {
         created_at: Date;
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
-        movement_type: string;
         qty: number;
+        movement_type: string;
         source: string | null;
         reference_id: string | null;
         movement_date: Date;

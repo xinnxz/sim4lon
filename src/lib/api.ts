@@ -1701,3 +1701,36 @@ export const lpgPricesApi = {
         });
     },
 };
+
+// ========================
+// AGEN API (LPG Distributor/Supplier)
+// ========================
+
+/**
+ * Agen (Distributor) interface
+ */
+export interface Agen {
+    id: string;
+    code: string;
+    name: string;
+    address: string | null;
+    pic_name: string | null;
+    phone: string | null;
+    email: string | null;
+    note: string | null;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+/**
+ * Agen API - Get agen data for current pangkalan
+ */
+export const agenApi = {
+    /**
+     * Get agen linked to current pangkalan
+     */
+    async getMyAgen(): Promise<Agen | null> {
+        return apiRequest('/agen/my-agen');
+    },
+};

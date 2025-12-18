@@ -6,10 +6,10 @@ export declare class AuthController {
     register(dto: RegisterDto): Promise<{
         message: string;
         user: {
-            name: string;
             id: string;
             code: string;
             email: string;
+            name: string;
             role: import("@prisma/client").$Enums.user_role;
             created_at: Date;
         };
@@ -24,17 +24,17 @@ export declare class AuthController {
             role: import("@prisma/client").$Enums.user_role;
             pangkalan_id: string | null;
             pangkalan: {
-                name: string;
                 id: string;
                 code: string;
+                name: string;
             } | null;
         };
     }>;
     getProfile(userId: string): Promise<{
-        name: string;
         id: string;
         code: string;
         email: string;
+        name: string;
         phone: string | null;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;
@@ -43,9 +43,9 @@ export declare class AuthController {
         created_at: Date;
         updated_at: Date;
         pangkalans: {
-            name: string;
             id: string;
             code: string;
+            name: string;
             phone: string | null;
             address: string;
         } | null;
@@ -53,10 +53,10 @@ export declare class AuthController {
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
         message: string;
         user: {
-            name: string;
             id: string;
             code: string;
             email: string;
+            name: string;
             phone: string | null;
             avatar_url: string | null;
             role: import("@prisma/client").$Enums.user_role;
