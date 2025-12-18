@@ -25,7 +25,7 @@ export default function RingkasanStokPageContent() {
   return (
     <>
       <main className="flex-1 flex flex-col">
-<div className="flex-1 space-y-6 p-6 pl-8">
+        <div className="flex-1 space-y-6 p-6 pl-8">
           {/* Back Button */}
           <div className="flex items-center gap-2 mb-2">
             <a href="./dashboard-admin.html" className="text-primary hover:underline flex items-center gap-1">
@@ -39,13 +39,13 @@ export default function RingkasanStokPageContent() {
             <h1 className="text-3xl font-bold tracking-tight" style={{ margin: '0px 0px 0px 10px' }}>
               Stok LPG
             </h1>
-            <StockActions 
+            <StockActions
               onUpdateClick={handleUpdateStokClick}
               onManageLPGClick={handleManageLPGClick}
             />
           </div>
 
-{/* KPI Summary Cards */}
+          {/* KPI Summary Cards */}
           <KPISummaryCards />
 
           {/* Stock Summary Cards */}
@@ -57,14 +57,14 @@ export default function RingkasanStokPageContent() {
       </main>
 
       {/* Update Stok Modal */}
-      <UpdateStokModal 
-        open={showUpdateModal} 
+      <UpdateStokModal
+        open={showUpdateModal}
         onOpenChange={setShowUpdateModal}
       />
 
       {/* Manage LPG Types Modal */}
-      <ManageLPGTypesModal 
-        open={showManageLPGModal} 
+      <ManageLPGTypesModal
+        open={showManageLPGModal}
         onOpenChange={setShowManageLPGModal}
       />
     </>

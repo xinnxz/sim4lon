@@ -18,9 +18,9 @@ import { dashboardApi } from '@/lib/api'
 interface ChartDataPoint {
   day: string
   profit: number
-  totalSales: number
-  totalCost: number
-  orderCount: number
+  totalSales?: number
+  totalCost?: number
+  orderCount?: number
 }
 
 // Format angka ke format Rupiah
@@ -146,38 +146,60 @@ export default function ProfitChart({ isVisible = true }: ProfitChartProps) {
       >
         <defs>
           <linearGradient id="colorProfitGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(152 100% 35%)" stopOpacity={1} />
-            <stop offset="100%" stopColor="hsl(152 100% 45%)" stopOpacity={0.8} />
+            <stop offset="0%" stopColor="hsl(152 100% 40%)" stopOpacity={1} />
+            <stop offset="50%" stopColor="hsl(152 90% 35%)" stopOpacity={0.95} />
+            <stop offset="100%" stopColor="hsl(152 85% 30%)" stopOpacity={0.9} />
           </linearGradient>
+          <filter id="barGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="barShadow" x="-20%" y="-10%" width="140%" height="130%">
+            <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="hsl(152 100% 30%)" floodOpacity="0.3" />
+          </filter>
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke="hsl(var(--border))"
-          opacity={0.5}
+          opacity={0.4}
           vertical={false}
         />
         <XAxis
           dataKey="day"
           stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '11px', fontWeight: 500 }}
+          axisLine={{ stroke: 'hsl(var(--border))' }}
+          tickLine={false}
         />
         <YAxis
           stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '12px' }}
-          tickFormatter={(value) => `Rp${(value / 1000).toFixed(0)}K`}
+          style={{ fontSize: '11px', fontWeight: 500 }}
+          tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+          axisLine={false}
+          tickLine={false}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--primary) / 0.1)', radius: 8 }} />
+        <Tooltip
+          content={<CustomTooltip />}
+          cursor={{ fill: 'hsl(152 100% 40% / 0.08)', radius: 8 }}
+        />
         <Bar
           dataKey="profit"
           fill="url(#colorProfitGradient)"
-          radius={[8, 8, 0, 0]}
+          radius={[10, 10, 0, 0]}
           isAnimationActive={isVisible}
           animationBegin={0}
-          animationDuration={800}
-          animationEasing="ease-in-out"
+          animationDuration={1000}
+          animationEasing="ease-out"
+          style={{ filter: 'url(#barShadow)' }}
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={GRADIENT_COLORS[index % GRADIENT_COLORS.length]} />
+            <Cell
+              key={`cell-${index}`}
+              fill={GRADIENT_COLORS[index % GRADIENT_COLORS.length]}
+            />
           ))}
         </Bar>
       </BarChart>

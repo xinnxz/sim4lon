@@ -463,27 +463,32 @@ export default function CreateOrderForm() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid gap-6 lg:grid-cols-3 dashboard-gradient-bg min-h-screen p-6">
       {/* Form Section */}
       <div className="lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isEditMode ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
-            </CardTitle>
-            <CardDescription>
-              {isEditMode
-                ? `Perbarui informasi pesanan`
-                : 'Lengkapi informasi pesanan LPG baru'}
-            </CardDescription>
+        <div className="chart-card-premium rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
+              <div>
+                <h2 className="text-xl font-bold text-gradient-primary">
+                  {isEditMode ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {isEditMode
+                    ? 'Perbarui informasi pesanan'
+                    : 'Lengkapi informasi pesanan LPG baru'}
+                </p>
+              </div>
+            </div>
             {isEditMode && editOrderStatus && (
-              <div className="mt-4 flex items-center gap-3 pt-4 border-t">
+              <div className="mt-4 flex items-center gap-3 pt-4 border-t border-border/50">
                 <span className="text-sm text-muted-foreground">Status:</span>
                 <Badge variant="secondary">{editOrderStatus}</Badge>
               </div>
             )}
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6">
             {isFormDisabled && (
               <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                 <p className="text-sm font-medium text-destructive">
@@ -734,20 +739,23 @@ export default function CreateOrderForm() {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Summary Section */}
       <div className="lg:col-span-1">
-        <Card className="sticky top-6 border-border shadow-card">
-          <CardHeader>
-            <CardTitle className="text-lg">Ringkasan Pesanan</CardTitle>
-            <p className="text-sm text-muted-foreground">
+        <div className="sticky top-6 glass-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 8px 32px -8px rgba(22, 163, 74, 0.15)' }}>
+          <div className="p-5 border-b border-border/50">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <h3 className="text-lg font-semibold">Ringkasan Pesanan</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
               {isEditMode ? 'Verifikasi perubahan pesanan' : 'Verifikasi detail sebelum menyimpan'}
             </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          </div>
+          <div className="p-5 space-y-4">
             {/* Pangkalan Info */}
             {selectedPangkalan ? (
               <div className="space-y-2 p-3 bg-secondary rounded-lg border border-border">
@@ -849,7 +857,7 @@ export default function CreateOrderForm() {
 
             {/* Status Info */}
             {!isEditMode && (
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-lg border border-blue-200">
                 <div className="flex gap-2">
                   <SafeIcon name="Info" className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
                   <p className="text-xs text-blue-700">
@@ -858,8 +866,8 @@ export default function CreateOrderForm() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

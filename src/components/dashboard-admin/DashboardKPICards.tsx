@@ -56,25 +56,36 @@ const KPICardItem = ({ kpi, index }: KPICardItemProps) => {
         }}
       >
         <div
-          className="overflow-hidden shadow-sm transition-shadow duration-300 ease-out cursor-default group relative bg-gradient-to-br from-card via-card to-card/70 h-full rounded-xl border-0 bg-card text-card-foreground"
+          className="overflow-hidden transition-all duration-300 ease-out cursor-default group relative h-full rounded-2xl glass-card shimmer-effect"
           style={{
-            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-            transition: 'box-shadow 0.3s cubic-bezier(0.23, 1, 0.320, 1)',
-            border: '1px solid hsl(var(--border))',
+            boxShadow: isHovering
+              ? '0 20px 40px -8px rgba(0, 0, 0, 0.15), 0 0 30px -5px rgba(22, 163, 74, 0.1)'
+              : '0 4px 20px -4px rgba(0, 0, 0, 0.08)',
             pointerEvents: 'auto'
           }}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-sm sm:text-base font-semibold leading-tight">{kpi.title}</CardTitle>
-            <div className={`${kpi.color} p-2.5 rounded-lg flex-shrink-0 transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg`}>
+          {/* Gradient overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10">
+            <CardTitle className="text-sm sm:text-base font-semibold leading-tight text-foreground/80">{kpi.title}</CardTitle>
+            <div
+              className={`${kpi.color} p-3 rounded-xl flex-shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}
+              style={{
+                boxShadow: `0 4px 15px -3px ${kpi.iconColor.includes('blue') ? 'rgba(59, 130, 246, 0.3)' :
+                  kpi.iconColor.includes('amber') ? 'rgba(245, 158, 11, 0.3)' :
+                    kpi.iconColor.includes('green') ? 'rgba(34, 197, 94, 0.3)' :
+                      'rgba(168, 85, 247, 0.3)'}`
+              }}
+            >
               <SafeIcon name={kpi.icon} className={`h-5 w-5 ${kpi.iconColor}`} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="text-2xl sm:text-3xl font-bold transition-colors duration-300">{kpi.value}</div>
+          <CardContent className="space-y-3 relative z-10">
+            <div className="text-3xl sm:text-4xl font-bold transition-colors duration-300 tracking-tight">{kpi.value}</div>
             <Badge
               variant={kpi.changeType === 'positive' ? 'default' : 'destructive'}
-              className="text-xs font-semibold transition-all duration-300"
+              className="text-xs font-semibold transition-all duration-300 px-3 py-1"
             >
               {kpi.change}
             </Badge>
