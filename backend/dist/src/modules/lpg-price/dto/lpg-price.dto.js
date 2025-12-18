@@ -70,4 +70,10 @@ class BulkUpdateLpgPricesDto {
     prices;
 }
 exports.BulkUpdateLpgPricesDto = BulkUpdateLpgPricesDto;
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => LpgPriceItemDto),
+    __metadata("design:type", Array)
+], BulkUpdateLpgPricesDto.prototype, "prices", void 0);
 //# sourceMappingURL=lpg-price.dto.js.map

@@ -57,11 +57,6 @@ const menuItems = [
         href: '/pangkalan/laporan',
         icon: 'FileText',
     },
-    {
-        name: 'Pengaturan Harga',
-        href: '/pangkalan/pengaturan-harga',
-        icon: 'BadgeDollarSign',
-    },
 ]
 
 export default function PangkalanSidebar() {

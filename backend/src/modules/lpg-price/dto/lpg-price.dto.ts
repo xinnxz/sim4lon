@@ -1,4 +1,4 @@
-import { IsNumber, IsEnum, IsBoolean, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsEnum, IsBoolean, IsOptional, Min, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { lpg_type } from '@prisma/client';
 
@@ -49,5 +49,8 @@ export class LpgPriceItemDto {
  * DTO untuk bulk update semua harga
  */
 export class BulkUpdateLpgPricesDto {
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => LpgPriceItemDto)
     prices: LpgPriceItemDto[];
 }

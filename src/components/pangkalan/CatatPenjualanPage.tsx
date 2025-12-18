@@ -68,6 +68,26 @@ export default function CatatPenjualanPage() {
         return priceFromDb ? Number(priceFromDb.selling_price) : displayItem.defaultPrice
     }
 
+    // Check if LPG type is active
+    const isLpgActive = (type: string) => {
+        const displayItem = LPG_DISPLAY.find(l => l.value === type)
+        if (!displayItem) return false
+        const priceFromDb = lpgPrices.find(p => p.lpg_type === displayItem.dbType)
+        return priceFromDb ? priceFromDb.is_active : true // Default active if not in DB
+    }
+
+    // Get active LPG types
+    const activeLpgTypes = LPG_DISPLAY.filter(lpg => isLpgActive(lpg.value))
+
+    // Auto-select first active type when prices load
+    useEffect(() => {
+        if (lpgPrices.length > 0 && activeLpgTypes.length > 0) {
+            if (!isLpgActive(lpgType)) {
+                setLpgType(activeLpgTypes[0].value)
+            }
+        }
+    }, [lpgPrices])
+
     const selectedLpg = LPG_DISPLAY.find(l => l.value === lpgType)!
     const currentPrice = getPrice(lpgType)
     const total = qty * currentPrice
@@ -179,7 +199,7 @@ export default function CatatPenjualanPage() {
                             <div>
                                 <Label className="text-sm font-semibold text-slate-700 mb-3 block">Tipe LPG</Label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {LPG_DISPLAY.map((lpg) => (
+                                    {activeLpgTypes.map((lpg) => (
                                         <button
                                             key={lpg.value}
                                             type="button"
