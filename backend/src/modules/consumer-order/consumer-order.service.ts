@@ -188,6 +188,56 @@ export class ConsumerOrderService {
                 },
             });
 
+            this.logger.log(`[CREATE] Order created - ID: ${order.id}`);
+
+            // ============================================
+            // STOCK DEDUCTION - Best Practice
+            // Kurangi stok setelah penjualan berhasil dicatat
+            // ============================================
+            try {
+                // 1. Find or create stock record for this LPG type
+                const existingStock = await this.prisma.pangkalan_stocks.findFirst({
+                    where: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: dto.lpg_type,
+                    },
+                });
+
+                if (existingStock) {
+                    // Deduct stock
+                    const newQty = existingStock.qty - dto.qty;
+                    await this.prisma.pangkalan_stocks.update({
+                        where: { id: existingStock.id },
+                        data: {
+                            qty: newQty < 0 ? 0 : newQty, // Prevent negative stock
+                            updated_at: new Date(),
+                        },
+                    });
+                    this.logger.log(`[CREATE] Stock deducted: ${existingStock.qty} -> ${newQty} for ${dto.lpg_type}`);
+                } else {
+                    this.logger.warn(`[CREATE] No stock record found for ${dto.lpg_type} - skipping deduction`);
+                }
+
+                // 2. Create stock movement record for audit trail
+                await this.prisma.pangkalan_stock_movements.create({
+                    data: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: dto.lpg_type,
+                        movement_type: 'OUT',
+                        qty: dto.qty,
+                        source: 'SALE', // Reference type: SALE, PURCHASE, ADJUSTMENT
+                        reference_id: order.id,
+                        note: `Penjualan ${orderCode} - ${dto.consumer_name || 'Walk-in'}`,
+                    },
+                });
+                this.logger.log(`[CREATE] Stock movement recorded`);
+
+            } catch (stockError) {
+                // Log error but don't fail the order
+                this.logger.error(`[CREATE] Stock deduction error: ${stockError.message}`);
+                // Order is still valid, stock will be handled manually if needed
+            }
+
             this.logger.log(`[CREATE] Success - order ID: ${order.id}`);
             return order;
         } catch (error) {

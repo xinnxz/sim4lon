@@ -1608,3 +1608,63 @@ export const expensesApi = {
         return apiRequest(`/expenses/summary?startDate=${startDate}&endDate=${endDate}`);
     },
 };
+
+// ========================
+// LPG PRICES API (Pangkalan Price Settings)
+// ========================
+
+/**
+ * Pangkalan LPG Price type (for price settings per pangkalan)
+ */
+export interface PangkalanLpgPrice {
+    id: string;
+    pangkalan_id: string;
+    lpg_type: string;
+    cost_price: number;
+    selling_price: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+/**
+ * LPG Prices API
+ * Untuk mengelola harga default LPG per pangkalan
+ */
+export const lpgPricesApi = {
+    /**
+     * Get all LPG prices for current pangkalan
+     */
+    async getAll(): Promise<PangkalanLpgPrice[]> {
+        return apiRequest('/lpg-prices');
+    },
+
+    /**
+     * Update a single price
+     */
+    async update(id: string, data: {
+        cost_price?: number;
+        selling_price?: number;
+        is_active?: boolean;
+    }): Promise<PangkalanLpgPrice> {
+        return apiRequest(`/lpg-prices/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    /**
+     * Bulk update all prices
+     */
+    async bulkUpdate(prices: {
+        lpg_type: string;
+        cost_price: number;
+        selling_price: number;
+        is_active?: boolean;
+    }[]): Promise<PangkalanLpgPrice[]> {
+        return apiRequest('/lpg-prices/bulk', {
+            method: 'POST',
+            body: JSON.stringify({ prices }),
+        });
+    },
+};

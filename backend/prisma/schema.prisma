@@ -1,19 +1,3 @@
-// ============================================================
-// SIM4LON DATABASE SCHEMA
-// Sistem Informasi Manajemen Distribusi LPG
-// ============================================================
-//
-// SCHEMA VERSION: 2.0 (Cleaned up)
-// LAST UPDATED: 2025-12-16
-//
-// TABLES:
-//   Core:      users, pangkalans, drivers
-//   Orders:    orders, order_items, timeline_tracks
-//   Payments:  invoices, payment_records, order_payment_details
-//   Products:  lpg_products (lpg_prices deprecated)
-//   Tracking:  stock_histories, activity_logs
-// ============================================================
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
@@ -22,34 +6,30 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [uuid_ossp(map: "uuid-ossp"), pgcrypto]
+  extensions = [pgcrypto, uuid_ossp(map: "uuid-ossp")]
 }
-
-// ============================================================
-// CORE TABLES
-// ============================================================
 
 /// User account for admin and operator login
 model users {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code         String    @unique @db.VarChar(20) /// Display code: USR-001
-  email        String    @unique @db.VarChar(255)
-  password     String    @db.VarChar(255)
-  name         String    @db.VarChar(255)
-  phone        String?   @db.VarChar(20)
-  avatar_url   String?
-  role         user_role @default(OPERATOR)
-  pangkalan_id String?   @db.Uuid /// Link to pangkalan for PANGKALAN role
-  is_active    Boolean   @default(true)
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at   DateTime? @db.Timestamptz(6)
-
-  // Relations
-  pangkalans      pangkalans?       @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_pangkalan")
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Display code: USR-001
+  code            String            @unique @db.VarChar(20)
+  email           String            @unique @db.VarChar(255)
+  password        String            @db.VarChar(255)
+  name            String            @db.VarChar(255)
+  phone           String?           @db.VarChar(20)
+  avatar_url      String?
+  role            user_role         @default(OPERATOR)
+  /// Link to pangkalan for PANGKALAN role
+  pangkalan_id    String?           @db.Uuid
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
   activity_logs   activity_logs[]
   payment_records payment_records[]
   stock_histories stock_histories[]
+  pangkalans      pangkalans?       @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_pangkalan")
 
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
@@ -58,47 +38,68 @@ model users {
 
 /// LPG Distribution Agent / Pangkalan
 model pangkalans {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String    @unique @db.VarChar(20) /// Display code: PKL-001
-  name       String    @db.VarChar(255)
-  address    String
-  region     String?   @db.VarChar(100)
-  pic_name   String?   @db.VarChar(255) /// Person In Charge name
-  phone      String?   @db.VarChar(20)
-  email      String?   @db.VarChar(255) /// For sending invoices
-  capacity   Int? /// Storage capacity in units
-  note       String?
-  is_active  Boolean   @default(true)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at DateTime? @db.Timestamptz(6)
-
-  // Relations
+  id                        String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Display code: PKL-001
+  code                      String                      @unique @db.VarChar(20)
+  name                      String                      @db.VarChar(255)
+  address                   String
+  region                    String?                     @db.VarChar(100)
+  /// Person In Charge name
+  pic_name                  String?                     @db.VarChar(255)
+  phone                     String?                     @db.VarChar(20)
+  /// For sending invoices
+  email                     String?                     @db.VarChar(255)
+  /// Storage capacity in units
+  capacity                  Int?
+  note                      String?
+  is_active                 Boolean                     @default(true)
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  deleted_at                DateTime?                   @db.Timestamptz(6)
+  consumer_orders           consumer_orders[]
+  consumers                 consumers[]
+  expenses                  expenses[]
+  lpg_prices                lpg_prices[]
   orders                    orders[]
-  users                     users[] /// Users linked to this pangkalan
-  consumers                 consumers[] /// Consumers of this pangkalan
-  consumer_orders           consumer_orders[] /// Consumer orders for this pangkalan
-  expenses                  expenses[] /// Expense records for this pangkalan
-  pangkalan_stocks          pangkalan_stocks[] /// Stock levels for this pangkalan
-  pangkalan_stock_movements pangkalan_stock_movements[] /// Stock movement history
+  pangkalan_stock_movements pangkalan_stock_movements[]
+  pangkalan_stocks          pangkalan_stocks[]
+  users                     users[]
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
 }
 
+/// Default LPG prices per pangkalan
+/// Stores modal (cost) and selling price for each LPG type per pangkalan
+model lpg_prices {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id  String     @db.Uuid
+  lpg_type      lpg_type
+  /// Harga modal/beli (HPP)
+  cost_price    Decimal    @db.Decimal(15, 2)
+  /// Harga jual default ke konsumen
+  selling_price Decimal    @db.Decimal(15, 2)
+  /// Apakah tipe ini dijual
+  is_active     Boolean    @default(true)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime   @default(now()) @db.Timestamptz(6)
+  pangkalans    pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_lpg_prices_pangkalan")
+
+  @@unique([pangkalan_id, lpg_type], map: "uq_lpg_prices_pangkalan_type")
+  @@index([pangkalan_id], map: "idx_lpg_prices_pangkalan")
+}
+
 /// Expense/Pengeluaran records for pangkalan
 model expenses {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id String   @db.Uuid
-  category     String   @db.VarChar(50)
-  amount       Decimal  @db.Decimal(15, 2)
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id String     @db.Uuid
+  category     String     @db.VarChar(50)
+  amount       Decimal    @db.Decimal(15, 2)
   description  String?
-  expense_date DateTime @default(now()) @db.Timestamptz(6)
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  pangkalans pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_expenses_pangkalan")
+  expense_date DateTime   @default(now()) @db.Timestamptz(6)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime   @default(now()) @db.Timestamptz(6)
+  pangkalans   pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_expenses_pangkalan")
 
   @@index([pangkalan_id], map: "idx_expenses_pangkalan")
   @@index([expense_date(sort: Desc)], map: "idx_expenses_date")
@@ -107,16 +108,14 @@ model expenses {
 
 /// Consumer-specific pricing for pangkalan
 model consumer_pricing {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id String   @db.Uuid
-  consumer_id  String   @db.Uuid
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id String    @db.Uuid
+  consumer_id  String    @db.Uuid
   lpg_type     lpg_type
-  price        Decimal  @db.Decimal(15, 2)
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  consumers consumers @relation(fields: [consumer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_pricing_consumer")
+  price        Decimal   @db.Decimal(15, 2)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
+  consumers    consumers @relation(fields: [consumer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_pricing_consumer")
 
   @@unique([consumer_id, lpg_type], map: "idx_consumer_pricing_unique")
   @@index([pangkalan_id], map: "idx_consumer_pricing_pangkalan")
@@ -125,17 +124,15 @@ model consumer_pricing {
 
 /// Pangkalan stock levels per LPG type
 model pangkalan_stocks {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id   String   @db.Uuid
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id   String     @db.Uuid
   lpg_type       lpg_type
-  qty            Int      @default(0)
-  warning_level  Int      @default(20)
-  critical_level Int      @default(10)
-  created_at     DateTime @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  pangkalans pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pangkalan_stocks_pangkalan")
+  qty            Int        @default(0)
+  warning_level  Int        @default(20)
+  critical_level Int        @default(10)
+  created_at     DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime   @default(now()) @db.Timestamptz(6)
+  pangkalans     pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pangkalan_stocks_pangkalan")
 
   @@unique([pangkalan_id, lpg_type], map: "idx_pangkalan_stocks_unique")
   @@index([pangkalan_id], map: "idx_pangkalan_stocks_pangkalan")
@@ -143,19 +140,17 @@ model pangkalan_stocks {
 
 /// Stock movement history for pangkalan
 model pangkalan_stock_movements {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id  String   @db.Uuid
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id  String     @db.Uuid
   lpg_type      lpg_type
-  movement_type String   @db.VarChar(20)
+  movement_type String     @db.VarChar(20)
   qty           Int
-  source        String?  @db.VarChar(50)
-  reference_id  String?  @db.Uuid
+  source        String?    @db.VarChar(50)
+  reference_id  String?    @db.Uuid
   note          String?
-  movement_date DateTime @default(now()) @db.Timestamptz(6)
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  pangkalans pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pangkalan_stock_movements_pangkalan")
+  movement_date DateTime   @default(now()) @db.Timestamptz(6)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  pangkalans    pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pangkalan_stock_movements_pangkalan")
 
   @@index([pangkalan_id], map: "idx_pangkalan_stock_movements_pangkalan")
   @@index([movement_date(sort: Desc)], map: "idx_pangkalan_stock_movements_date")
@@ -165,42 +160,41 @@ model pangkalan_stock_movements {
 /// Delivery driver information
 model drivers {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String    @unique @db.VarChar(20) /// Display code: DRV-001
+  /// Display code: DRV-001
+  code       String    @unique @db.VarChar(20)
   name       String    @db.VarChar(255)
   phone      String?   @db.VarChar(20)
-  vehicle_id String?   @db.VarChar(20) /// License plate number
+  /// License plate number
+  vehicle_id String?   @db.VarChar(20)
   note       String?
   is_active  Boolean   @default(true)
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime  @default(now()) @db.Timestamptz(6)
   deleted_at DateTime? @db.Timestamptz(6)
-
-  // Relations
-  orders orders[]
+  orders     orders[]
 
   @@index([is_active], map: "idx_drivers_active")
 }
 
-// ============================================================
-// PRODUCT & STOCK TABLES
-// ============================================================
-
 /// LPG Product catalog with direct pricing
 model lpg_products {
-  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String       @db.VarChar(100) /// e.g., "Elpiji 3kg Hijau"
-  size_kg       Decimal      @db.Decimal(5, 2) /// Weight: 3.00, 12.00, 50.00
-  category      lpg_category @default(NON_SUBSIDI)
-  color         String?      @db.VarChar(50) /// hijau, biru, pink
-  description   String?
-  selling_price Decimal      @default(0) @db.Decimal(15, 2) /// Harga jual
-  cost_price    Decimal?     @db.Decimal(15, 2) /// Harga beli (untuk profit margin)
-  is_active     Boolean      @default(true)
-  created_at    DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime     @default(now()) @db.Timestamptz(6)
-  deleted_at    DateTime?    @db.Timestamptz(6)
-
-  // Relations
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// e.g., "Elpiji 3kg Hijau"
+  name            String            @db.VarChar(100)
+  /// Weight: 3.00, 12.00, 50.00
+  size_kg         Decimal           @db.Decimal(5, 2)
+  category        lpg_category      @default(NON_SUBSIDI)
+  /// hijau, biru, pink
+  color           String?           @db.VarChar(50)
+  description     String?
+  /// Harga jual
+  selling_price   Decimal           @default(0) @db.Decimal(15, 2)
+  /// Harga beli (untuk profit margin)
+  cost_price      Decimal?          @db.Decimal(15, 2)
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
   stock_histories stock_histories[]
 
   @@index([category], map: "idx_lpg_products_category")
@@ -210,18 +204,20 @@ model lpg_products {
 /// Stock movement history (MASUK/KELUAR)
 model stock_histories {
   id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  lpg_product_id      String?             @db.Uuid /// Reference to product
-  lpg_type            lpg_type? /// @deprecated - Legacy field for backward compat
-  movement_type       stock_movement_type /// MASUK or KELUAR
-  qty                 Int /// Quantity moved
+  /// Reference to product
+  lpg_product_id      String?             @db.Uuid
+  /// @deprecated - Legacy field for backward compat
+  lpg_type            lpg_type?
+  /// MASUK or KELUAR
+  movement_type       stock_movement_type
+  /// Quantity moved
+  qty                 Int
   note                String?
   recorded_by_user_id String?             @db.Uuid
   timestamp           DateTime            @default(now()) @db.Timestamptz(6)
   created_at          DateTime            @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  lpg_product lpg_products? @relation(fields: [lpg_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_lpg_product")
-  users       users?        @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_user")
+  lpg_product         lpg_products?       @relation(fields: [lpg_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_lpg_product")
+  users               users?              @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_user")
 
   @@index([lpg_product_id], map: "idx_stock_product")
   @@index([lpg_type], map: "idx_stock_type")
@@ -229,35 +225,33 @@ model stock_histories {
   @@index([timestamp(sort: Desc)], map: "idx_stock_timestamp")
 }
 
-// ============================================================
-// ORDER TABLES
-// ============================================================
-
 /// Main order/pesanan record
 model orders {
-  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code           String         @unique @db.VarChar(20) /// Display: ORD-0001
-  pangkalan_id   String         @db.Uuid
-  driver_id      String?        @db.Uuid
-  order_date     DateTime       @default(dbgenerated("CURRENT_DATE")) @db.Date
-  current_status status_pesanan @default(DRAFT)
-  subtotal       Decimal        @default(0) @db.Decimal(15, 2) /// Before tax
-  tax_amount     Decimal        @default(0) @db.Decimal(15, 2) /// PPN 12% for non-subsidi
-  total_amount   Decimal        @default(0) @db.Decimal(15, 2) /// subtotal + tax
-  note           String?
-  created_at     DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime       @default(now()) @db.Timestamptz(6)
-  deleted_at     DateTime?      @db.Timestamptz(6)
-
-  // Relations
-  pangkalans            pangkalans             @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_pangkalan")
-  drivers               drivers?               @relation(fields: [driver_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_driver")
+  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Display: ORD-0001
+  code                  String                 @unique @db.VarChar(20)
+  pangkalan_id          String                 @db.Uuid
+  driver_id             String?                @db.Uuid
+  order_date            DateTime               @default(dbgenerated("CURRENT_DATE")) @db.Date
+  current_status        status_pesanan         @default(DRAFT)
+  /// Before tax
+  subtotal              Decimal                @default(0) @db.Decimal(15, 2)
+  /// PPN 12% for non-subsidi
+  tax_amount            Decimal                @default(0) @db.Decimal(15, 2)
+  /// subtotal + tax
+  total_amount          Decimal                @default(0) @db.Decimal(15, 2)
+  note                  String?
+  created_at            DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?              @db.Timestamptz(6)
+  activity_logs         activity_logs[]
+  invoices              invoices[]
   order_items           order_items[]
   order_payment_details order_payment_details?
-  invoices              invoices[]
+  drivers               drivers?               @relation(fields: [driver_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_driver")
+  pangkalans            pangkalans             @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_pangkalan")
   payment_records       payment_records[]
   timeline_tracks       timeline_tracks[]
-  activity_logs         activity_logs[]
 
   @@index([current_status], map: "idx_orders_status")
   @@index([pangkalan_id], map: "idx_orders_pangkalan")
@@ -269,18 +263,19 @@ model orders {
 model order_items {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id       String   @db.Uuid
-  lpg_type       lpg_type /// Product type enum
-  label          String?  @db.VarChar(50) /// Display name
+  /// Product type enum
+  lpg_type       lpg_type
+  /// Display name
+  label          String?  @db.VarChar(50)
   price_per_unit Decimal  @db.Decimal(15, 2)
   qty            Int
   sub_total      Decimal? @db.Decimal(15, 2)
-  is_taxable     Boolean  @default(false) /// true for NON_SUBSIDI (12% PPN)
+  /// true for NON_SUBSIDI (12% PPN)
+  is_taxable     Boolean  @default(false)
   tax_amount     Decimal  @default(0) @db.Decimal(15, 2)
   created_at     DateTime @default(now()) @db.Timestamptz(6)
   updated_at     DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  orders orders @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_order_items_order")
+  orders         orders   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_order_items_order")
 
   @@index([order_id], map: "idx_order_items_order")
 }
@@ -289,41 +284,36 @@ model order_items {
 model timeline_tracks {
   id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id    String         @db.Uuid
-  status      status_pesanan /// Status at this point
+  /// Status at this point
+  status      status_pesanan
   description String?
   note        String?
   created_at  DateTime       @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  orders orders @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_timeline_orders")
+  orders      orders         @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_timeline_orders")
 
   @@index([order_id], map: "idx_timeline_order")
   @@index([order_id, created_at(sort: Desc)], map: "idx_timeline_created")
 }
 
-// ============================================================
-// PAYMENT TABLES
-// ============================================================
-
 /// Invoice generated from order
 model invoices {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  order_id        String    @db.Uuid
-  invoice_number  String?   @unique @db.VarChar(50) /// INV-2024-0001
-  invoice_date    DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
-  due_date        DateTime? @db.Date
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id        String            @db.Uuid
+  /// INV-2024-0001
+  invoice_number  String?           @unique @db.VarChar(50)
+  invoice_date    DateTime          @default(dbgenerated("CURRENT_DATE")) @db.Date
+  due_date        DateTime?         @db.Date
   billing_address String?
-  billed_to_name  String?   @db.VarChar(255)
-  sub_total       Decimal   @db.Decimal(15, 2)
-  tax_rate        Decimal?  @default(0) @db.Decimal(5, 2)
-  tax_amount      Decimal?  @default(0) @db.Decimal(15, 2)
-  grand_total     Decimal   @db.Decimal(15, 2)
-  payment_status  String?   @default("UNPAID") @db.VarChar(50) /// UNPAID, PARTIAL, PAID
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at      DateTime? @db.Timestamptz(6)
-
-  // Relations
+  billed_to_name  String?           @db.VarChar(255)
+  sub_total       Decimal           @db.Decimal(15, 2)
+  tax_rate        Decimal?          @default(0) @db.Decimal(5, 2)
+  tax_amount      Decimal?          @default(0) @db.Decimal(15, 2)
+  grand_total     Decimal           @db.Decimal(15, 2)
+  /// UNPAID, PARTIAL, PAID
+  payment_status  String?           @default("UNPAID") @db.VarChar(50)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?         @db.Timestamptz(6)
   orders          orders            @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoices_order")
   payment_records payment_records[]
 
@@ -336,16 +326,16 @@ model order_payment_details {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order_id       String          @unique @db.Uuid
   is_paid        Boolean         @default(false)
-  is_dp          Boolean         @default(false) /// Down payment flag
+  /// Down payment flag
+  is_dp          Boolean         @default(false)
   payment_method payment_method?
   amount_paid    Decimal?        @default(0) @db.Decimal(15, 2)
   payment_date   DateTime?       @db.Timestamptz(6)
-  proof_url      String? /// Payment proof image
+  /// Payment proof image
+  proof_url      String?
   created_at     DateTime        @default(now()) @db.Timestamptz(6)
   updated_at     DateTime        @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  orders orders @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_payment_details_order")
+  orders         orders          @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_payment_details_order")
 }
 
 /// Individual payment transaction records
@@ -360,66 +350,57 @@ model payment_records {
   recorded_by_user_id String         @db.Uuid
   note                String?
   created_at          DateTime       @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  orders   orders?   @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_order")
-  invoices invoices? @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_invoice")
-  users    users     @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_user")
+  invoices            invoices?      @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_invoice")
+  orders              orders?        @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_order")
+  users               users          @relation(fields: [recorded_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_records_user")
 
   @@index([order_id], map: "idx_payment_records_order")
   @@index([payment_time(sort: Desc)], map: "idx_payment_records_time")
 }
-
-// ============================================================
-// ACTIVITY TRACKING
-// ============================================================
 
 /// System activity logs for audit trail
 model activity_logs {
   id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id        String?         @db.Uuid
   order_id       String?         @db.Uuid
-  type           String          @db.VarChar(50) /// order_created, stock_updated, etc.
+  /// order_created, stock_updated, etc.
+  type           String          @db.VarChar(50)
   title          String          @db.VarChar(255)
   description    String?
-  pangkalan_name String?         @db.VarChar(255) /// Denormalized for display
+  /// Denormalized for display
+  pangkalan_name String?         @db.VarChar(255)
   detail_numeric Decimal?        @db.Decimal(15, 2)
-  icon_name      String?         @db.VarChar(50) /// Lucide icon name
+  /// Lucide icon name
+  icon_name      String?         @db.VarChar(50)
   order_status   status_pesanan?
   timestamp      DateTime        @default(now()) @db.Timestamptz(6)
   created_at     DateTime        @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  users  users?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_user")
-  orders orders? @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_order")
+  orders         orders?         @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_order")
+  users          users?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_logs_user")
 
   @@index([type], map: "idx_activity_type")
   @@index([timestamp(sort: Desc)], map: "idx_activity_timestamp")
   @@index([user_id], map: "idx_activity_user")
 }
 
-// ============================================================
-// PANGKALAN CONSUMER MANAGEMENT (SAAS Multi-Tenant)
-// ============================================================
-
 /// Consumer/customer of a pangkalan (warung, ibu-ibu, etc.)
 model consumers {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id String   @db.Uuid
-  name         String   @db.VarChar(255)
-  nik          String?  @db.VarChar(16) /// NIK for subsidy verification
-  kk           String?  @db.VarChar(16) /// Nomor KK for household identification
-  phone        String?  @db.VarChar(20)
-  address      String?
-  note         String?
-  is_active    Boolean  @default(true)
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  pangkalans       pangkalans         @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumers_pangkalan")
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id     String             @db.Uuid
+  name             String             @db.VarChar(255)
+  /// NIK for subsidy verification
+  nik              String?            @db.VarChar(16)
+  /// Nomor KK for household identification
+  kk               String?            @db.VarChar(16)
+  phone            String?            @db.VarChar(20)
+  address          String?
+  note             String?
+  is_active        Boolean            @default(true)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
   consumer_orders  consumer_orders[]
   consumer_pricing consumer_pricing[]
+  pangkalans       pangkalans         @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumers_pangkalan")
 
   @@index([pangkalan_id], map: "idx_consumers_pangkalan")
   @@index([is_active], map: "idx_consumers_active")
@@ -428,24 +409,25 @@ model consumers {
 /// Consumer order - sales from pangkalan to end consumers
 model consumer_orders {
   id             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code           String                  @unique @db.VarChar(20) /// Display: PORD-0001
+  /// Display: PORD-0001
+  code           String                  @unique @db.VarChar(20)
   pangkalan_id   String                  @db.Uuid
   consumer_id    String?                 @db.Uuid
-  consumer_name  String?                 @db.VarChar(255) /// For walk-in customers
+  /// For walk-in customers
+  consumer_name  String?                 @db.VarChar(255)
   lpg_type       lpg_type
   qty            Int
   price_per_unit Decimal                 @db.Decimal(15, 2)
-  cost_price     Decimal                 @default(0) @db.Decimal(15, 2) /// Harga beli/modal per unit
+  /// Harga beli/modal per unit
+  cost_price     Decimal                 @default(0) @db.Decimal(15, 2)
   total_amount   Decimal                 @db.Decimal(15, 2)
   payment_status consumer_payment_status @default(LUNAS)
   note           String?
   sale_date      DateTime                @default(now()) @db.Timestamptz(6)
   created_at     DateTime                @default(now()) @db.Timestamptz(6)
   updated_at     DateTime                @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  pangkalans pangkalans @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_orders_pangkalan")
-  consumers  consumers? @relation(fields: [consumer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_orders_consumer")
+  consumers      consumers?              @relation(fields: [consumer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_orders_consumer")
+  pangkalans     pangkalans              @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_orders_pangkalan")
 
   @@index([pangkalan_id], map: "idx_consumer_orders_pangkalan")
   @@index([consumer_id], map: "idx_consumer_orders_consumer")
@@ -453,21 +435,22 @@ model consumer_orders {
   @@index([payment_status], map: "idx_consumer_orders_status")
 }
 
-// ============================================================
-// ENUMS
-// ============================================================
-
 /// User role for access control
 enum user_role {
-  ADMIN /// Full access
-  OPERATOR /// Limited access
-  PANGKALAN /// Pangkalan owner - access to own data only
+  /// Full access
+  ADMIN
+  /// Limited access
+  OPERATOR
+  /// Pangkalan owner - access to own data only
+  PANGKALAN
 }
 
 /// LPG product category
 enum lpg_category {
-  SUBSIDI /// Government subsidized (3kg hijau)
-  NON_SUBSIDI /// Commercial (12kg, 50kg)
+  /// Government subsidized (3kg hijau)
+  SUBSIDI
+  /// Commercial (12kg, 50kg)
+  NON_SUBSIDI
 }
 
 /// @deprecated - Legacy LPG type enum, use lpg_products instead
@@ -480,28 +463,40 @@ enum lpg_type {
 
 /// Order status workflow
 enum status_pesanan {
-  DRAFT /// Newly created
-  MENUNGGU_PEMBAYARAN /// Awaiting payment
-  DIPROSES /// Being processed
-  SIAP_KIRIM /// Ready for delivery
-  DIKIRIM /// Out for delivery
-  SELESAI /// Completed
-  BATAL /// Cancelled
+  /// Newly created
+  DRAFT
+  /// Awaiting payment
+  MENUNGGU_PEMBAYARAN
+  /// Being processed
+  DIPROSES
+  /// Ready for delivery
+  SIAP_KIRIM
+  /// Out for delivery
+  DIKIRIM
+  /// Completed
+  SELESAI
+  /// Cancelled
+  BATAL
 }
 
 /// Payment method options
 enum payment_method {
-  TUNAI /// Cash
-  TRANSFER /// Bank transfer
+  /// Cash
+  TUNAI
+  /// Bank transfer
+  TRANSFER
 }
 
 /// Stock movement direction
 enum stock_movement_type {
-  MASUK /// Stock in
-  KELUAR /// Stock out
+  /// Stock in
+  MASUK
+  /// Stock out
+  KELUAR
 }
 
 /// Consumer payment status - always LUNAS (no debt feature)
 enum consumer_payment_status {
-  LUNAS /// Paid in full
+  /// Paid in full
+  LUNAS
 }

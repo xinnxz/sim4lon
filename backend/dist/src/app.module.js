@@ -29,6 +29,7 @@ const consumer_module_1 = require("./modules/consumer/consumer.module");
 const consumer_order_module_1 = require("./modules/consumer-order/consumer-order.module");
 const pangkalan_stock_module_1 = require("./modules/pangkalan-stock/pangkalan-stock.module");
 const expense_module_1 = require("./modules/expense/expense.module");
+const lpg_price_module_1 = require("./modules/lpg-price/lpg-price.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -56,6 +57,7 @@ exports.AppModule = AppModule = __decorate([
             consumer_order_module_1.ConsumerOrderModule,
             pangkalan_stock_module_1.PangkalanStockModule,
             expense_module_1.ExpenseModule,
+            lpg_price_module_1.LpgPriceModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

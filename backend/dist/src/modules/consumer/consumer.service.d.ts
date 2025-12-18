@@ -9,8 +9,8 @@ export declare class ConsumerService {
                 consumer_orders: number;
             };
         } & {
-            id: string;
             name: string;
+            id: string;
             phone: string | null;
             pangkalan_id: string;
             is_active: boolean;
@@ -33,8 +33,8 @@ export declare class ConsumerService {
             consumer_orders: number;
         };
     } & {
-        id: string;
         name: string;
+        id: string;
         phone: string | null;
         pangkalan_id: string;
         is_active: boolean;
@@ -46,8 +46,8 @@ export declare class ConsumerService {
         kk: string | null;
     }>;
     create(pangkalanId: string, dto: CreateConsumerDto): Promise<{
-        id: string;
         name: string;
+        id: string;
         phone: string | null;
         pangkalan_id: string;
         is_active: boolean;
@@ -59,8 +59,8 @@ export declare class ConsumerService {
         kk: string | null;
     }>;
     update(id: string, pangkalanId: string, dto: UpdateConsumerDto): Promise<{
-        id: string;
         name: string;
+        id: string;
         phone: string | null;
         pangkalan_id: string;
         is_active: boolean;

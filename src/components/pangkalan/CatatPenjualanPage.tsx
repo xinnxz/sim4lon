@@ -6,6 +6,7 @@
  * - Submit button near Total for clear context
  * - Hold +/- for rapid quantity change
  * - Consumer autocomplete with NIK
+ * - Prices fetched from database (configurable per pangkalan)
  */
 
 'use client'
@@ -17,14 +18,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
-import { consumerOrdersApi, consumersApi, type Consumer } from '@/lib/api'
+import { consumerOrdersApi, consumersApi, lpgPricesApi, type Consumer, type PangkalanLpgPrice } from '@/lib/api'
 import { toast } from 'sonner'
 
-const LPG_OPTIONS = [
-    { value: '3kg', display: '3 kg', price: 20000, color: '#22C55E', bgClass: 'from-green-500 to-emerald-600' },
-    { value: '5kg', display: '5.5 kg', price: 60000, color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600' },
-    { value: '12kg', display: '12 kg', price: 180000, color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600' },
-    { value: '50kg', display: '50 kg', price: 700000, color: '#ef0e0e', bgClass: 'from-red-500 to-red-600' },
+// Static LPG display options (colors, display names)
+const LPG_DISPLAY = [
+    { value: '3kg', dbType: 'kg3', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
+    { value: '5kg', dbType: 'kg5', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
+    { value: '12kg', dbType: 'kg12', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
+    { value: '50kg', dbType: 'kg50', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
 ]
 
 export default function CatatPenjualanPage() {
@@ -38,13 +40,37 @@ export default function CatatPenjualanPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [lpgPrices, setLpgPrices] = useState<PangkalanLpgPrice[]>([])
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const selectedLpg = LPG_OPTIONS.find(l => l.value === lpgType)!
-    const total = qty * selectedLpg.price
+    // Fetch LPG prices on mount
+    useEffect(() => {
+        const fetchPrices = async () => {
+            try {
+                const prices = await lpgPricesApi.getAll()
+                setLpgPrices(prices)
+            } catch (error) {
+                console.error('Failed to fetch LPG prices:', error)
+            }
+        }
+        fetchPrices()
+    }, [])
+
+    // Get price for current LPG type (from API or default)
+    const getPrice = (type: string) => {
+        const displayItem = LPG_DISPLAY.find(l => l.value === type)
+        if (!displayItem) return 20000
+
+        const priceFromDb = lpgPrices.find(p => p.lpg_type === displayItem.dbType)
+        return priceFromDb ? Number(priceFromDb.selling_price) : displayItem.defaultPrice
+    }
+
+    const selectedLpg = LPG_DISPLAY.find(l => l.value === lpgType)!
+    const currentPrice = getPrice(lpgType)
+    const total = qty * currentPrice
 
     const formatCurrency = (v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(v)
 
@@ -97,7 +123,7 @@ export default function CatatPenjualanPage() {
                 consumer_name: selectedConsumer?.name || consumerSearch || 'Walk-in',
                 lpg_type: lpgType as any,
                 qty,
-                price_per_unit: selectedLpg.price,
+                price_per_unit: currentPrice, // Use dynamic price from API
                 payment_status: paymentStatus,
             })
             setShowSuccess(true)
@@ -153,7 +179,7 @@ export default function CatatPenjualanPage() {
                             <div>
                                 <Label className="text-sm font-semibold text-slate-700 mb-3 block">Tipe LPG</Label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {LPG_OPTIONS.map((lpg) => (
+                                    {LPG_DISPLAY.map((lpg) => (
                                         <button
                                             key={lpg.value}
                                             type="button"
@@ -172,7 +198,7 @@ export default function CatatPenjualanPage() {
                                                 </div>
                                                 <div>
                                                     <span className={`font-bold block ${lpgType === lpg.value ? 'text-white' : 'text-slate-900'}`}>{lpg.display}</span>
-                                                    <span className={`text-xs ${lpgType === lpg.value ? 'text-white/80' : 'text-slate-500'}`}>{formatCurrency(lpg.price)}</span>
+                                                    <span className={`text-xs ${lpgType === lpg.value ? 'text-white/80' : 'text-slate-500'}`}>{formatCurrency(getPrice(lpg.value))}</span>
                                                 </div>
                                             </div>
                                             {lpgType === lpg.value && <SafeIcon name="Check" className="absolute top-2 right-2 h-4 w-4 text-white" />}
@@ -312,7 +338,7 @@ export default function CatatPenjualanPage() {
                             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-center text-white shadow-lg">
                                 <p className="text-blue-200 text-sm font-medium">Total Pembayaran</p>
                                 <p className="text-4xl font-bold my-2">{formatCurrency(total)}</p>
-                                <p className="text-blue-200 text-sm">{qty} × {selectedLpg.display} @ {formatCurrency(selectedLpg.price)}</p>
+                                <p className="text-blue-200 text-sm">{qty} × {selectedLpg.display} @ {formatCurrency(currentPrice)}</p>
                             </div>
 
                             {/* Submit Button */}
