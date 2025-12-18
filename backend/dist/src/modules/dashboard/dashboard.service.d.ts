@@ -42,6 +42,9 @@ export declare class DashboardService {
         data: {
             day: string;
             profit: number;
+            totalSales: number;
+            totalCost: number;
+            orderCount: number;
         }[];
     }>;
     getTopPangkalan(): Promise<{

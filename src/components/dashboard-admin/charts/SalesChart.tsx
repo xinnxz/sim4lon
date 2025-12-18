@@ -15,14 +15,56 @@ interface ChartDataPoint {
   sales: number
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+// Format angka ke format Rupiah
+const formatRupiah = (value: number) => {
+  if (value >= 1000000) {
+    return `Rp ${(value / 1000000).toFixed(1)}Jt`
+  } else if (value >= 1000) {
+    return `Rp ${(value / 1000).toFixed(0)}K`
+  }
+  return `Rp ${value.toLocaleString('id-ID')}`
+}
+
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: any[]
+  allData?: ChartDataPoint[]
+}
+
+const CustomTooltip = ({ active, payload, allData = [] }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
+    const data = payload[0].payload as ChartDataPoint
+    const currentSales = data.sales
+
+    // Hitung rata-rata dari semua data
+    const totalSales = allData.reduce((sum, d) => sum + d.sales, 0)
+    const avgSales = allData.length > 0 ? totalSales / allData.length : 0
+    const diffFromAvg = currentSales - avgSales
+    const diffPercent = avgSales > 0 ? ((diffFromAvg / avgSales) * 100).toFixed(1) : '0'
+
     return (
-      <div className="bg-background border border-border rounded-lg shadow-lg p-3 backdrop-blur-sm">
-        <p className="text-sm font-semibold text-foreground">{payload[0].payload.day}</p>
-        <p className="text-sm text-primary font-bold">
-          Rp {(payload[0].value / 1000000).toFixed(1)}Jt
-        </p>
+      <div className="bg-background border border-border rounded-lg shadow-lg p-4 backdrop-blur-sm min-w-[180px]">
+        <p className="text-sm font-bold text-foreground mb-3 border-b pb-2">{data.day}</p>
+
+        {/* Total Penjualan */}
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs text-muted-foreground">Total Penjualan:</span>
+          <span className="text-sm font-bold text-primary">{formatRupiah(currentSales)}</span>
+        </div>
+
+        {/* Perbandingan dengan rata-rata */}
+        <div className="border-t pt-2">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs text-muted-foreground">Rata-rata Minggu:</span>
+            <span className="text-xs font-medium text-foreground">{formatRupiah(avgSales)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">vs Rata-rata:</span>
+            <span className={`text-xs font-semibold ${diffFromAvg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {diffFromAvg >= 0 ? '+' : ''}{diffPercent}%
+            </span>
+          </div>
+        </div>
       </div>
     )
   }
@@ -114,7 +156,7 @@ export default function SalesChart({ isVisible = true }: SalesChartProps) {
           style={{ fontSize: '12px' }}
           tickFormatter={(value) => `Rp${(value / 1000000).toFixed(0)}Jt`}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, opacity: 0.3 }} />
+        <Tooltip content={<CustomTooltip allData={data} />} cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, opacity: 0.3 }} />
         <Line
           type="monotone"
           dataKey="sales"

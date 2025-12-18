@@ -294,7 +294,7 @@ export default function KonsumenListPage() {
                                 {/* NIK & KK */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="nik">NIK (16 digit)</Label>
+                                        <Label htmlFor="nik">NIK (16 digit) (Opsional)</Label>
                                         <Input
                                             id="nik"
                                             value={formData.nik}
@@ -305,7 +305,7 @@ export default function KonsumenListPage() {
                                         <p className="text-xs text-slate-400">{formData.nik.length}/16 digit</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="kk">No. KK (16 digit)</Label>
+                                        <Label htmlFor="kk">No. KK (16 digit) (Opsional)</Label>
                                         <Input
                                             id="kk"
                                             value={formData.kk}
@@ -319,7 +319,7 @@ export default function KonsumenListPage() {
 
                                 {/* Phone */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone">No. Telepon</Label>
+                                    <Label htmlFor="phone">No. Telepon (Opsional)</Label>
                                     <Input
                                         id="phone"
                                         value={formData.phone}
@@ -330,7 +330,7 @@ export default function KonsumenListPage() {
 
                                 {/* Address */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="address">Alamat</Label>
+                                    <Label htmlFor="address">Alamat (Opsional)</Label>
                                     <Textarea
                                         id="address"
                                         value={formData.address}

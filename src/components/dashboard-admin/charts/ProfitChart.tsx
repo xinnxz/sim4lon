@@ -2,8 +2,13 @@
  * ProfitChart - Chart Keuntungan dengan Data Real dari API
  * 
  * PENJELASAN:
- * Chart ini menampilkan profit (10% dari penjualan SELESAI) 7 hari terakhir.
+ * Chart ini menampilkan profit (Harga Jual - Modal) 7 hari terakhir.
  * Data diambil dari API /dashboard/profit menggunakan dashboardApi.getProfitChart()
+ * 
+ * RUMUS PROFIT:
+ * Profit = Total Penjualan - Total Modal
+ * - Total Penjualan = sum(price_per_unit * qty) dari order_items
+ * - Total Modal = sum(cost_price * qty) dari lpg_products
  */
 
 import { useState, useEffect } from 'react'
@@ -13,14 +18,54 @@ import { dashboardApi } from '@/lib/api'
 interface ChartDataPoint {
   day: string
   profit: number
+  totalSales: number
+  totalCost: number
+  orderCount: number
+}
+
+// Format angka ke format Rupiah
+const formatRupiah = (value: number) => {
+  if (value >= 1000000) {
+    return `Rp ${(value / 1000000).toFixed(1)}Jt`
+  } else if (value >= 1000) {
+    return `Rp ${(value / 1000).toFixed(0)}K`
+  }
+  return `Rp ${value.toLocaleString('id-ID')}`
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
+    const data = payload[0].payload as ChartDataPoint
     return (
-      <div className="bg-background border border-border rounded-lg shadow-lg p-3 backdrop-blur-sm">
-        <p className="text-sm font-semibold text-foreground">{payload[0].payload.day}</p>
-        <p className="text-sm font-bold text-green-600">Rp {(payload[0].value / 1000).toFixed(0)}K</p>
+      <div className="bg-background border border-border rounded-lg shadow-lg p-4 backdrop-blur-sm min-w-[200px]">
+        <p className="text-sm font-bold text-foreground mb-3 border-b pb-2">{data.day}</p>
+
+        {/* Total Penjualan */}
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-muted-foreground">Total Penjualan:</span>
+          <span className="text-sm font-semibold text-blue-600">{formatRupiah(data.totalSales)}</span>
+        </div>
+
+        {/* Total Modal */}
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-muted-foreground">Total Modal:</span>
+          <span className="text-sm font-semibold text-orange-600">{formatRupiah(data.totalCost)}</span>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-dashed my-2"></div>
+
+        {/* Keuntungan */}
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-medium text-foreground">Keuntungan:</span>
+          <span className="text-sm font-bold text-green-600">{formatRupiah(data.profit)}</span>
+        </div>
+
+        {/* Order Count */}
+        <div className="flex justify-between items-center mt-2 pt-2 border-t">
+          <span className="text-xs text-muted-foreground">Pesanan Selesai:</span>
+          <span className="text-xs font-medium text-foreground">{data.orderCount} pesanan</span>
+        </div>
       </div>
     )
   }

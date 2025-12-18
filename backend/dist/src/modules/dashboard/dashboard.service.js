@@ -150,58 +150,28 @@ let DashboardService = class DashboardService {
             },
             orderBy: { size_kg: 'asc' }
         });
-        const currentStockData = await this.prisma.client.stock_histories.groupBy({
-            by: ['lpg_product_id', 'movement_type'],
-            where: {
-                lpg_product_id: { not: null }
-            },
-            _sum: { qty: true }
-        });
-        const productStockMap = {};
-        products.forEach(p => {
-            const productData = currentStockData.filter(s => s.lpg_product_id === p.id);
-            const inQty = productData.find(s => s.movement_type === 'MASUK')?._sum.qty || 0;
-            const outQty = productData.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
-            productStockMap[p.id] = inQty - outQty;
-        });
         const days = [];
-        const runningStock = { ...productStockMap };
-        for (let i = 0; i < 7; i++) {
+        for (let i = 6; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
-            if (i === 0) {
-                const dayData = { day: dayNames[date.getDay()] };
-                products.forEach(p => {
-                    dayData[p.id] = runningStock[p.id] || 0;
-                });
-                days.unshift(dayData);
-            }
-            else {
-                const movements = await this.prisma.client.stock_histories.findMany({
-                    where: {
-                        timestamp: { gte: date, lt: nextDay },
-                        lpg_product_id: { not: null }
-                    }
-                });
-                movements.forEach((m) => {
-                    if (m.lpg_product_id && runningStock[m.lpg_product_id] !== undefined) {
-                        if (m.movement_type === 'MASUK') {
-                            runningStock[m.lpg_product_id] -= m.qty;
-                        }
-                        else {
-                            runningStock[m.lpg_product_id] += m.qty;
-                        }
-                    }
-                });
-                const dayData = { day: dayNames[date.getDay()] };
-                products.forEach(p => {
-                    dayData[p.id] = runningStock[p.id] || 0;
-                });
-                days.unshift(dayData);
-            }
+            const movements = await this.prisma.client.stock_histories.groupBy({
+                by: ['lpg_product_id'],
+                where: {
+                    timestamp: { gte: date, lt: nextDay },
+                    lpg_product_id: { not: null },
+                    movement_type: 'KELUAR'
+                },
+                _sum: { qty: true }
+            });
+            const dayData = { day: dayNames[date.getDay()] };
+            products.forEach(p => {
+                const movement = movements.find(m => m.lpg_product_id === p.id);
+                dayData[p.id] = movement?._sum.qty || 0;
+            });
+            days.push(dayData);
         }
         const colorPalette = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
         return {
@@ -238,13 +208,32 @@ let DashboardService = class DashboardService {
     async getProfitChart() {
         const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
         const result = [];
+        const products = await this.prisma.lpg_products.findMany({
+            where: { is_active: true, deleted_at: null }
+        });
+        const costPriceMap = {};
+        products.forEach(p => {
+            const sizeKg = Number(p.size_kg);
+            let lpgTypeKey = '';
+            if (sizeKg === 3)
+                lpgTypeKey = 'kg3';
+            else if (sizeKg === 5.5)
+                lpgTypeKey = 'kg5';
+            else if (sizeKg === 12)
+                lpgTypeKey = 'kg12';
+            else if (sizeKg === 50)
+                lpgTypeKey = 'kg50';
+            if (lpgTypeKey) {
+                costPriceMap[lpgTypeKey] = Number(p.cost_price) || 0;
+            }
+        });
         for (let i = 6; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
             nextDay.setDate(nextDay.getDate() + 1);
-            const salesData = await this.prisma.client.orders.aggregate({
+            const orders = await this.prisma.client.orders.findMany({
                 where: {
                     created_at: {
                         gte: date,
@@ -252,15 +241,28 @@ let DashboardService = class DashboardService {
                     },
                     current_status: 'SELESAI',
                 },
-                _sum: {
-                    total_amount: true,
-                },
+                include: {
+                    order_items: true
+                }
             });
-            const totalAmount = salesData._sum?.total_amount || 0;
-            const profit = Number(totalAmount) * 0.1;
+            let totalSales = 0;
+            let totalCost = 0;
+            orders.forEach(order => {
+                order.order_items.forEach(item => {
+                    const sellingPrice = Number(item.price_per_unit) || 0;
+                    const costPrice = costPriceMap[item.lpg_type] || 0;
+                    const qty = item.qty || 0;
+                    totalSales += sellingPrice * qty;
+                    totalCost += costPrice * qty;
+                });
+            });
+            const profit = totalSales - totalCost;
             result.push({
                 day: days[date.getDay()],
-                profit,
+                profit: profit > 0 ? profit : 0,
+                totalSales,
+                totalCost,
+                orderCount: orders.length
             });
         }
         return { data: result };

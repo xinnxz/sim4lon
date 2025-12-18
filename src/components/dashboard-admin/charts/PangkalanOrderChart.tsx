@@ -24,6 +24,7 @@ import { dashboardApi, pangkalanApi } from '@/lib/api'
 interface ChartDataPoint {
   name: string
   value: number
+  index?: number
   percentage?: string
 }
 
@@ -33,11 +34,38 @@ const COLORS = ['#22c55e', '#3b82f6', '#f59e0b']
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload
+    const index = payload[0].payload.index ?? 0
+
+    // Determine ranking badge color
+    const getRankBadge = (idx: number) => {
+      if (idx === 0) return { text: '🥇 #1', color: 'text-yellow-600 bg-yellow-100' }
+      if (idx === 1) return { text: '🥈 #2', color: 'text-gray-600 bg-gray-100' }
+      if (idx === 2) return { text: '🥉 #3', color: 'text-amber-600 bg-amber-100' }
+      return { text: `#${idx + 1}`, color: 'text-muted-foreground bg-muted' }
+    }
+
+    const rankBadge = getRankBadge(index)
+
     return (
-      <div className="bg-background border border-border rounded-lg shadow-lg p-3 backdrop-blur-sm">
-        <p className="text-xs font-semibold text-foreground max-w-[160px] truncate">{data.name}</p>
-        <p className="text-sm font-bold text-primary">{data.value} pesanan</p>
-        <p className="text-xs text-muted-foreground">{data.percentage}%</p>
+      <div className="bg-background border border-border rounded-lg shadow-lg p-4 backdrop-blur-sm min-w-[200px]">
+        {/* Ranking Badge */}
+        <div className="flex items-center justify-between mb-2 pb-2 border-b">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rankBadge.color}`}>
+            {rankBadge.text}
+          </span>
+          <span className="text-sm font-bold text-primary">{data.percentage}%</span>
+        </div>
+
+        {/* Nama Pangkalan */}
+        <p className="text-sm font-bold text-foreground mb-2 truncate max-w-[180px]" title={data.name}>
+          {data.name}
+        </p>
+
+        {/* Jumlah Pesanan */}
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-muted-foreground">Total Pesanan:</span>
+          <span className="text-sm font-bold text-green-600">{data.value} pesanan</span>
+        </div>
       </div>
     )
   }
@@ -62,10 +90,11 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
         setIsLoading(true)
         const response = await dashboardApi.getTopPangkalan()
 
-        // Calculate percentages
+        // Calculate percentages and add index for ranking
         const totalValue = response.data.reduce((sum, item) => sum + item.value, 0)
-        const processedData = response.data.map(item => ({
+        const processedData = response.data.map((item, index) => ({
           ...item,
+          index,
           percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
         }))
 
