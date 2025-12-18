@@ -34,7 +34,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
-import { authApi, pangkalanStockApi, lpgPricesApi, type UserProfile, type StockLevel, type LpgType, type PangkalanStockMovement, type PangkalanLpgPrice } from '@/lib/api'
+import { authApi, pangkalanStockApi, lpgPricesApi, agenApi, type UserProfile, type StockLevel, type LpgType, type PangkalanStockMovement, type PangkalanLpgPrice, type Agen } from '@/lib/api'
 import { toast } from 'sonner'
 
 // LPG type config (supports both '3kg' and 'kg3' formats)
@@ -63,9 +63,10 @@ export default function StokPangkalanPage() {
     const [activeTab, setActiveTab] = useState<TabType>('stock')
     const [isReceiveOpen, setIsReceiveOpen] = useState(false)
     const [isOrderOpen, setIsOrderOpen] = useState(false)
-    const [receiveData, setReceiveData] = useState({ lpgType: '3kg' as LpgType, qty: 0, note: '' })
-    const [orderData, setOrderData] = useState({ lpgType: '3kg' as LpgType, qty: 0, note: '' })
+    const [receiveData, setReceiveData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
+    const [orderData, setOrderData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [agen, setAgen] = useState<Agen | null>(null)
 
     // History pagination & filter
     const [currentPage, setCurrentPage] = useState(1)
@@ -146,6 +147,19 @@ export default function StokPangkalanPage() {
             fetchPrices()
         }
     }, [activeTab, filterType])
+
+    // Fetch agen data for WhatsApp order
+    useEffect(() => {
+        const fetchAgen = async () => {
+            try {
+                const agenData = await agenApi.getMyAgen()
+                setAgen(agenData)
+            } catch (error) {
+                console.error('Failed to fetch agen:', error)
+            }
+        }
+        fetchAgen()
+    }, [])
 
     // Price management functions
     const updatePrice = (lpgType: string, field: 'cost' | 'sell', value: number) => {
@@ -258,8 +272,37 @@ export default function StokPangkalanPage() {
             toast.error('Jumlah harus lebih dari 0')
             return
         }
-        // Future: API integration with agen
-        toast.success(`Pesanan ${orderData.qty} tabung ${LPG_CONFIG[orderData.lpgType]?.name} berhasil dikirim ke Agen! (Coming Soon)`)
+
+        if (!agen?.phone) {
+            toast.error('Nomor telepon Agen belum terdaftar. Hubungi admin untuk menambahkan data agen.')
+            return
+        }
+
+        // Format phone number for WhatsApp (remove leading 0, add 62)
+        let phoneNumber = agen.phone.replace(/\D/g, '')
+        if (phoneNumber.startsWith('0')) {
+            phoneNumber = '62' + phoneNumber.substring(1)
+        } else if (!phoneNumber.startsWith('62')) {
+            phoneNumber = '62' + phoneNumber
+        }
+
+        // Generate message
+        const lpgName = LPG_CONFIG[orderData.lpgType]?.name || orderData.lpgType
+        const pangkalanName = profile?.pangkalans?.name || 'Pangkalan'
+        const message = `*🛢️ PESANAN LPG*
+
+Dari: ${pangkalanName}
+Tipe: ${lpgName}
+Jumlah: ${orderData.qty} tabung
+${orderData.note ? `Catatan: ${orderData.note}` : ''}
+
+Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
+
+        // Open WhatsApp
+        const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+        window.open(waUrl, '_blank')
+
+        toast.success(`Membuka WhatsApp untuk menghubungi ${agen.name}`)
         setIsOrderOpen(false)
         setOrderData({ lpgType: '3kg', qty: 0, note: '' })
     }
@@ -346,21 +389,37 @@ export default function StokPangkalanPage() {
                                         onChange={(e) => setOrderData({ ...orderData, note: e.target.value })}
                                     />
                                 </div>
-                                <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                                    <div className="flex items-start gap-2">
-                                        <SafeIcon name="AlertCircle" className="h-4 w-4 text-amber-600 mt-0.5" />
-                                        <p className="text-sm text-amber-700">
-                                            <strong>Coming Soon:</strong> Fitur integrasi dengan agen akan segera tersedia.
-                                            Pesanan akan dikirim langsung ke sistem agen.
-                                        </p>
+                                {/* Agen Info Banner */}
+                                {agen ? (
+                                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                                        <div className="flex items-start gap-2">
+                                            <SafeIcon name="Building2" className="h-4 w-4 text-green-600 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-medium text-green-800">{agen.name}</p>
+                                                <p className="text-xs text-green-600">{agen.phone}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                        <div className="flex items-start gap-2">
+                                            <SafeIcon name="AlertCircle" className="h-4 w-4 text-amber-600 mt-0.5" />
+                                            <p className="text-sm text-amber-700">
+                                                Agen belum terdaftar. Hubungi admin untuk menambahkan data agen.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsOrderOpen(false)}>Batal</Button>
-                                <Button onClick={handleOrderToAgen} className="bg-blue-600 hover:bg-blue-700">
-                                    <SafeIcon name="Send" className="h-4 w-4 mr-2" />
-                                    Kirim Pesanan
+                                <Button
+                                    onClick={handleOrderToAgen}
+                                    disabled={!agen?.phone}
+                                    className="bg-green-600 hover:bg-green-700"
+                                >
+                                    <SafeIcon name="MessageCircle" className="h-4 w-4 mr-2" />
+                                    Kirim via WhatsApp
                                 </Button>
                             </DialogFooter>
                         </DialogContent>

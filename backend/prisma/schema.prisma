@@ -36,6 +36,28 @@ model users {
   @@index([pangkalan_id], map: "idx_users_pangkalan")
 }
 
+/// LPG Distributor / Agen (Supplier to Pangkalan)
+model agen {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Display code: AGN-001
+  code       String       @unique @db.VarChar(20)
+  name       String       @db.VarChar(255)
+  address    String?
+  /// Contact person name
+  pic_name   String?      @db.VarChar(255)
+  phone      String?      @db.VarChar(20)
+  email      String?      @db.VarChar(255)
+  note       String?
+  is_active  Boolean      @default(true)
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at DateTime     @default(now()) @db.Timestamptz(6)
+  deleted_at DateTime?    @db.Timestamptz(6)
+  /// Pangkalans supplied by this agen
+  pangkalans pangkalans[]
+
+  @@index([is_active], map: "idx_agen_active")
+}
+
 /// LPG Distribution Agent / Pangkalan
 model pangkalans {
   id                        String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -52,10 +74,14 @@ model pangkalans {
   /// Storage capacity in units
   capacity                  Int?
   note                      String?
+  /// Agen/Distributor for this pangkalan
+  agen_id                   String?                     @db.Uuid
   is_active                 Boolean                     @default(true)
   created_at                DateTime                    @default(now()) @db.Timestamptz(6)
   updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
   deleted_at                DateTime?                   @db.Timestamptz(6)
+  /// Relation to agen
+  agen                      agen?                       @relation(fields: [agen_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_pangkalans_agen")
   consumer_orders           consumer_orders[]
   consumers                 consumers[]
   expenses                  expenses[]
@@ -67,6 +93,7 @@ model pangkalans {
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
+  @@index([agen_id], map: "idx_pangkalans_agen")
 }
 
 /// Default LPG prices per pangkalan
