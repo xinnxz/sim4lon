@@ -3,6 +3,7 @@ import { CreateConsumerOrderDto, UpdateConsumerOrderDto } from './dto';
 import { Decimal } from '@prisma/client/runtime/library';
 export declare class ConsumerOrderService {
     private prisma;
+    private readonly logger;
     constructor(prisma: PrismaService);
     findAll(pangkalanId: string, page?: number, limit?: number, options?: {
         startDate?: string;

@@ -71,8 +71,51 @@ export default function LaporanPangkalanPage() {
     const [recentSales, setRecentSales] = useState<ConsumerOrder[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [selectedPeriod, setSelectedPeriod] = useState('7hari')
+    const [selectedPeriod, setSelectedPeriod] = useState('hariini')
+    const [customStartDate, setCustomStartDate] = useState('')
+    const [customEndDate, setCustomEndDate] = useState('')
+    const [showCustom, setShowCustom] = useState(false)
+    const [allSales, setAllSales] = useState<ConsumerOrder[]>([]) // Store all sales for filtering
 
+    // Calculate date range based on selected period
+    const getDateRange = () => {
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+        switch (selectedPeriod) {
+            case 'hariini':
+                return { start: today, end: now }
+            case 'mingguini':
+                const dayOfWeek = today.getDay()
+                const startOfWeek = new Date(today)
+                startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)) // Start from Monday
+                return { start: startOfWeek, end: now }
+            case 'bulanini':
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+                return { start: startOfMonth, end: now }
+            case 'custom':
+                if (customStartDate && customEndDate) {
+                    return {
+                        start: new Date(customStartDate),
+                        end: new Date(customEndDate + 'T23:59:59')
+                    }
+                }
+                return { start: today, end: now }
+            default:
+                return { start: today, end: now }
+        }
+    }
+
+    // Filter sales based on date range
+    const filterSalesByDateRange = (sales: ConsumerOrder[]) => {
+        const { start, end } = getDateRange()
+        return sales.filter(sale => {
+            const saleDate = new Date(sale.sale_date)
+            return saleDate >= start && saleDate <= end
+        })
+    }
+
+    // Initial fetch all data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -82,13 +125,13 @@ export default function LaporanPangkalanPage() {
                 const profileData = await authApi.getProfile()
                 setProfile(profileData)
 
-                const [chartDataResult, recentResult] = await Promise.all([
+                const [chartDataResult, allSalesResult] = await Promise.all([
                     consumerOrdersApi.getChartData(),
-                    consumerOrdersApi.getRecent(50),
+                    consumerOrdersApi.getRecent(200), // Get more sales for filtering
                 ])
 
                 setChartData(chartDataResult || [])
-                setRecentSales(recentResult || [])
+                setAllSales(allSalesResult || [])
             } catch (err: any) {
                 console.error('❌ [Laporan] Error:', err)
                 setError(`Gagal memuat data: ${err?.message || 'Unknown error'}`)
@@ -98,6 +141,19 @@ export default function LaporanPangkalanPage() {
         }
         fetchData()
     }, [])
+
+    // Apply filter when period changes
+    useEffect(() => {
+        if (allSales.length > 0) {
+            const filtered = filterSalesByDateRange(allSales)
+            setRecentSales(filtered)
+        }
+    }, [selectedPeriod, customStartDate, customEndDate, allSales])
+
+    // Handle custom date apply
+    const handleApplyCustomDate = () => {
+        setSelectedPeriod('custom')
+    }
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -118,19 +174,53 @@ export default function LaporanPangkalanPage() {
         return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
     }
 
-    // Calculate totals
-    const totals = chartData.reduce((acc, day) => ({
-        qty: acc.qty + Math.round(day.penjualan / HARGA_JUAL),
-        penjualan: acc.penjualan + day.penjualan,
-        modal: acc.modal + day.modal,
-        pengeluaran: acc.pengeluaran + day.pengeluaran,
-        laba: acc.laba + day.laba,
-    }), { qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, laba: 0 })
+    // HPP (Harga Pokok Pembelian) per type for calculation
+    const COST_PRICES: Record<string, number> = {
+        'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
+        '3kg': 16000, '5kg': 52000, '12kg': 142000, '50kg': 590000,
+    }
 
-    const marginKotor = totals.penjualan - totals.modal
+    // Calculate totals from FILTERED sales data (not chartData)
+    // This makes summary cards reflect the selected filter period
+    const filteredTotals = recentSales.reduce((acc, sale) => {
+        const costPrice = COST_PRICES[sale.lpg_type] || 16000
+        const modal = sale.qty * costPrice
+        const penjualan = Number(sale.total_amount)
+        const marginKotor = penjualan - modal
+
+        return {
+            qty: acc.qty + sale.qty,
+            penjualan: acc.penjualan + penjualan,
+            modal: acc.modal + modal,
+            marginKotor: acc.marginKotor + marginKotor,
+            laba: acc.laba + marginKotor, // Simplified: laba = margin kotor (without pengeluaran)
+        }
+    }, { qty: 0, penjualan: 0, modal: 0, marginKotor: 0, laba: 0 })
+
+    // For backward compatibility - use filtered totals for summary cards
+    const totals = {
+        qty: filteredTotals.qty,
+        penjualan: filteredTotals.penjualan,
+        modal: filteredTotals.modal,
+        pengeluaran: 0, // Pengeluaran not included in per-sale data
+        laba: filteredTotals.laba,
+    }
+
+    const marginKotor = filteredTotals.marginKotor
     const marginPercentage = totals.penjualan > 0 ? ((totals.laba / totals.penjualan) * 100).toFixed(1) : '0'
 
-    // Prepare chart data
+    // Get period label for display
+    const getPeriodLabel = () => {
+        switch (selectedPeriod) {
+            case 'hariini': return 'Hari Ini'
+            case 'mingguini': return 'Minggu Ini'
+            case 'bulanini': return 'Bulan Ini'
+            case 'custom': return `${customStartDate} - ${customEndDate}`
+            default: return 'Hari Ini'
+        }
+    }
+
+    // Prepare chart data (stays as 7-day trend)
     const enhancedChartData = chartData.map(day => ({
         name: formatDate(day.date),
         fullDate: day.date,
@@ -178,28 +268,82 @@ export default function LaporanPangkalanPage() {
     return (
         <div className="space-y-8 pb-8">
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Laporan Penjualan</h1>
-                    <p className="text-slate-500 mt-1 flex items-center gap-2">
-                        <SafeIcon name="Calculator" className="h-4 w-4" />
-                        Perhitungan: Qty × (Harga Jual - Modal)
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <select
-                        value={selectedPeriod}
-                        onChange={(e) => setSelectedPeriod(e.target.value)}
-                        className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all hover:border-slate-300"
-                    >
-                        <option value="7hari">7 Hari Terakhir</option>
-                        <option value="bulan">Bulan Ini</option>
-                        <option value="minggu">Minggu Ini</option>
-                    </select>
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Laporan Penjualan</h1>
+                        <p className="text-slate-500 mt-1 flex items-center gap-2">
+                            <SafeIcon name="Calculator" className="h-4 w-4" />
+                            Perhitungan: Qty × (Harga Jual - Modal)
+                        </p>
+                    </div>
                     <Button variant="outline" size="default" className="rounded-xl shadow-sm hover:shadow-md transition-all">
                         <SafeIcon name="Download" className="h-4 w-4 mr-2" />
                         Export
                     </Button>
+                </div>
+
+                {/* Date Filter Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+                        {[
+                            { value: 'hariini', label: 'Hari Ini', icon: 'Calendar' },
+                            { value: 'mingguini', label: 'Minggu Ini', icon: 'CalendarDays' },
+                            { value: 'bulanini', label: 'Bulan Ini', icon: 'CalendarRange' },
+                        ].map((period) => (
+                            <button
+                                key={period.value}
+                                onClick={() => { setSelectedPeriod(period.value); setShowCustom(false) }}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedPeriod === period.value && !showCustom
+                                    ? 'bg-white shadow-sm text-blue-600'
+                                    : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                            >
+                                <SafeIcon name={period.icon as any} className="h-4 w-4" />
+                                {period.label}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setShowCustom(!showCustom)}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${showCustom
+                                ? 'bg-white shadow-sm text-blue-600'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                        >
+                            <SafeIcon name="Settings2" className="h-4 w-4" />
+                            Custom
+                        </button>
+                    </div>
+
+                    {/* Custom Date Range */}
+                    {showCustom && (
+                        <div className="flex items-center gap-2 animate-in slide-in-from-left-2 duration-200">
+                            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
+                                <SafeIcon name="CalendarDays" className="h-4 w-4 text-slate-400" />
+                                <input
+                                    type="date"
+                                    value={customStartDate}
+                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                    className="bg-transparent border-none text-sm focus:outline-none w-32"
+                                />
+                                <span className="text-slate-400">-</span>
+                                <input
+                                    type="date"
+                                    value={customEndDate}
+                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                    className="bg-transparent border-none text-sm focus:outline-none w-32"
+                                />
+                            </div>
+                            <Button
+                                size="sm"
+                                className="rounded-lg bg-blue-600 hover:bg-blue-700"
+                                onClick={handleApplyCustomDate}
+                            >
+                                <SafeIcon name="Search" className="h-4 w-4 mr-1" />
+                                Terapkan
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -239,89 +383,101 @@ export default function LaporanPangkalanPage() {
                 </div>
             </div>
 
-            {/* Summary Cards */}
-            <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-                {/* Total Penjualan */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="Banknote" className="h-4 w-4" />
-                            Total Penjualan
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
-                        <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
-                            <SafeIcon name="Flame" className="h-3.5 w-3.5" />
-                            {totals.qty} tabung terjual
-                        </p>
-                    </CardContent>
-                </Card>
+            {/* Summary Cards with Period Indicator */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-slate-900">Ringkasan</h2>
+                        <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                            <SafeIcon name="Calendar" className="h-3 w-3 mr-1" />
+                            {getPeriodLabel()}
+                        </Badge>
+                    </div>
+                    <p className="text-sm text-slate-500">{recentSales.length} transaksi</p>
+                </div>
+                <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+                    {/* Total Penjualan */}
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <SafeIcon name="Banknote" className="h-4 w-4" />
+                                Total Penjualan
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
+                            <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
+                                <SafeIcon name="Flame" className="h-3.5 w-3.5" />
+                                {totals.qty} tabung terjual
+                            </p>
+                        </CardContent>
+                    </Card>
 
-                {/* Total Modal */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="Wallet" className="h-4 w-4" />
-                            Total Modal
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
-                        <p className="text-slate-300 text-sm mt-2">Biaya pembelian LPG</p>
-                    </CardContent>
-                </Card>
+                    {/* Total Modal */}
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <SafeIcon name="Wallet" className="h-4 w-4" />
+                                Total Modal
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
+                            <p className="text-slate-300 text-sm mt-2">Biaya pembelian LPG</p>
+                        </CardContent>
+                    </Card>
 
-                {/* Margin Kotor */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="ArrowUpRight" className="h-4 w-4" />
-                            Margin Kotor
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
-                        <p className="text-cyan-100 text-sm mt-2">Sebelum pengeluaran</p>
-                    </CardContent>
-                </Card>
+                    {/* Margin Kotor */}
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <SafeIcon name="ArrowUpRight" className="h-4 w-4" />
+                                Margin Kotor
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
+                            <p className="text-cyan-100 text-sm mt-2">Sebelum pengeluaran</p>
+                        </CardContent>
+                    </Card>
 
-                {/* Pengeluaran */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="MinusCircle" className="h-4 w-4" />
-                            Pengeluaran
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
-                        <p className="text-orange-100 text-sm mt-2">Biaya operasional</p>
-                    </CardContent>
-                </Card>
+                    {/* Pengeluaran */}
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <SafeIcon name="MinusCircle" className="h-4 w-4" />
+                                Pengeluaran
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
+                            <p className="text-orange-100 text-sm mt-2">Biaya operasional</p>
+                        </CardContent>
+                    </Card>
 
-                {/* Laba Bersih */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
-                            Laba Bersih
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <Badge className="bg-white/20 text-white hover:bg-white/30 text-xs">
-                                {marginPercentage}% margin
-                            </Badge>
-                        </div>
-                    </CardContent>
-                </Card>
+                    {/* Laba Bersih */}
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
+                                Laba Bersih
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                                <Badge className="bg-white/20 text-white hover:bg-white/30 text-xs">
+                                    {marginPercentage}% margin
+                                </Badge>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             {/* Charts Section */}

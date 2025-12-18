@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateConsumerOrderDto, UpdateConsumerOrderDto } from './dto';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -16,6 +16,8 @@ import { Decimal } from '@prisma/client/runtime/library';
  */
 @Injectable()
 export class ConsumerOrderService {
+    private readonly logger = new Logger(ConsumerOrderService.name);
+
     constructor(private prisma: PrismaService) { }
 
     /**
@@ -116,55 +118,83 @@ export class ConsumerOrderService {
      * Create new consumer order (record a sale)
      */
     async create(pangkalanId: string, dto: CreateConsumerOrderDto) {
-        // Validate: must have either consumer_id or consumer_name
-        if (!dto.consumer_id && !dto.consumer_name) {
-            throw new BadRequestException('Harus mengisi consumer_id atau consumer_name');
-        }
+        this.logger.log(`[CREATE] Starting - pangkalanId: ${pangkalanId}`);
+        this.logger.log(`[CREATE] DTO received: ${JSON.stringify(dto)}`);
 
-        // If consumer_id provided, verify ownership
-        if (dto.consumer_id) {
-            const consumer = await this.prisma.consumers.findFirst({
-                where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
-            });
-            if (!consumer) {
-                throw new NotFoundException('Pelanggan tidak ditemukan');
+        try {
+            // Validate: must have either consumer_id or consumer_name
+            if (!dto.consumer_id && !dto.consumer_name) {
+                this.logger.warn('[CREATE] Validation failed - no consumer_id or consumer_name');
+                throw new BadRequestException('Harus mengisi consumer_id atau consumer_name');
             }
-        }
 
-        // Generate order code
-        const orderCount = await this.prisma.consumer_orders.count({
-            where: { pangkalan_id: pangkalanId },
-        });
-        const orderCode = `PORD-${String(orderCount + 1).padStart(4, '0')}`;
+            // If consumer_id provided, verify ownership
+            if (dto.consumer_id) {
+                this.logger.log(`[CREATE] Verifying consumer_id: ${dto.consumer_id}`);
+                const consumer = await this.prisma.consumers.findFirst({
+                    where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
+                });
+                if (!consumer) {
+                    this.logger.warn('[CREATE] Consumer not found or not owned');
+                    throw new NotFoundException('Pelanggan tidak ditemukan');
+                }
+                this.logger.log(`[CREATE] Consumer verified: ${consumer.name}`);
+            }
 
-        // Calculate total
-        const totalAmount = dto.qty * dto.price_per_unit;
+            // Generate order code
+            const orderCount = await this.prisma.consumer_orders.count({
+                where: { pangkalan_id: pangkalanId },
+            });
+            const orderCode = `PORD-${String(orderCount + 1).padStart(4, '0')}`;
+            this.logger.log(`[CREATE] Generated order code: ${orderCode}`);
 
-        const order = await this.prisma.consumer_orders.create({
-            data: {
+            // Calculate total
+            const totalAmount = dto.qty * dto.price_per_unit;
+            this.logger.log(`[CREATE] Total amount: ${totalAmount}`);
+
+            // HPP (Harga Pokok Pembelian) per type
+            const COST_PRICES: Record<string, number> = {
+                'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
+                '3kg': 16000, '5kg': 52000, '12kg': 142000, '50kg': 590000,
+            };
+            const costPrice = COST_PRICES[dto.lpg_type as string] || 16000;
+
+            // Prepare data
+            const createData = {
                 code: orderCode,
                 pangkalan_id: pangkalanId,
-                consumer_id: dto.consumer_id,
-                consumer_name: dto.consumer_name,
+                consumer_id: dto.consumer_id || null,
+                consumer_name: dto.consumer_name || null,
                 lpg_type: dto.lpg_type,
                 qty: dto.qty,
                 price_per_unit: dto.price_per_unit,
+                cost_price: costPrice, // HPP per unit
                 total_amount: totalAmount,
                 payment_status: dto.payment_status || 'LUNAS',
-                note: dto.note,
-            },
-            include: {
-                consumers: {
-                    select: {
-                        id: true,
-                        name: true,
-                        phone: true,
+                note: dto.note || null,
+            };
+            this.logger.log(`[CREATE] Prisma create data: ${JSON.stringify(createData)}`);
+
+            const order = await this.prisma.consumer_orders.create({
+                data: createData,
+                include: {
+                    consumers: {
+                        select: {
+                            id: true,
+                            name: true,
+                            phone: true,
+                        },
                     },
                 },
-            },
-        });
+            });
 
-        return order;
+            this.logger.log(`[CREATE] Success - order ID: ${order.id}`);
+            return order;
+        } catch (error) {
+            this.logger.error(`[CREATE] Error: ${error.message}`);
+            this.logger.error(`[CREATE] Stack: ${error.stack}`);
+            throw error;
+        }
     }
 
     /**
