@@ -9,8 +9,8 @@ export declare class ExpenseController {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }[]>;
     getSummary(req: any, startDate: string, endDate: string): Promise<{
@@ -25,8 +25,8 @@ export declare class ExpenseController {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     } | null>;
     create(req: any, dto: CreateExpenseDto): Promise<{
@@ -35,8 +35,8 @@ export declare class ExpenseController {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }>;
     update(req: any, id: string, dto: UpdateExpenseDto): Promise<{
@@ -45,8 +45,8 @@ export declare class ExpenseController {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }>;
     delete(req: any, id: string): Promise<{

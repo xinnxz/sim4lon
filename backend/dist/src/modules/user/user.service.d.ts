@@ -5,10 +5,10 @@ export declare class UserService {
     constructor(prisma: PrismaService);
     findAll(page?: number, limit?: number, search?: string): Promise<{
         data: {
+            name: string;
             id: string;
             code: string;
             email: string;
-            name: string;
             phone: string | null;
             avatar_url: string | null;
             role: import("@prisma/client").$Enums.user_role;
@@ -24,10 +24,10 @@ export declare class UserService {
         };
     }>;
     findOne(id: string): Promise<{
+        name: string;
         id: string;
         code: string;
         email: string;
-        name: string;
         phone: string | null;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;
@@ -36,19 +36,19 @@ export declare class UserService {
         updated_at: Date;
     }>;
     create(dto: CreateUserDto): Promise<{
+        name: string;
         id: string;
         code: string;
         email: string;
-        name: string;
         phone: string | null;
         role: import("@prisma/client").$Enums.user_role;
         is_active: boolean;
         created_at: Date;
     }>;
     update(id: string, dto: UpdateUserDto): Promise<{
+        name: string;
         id: string;
         email: string;
-        name: string;
         phone: string | null;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;

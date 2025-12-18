@@ -61,6 +61,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     // New: Pangkalan Stock Management
     get pangkalan_stocks() { return this._client.pangkalan_stocks; }
     get pangkalan_stock_movements() { return this._client.pangkalan_stock_movements; }
+    // New: LPG Price Settings
+    get lpg_prices() { return this._client.lpg_prices; }
 
     async onModuleInit() {
         await this._client.$connect();

@@ -9,10 +9,10 @@ export declare class PangkalanController {
                 orders: number;
             };
         } & {
+            name: string;
             id: string;
             code: string;
             email: string | null;
-            name: string;
             phone: string | null;
             is_active: boolean;
             created_at: Date;
@@ -36,10 +36,10 @@ export declare class PangkalanController {
             orders: number;
         };
     } & {
+        name: string;
         id: string;
         code: string;
         email: string | null;
-        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
@@ -52,10 +52,10 @@ export declare class PangkalanController {
         capacity: number | null;
     }>;
     create(dto: CreatePangkalanDto): Promise<{
+        name: string;
         id: string;
         code: string;
         email: string | null;
-        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;
@@ -68,10 +68,10 @@ export declare class PangkalanController {
         capacity: number | null;
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
+        name: string;
         id: string;
         code: string;
         email: string | null;
-        name: string;
         phone: string | null;
         is_active: boolean;
         created_at: Date;

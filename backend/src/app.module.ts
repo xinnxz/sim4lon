@@ -20,6 +20,7 @@ import { ConsumerModule } from './modules/consumer/consumer.module';
 import { ConsumerOrderModule } from './modules/consumer-order/consumer-order.module';
 import { PangkalanStockModule } from './modules/pangkalan-stock/pangkalan-stock.module';
 import { ExpenseModule } from './modules/expense/expense.module';
+import { LpgPriceModule } from './modules/lpg-price/lpg-price.module';
 
 @Module({
     imports: [
@@ -45,6 +46,7 @@ import { ExpenseModule } from './modules/expense/expense.module';
         ConsumerOrderModule,
         PangkalanStockModule,
         ExpenseModule,
+        LpgPriceModule,
     ],
     controllers: [AppController],
     providers: [AppService],

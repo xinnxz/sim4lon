@@ -7,19 +7,19 @@ export declare class StockService {
     getHistory(page?: number, limit?: number, lpgType?: string, movementType?: string): Promise<{
         data: ({
             users: {
-                id: string;
                 name: string;
+                id: string;
             } | null;
         } & {
             id: string;
             created_at: Date;
             timestamp: Date;
-            note: string | null;
-            lpg_type: import("@prisma/client").$Enums.lpg_type | null;
-            qty: number;
             recorded_by_user_id: string | null;
+            note: string | null;
             lpg_product_id: string | null;
+            lpg_type: import("@prisma/client").$Enums.lpg_type | null;
             movement_type: import("@prisma/client").$Enums.stock_movement_type;
+            qty: number;
         })[];
         meta: {
             total: number;
@@ -30,19 +30,19 @@ export declare class StockService {
     }>;
     createMovement(dto: CreateStockMovementDto, userId: string): Promise<{
         users: {
-            id: string;
             name: string;
+            id: string;
         } | null;
     } & {
         id: string;
         created_at: Date;
         timestamp: Date;
-        note: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
-        qty: number;
         recorded_by_user_id: string | null;
+        note: string | null;
         lpg_product_id: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
     }>;
     getSummary(): Promise<Record<string, {
         in: number;
@@ -51,18 +51,18 @@ export declare class StockService {
     }>>;
     getHistoryByType(lpgType: lpg_type, limit?: number): Promise<({
         users: {
-            id: string;
             name: string;
+            id: string;
         } | null;
     } & {
         id: string;
         created_at: Date;
         timestamp: Date;
-        note: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
-        qty: number;
         recorded_by_user_id: string | null;
+        note: string | null;
         lpg_product_id: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type | null;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
     })[]>;
 }

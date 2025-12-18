@@ -139,6 +139,44 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
                     },
                 },
             });
+            this.logger.log(`[CREATE] Order created - ID: ${order.id}`);
+            try {
+                const existingStock = await this.prisma.pangkalan_stocks.findFirst({
+                    where: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: dto.lpg_type,
+                    },
+                });
+                if (existingStock) {
+                    const newQty = existingStock.qty - dto.qty;
+                    await this.prisma.pangkalan_stocks.update({
+                        where: { id: existingStock.id },
+                        data: {
+                            qty: newQty < 0 ? 0 : newQty,
+                            updated_at: new Date(),
+                        },
+                    });
+                    this.logger.log(`[CREATE] Stock deducted: ${existingStock.qty} -> ${newQty} for ${dto.lpg_type}`);
+                }
+                else {
+                    this.logger.warn(`[CREATE] No stock record found for ${dto.lpg_type} - skipping deduction`);
+                }
+                await this.prisma.pangkalan_stock_movements.create({
+                    data: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: dto.lpg_type,
+                        movement_type: 'OUT',
+                        qty: dto.qty,
+                        source: 'SALE',
+                        reference_id: order.id,
+                        note: `Penjualan ${orderCode} - ${dto.consumer_name || 'Walk-in'}`,
+                    },
+                });
+                this.logger.log(`[CREATE] Stock movement recorded`);
+            }
+            catch (stockError) {
+                this.logger.error(`[CREATE] Stock deduction error: ${stockError.message}`);
+            }
             this.logger.log(`[CREATE] Success - order ID: ${order.id}`);
             return order;
         }

@@ -25,6 +25,7 @@ export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
     get expenses(): import("@prisma/client").Prisma.expensesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get pangkalan_stocks(): import("@prisma/client").Prisma.pangkalan_stocksDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get pangkalan_stock_movements(): import("@prisma/client").Prisma.pangkalan_stock_movementsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get lpg_prices(): import("@prisma/client").Prisma.lpg_pricesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
 }

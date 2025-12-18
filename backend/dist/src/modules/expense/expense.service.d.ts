@@ -9,8 +9,8 @@ export declare class ExpenseService {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }[]>;
     findById(id: string, pangkalanId: string): Promise<{
@@ -19,8 +19,8 @@ export declare class ExpenseService {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     } | null>;
     create(pangkalanId: string, dto: CreateExpenseDto): Promise<{
@@ -29,8 +29,8 @@ export declare class ExpenseService {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }>;
     update(id: string, pangkalanId: string, dto: UpdateExpenseDto): Promise<{
@@ -39,8 +39,8 @@ export declare class ExpenseService {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }>;
     delete(id: string, pangkalanId: string): Promise<{
@@ -49,8 +49,8 @@ export declare class ExpenseService {
         created_at: Date;
         updated_at: Date;
         description: string | null;
-        category: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        category: string;
         expense_date: Date;
     }>;
     getSummary(pangkalanId: string, startDate: string, endDate: string): Promise<{
