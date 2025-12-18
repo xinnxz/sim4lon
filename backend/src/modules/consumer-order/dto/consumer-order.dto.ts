@@ -1,6 +1,18 @@
-import { IsString, IsOptional, IsNumber, IsEnum, IsUUID, Min, MaxLength, IsDecimal } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsEnum, IsUUID, Min, MaxLength, IsIn } from 'class-validator';
 import { lpg_type, consumer_payment_status } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
+
+// Accept both frontend (3kg) and backend (kg3) formats
+const ALL_LPG_TYPES = ['3kg', '5kg', '12kg', '50kg', 'kg3', 'kg5', 'kg12', 'kg50'];
+
+// Convert frontend format (3kg) to Prisma enum (kg3)
+function toPrismaLpgType(value: string): lpg_type {
+    const mapping: Record<string, lpg_type> = {
+        '3kg': 'kg3' as lpg_type, '5kg': 'kg5' as lpg_type, '12kg': 'kg12' as lpg_type, '50kg': 'kg50' as lpg_type,
+        'kg3': 'kg3' as lpg_type, 'kg5': 'kg5' as lpg_type, 'kg12': 'kg12' as lpg_type, 'kg50': 'kg50' as lpg_type,
+    };
+    return mapping[value] || 'kg3' as lpg_type;
+}
 
 /**
  * DTO untuk membuat consumer order (penjualan ke konsumen)
@@ -20,7 +32,8 @@ export class CreateConsumerOrderDto {
     @MaxLength(255)
     consumer_name?: string;  // For walk-in customers
 
-    @IsEnum(lpg_type)
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @Transform(({ value }) => toPrismaLpgType(value))
     lpg_type: lpg_type;
 
     @IsNumber()

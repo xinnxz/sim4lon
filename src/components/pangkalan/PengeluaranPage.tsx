@@ -1,17 +1,13 @@
 /**
- * PengeluaranPage - Halaman Pengeluaran Pangkalan
+ * PengeluaranPage - Enhanced Pengeluaran Management Page
  * 
- * PENJELASAN:
- * Halaman untuk mencatat dan mengelola pengeluaran operasional pangkalan.
- * Terintegrasi dengan Laporan untuk menghitung laba bersih.
- * 
- * Kategori Pengeluaran:
- * - OPERASIONAL: Biaya operasional umum
- * - TRANSPORT: BBM, ojek, transportasi
- * - SEWA: Sewa tempat, alat
- * - LISTRIK: Listrik, air
- * - GAJI: Gaji karyawan
- * - LAINNYA: Pengeluaran lainnya
+ * Features:
+ * - Full CRUD operations for expenses
+ * - Clickable category chips in form
+ * - Stats cards with gradients
+ * - Month filter
+ * - Category breakdown cards
+ * - Consistent styling with Dashboard/Laporan
  */
 
 'use client'
@@ -22,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import {
     Dialog,
     DialogContent,
@@ -36,14 +32,14 @@ import SafeIcon from '@/components/common/SafeIcon'
 import { expensesApi, type Expense, type ExpenseCategory } from '@/lib/api'
 import { toast } from 'sonner'
 
-// Kategori dengan label dan icon
-const CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string }[] = [
-    { value: 'OPERASIONAL', label: 'Operasional', icon: 'Settings', color: 'bg-slate-500' },
-    { value: 'TRANSPORT', label: 'Transport', icon: 'Fuel', color: 'bg-orange-500' },
-    { value: 'SEWA', label: 'Sewa', icon: 'Home', color: 'bg-purple-500' },
-    { value: 'LISTRIK', label: 'Listrik/Air', icon: 'Zap', color: 'bg-yellow-500' },
-    { value: 'GAJI', label: 'Gaji', icon: 'Users', color: 'bg-blue-500' },
-    { value: 'LAINNYA', label: 'Lainnya', icon: 'MoreHorizontal', color: 'bg-gray-500' },
+// Kategori dengan label, icon, dan color
+const CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string; gradient: string }[] = [
+    { value: 'OPERASIONAL', label: 'Operasional', icon: 'Settings', color: 'bg-slate-500', gradient: 'from-slate-500 to-slate-600' },
+    { value: 'TRANSPORT', label: 'Transport', icon: 'Truck', color: 'bg-orange-500', gradient: 'from-orange-500 to-orange-600' },
+    { value: 'SEWA', label: 'Sewa', icon: 'Home', color: 'bg-purple-500', gradient: 'from-purple-500 to-purple-600' },
+    { value: 'LISTRIK', label: 'Listrik/Air', icon: 'Zap', color: 'bg-yellow-500', gradient: 'from-yellow-500 to-amber-600' },
+    { value: 'GAJI', label: 'Gaji', icon: 'Users', color: 'bg-blue-500', gradient: 'from-blue-500 to-blue-600' },
+    { value: 'LAINNYA', label: 'Lainnya', icon: 'MoreHorizontal', color: 'bg-gray-500', gradient: 'from-gray-500 to-gray-600' },
 ]
 
 export default function PengeluaranPage() {
@@ -58,8 +54,6 @@ export default function PengeluaranPage() {
         expense_date: new Date().toISOString().split('T')[0],
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
-
-    // Filter state
     const [filterMonth, setFilterMonth] = useState(() => {
         const now = new Date()
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -139,7 +133,7 @@ export default function PengeluaranPage() {
     }
 
     const handleDelete = async (expense: Expense) => {
-        if (!confirm(`Hapus pengeluaran "${getCategoryLabel(expense.category)}" Rp ${formatNumber(expense.amount)}?`)) return
+        if (!confirm(`Hapus pengeluaran "${getCategoryLabel(expense.category)}" ${formatCurrency(expense.amount)}?`)) return
 
         try {
             await expensesApi.delete(expense.id)
@@ -158,10 +152,6 @@ export default function PengeluaranPage() {
         }).format(value)
     }
 
-    const formatNumber = (value: number) => {
-        return new Intl.NumberFormat('id-ID').format(value)
-    }
-
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('id-ID', {
             day: 'numeric',
@@ -170,227 +160,297 @@ export default function PengeluaranPage() {
         })
     }
 
-    const getCategoryLabel = (cat: string) => {
-        return CATEGORIES.find(c => c.value === cat)?.label || cat
-    }
-
-    const getCategoryColor = (cat: string) => {
-        return CATEGORIES.find(c => c.value === cat)?.color || 'bg-gray-500'
-    }
-
-    const getCategoryIcon = (cat: string) => {
-        return CATEGORIES.find(c => c.value === cat)?.icon || 'Circle'
-    }
+    const getCategoryLabel = (cat: string) => CATEGORIES.find(c => c.value === cat)?.label || cat
+    const getCategoryColor = (cat: string) => CATEGORIES.find(c => c.value === cat)?.color || 'bg-gray-500'
+    const getCategoryGradient = (cat: string) => CATEGORIES.find(c => c.value === cat)?.gradient || 'from-gray-500 to-gray-600'
+    const getCategoryIcon = (cat: string) => CATEGORIES.find(c => c.value === cat)?.icon || 'Circle'
 
     // Calculate summary
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
     const expensesByCategory = CATEGORIES.map(cat => ({
         ...cat,
         total: expenses.filter(e => e.category === cat.value).reduce((sum, e) => sum + Number(e.amount), 0),
+        count: expenses.filter(e => e.category === cat.value).length,
     })).filter(cat => cat.total > 0)
 
-    return (
-        <div className="flex-1 space-y-6 p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Pengeluaran</h1>
-                    <p className="text-muted-foreground">Catat biaya operasional pangkalan</p>
+    if (isLoading && expenses.length === 0) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px]">
+                <div className="text-center">
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-red-200 border-t-red-600 mx-auto"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <SafeIcon name="Wallet" className="h-6 w-6 text-red-600" />
+                        </div>
+                    </div>
+                    <p className="text-slate-500 mt-4 font-medium">Memuat data pengeluaran...</p>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-700">
-                            <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
-                            Tambah Pengeluaran
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <form onSubmit={handleSubmit}>
-                            <DialogHeader>
-                                <DialogTitle>
-                                    {editingExpense ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'}
-                                </DialogTitle>
-                                <DialogDescription>
-                                    {editingExpense ? 'Perbarui data pengeluaran' : 'Isi data pengeluaran baru'}
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="category">Kategori</Label>
-                                    <Select
-                                        value={formData.category}
-                                        onValueChange={(v: ExpenseCategory) => setFormData({ ...formData, category: v })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih kategori" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {CATEGORIES.map(cat => (
-                                                <SelectItem key={cat.value} value={cat.value}>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`w-2 h-2 rounded-full ${cat.color}`}></span>
-                                                        {cat.label}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="amount">Jumlah (Rp) *</Label>
-                                    <Input
-                                        id="amount"
-                                        type="number"
-                                        value={formData.amount}
-                                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                        placeholder="50000"
-                                        min="0"
-                                        required
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="expense_date">Tanggal</Label>
-                                    <Input
-                                        id="expense_date"
-                                        type="date"
-                                        value={formData.expense_date}
-                                        onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })}
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="description">Keterangan</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="BBM motor untuk antar..."
-                                        rows={2}
-                                    />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                    Batal
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                                    {isSubmitting ? (
-                                        <>
-                                            <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
-                                            Menyimpan...
-                                        </>
-                                    ) : (
-                                        'Simpan'
-                                    )}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
             </div>
+        )
+    }
 
-            {/* Filter */}
-            <div className="flex gap-4 items-center">
+    return (
+        <div className="space-y-8 pb-8">
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                    <Label>Bulan</Label>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Pengeluaran</h1>
+                    <p className="text-slate-500 mt-1 flex items-center gap-2">
+                        <SafeIcon name="Wallet" className="h-4 w-4" />
+                        Catat biaya operasional pangkalan
+                    </p>
+                </div>
+                <div className="flex items-center gap-3">
+                    {/* Month Filter */}
                     <Input
                         type="month"
                         value={filterMonth}
                         onChange={(e) => setFilterMonth(e.target.value)}
-                        className="w-[180px]"
+                        className="w-[160px] rounded-xl"
                     />
+
+                    {/* Add Button */}
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button
+                                onClick={() => handleOpenDialog()}
+                                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg shadow-red-500/25"
+                            >
+                                <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
+                                Tambah Pengeluaran
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <form onSubmit={handleSubmit}>
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2">
+                                        <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                                            <SafeIcon name="Wallet" className="h-5 w-5 text-red-600" />
+                                        </div>
+                                        {editingExpense ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {editingExpense ? 'Perbarui data pengeluaran' : 'Isi data pengeluaran baru'}
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    {/* Category Selection */}
+                                    <div className="space-y-2">
+                                        <Label>Kategori *</Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {CATEGORIES.map(cat => (
+                                                <button
+                                                    key={cat.value}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, category: cat.value })}
+                                                    className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${formData.category === cat.value
+                                                            ? 'border-red-500 bg-red-50'
+                                                            : 'border-slate-200 hover:border-slate-300'
+                                                        }`}
+                                                >
+                                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center`}>
+                                                        <SafeIcon name={cat.icon} className="h-5 w-5 text-white" />
+                                                    </div>
+                                                    <span className={`text-xs font-medium ${formData.category === cat.value ? 'text-red-700' : 'text-slate-600'}`}>
+                                                        {cat.label}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Amount */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="amount">Jumlah (Rp) *</Label>
+                                        <Input
+                                            id="amount"
+                                            type="number"
+                                            value={formData.amount}
+                                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                            placeholder="50000"
+                                            min="0"
+                                            required
+                                            className="text-lg font-bold"
+                                        />
+                                    </div>
+
+                                    {/* Date */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="expense_date">Tanggal</Label>
+                                        <Input
+                                            id="expense_date"
+                                            type="date"
+                                            value={formData.expense_date}
+                                            onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })}
+                                        />
+                                    </div>
+
+                                    {/* Description */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="description">Keterangan</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            placeholder="BBM motor untuk antar gas..."
+                                            rows={2}
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                        Batal
+                                    </Button>
+                                    <Button type="submit" disabled={isSubmitting} className="bg-red-600 hover:bg-red-700">
+                                        {isSubmitting ? (
+                                            <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                                        ) : (
+                                            <SafeIcon name="Check" className="h-4 w-4 mr-2" />
+                                        )}
+                                        Simpan
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 
             {/* Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 shadow-lg">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium opacity-90">Total Pengeluaran</CardTitle>
+            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                {/* Total Pengeluaran */}
+                <Card className="relative overflow-hidden bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <CardHeader className="pb-2 relative">
+                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                            <SafeIcon name="TrendingDown" className="h-4 w-4" />
+                            Total Pengeluaran
+                        </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
-                        <p className="text-red-100 text-sm mt-1">{expenses.length} transaksi</p>
+                    <CardContent className="relative">
+                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totalExpenses)}</p>
+                        <p className="text-red-100 text-sm mt-2">{expenses.length} transaksi bulan ini</p>
                     </CardContent>
                 </Card>
 
+                {/* Top 3 Categories */}
                 {expensesByCategory.slice(0, 3).map(cat => (
-                    <Card key={cat.value} className="bg-white dark:bg-slate-800 shadow-lg">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${cat.color}`}></span>
+                    <Card key={cat.value} className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                                <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${cat.gradient} flex items-center justify-center`}>
+                                    <SafeIcon name={cat.icon} className="h-4 w-4 text-white" />
+                                </div>
                                 {cat.label}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="text-xl font-bold">{formatCurrency(cat.total)}</div>
+                        <CardContent className="relative">
+                            <p className="text-2xl font-bold text-slate-900">{formatCurrency(cat.total)}</p>
+                            <p className="text-slate-500 text-sm mt-2">{cat.count} transaksi</p>
                         </CardContent>
                     </Card>
                 ))}
             </div>
 
+            {/* Category Breakdown */}
+            {expensesByCategory.length > 0 && (
+                <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                <SafeIcon name="PieChart" className="h-4 w-4 text-purple-600" />
+                            </div>
+                            Breakdown Kategori
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            {expensesByCategory.map(cat => {
+                                const percentage = totalExpenses > 0 ? ((cat.total / totalExpenses) * 100).toFixed(1) : '0'
+                                return (
+                                    <div key={cat.value} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center flex-shrink-0`}>
+                                            <SafeIcon name={cat.icon} className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-medium text-slate-900">{cat.label}</span>
+                                                <Badge variant="secondary" className="bg-slate-200">{percentage}%</Badge>
+                                            </div>
+                                            <p className="text-sm text-slate-500 font-bold">{formatCurrency(cat.total)}</p>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Expense List */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Daftar Pengeluaran</CardTitle>
+            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                            <SafeIcon name="Receipt" className="h-4 w-4 text-red-600" />
+                        </div>
+                        Daftar Pengeluaran
+                    </CardTitle>
                     <CardDescription>Riwayat pengeluaran bulan ini</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-blue-500" />
-                        </div>
-                    ) : expenses.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <SafeIcon name="Wallet" className="h-12 w-12 text-muted-foreground mb-4" />
-                            <p className="text-muted-foreground">Belum ada pengeluaran bulan ini</p>
-                            <Button
-                                onClick={() => handleOpenDialog()}
-                                className="mt-4 bg-blue-600 hover:bg-blue-700"
-                            >
-                                <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
+                    {expenses.length === 0 ? (
+                        <div className="text-center py-16">
+                            <SafeIcon name="Wallet" className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold text-slate-700 mb-2">Belum Ada Pengeluaran</h3>
+                            <p className="text-slate-400 mb-6">Catat pengeluaran operasional Anda</p>
+                            <Button onClick={() => handleOpenDialog()} className="bg-red-600 hover:bg-red-700">
+                                <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
                                 Catat Pengeluaran Pertama
                             </Button>
                         </div>
                     ) : (
-                        <div className="divide-y">
-                            {expenses.map((expense) => (
+                        <div className="divide-y divide-slate-100">
+                            {expenses.map((expense, index) => (
                                 <div
                                     key={expense.id}
-                                    className="flex items-center justify-between p-4 hover:bg-accent/50 transition-colors"
+                                    className={`flex items-center justify-between p-4 hover:bg-red-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className={`h-10 w-10 rounded-full ${getCategoryColor(expense.category)} flex items-center justify-center`}>
-                                            <SafeIcon name={getCategoryIcon(expense.category)} className="h-5 w-5 text-white" />
+                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getCategoryGradient(expense.category)} flex items-center justify-center`}>
+                                            <SafeIcon name={getCategoryIcon(expense.category)} className="h-6 w-6 text-white" />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="font-medium">{getCategoryLabel(expense.category)}</p>
-                                                <span className="text-sm text-muted-foreground">
+                                                <p className="font-semibold text-slate-900">{getCategoryLabel(expense.category)}</p>
+                                                <Badge variant="outline" className="text-xs">
                                                     {formatDate(expense.expense_date)}
-                                                </span>
+                                                </Badge>
                                             </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                {expense.description || '-'}
+                                            <p className="text-sm text-slate-500 mt-1">
+                                                {expense.description || 'Tidak ada keterangan'}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <span className="font-bold text-red-600">
+                                        <span className="font-bold text-red-600 text-lg">
                                             -{formatCurrency(expense.amount)}
                                         </span>
                                         <div className="flex items-center gap-1">
                                             <Button
                                                 variant="ghost"
-                                                size="icon"
+                                                size="sm"
                                                 onClick={() => handleOpenDialog(expense)}
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                             >
                                                 <SafeIcon name="Pencil" className="h-4 w-4" />
                                             </Button>
                                             <Button
                                                 variant="ghost"
-                                                size="icon"
+                                                size="sm"
                                                 onClick={() => handleDelete(expense)}
-                                                className="text-destructive hover:text-destructive"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                             >
                                                 <SafeIcon name="Trash2" className="h-4 w-4" />
                                             </Button>

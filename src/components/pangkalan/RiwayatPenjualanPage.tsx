@@ -20,42 +20,102 @@ import { toast } from 'sonner'
 
 // LPG type names
 const LPG_NAMES: Record<string, string> = {
-    'kg3': '3 kg',
-    'kg5': '5.5 kg',
-    'kg12': '12 kg',
-    'kg50': '50 kg',
+    '3kg': '3 kg',
+    '5kg': '5.5 kg',
+    '12kg': '12 kg',
+    '50kg': '50 kg',
 }
 
 export default function RiwayatPenjualanPage() {
     const [orders, setOrders] = useState<ConsumerOrder[]>([])
     const [stats, setStats] = useState<ConsumerOrderStats | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [isPageLoading, setIsPageLoading] = useState(false) // For pagination
     const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(10) // Page size
     const [totalPages, setTotalPages] = useState(1)
     const [total, setTotal] = useState(0)
 
-    const fetchData = async () => {
+    // Filter states
+    const [searchQuery, setSearchQuery] = useState('')
+    const [debouncedSearch, setDebouncedSearch] = useState('')
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
+    const [lpgTypeFilter, setLpgTypeFilter] = useState('')
+
+    // Fetch stats only once on mount
+    const fetchStats = async () => {
         try {
-            setIsLoading(true)
-            const [ordersResponse, statsData] = await Promise.all([
-                consumerOrdersApi.getAll(page, 10),
-                consumerOrdersApi.getStats(true), // Today stats
-            ])
-            setOrders(ordersResponse.data)
-            setTotalPages(ordersResponse.meta.totalPages)
-            setTotal(ordersResponse.meta.total)
+            const statsData = await consumerOrdersApi.getStats(true)
             setStats(statsData)
         } catch (error) {
-            console.error('Failed to fetch data:', error)
-            toast.error('Gagal memuat data penjualan')
-        } finally {
-            setIsLoading(false)
+            console.error('Failed to fetch stats:', error)
         }
     }
 
+    // Fetch orders (called on page/limit/filter change)
+    const fetchOrders = async (showFullLoading = false) => {
+        try {
+            if (showFullLoading) {
+                setIsLoading(true)
+            } else {
+                setIsPageLoading(true)
+            }
+            const ordersResponse = await consumerOrdersApi.getAll(page, limit, {
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
+            })
+
+            // Client-side filtering for search and LPG type (if API doesn't support)
+            let filteredData = ordersResponse.data
+            if (debouncedSearch) {
+                const search = debouncedSearch.toLowerCase()
+                filteredData = filteredData.filter(o =>
+                    (o.consumers?.name || o.consumer_name || '').toLowerCase().includes(search) ||
+                    o.code.toLowerCase().includes(search)
+                )
+            }
+            if (lpgTypeFilter) {
+                filteredData = filteredData.filter(o => o.lpg_type === lpgTypeFilter)
+            }
+
+            setOrders(filteredData)
+            setTotalPages(ordersResponse.meta.totalPages)
+            setTotal(ordersResponse.meta.total)
+        } catch (error) {
+            console.error('Failed to fetch orders:', error)
+            toast.error('Gagal memuat data penjualan')
+        } finally {
+            setIsLoading(false)
+            setIsPageLoading(false)
+        }
+    }
+
+    // Initial load
     useEffect(() => {
-        fetchData()
-    }, [page])
+        fetchStats()
+        fetchOrders(true)
+    }, [])
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery)
+        }, 300)
+        return () => clearTimeout(timer)
+    }, [searchQuery])
+
+    // Pagination/filter changes - fast update
+    useEffect(() => {
+        if (!isLoading) {
+            fetchOrders(false)
+        }
+    }, [page, limit, debouncedSearch, startDate, endDate, lpgTypeFilter])
+
+    // Reset page when filters change
+    useEffect(() => {
+        setPage(1)
+    }, [debouncedSearch, startDate, endDate, lpgTypeFilter])
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -85,10 +145,33 @@ export default function RiwayatPenjualanPage() {
         try {
             await consumerOrdersApi.delete(order.id)
             toast.success('Transaksi dihapus')
-            fetchData()
+            fetchOrders(false)
+            fetchStats()
         } catch (error: any) {
             toast.error(error.message || 'Gagal menghapus transaksi')
         }
+    }
+
+    // Generate smart page numbers
+    const getPageNumbers = () => {
+        const pages: (number | string)[] = []
+        const maxVisible = 5
+
+        if (totalPages <= maxVisible) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i)
+        } else {
+            pages.push(1)
+            if (page > 3) pages.push('...')
+
+            const start = Math.max(2, page - 1)
+            const end = Math.min(totalPages - 1, page + 1)
+
+            for (let i = start; i <= end; i++) pages.push(i)
+
+            if (page < totalPages - 2) pages.push('...')
+            pages.push(totalPages)
+        }
+        return pages
     }
 
     if (isLoading && orders.length === 0) {
@@ -194,6 +277,86 @@ export default function RiwayatPenjualanPage() {
                 </Card>
             </div>
 
+            {/* Filter Bar */}
+            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                <CardContent className="p-4">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        {/* Search Input */}
+                        <div className="relative flex-1">
+                            <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Cari nama pelanggan atau kode transaksi..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                >
+                                    <SafeIcon name="X" className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Date Range */}
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-500 whitespace-nowrap">Dari:</span>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-500 whitespace-nowrap">Sampai:</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+
+                        {/* LPG Type Filter */}
+                        <select
+                            value={lpgTypeFilter}
+                            onChange={(e) => setLpgTypeFilter(e.target.value)}
+                            className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                        >
+                            <option value="">Semua Tipe</option>
+                            <option value="3kg">3 kg</option>
+                            <option value="5kg">5.5 kg</option>
+                            <option value="12kg">12 kg</option>
+                            <option value="50kg">50 kg</option>
+                        </select>
+
+                        {/* Clear Filters */}
+                        {(searchQuery || startDate || endDate || lpgTypeFilter) && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    setSearchQuery('')
+                                    setStartDate('')
+                                    setEndDate('')
+                                    setLpgTypeFilter('')
+                                }}
+                                className="rounded-xl whitespace-nowrap"
+                            >
+                                <SafeIcon name="X" className="h-4 w-4 mr-1" />
+                                Hapus Filter
+                            </Button>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Orders Table */}
             <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
                 <CardHeader className="border-b border-slate-100 bg-slate-50/50">
@@ -296,47 +459,69 @@ export default function RiwayatPenjualanPage() {
             </Card>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="rounded-xl"
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Page Size Selector */}
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <span>Tampilkan</span>
+                    <select
+                        value={limit}
+                        onChange={(e) => {
+                            setLimit(Number(e.target.value))
+                            setPage(1) // Reset to first page
+                        }}
+                        className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                        <SafeIcon name="ChevronLeft" className="h-4 w-4 mr-1" />
-                        Sebelumnya
-                    </Button>
-                    <div className="flex items-center gap-2">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                            const pageNum = i + 1
-                            return (
-                                <Button
-                                    key={pageNum}
-                                    variant={page === pageNum ? 'default' : 'ghost'}
-                                    size="sm"
-                                    onClick={() => setPage(pageNum)}
-                                    className={`w-10 h-10 rounded-xl ${page === pageNum ? 'bg-blue-600' : ''}`}
-                                >
-                                    {pageNum}
-                                </Button>
-                            )
-                        })}
-                        {totalPages > 5 && <span className="text-slate-400">...</span>}
-                    </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                        className="rounded-xl"
-                    >
-                        Selanjutnya
-                        <SafeIcon name="ChevronRight" className="h-4 w-4 ml-1" />
-                    </Button>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                    </select>
+                    <span>dari {total} data</span>
                 </div>
-            )}
+
+                {/* Page Navigation */}
+                {totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page === 1 || isPageLoading}
+                            className="rounded-lg h-9 px-3"
+                        >
+                            <SafeIcon name="ChevronLeft" className="h-4 w-4" />
+                        </Button>
+
+                        <div className="flex items-center gap-1">
+                            {getPageNumbers().map((pageNum, idx) => (
+                                pageNum === '...' ? (
+                                    <span key={`ellipsis-${idx}`} className="px-2 text-slate-400">...</span>
+                                ) : (
+                                    <Button
+                                        key={pageNum}
+                                        variant={page === pageNum ? 'default' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setPage(pageNum as number)}
+                                        disabled={isPageLoading}
+                                        className={`w-9 h-9 rounded-lg ${page === pageNum ? 'bg-blue-600 hover:bg-blue-700' : 'hover:bg-slate-100'}`}
+                                    >
+                                        {pageNum}
+                                    </Button>
+                                )
+                            ))}
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages || isPageLoading}
+                            className="rounded-lg h-9 px-3"
+                        >
+                            <SafeIcon name="ChevronRight" className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

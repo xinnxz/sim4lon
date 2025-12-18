@@ -698,7 +698,7 @@ export const lpgProductsApi = {
 // STOCK API
 // ============================================================
 
-export type LpgType = '3kg' | '12kg' | '50kg';
+export type LpgType = '3kg' | '5kg' | '12kg' | '50kg';
 export type MovementType = 'MASUK' | 'KELUAR';
 
 export interface StockHistory {
@@ -1313,12 +1313,16 @@ export const paymentApi = {
 // CONSUMER API (Pangkalan Dashboard)
 // ============================================================
 
+// Consumer type for categorization
+export type ConsumerType = 'RUMAH_TANGGA' | 'WARUNG';
+
 export interface Consumer {
     id: string;
     pangkalan_id: string;
     name: string;
-    nik: string | null;      // NIK for subsidy verification (16 digits)
-    kk: string | null;       // Nomor KK for household ID (16 digits)
+    nik: string | null;           // NIK for subsidy verification (16 digits)
+    kk: string | null;            // Nomor KK for household ID (16 digits)
+    consumer_type: ConsumerType | null;  // Consumer category
     phone: string | null;
     address: string | null;
     note: string | null;
@@ -1376,6 +1380,7 @@ export const consumersApi = {
 // ============================================================
 // CONSUMER ORDER API (Pangkalan Dashboard)
 // ============================================================
+
 
 export type ConsumerPaymentStatus = 'LUNAS' | 'HUTANG';
 
@@ -1533,5 +1538,73 @@ export const pangkalanStockApi = {
             method: 'POST',
             body: JSON.stringify(data),
         });
+    },
+};
+
+// ============================================================
+// EXPENSE API (Pangkalan Dashboard)
+// ============================================================
+
+export type ExpenseCategory = 'OPERASIONAL' | 'TRANSPORT' | 'SEWA' | 'LISTRIK' | 'GAJI' | 'LAINNYA';
+
+export interface Expense {
+    id: string;
+    pangkalan_id: string;
+    category: ExpenseCategory;
+    amount: number;
+    description: string | null;
+    expense_date: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export const expensesApi = {
+    async getAll(startDate?: string, endDate?: string): Promise<Expense[]> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        const queryString = params.toString();
+        return apiRequest(`/expenses${queryString ? `?${queryString}` : ''}`);
+    },
+
+    async getById(id: string): Promise<Expense> {
+        return apiRequest(`/expenses/${id}`);
+    },
+
+    async create(data: {
+        category: ExpenseCategory;
+        amount: number;
+        description?: string;
+        expense_date?: string;
+    }): Promise<Expense> {
+        return apiRequest('/expenses', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: {
+        category?: ExpenseCategory;
+        amount?: number;
+        description?: string;
+        expense_date?: string;
+    }): Promise<Expense> {
+        return apiRequest(`/expenses/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string): Promise<{ message: string }> {
+        return apiRequest(`/expenses/${id}`, { method: 'DELETE' });
+    },
+
+    async getSummary(startDate: string, endDate: string): Promise<{
+        total: number;
+        count: number;
+        byCategory: Record<string, number>;
+        byDate: Record<string, number>;
+    }> {
+        return apiRequest(`/expenses/summary?startDate=${startDate}&endDate=${endDate}`);
     },
 };

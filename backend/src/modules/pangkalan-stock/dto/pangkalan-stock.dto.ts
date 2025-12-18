@@ -1,17 +1,43 @@
 import { IsString, IsNumber, IsOptional, Min, IsIn, IsDateString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-// Use string type to match Prisma enum - values must match schema's lpg_type enum
+// Backend uses kg3/kg5/kg12/kg50 (Prisma enum identifiers)
+// Frontend uses 3kg/5kg/12kg/50kg (human-readable format)
 export type LpgType = 'kg3' | 'kg5' | 'kg12' | 'kg50';
 export type MovementType = 'MASUK' | 'KELUAR' | 'OPNAME';
 
+// Prisma enum values
 export const LPG_TYPES: LpgType[] = ['kg3', 'kg5', 'kg12', 'kg50'];
+// Frontend format values (also accepted in API)
+export const LPG_TYPES_FRONTEND = ['3kg', '5kg', '12kg', '50kg'];
+// Combined for validation
+export const ALL_LPG_TYPES = [...LPG_TYPES, ...LPG_TYPES_FRONTEND];
 export const MOVEMENT_TYPES: MovementType[] = ['MASUK', 'KELUAR', 'OPNAME'];
+
+// Convert frontend format (3kg) to backend format (kg3)
+export function toBackendFormat(type: string): LpgType {
+    const mapping: Record<string, LpgType> = {
+        '3kg': 'kg3', '5kg': 'kg5', '12kg': 'kg12', '50kg': 'kg50',
+        'kg3': 'kg3', 'kg5': 'kg5', 'kg12': 'kg12', 'kg50': 'kg50',
+    };
+    return mapping[type] || 'kg3';
+}
+
+// Convert backend format (kg3) to frontend format (3kg)
+export function toFrontendFormat(type: string): string {
+    const mapping: Record<string, string> = {
+        'kg3': '3kg', 'kg5': '5kg', 'kg12': '12kg', 'kg50': '50kg',
+        '3kg': '3kg', '5kg': '5kg', '12kg': '12kg', '50kg': '50kg',
+    };
+    return mapping[type] || '3kg';
+}
 
 /**
  * DTO untuk terima stok dari agen
  */
 export class ReceiveStockDto {
-    @IsIn(LPG_TYPES)
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @Transform(({ value }) => toBackendFormat(value))
     lpg_type: LpgType;
 
     @IsNumber()
@@ -31,7 +57,8 @@ export class ReceiveStockDto {
  * DTO untuk stock opname (adjustment)
  */
 export class AdjustStockDto {
-    @IsIn(LPG_TYPES)
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @Transform(({ value }) => toBackendFormat(value))
     lpg_type: LpgType;
 
     @IsNumber()
@@ -47,7 +74,8 @@ export class AdjustStockDto {
  * DTO untuk update stock level alerts
  */
 export class UpdateStockLevelsDto {
-    @IsIn(LPG_TYPES)
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @Transform(({ value }) => toBackendFormat(value))
     lpg_type: LpgType;
 
     @IsOptional()

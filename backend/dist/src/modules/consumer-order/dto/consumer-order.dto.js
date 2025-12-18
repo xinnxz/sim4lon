@@ -13,6 +13,14 @@ exports.UpdateConsumerOrderDto = exports.CreateConsumerOrderDto = void 0;
 const class_validator_1 = require("class-validator");
 const client_1 = require("@prisma/client");
 const class_transformer_1 = require("class-transformer");
+const ALL_LPG_TYPES = ['3kg', '5kg', '12kg', '50kg', 'kg3', 'kg5', 'kg12', 'kg50'];
+function toPrismaLpgType(value) {
+    const mapping = {
+        '3kg': 'kg3', '5kg': 'kg5', '12kg': 'kg12', '50kg': 'kg50',
+        'kg3': 'kg3', 'kg5': 'kg5', 'kg12': 'kg12', 'kg50': 'kg50',
+    };
+    return mapping[value] || 'kg3';
+}
 class CreateConsumerOrderDto {
     consumer_id;
     consumer_name;
@@ -35,7 +43,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateConsumerOrderDto.prototype, "consumer_name", void 0);
 __decorate([
-    (0, class_validator_1.IsEnum)(client_1.lpg_type),
+    (0, class_validator_1.IsIn)(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' }),
+    (0, class_transformer_1.Transform)(({ value }) => toPrismaLpgType(value)),
     __metadata("design:type", String)
 ], CreateConsumerOrderDto.prototype, "lpg_type", void 0);
 __decorate([

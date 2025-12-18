@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ReceiveStockDto, AdjustStockDto, UpdateStockLevelsDto, LpgType, LPG_TYPES } from './dto';
+import { ReceiveStockDto, AdjustStockDto, UpdateStockLevelsDto, LpgType, LPG_TYPES, toFrontendFormat } from './dto';
 
 /**
  * PangkalanStockService - Business logic untuk manajemen stok pangkalan
@@ -51,7 +51,7 @@ export class PangkalanStockService {
 
                 return {
                     id: stock.id,
-                    lpg_type: stock.lpg_type,
+                    lpg_type: toFrontendFormat(stock.lpg_type), // Return in frontend format (3kg)
                     qty: stock.qty,
                     warning_level: stock.warning_level,
                     critical_level: stock.critical_level,

@@ -193,7 +193,7 @@ export default function CreateOrderForm() {
         note: order.note || '',
         items: order.order_items.map((item, index) => {
           // Match productId by finding product with same size
-          // lpg_type format: "kg3", "kg12", "kg50" -> extract number
+          // lpg_type format: "3kg", "kg12", "kg50" -> extract number
           const sizeMatch = item.lpg_type.match(/\d+/)
           const size = sizeMatch ? parseFloat(sizeMatch[0]) : 0
 
