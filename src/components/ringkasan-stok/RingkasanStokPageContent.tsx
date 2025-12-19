@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import StockSummaryCards from '@/components/ringkasan-stok/StockSummaryCards'
 import WeeklyConsumptionChart from '@/components/ringkasan-stok/WeeklyConsumptionChart'
-import UpdateStokModal from '@/components/ringkasan-stok/UpdateStokModal'
+// UpdateStokModal removed - inline edit on cards replaces this
 import ManageLPGTypesModal from '@/components/ringkasan-stok/ManageLPGTypesModal'
 import SafeIcon from '@/components/common/SafeIcon'
 import { lpgProductsApi, type LpgProductWithStock } from '@/lib/api'
 
 export default function RingkasanStokPageContent() {
-  const [showUpdateModal, setShowUpdateModal] = useState(false)
+  // showUpdateModal removed - inline edit on cards replaces this
   const [showManageLPGModal, setShowManageLPGModal] = useState(false)
   const [stats, setStats] = useState({ total: 0, subsidi: 0, nonSubsidi: 0, products: 0 })
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -122,11 +122,7 @@ export default function RingkasanStokPageContent() {
         </div>
       </main>
 
-      {/* Update Stok Modal */}
-      <UpdateStokModal
-        open={showUpdateModal}
-        onOpenChange={setShowUpdateModal}
-      />
+      {/* Update Stok Modal removed - inline edit on cards replaces this */}
 
       {/* Manage LPG Types Modal */}
       <ManageLPGTypesModal
