@@ -500,10 +500,11 @@ enum lpg_category {
 
 /// @deprecated - Legacy LPG type enum, use lpg_products instead
 enum lpg_type {
-  kg3  @map("3kg")
-  kg5  @map("5.5kg")
-  kg12 @map("12kg")
-  kg50 @map("50kg")
+  gr220 @map("220gr")
+  kg3   @map("3kg")
+  kg5   @map("5.5kg")
+  kg12  @map("12kg")
+  kg50  @map("50kg")
 }
 
 /// Order status workflow
@@ -560,40 +561,46 @@ enum kondisi_type {
 
 /// Daily planning/alokasi for each pangkalan
 model perencanaan_harian {
-  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id  String      @db.Uuid
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id  String       @db.Uuid
   /// Date of the planning
-  tanggal       DateTime    @db.Date
+  tanggal       DateTime     @db.Date
+  /// LPG type (3kg, 12kg, 50kg, etc)
+  lpg_type      lpg_type     @default(kg3)
   /// Planned quantity
-  jumlah        Int         @default(0)
+  jumlah        Int          @default(0)
   /// Condition type: NORMAL or FAKULTATIF
   kondisi       kondisi_type @default(NORMAL)
   /// Monthly allocation limit
-  alokasi_bulan Int         @default(0)
-  created_at    DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime    @default(now()) @db.Timestamptz(6)
-  pangkalans    pangkalans  @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  alokasi_bulan Int          @default(0)
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime     @default(now()) @db.Timestamptz(6)
+  pangkalans    pangkalans   @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([pangkalan_id, tanggal], map: "uq_perencanaan_pangkalan_tanggal")
+  @@unique([pangkalan_id, tanggal, lpg_type], map: "uq_perencanaan_pangkalan_tanggal_lpg")
   @@index([pangkalan_id], map: "idx_perencanaan_pangkalan")
   @@index([tanggal], map: "idx_perencanaan_tanggal")
 }
 
 /// Daily distribution/penyaluran for each pangkalan
 model penyaluran_harian {
-  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id    String      @db.Uuid
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id    String       @db.Uuid
   /// Date of the distribution
-  tanggal         DateTime    @db.Date
+  tanggal         DateTime     @db.Date
+  /// LPG type (3kg, 12kg, 50kg, etc)
+  lpg_type        lpg_type     @default(kg3)
   /// Distributed quantity
-  jumlah          Int         @default(0)
+  jumlah          Int          @default(0)
+  /// Condition type: NORMAL or FAKULTATIF
+  kondisi         kondisi_type @default(NORMAL)
   /// Payment type: CASHLESS, CASH
-  tipe_pembayaran String      @default("CASHLESS") @db.VarChar(20)
-  created_at      DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime    @default(now()) @db.Timestamptz(6)
-  pangkalans      pangkalans  @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tipe_pembayaran String       @default("CASHLESS") @db.VarChar(20)
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime     @default(now()) @db.Timestamptz(6)
+  pangkalans      pangkalans   @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([pangkalan_id, tanggal], map: "uq_penyaluran_pangkalan_tanggal")
+  @@unique([pangkalan_id, tanggal, lpg_type], map: "uq_penyaluran_pangkalan_tanggal_lpg")
   @@index([pangkalan_id], map: "idx_penyaluran_pangkalan")
   @@index([tanggal], map: "idx_penyaluran_tanggal")
 }

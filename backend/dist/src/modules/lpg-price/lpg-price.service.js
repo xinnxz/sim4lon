@@ -17,6 +17,7 @@ let LpgPriceService = LpgPriceService_1 = class LpgPriceService {
     prisma;
     logger = new common_1.Logger(LpgPriceService_1.name);
     DEFAULT_PRICES = {
+        gr220: { cost: 3000, sell: 5000 },
         kg3: { cost: 16000, sell: 20000 },
         kg5: { cost: 52000, sell: 60000 },
         kg12: { cost: 142000, sell: 180000 },
@@ -42,7 +43,7 @@ let LpgPriceService = LpgPriceService_1 = class LpgPriceService {
         return prices;
     }
     async createDefaultPrices(pangkalanId) {
-        const lpgTypes = ['kg3', 'kg5', 'kg12', 'kg50'];
+        const lpgTypes = ['gr220', 'kg3', 'kg5', 'kg12', 'kg50'];
         for (const type of lpgTypes) {
             const defaultPrice = this.DEFAULT_PRICES[type];
             await this.prisma.lpg_prices.upsert({

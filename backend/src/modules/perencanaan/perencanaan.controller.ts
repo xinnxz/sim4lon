@@ -27,8 +27,9 @@ export class PerencanaanController {
     getRekapitulasi(
         @Query('bulan') bulan: string,
         @Query('kondisi') kondisi?: string,
+        @Query('lpg_type') lpgType?: string,
     ) {
-        return this.perencanaanService.getRekapitulasi(bulan, kondisi);
+        return this.perencanaanService.getRekapitulasi(bulan, kondisi, lpgType);
     }
 
     /**

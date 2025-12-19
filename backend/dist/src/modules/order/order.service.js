@@ -329,24 +329,27 @@ let OrderService = class OrderService {
                     },
                 });
             }
-            if (totalQtyForPenyaluran > 0) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            for (const item of updated.order_items) {
                 await this.prisma.penyaluran_harian.upsert({
                     where: {
-                        pangkalan_id_tanggal: {
+                        pangkalan_id_tanggal_lpg_type: {
                             pangkalan_id: updated.pangkalan_id,
                             tanggal: today,
+                            lpg_type: item.lpg_type,
                         }
                     },
                     create: {
                         pangkalan_id: updated.pangkalan_id,
                         tanggal: today,
-                        jumlah: totalQtyForPenyaluran,
+                        lpg_type: item.lpg_type,
+                        jumlah: item.qty,
+                        kondisi: 'NORMAL',
                         tipe_pembayaran: 'CASHLESS',
                     },
                     update: {
-                        jumlah: { increment: totalQtyForPenyaluran },
+                        jumlah: { increment: item.qty },
                         updated_at: new Date(),
                     },
                 });

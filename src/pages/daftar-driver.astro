@@ -9,7 +9,7 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Daftar Supir - SIM4LON">
-  <ProtectedDashboard client:load>
+  <ProtectedDashboard client:load allowedRoles={['ADMIN']}>
     <AdminHeader client:load userName="Admin User" userRole="Administrator" notificationCount={3} />
     <AppSidebarLayout client:load headerHeight="64px">
       <main class="flex-1 flex flex-col">

@@ -680,7 +680,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
 
                                 {/* Stock Opname */}
                                 <button
-                                    onClick={() => toast.info('Fitur Stock Opname akan segera tersedia')}
+                                    onClick={() => toast.info('Kaleum euy fitur na can beres')}
                                     className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-100 hover:border-slate-300 transition-all group"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">

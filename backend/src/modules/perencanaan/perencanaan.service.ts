@@ -65,7 +65,7 @@ export class PerencanaanService {
     /**
      * Get rekapitulasi perencanaan for a month (grid view)
      */
-    async getRekapitulasi(bulan: string, kondisi?: string) {
+    async getRekapitulasi(bulan: string, kondisi?: string, lpgType?: string) {
         const [year, month] = bulan.split('-').map(Number);
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0);
@@ -89,6 +89,9 @@ export class PerencanaanService {
         };
         if (kondisi) {
             where.kondisi = kondisi as kondisi_type;
+        }
+        if (lpgType) {
+            where.lpg_type = lpgType;
         }
 
         const perencanaan = await this.prisma.perencanaan_harian.findMany({
@@ -144,11 +147,13 @@ export class PerencanaanService {
      * Create single perencanaan entry
      */
     async create(dto: CreatePerencanaanDto) {
+        const lpgType = (dto as any).lpg_type || 'kg3';
         return this.prisma.perencanaan_harian.upsert({
             where: {
-                pangkalan_id_tanggal: {
+                pangkalan_id_tanggal_lpg_type: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(dto.tanggal),
+                    lpg_type: lpgType,
                 },
             },
             update: {
@@ -159,6 +164,7 @@ export class PerencanaanService {
             create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(dto.tanggal),
+                lpg_type: lpgType,
                 jumlah: dto.jumlah,
                 kondisi: (dto.kondisi || 'NORMAL') as kondisi_type,
                 alokasi_bulan: dto.alokasi_bulan || 0,
@@ -170,12 +176,14 @@ export class PerencanaanService {
      * Bulk update perencanaan (for grid input)
      */
     async bulkUpdate(dto: BulkUpdatePerencanaanDto) {
+        const lpgType = (dto as any).lpg_type || 'kg3';
         const operations = dto.data.map(item =>
             this.prisma.perencanaan_harian.upsert({
                 where: {
-                    pangkalan_id_tanggal: {
+                    pangkalan_id_tanggal_lpg_type: {
                         pangkalan_id: dto.pangkalan_id,
                         tanggal: new Date(item.tanggal),
+                        lpg_type: lpgType,
                     },
                 },
                 update: {
@@ -185,6 +193,7 @@ export class PerencanaanService {
                 create: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(item.tanggal),
+                    lpg_type: lpgType,
                     jumlah: item.jumlah,
                     kondisi: (dto.kondisi || 'NORMAL') as kondisi_type,
                 },

@@ -132,11 +132,11 @@ export default function InOutAgenPage() {
             {/* Filter Bar */}
             <Card className="glass-card">
                 <CardContent className="p-4">
-                    <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">Bulan:</span>
                             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="w-48">
+                                <SelectTrigger className="w-44">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -147,15 +147,17 @@ export default function InOutAgenPage() {
                             </Select>
                         </div>
 
-                        <Button variant="outline" onClick={fetchData} disabled={isLoading}>
-                            <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                            Refresh
-                        </Button>
+                        <div className="flex items-center gap-2 sm:ml-auto">
+                            <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
+                                <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                                Refresh
+                            </Button>
 
-                        <Button variant="outline" className="ml-auto">
-                            <SafeIcon name="Download" className="w-4 h-4 mr-2" />
-                            Download
-                        </Button>
+                            <Button variant="outline" size="sm">
+                                <SafeIcon name="Download" className="w-4 h-4 mr-1" />
+                                Download
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -172,20 +174,31 @@ export default function InOutAgenPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div
+                        className="overflow-x-auto cursor-grab active:cursor-grabbing"
+                        onWheel={(e) => {
+                            // Convert vertical scroll to horizontal scroll
+                            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                                e.preventDefault()
+                                e.currentTarget.scrollLeft += e.deltaY
+                            }
+                        }}
+                    >
                         <table className="w-full text-sm">
-                            <thead className="bg-muted/50 sticky top-0">
+                            <thead className="bg-muted/50 sticky top-0 z-20">
                                 <tr>
-                                    <th className="sticky left-0 bg-muted/50 px-4 py-3 text-left font-medium min-w-[120px]">Field</th>
-                                    {dayHeaders.map(day => (
-                                        <th
-                                            key={day}
-                                            className={`px-2 py-3 text-center font-medium min-w-[50px] ${isCurrentMonth && day === today ? 'bg-primary/20 text-primary font-bold' : ''
-                                                }`}
-                                        >
-                                            {String(day).padStart(2, '0')}
-                                        </th>
-                                    ))}
+                                    <th className="sticky left-0 z-30 bg-muted px-4 py-3 text-left font-medium min-w-[120px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Field</th>
+                                    {dayHeaders.map(day => {
+                                        const todayClass = isCurrentMonth && day === today ? 'bg-primary/20 text-primary font-bold' : ''
+                                        return (
+                                            <th
+                                                key={day}
+                                                className={`px-2 py-3 text-center font-medium min-w-[50px] ${todayClass}`}
+                                            >
+                                                {String(day).padStart(2, '0')}
+                                            </th>
+                                        )
+                                    })}
                                 </tr>
                             </thead>
                             <tbody>
@@ -197,29 +210,47 @@ export default function InOutAgenPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    ROWS.map(row => (
-                                        <tr key={row.key} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
-                                            <td className={`sticky left-0 bg-background/95 px-4 py-3 font-medium bg-${row.color}-500/10`}>
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-2 h-2 rounded-full bg-${row.color}-500`} />
-                                                    {row.label}
-                                                </div>
-                                            </td>
-                                            {dayHeaders.map(day => {
-                                                const dayData = data?.daily[day]
-                                                const value = dayData ? dayData[row.key as keyof typeof dayData] : 0
-                                                return (
-                                                    <td
-                                                        key={day}
-                                                        className={`px-2 py-3 text-center ${isCurrentMonth && day === today ? 'bg-primary/10 font-bold' : ''
-                                                            } ${value === 0 && row.key !== 'stok_akhir' ? 'text-muted-foreground' : ''}`}
-                                                    >
-                                                        {value.toLocaleString()}
-                                                    </td>
-                                                )
-                                            })}
-                                        </tr>
-                                    ))
+                                    ROWS.map(row => {
+                                        // Use solid background colors for sticky columns
+                                        const bgColors: Record<string, string> = {
+                                            blue: '#eff6ff',    // blue-50
+                                            green: '#f0fdf4',   // green-50
+                                            orange: '#fff7ed',  // orange-50
+                                            purple: '#faf5ff'   // purple-50
+                                        }
+                                        const dotColors: Record<string, string> = {
+                                            blue: 'rgb(59, 130, 246)',
+                                            green: 'rgb(34, 197, 94)',
+                                            orange: 'rgb(249, 115, 22)',
+                                            purple: 'rgb(168, 85, 247)'
+                                        }
+                                        return (
+                                            <tr key={row.key} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                                                <td
+                                                    className="sticky left-0 z-10 bg-background px-4 py-3 font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"
+                                                    style={{ backgroundColor: bgColors[row.color] }}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColors[row.color] }} />
+                                                        {row.label}
+                                                    </div>
+                                                </td>
+                                                {dayHeaders.map(day => {
+                                                    const dayData = data?.daily[day]
+                                                    const value = dayData ? dayData[row.key as keyof typeof dayData] : 0
+                                                    const todayClass = isCurrentMonth && day === today ? 'bg-primary/10 font-bold' : ''
+                                                    return (
+                                                        <td
+                                                            key={day}
+                                                            className={`px-2 py-3 text-center ${todayClass} ${value === 0 && row.key !== 'stok_akhir' ? 'text-muted-foreground' : ''}`}
+                                                        >
+                                                            {value.toLocaleString()}
+                                                        </td>
+                                                    )
+                                                })}
+                                            </tr>
+                                        )
+                                    })
                                 )}
                             </tbody>
                         </table>

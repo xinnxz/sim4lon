@@ -55,9 +55,11 @@ export default function PangkalanHeaderSimple() {
             <div className="flex h-full items-center px-4 gap-4">
                 {/* Logo & Title */}
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
-                        <SafeIcon name="Flame" className="h-5 w-5 text-white" />
-                    </div>
+                    <img
+                        src="/src/assets/logo-pertamina-2.png"
+                        alt="Pertamina"
+                        className="h-10 object-contain"
+                    />
                     <div>
                         <h1 className="text-lg font-bold text-slate-900 dark:text-white">SIM4LON</h1>
                         <p className="text-xs text-slate-500 dark:text-slate-400">

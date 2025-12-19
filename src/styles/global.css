@@ -129,12 +129,18 @@
 }
 
 @layer base {
+  /* Global scaling - makes entire UI proportionally smaller */
+  html {
+    font-size: 14px; /* Default is 16px, this makes everything ~87.5% smaller */
+  }
+  
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
@@ -644,5 +650,49 @@
 
   .button-interactive {
     @apply active:scale-95 transition-transform duration-150 ease-out;
+  }
+
+  /* Modern Hidden Scrollbar for Sidebar - elegant auto-hide */
+  .sidebar-scrollbar-hidden {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  .sidebar-scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Sidebar scrollbar hidden completely */
+  .sidebar-scrollbar-modern {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .sidebar-scrollbar-modern::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Thin scrollbar for tables */
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(155, 155, 155, 0.7);
   }
 }

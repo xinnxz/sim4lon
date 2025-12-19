@@ -50,7 +50,7 @@ export class PenyaluranService {
         return data;
     }
 
-    async getRekapitulasi(bulan: string, tipePembayaran?: string) {
+    async getRekapitulasi(bulan: string, tipePembayaran?: string, lpgType?: string) {
         const [year, month] = bulan.split('-').map(Number);
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0);
@@ -66,6 +66,9 @@ export class PenyaluranService {
         if (tipePembayaran) {
             where.tipe_pembayaran = tipePembayaran;
         }
+        if (lpgType) {
+            where.lpg_type = lpgType;
+        }
 
         const penyaluran = await this.prisma.penyaluran_harian.findMany({
             where,
@@ -74,7 +77,8 @@ export class PenyaluranService {
 
         const result = pangkalans.map(pangkalan => {
             const dailyData: Record<number, number> = {};
-            let total = 0;
+            let totalNormal = 0;
+            let totalFakultatif = 0;
 
             for (let day = 1; day <= daysInMonth; day++) {
                 dailyData[day] = 0;
@@ -83,8 +87,14 @@ export class PenyaluranService {
             const pangkalanData = penyaluran.filter(p => p.pangkalan_id === pangkalan.id);
             for (const p of pangkalanData) {
                 const day = new Date(p.tanggal).getDate();
-                dailyData[day] = p.jumlah;
-                total += p.jumlah;
+                dailyData[day] += p.jumlah;
+                // Type assertion needed until prisma generate is run
+                const kondisi = (p as any).kondisi || 'NORMAL';
+                if (kondisi === 'NORMAL') {
+                    totalNormal += p.jumlah;
+                } else {
+                    totalFakultatif += p.jumlah;
+                }
             }
 
             return {
@@ -94,8 +104,10 @@ export class PenyaluranService {
                 alokasi: pangkalan.alokasi_bulanan,
                 status: 'AKTIF',
                 daily: dailyData,
-                total,
-                sisa_alokasi: pangkalan.alokasi_bulanan - total,
+                total_normal: totalNormal,
+                total_fakultatif: totalFakultatif,
+                sisa_alokasi: pangkalan.alokasi_bulanan - totalNormal - totalFakultatif,
+                grand_total: totalNormal + totalFakultatif,
             };
         });
 
@@ -103,11 +115,13 @@ export class PenyaluranService {
     }
 
     async create(dto: CreatePenyaluranDto) {
+        const lpgType = (dto as any).lpg_type || 'kg3';
         return this.prisma.penyaluran_harian.upsert({
             where: {
-                pangkalan_id_tanggal: {
+                pangkalan_id_tanggal_lpg_type: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(dto.tanggal),
+                    lpg_type: lpgType,
                 },
             },
             update: {
@@ -117,6 +131,7 @@ export class PenyaluranService {
             create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(dto.tanggal),
+                lpg_type: lpgType,
                 jumlah: dto.jumlah,
                 tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
             },
@@ -124,12 +139,14 @@ export class PenyaluranService {
     }
 
     async bulkUpdate(dto: BulkUpdatePenyaluranDto) {
+        const lpgType = (dto as any).lpg_type || 'kg3';
         const operations = dto.data.map(item =>
             this.prisma.penyaluran_harian.upsert({
                 where: {
-                    pangkalan_id_tanggal: {
+                    pangkalan_id_tanggal_lpg_type: {
                         pangkalan_id: dto.pangkalan_id,
                         tanggal: new Date(item.tanggal),
+                        lpg_type: lpgType,
                     },
                 },
                 update: {
@@ -139,6 +156,7 @@ export class PenyaluranService {
                 create: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(item.tanggal),
+                    lpg_type: lpgType,
                     jumlah: item.jumlah,
                     tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
                 },

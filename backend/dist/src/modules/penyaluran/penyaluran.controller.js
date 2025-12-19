@@ -27,8 +27,8 @@ let PenyaluranController = class PenyaluranController {
     findAll(query) {
         return this.penyaluranService.findAll(query);
     }
-    getRekapitulasi(bulan, tipePembayaran) {
-        return this.penyaluranService.getRekapitulasi(bulan, tipePembayaran);
+    getRekapitulasi(bulan, tipePembayaran, lpgType) {
+        return this.penyaluranService.getRekapitulasi(bulan, tipePembayaran, lpgType);
     }
     create(dto) {
         return this.penyaluranService.create(dto);
@@ -55,8 +55,9 @@ __decorate([
     (0, common_1.Get)('rekapitulasi'),
     __param(0, (0, common_1.Query)('bulan')),
     __param(1, (0, common_1.Query)('tipe_pembayaran')),
+    __param(2, (0, common_1.Query)('lpg_type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], PenyaluranController.prototype, "getRekapitulasi", null);
 __decorate([

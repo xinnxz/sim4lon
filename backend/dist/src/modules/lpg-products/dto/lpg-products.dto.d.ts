@@ -13,6 +13,7 @@ export declare class UpdateLpgProductDto {
     size_kg?: number;
     category?: lpg_category;
     color?: string;
+    brand?: string;
     description?: string;
     selling_price?: number;
     cost_price?: number;

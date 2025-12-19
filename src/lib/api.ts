@@ -1825,9 +1825,10 @@ export const perencanaanApi = {
         return apiRequest(`/perencanaan?${urlParams.toString()}`);
     },
 
-    async getRekapitulasi(bulan: string, kondisi?: string): Promise<PerencanaanRekapitulasiResponse> {
+    async getRekapitulasi(bulan: string, kondisi?: string, lpgType?: string): Promise<PerencanaanRekapitulasiResponse> {
         const params = new URLSearchParams({ bulan });
         if (kondisi) params.append('kondisi', kondisi);
+        if (lpgType) params.append('lpg_type', lpgType);
         return apiRequest(`/perencanaan/rekapitulasi?${params.toString()}`);
     },
 
@@ -1898,8 +1899,10 @@ export interface PenyaluranRekapitulasiItem {
     alokasi: number;
     status: string;
     daily: Record<number, number>;
-    total: number;
+    total_normal: number;
+    total_fakultatif: number;
     sisa_alokasi: number;
+    grand_total: number;
 }
 
 export interface PenyaluranRekapitulasiResponse {
@@ -1925,9 +1928,10 @@ export const penyaluranApi = {
         return apiRequest(`/penyaluran?${urlParams.toString()}`);
     },
 
-    async getRekapitulasi(bulan: string, tipePembayaran?: string): Promise<PenyaluranRekapitulasiResponse> {
+    async getRekapitulasi(bulan: string, tipePembayaran?: string, lpgType?: string): Promise<PenyaluranRekapitulasiResponse> {
         const params = new URLSearchParams({ bulan });
         if (tipePembayaran) params.append('tipe_pembayaran', tipePembayaran);
+        if (lpgType) params.append('lpg_type', lpgType);
         return apiRequest(`/penyaluran/rekapitulasi?${params.toString()}`);
     },
 

@@ -8,12 +8,12 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Penyaluran - SIM4LON">
-  <ProtectedDashboard client:load>
+  <ProtectedDashboard client:load allowedRoles={['ADMIN']}>
     <AdminHeader client:load />
     <AppSidebarLayout client:load headerHeight="64px">
-      <main class="flex-1 flex flex-col dashboard-gradient-bg">
-        <div class="flex-1 overflow-auto">
-          <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main class="flex-1 flex flex-col dashboard-gradient-bg min-w-0">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-[calc(100vw-16rem)]">
             {/* Page Header */}
             <div class="mb-6 flex items-center gap-3">
               <div class="h-12 w-1.5 rounded-full bg-gradient-to-b from-green-500 via-green-400 to-emerald-400"></div>

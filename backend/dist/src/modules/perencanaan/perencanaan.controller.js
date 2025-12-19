@@ -27,8 +27,8 @@ let PerencanaanController = class PerencanaanController {
     findAll(query) {
         return this.perencanaanService.findAll(query);
     }
-    getRekapitulasi(bulan, kondisi) {
-        return this.perencanaanService.getRekapitulasi(bulan, kondisi);
+    getRekapitulasi(bulan, kondisi, lpgType) {
+        return this.perencanaanService.getRekapitulasi(bulan, kondisi, lpgType);
     }
     create(dto) {
         return this.perencanaanService.create(dto);
@@ -55,8 +55,9 @@ __decorate([
     (0, common_1.Get)('rekapitulasi'),
     __param(0, (0, common_1.Query)('bulan')),
     __param(1, (0, common_1.Query)('kondisi')),
+    __param(2, (0, common_1.Query)('lpg_type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], PerencanaanController.prototype, "getRekapitulasi", null);
 __decorate([
