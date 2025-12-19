@@ -64,6 +64,7 @@ class UpdateLpgProductDto {
     size_kg;
     category;
     color;
+    brand;
     description;
     selling_price;
     cost_price;
@@ -92,6 +93,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateLpgProductDto.prototype, "color", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateLpgProductDto.prototype, "brand", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

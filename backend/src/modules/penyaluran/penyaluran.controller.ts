@@ -19,8 +19,9 @@ export class PenyaluranController {
     getRekapitulasi(
         @Query('bulan') bulan: string,
         @Query('tipe_pembayaran') tipePembayaran?: string,
+        @Query('lpg_type') lpgType?: string,
     ) {
-        return this.penyaluranService.getRekapitulasi(bulan, tipePembayaran);
+        return this.penyaluranService.getRekapitulasi(bulan, tipePembayaran, lpgType);
     }
 
     @Post()

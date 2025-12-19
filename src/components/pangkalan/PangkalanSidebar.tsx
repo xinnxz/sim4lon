@@ -79,7 +79,7 @@ export default function PangkalanSidebar() {
 
     return (
         <Sidebar className="border-r bg-white dark:bg-slate-950">
-            <SidebarContent className="pt-4">
+            <SidebarContent className="pt-4 sidebar-scrollbar-modern">
                 <SidebarGroup>
                     <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">
                         Menu

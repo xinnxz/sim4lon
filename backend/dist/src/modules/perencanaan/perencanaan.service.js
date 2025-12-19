@@ -60,7 +60,7 @@ let PerencanaanService = class PerencanaanService {
         });
         return data;
     }
-    async getRekapitulasi(bulan, kondisi) {
+    async getRekapitulasi(bulan, kondisi, lpgType) {
         const [year, month] = bulan.split('-').map(Number);
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0);
@@ -80,6 +80,9 @@ let PerencanaanService = class PerencanaanService {
         };
         if (kondisi) {
             where.kondisi = kondisi;
+        }
+        if (lpgType) {
+            where.lpg_type = lpgType;
         }
         const perencanaan = await this.prisma.perencanaan_harian.findMany({
             where,
@@ -123,11 +126,13 @@ let PerencanaanService = class PerencanaanService {
         };
     }
     async create(dto) {
+        const lpgType = dto.lpg_type || 'kg3';
         return this.prisma.perencanaan_harian.upsert({
             where: {
-                pangkalan_id_tanggal: {
+                pangkalan_id_tanggal_lpg_type: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(dto.tanggal),
+                    lpg_type: lpgType,
                 },
             },
             update: {
@@ -138,6 +143,7 @@ let PerencanaanService = class PerencanaanService {
             create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(dto.tanggal),
+                lpg_type: lpgType,
                 jumlah: dto.jumlah,
                 kondisi: (dto.kondisi || 'NORMAL'),
                 alokasi_bulan: dto.alokasi_bulan || 0,
@@ -145,11 +151,13 @@ let PerencanaanService = class PerencanaanService {
         });
     }
     async bulkUpdate(dto) {
+        const lpgType = dto.lpg_type || 'kg3';
         const operations = dto.data.map(item => this.prisma.perencanaan_harian.upsert({
             where: {
-                pangkalan_id_tanggal: {
+                pangkalan_id_tanggal_lpg_type: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(item.tanggal),
+                    lpg_type: lpgType,
                 },
             },
             update: {
@@ -159,6 +167,7 @@ let PerencanaanService = class PerencanaanService {
             create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(item.tanggal),
+                lpg_type: lpgType,
                 jumlah: item.jumlah,
                 kondisi: (dto.kondisi || 'NORMAL'),
             },

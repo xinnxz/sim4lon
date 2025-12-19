@@ -61,6 +61,10 @@ export class UpdateLpgProductDto {
 
     @IsOptional()
     @IsString()
+    brand?: string;
+
+    @IsOptional()
+    @IsString()
     description?: string;
 
     @IsOptional()

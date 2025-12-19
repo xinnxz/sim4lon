@@ -6,15 +6,15 @@ export declare class PenerimaanController {
     findAll(query: GetPenerimaanQueryDto): Promise<{
         data: {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            tanggal: Date;
             no_so: string;
             no_lo: string;
             nama_material: string;
             qty_pcs: number;
             qty_kg: import("@prisma/client/runtime/library").Decimal;
-            tanggal: Date;
             sumber: string | null;
-            created_at: Date;
-            updated_at: Date;
         }[];
         meta: {
             total: number;
@@ -39,26 +39,26 @@ export declare class PenerimaanController {
     }>;
     create(dto: CreatePenerimaanDto): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        tanggal: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
         qty_pcs: number;
         qty_kg: import("@prisma/client/runtime/library").Decimal;
-        tanggal: Date;
         sumber: string | null;
-        created_at: Date;
-        updated_at: Date;
     }>;
     delete(id: string): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        tanggal: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
         qty_pcs: number;
         qty_kg: import("@prisma/client/runtime/library").Decimal;
-        tanggal: Date;
         sumber: string | null;
-        created_at: Date;
-        updated_at: Date;
     }>;
 }

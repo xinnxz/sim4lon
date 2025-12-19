@@ -54,7 +54,7 @@ let PenyaluranService = class PenyaluranService {
         });
         return data;
     }
-    async getRekapitulasi(bulan, tipePembayaran) {
+    async getRekapitulasi(bulan, tipePembayaran, lpgType) {
         const [year, month] = bulan.split('-').map(Number);
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0);
@@ -68,21 +68,31 @@ let PenyaluranService = class PenyaluranService {
         if (tipePembayaran) {
             where.tipe_pembayaran = tipePembayaran;
         }
+        if (lpgType) {
+            where.lpg_type = lpgType;
+        }
         const penyaluran = await this.prisma.penyaluran_harian.findMany({
             where,
             orderBy: { tanggal: 'asc' },
         });
         const result = pangkalans.map(pangkalan => {
             const dailyData = {};
-            let total = 0;
+            let totalNormal = 0;
+            let totalFakultatif = 0;
             for (let day = 1; day <= daysInMonth; day++) {
                 dailyData[day] = 0;
             }
             const pangkalanData = penyaluran.filter(p => p.pangkalan_id === pangkalan.id);
             for (const p of pangkalanData) {
                 const day = new Date(p.tanggal).getDate();
-                dailyData[day] = p.jumlah;
-                total += p.jumlah;
+                dailyData[day] += p.jumlah;
+                const kondisi = p.kondisi || 'NORMAL';
+                if (kondisi === 'NORMAL') {
+                    totalNormal += p.jumlah;
+                }
+                else {
+                    totalFakultatif += p.jumlah;
+                }
             }
             return {
                 id_registrasi: pangkalan.code,
@@ -91,18 +101,22 @@ let PenyaluranService = class PenyaluranService {
                 alokasi: pangkalan.alokasi_bulanan,
                 status: 'AKTIF',
                 daily: dailyData,
-                total,
-                sisa_alokasi: pangkalan.alokasi_bulanan - total,
+                total_normal: totalNormal,
+                total_fakultatif: totalFakultatif,
+                sisa_alokasi: pangkalan.alokasi_bulanan - totalNormal - totalFakultatif,
+                grand_total: totalNormal + totalFakultatif,
             };
         });
         return { bulan, days_in_month: daysInMonth, data: result };
     }
     async create(dto) {
+        const lpgType = dto.lpg_type || 'kg3';
         return this.prisma.penyaluran_harian.upsert({
             where: {
-                pangkalan_id_tanggal: {
+                pangkalan_id_tanggal_lpg_type: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(dto.tanggal),
+                    lpg_type: lpgType,
                 },
             },
             update: {
@@ -112,17 +126,20 @@ let PenyaluranService = class PenyaluranService {
             create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(dto.tanggal),
+                lpg_type: lpgType,
                 jumlah: dto.jumlah,
                 tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
             },
         });
     }
     async bulkUpdate(dto) {
+        const lpgType = dto.lpg_type || 'kg3';
         const operations = dto.data.map(item => this.prisma.penyaluran_harian.upsert({
             where: {
-                pangkalan_id_tanggal: {
+                pangkalan_id_tanggal_lpg_type: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(item.tanggal),
+                    lpg_type: lpgType,
                 },
             },
             update: {
@@ -132,6 +149,7 @@ let PenyaluranService = class PenyaluranService {
             create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(item.tanggal),
+                lpg_type: lpgType,
                 jumlah: item.jumlah,
                 tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
             },

@@ -100,14 +100,7 @@ export class LpgProductsService {
         return this.prisma.lpg_products.update({
             where: { id },
             data: {
-                name: dto.name,
-                size_kg: dto.size_kg,
-                category: dto.category,
-                color: dto.color,
-                description: dto.description,
-                selling_price: dto.selling_price,
-                cost_price: dto.cost_price,
-                is_active: dto.is_active,
+                ...dto,
                 updated_at: new Date(),
             },
         });

@@ -1,109 +1,18 @@
 /**
- * DashboardKPICards - KPI Cards dengan Data Real dari API
+ * DashboardKPICards - KPI Cards dengan Styling Premium seperti Pangkalan Dashboard
  * 
  * PENJELASAN:
- * Component ini menampilkan 4 KPI cards di dashboard:
- * 1. Total Pesanan Hari Ini
- * 2. Pesanan Belum Diproses (pending)
- * 3. Pesanan Selesai Hari Ini
- * 4. Total Stok LPG
- * 
- * Data diambil dari API /dashboard/stats menggunakan useEffect.
+ * Component ini menampilkan 4 KPI cards di dashboard dengan gradient colors yang vibrant:
+ * 1. Total Pesanan Hari Ini - Blue gradient
+ * 2. Pesanan Belum Diproses (pending) - Orange/Amber gradient
+ * 3. Pesanan Selesai Hari Ini - Green gradient
+ * 4. Total Stok LPG - White with purple accent
  */
 
 import { useState, useEffect } from 'react'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import SafeIcon from '@/components/common/SafeIcon'
-import { use3DTilt } from '@/hooks/use3DTilt'
 import { dashboardApi, type DashboardStats } from '@/lib/api'
-
-interface KPICardData {
-  title: string
-  value: string
-  change: string
-  changeType: 'positive' | 'negative'
-  icon: string
-  color: string
-  iconColor: string
-}
-
-interface KPICardItemProps {
-  kpi: KPICardData
-  index: number
-}
-
-const KPICardItem = ({ kpi, index }: KPICardItemProps) => {
-  const { cardRef, isHovering, handleMouseMove, handleMouseEnter, handleMouseLeave, getTransform } = use3DTilt()
-
-  return (
-    <div
-      ref={cardRef}
-      className={`animate-scaleIn kpi-card-${index + 1}`}
-      style={{
-        perspective: '1000px',
-        transformStyle: 'preserve-3d',
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div
-        style={{
-          transform: getTransform(),
-          transformStyle: 'preserve-3d',
-          transition: isHovering ? 'none' : 'transform 0.5s cubic-bezier(0.23, 1, 0.320, 1)',
-        }}
-      >
-        <div
-          className="overflow-hidden transition-all duration-300 ease-out cursor-default group relative h-full rounded-2xl glass-card shimmer-effect"
-          style={{
-            boxShadow: isHovering
-              ? '0 20px 40px -8px rgba(0, 0, 0, 0.15), 0 0 30px -5px rgba(22, 163, 74, 0.1)'
-              : '0 4px 20px -4px rgba(0, 0, 0, 0.08)',
-            pointerEvents: 'auto'
-          }}
-        >
-          {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10">
-            <CardTitle className="text-sm sm:text-base font-semibold leading-tight text-foreground/80">{kpi.title}</CardTitle>
-            <div
-              className={`${kpi.color} p-3 rounded-xl flex-shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}
-              style={{
-                boxShadow: `0 4px 15px -3px ${kpi.iconColor.includes('blue') ? 'rgba(59, 130, 246, 0.3)' :
-                  kpi.iconColor.includes('amber') ? 'rgba(245, 158, 11, 0.3)' :
-                    kpi.iconColor.includes('green') ? 'rgba(34, 197, 94, 0.3)' :
-                      'rgba(168, 85, 247, 0.3)'}`
-              }}
-            >
-              <SafeIcon name={kpi.icon} className={`h-5 w-5 ${kpi.iconColor}`} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 relative z-10">
-            <div className="text-3xl sm:text-4xl font-bold transition-colors duration-300 tracking-tight">{kpi.value}</div>
-            <Badge
-              variant={kpi.changeType === 'positive' ? 'default' : 'destructive'}
-              className="text-xs font-semibold transition-all duration-300 px-3 py-1"
-            >
-              {kpi.change}
-            </Badge>
-          </CardContent>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * Loading skeleton untuk KPI cards
- */
-const KPICardSkeleton = ({ index }: { index: number }) => (
-  <div className={`animate-pulse kpi-card-${index + 1}`}>
-    <div className="h-32 bg-muted rounded-xl" />
-  </div>
-)
 
 /**
  * Format angka dengan separator ribuan
@@ -112,14 +21,20 @@ function formatNumber(num: number): string {
   return new Intl.NumberFormat('id-ID').format(num)
 }
 
+/**
+ * Loading skeleton untuk KPI cards
+ */
+const KPICardSkeleton = ({ index }: { index: number }) => (
+  <div className={`animate-pulse kpi-card-${index + 1}`}>
+    <div className="h-32 bg-slate-200 rounded-2xl" />
+  </div>
+)
+
 export default function DashboardKPICards() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  /**
-   * Fetch data dari API saat component mount
-   */
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -138,10 +53,9 @@ export default function DashboardKPICards() {
     fetchStats()
   }, [])
 
-  // Show loading skeleton while fetching
   if (isLoading) {
     return (
-      <div id="il6kka" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-2">
         {[0, 1, 2, 3].map((index) => (
           <KPICardSkeleton key={index} index={index} />
         ))}
@@ -149,64 +63,85 @@ export default function DashboardKPICards() {
     )
   }
 
-  // Build KPI data from API response
-  // Calculate total stock - ONLY from dynamic products (no legacy fallback)
-  const totalStock = stats?.dynamicProducts?.reduce((sum, p) => sum + p.stock.current, 0) || 0;
-  const hasProducts = stats?.dynamicProducts && stats.dynamicProducts.length > 0;
-
-  // Format stock breakdown for badge text
-  const getStockBreakdown = () => {
-    if (!hasProducts) {
-      return 'Belum ada produk LPG';
-    }
-    const productCount = stats!.dynamicProducts.length;
-    return `${productCount} jenis produk`;
-  };
-
-  const kpiData: KPICardData[] = [
-    {
-      title: 'Total Pesanan',
-      value: formatNumber(stats?.todayOrders || 0),
-      change: 'Hari ini',
-      changeType: 'positive',
-      icon: 'ShoppingCart',
-      color: 'bg-blue-50',
-      iconColor: 'text-blue-600'
-    },
-    {
-      title: 'Menunggu Pembayaran',
-      value: formatNumber(stats?.pendingOrders || 0),
-      change: 'Perlu ditagih',
-      changeType: stats && stats.pendingOrders > 5 ? 'negative' : 'positive',
-      icon: 'Clock',
-      color: 'bg-amber-50',
-      iconColor: 'text-amber-600'
-    },
-    {
-      title: 'Pesanan Selesai',
-      value: formatNumber(stats?.completedOrders || 0),
-      change: 'Hari ini',
-      changeType: 'positive',
-      icon: 'Truck',
-      color: 'bg-green-50',
-      iconColor: 'text-green-600'
-    },
-    {
-      title: 'Total Stok LPG',
-      value: formatNumber(totalStock),
-      change: getStockBreakdown(),
-      changeType: totalStock < 100 ? 'negative' : 'positive',
-      icon: 'Package',
-      color: 'bg-purple-50',
-      iconColor: 'text-purple-600'
-    }
-  ]
+  // Calculate totals
+  const totalStock = stats?.dynamicProducts?.reduce((sum, p) => sum + p.stock.current, 0) || 0
+  const productCount = stats?.dynamicProducts?.length || 0
 
   return (
-    <div id="il6kka" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-2">
-      {kpiData.map((kpi, index) => (
-        <KPICardItem key={kpi.title} kpi={kpi} index={index} />
-      ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-2">
+      {/* Total Pesanan - Blue Gradient */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <CardHeader className="pb-2 relative">
+          <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+            <SafeIcon name="ShoppingCart" className="h-4 w-4" />
+            Total Pesanan
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <p className="text-3xl lg:text-4xl font-bold tracking-tight">{formatNumber(stats?.todayOrders || 0)}</p>
+          <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
+            <SafeIcon name="CalendarDays" className="h-3.5 w-3.5" />
+            Hari ini
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Menunggu Pembayaran - Amber/Orange Gradient */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/35 transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <CardHeader className="pb-2 relative">
+          <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+            <SafeIcon name="Clock" className="h-4 w-4" />
+            Menunggu Pembayaran
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <p className="text-3xl lg:text-4xl font-bold tracking-tight">{formatNumber(stats?.pendingOrders || 0)}</p>
+          <p className="text-amber-100 text-sm mt-2 flex items-center gap-1">
+            <SafeIcon name="AlertCircle" className="h-3.5 w-3.5" />
+            Perlu ditagih
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Pesanan Selesai - Green Gradient */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/35 transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <CardHeader className="pb-2 relative">
+          <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+            <SafeIcon name="Truck" className="h-4 w-4" />
+            Pesanan Selesai
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <p className="text-3xl lg:text-4xl font-bold tracking-tight">{formatNumber(stats?.completedOrders || 0)}</p>
+          <p className="text-green-100 text-sm mt-2 flex items-center gap-1">
+            <SafeIcon name="CheckCircle2" className="h-3.5 w-3.5" />
+            Hari ini
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Total Stok - White with Purple accent */}
+      <Card className="relative overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-100 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <CardHeader className="pb-2 relative">
+          <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
+              <SafeIcon name="Package" className="h-4 w-4 text-purple-600" />
+            </div>
+            Total Stok LPG
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <p className="text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">{formatNumber(totalStock)}</p>
+          <p className="text-slate-500 text-sm mt-2 flex items-center gap-1">
+            <SafeIcon name="Layers" className="h-3.5 w-3.5" />
+            {productCount > 0 ? `${productCount} jenis produk` : 'Belum ada produk'}
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

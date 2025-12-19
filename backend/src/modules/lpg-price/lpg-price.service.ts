@@ -19,6 +19,7 @@ export class LpgPriceService {
 
     // Default harga jika belum ada setting
     private readonly DEFAULT_PRICES: Record<lpg_type, { cost: number; sell: number }> = {
+        gr220: { cost: 3000, sell: 5000 },
         kg3: { cost: 16000, sell: 20000 },
         kg5: { cost: 52000, sell: 60000 },
         kg12: { cost: 142000, sell: 180000 },
@@ -57,7 +58,7 @@ export class LpgPriceService {
      * Create default prices for all LPG types
      */
     async createDefaultPrices(pangkalanId: string) {
-        const lpgTypes: lpg_type[] = ['kg3', 'kg5', 'kg12', 'kg50'];
+        const lpgTypes: lpg_type[] = ['gr220', 'kg3', 'kg5', 'kg12', 'kg50'];
 
         for (const type of lpgTypes) {
             const defaultPrice = this.DEFAULT_PRICES[type];
