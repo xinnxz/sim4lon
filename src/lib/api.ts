@@ -2030,6 +2030,7 @@ export const penerimaanApi = {
         qty_kg: number;
         tanggal: string;
         sumber?: string;
+        lpg_product_id?: string; // Link to product for chart integration
     }): Promise<PenerimaanStok> {
         return apiRequest('/penerimaan', {
             method: 'POST',

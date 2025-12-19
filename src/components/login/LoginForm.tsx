@@ -96,10 +96,12 @@ export default function LoginForm() {
   return (
     <Card className="border-0 shadow-lg animate-scaleIn">
       <CardHeader className="space-y-2 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80">
-            <SafeIcon name="Flame" className="h-8 w-8 text-primary-foreground" />
-          </div>
+        <div className="flex justify-center mb-4 mt-8">
+          <img
+            src="/src/assets/logo-pertamina-2.png"
+            alt="Pertamina"
+            className="h-16 object-contain"
+          />
         </div>
         <CardTitle className="text-2xl font-bold">SIM4LON</CardTitle>
         <CardDescription className="text-base">
@@ -203,7 +205,10 @@ export default function LoginForm() {
           {/* Demo Credentials Info */}
           <div className="mt-6 p-3 bg-secondary/50 rounded-lg border border-border animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium">Demo:</span> admin@sim4lon.co.id / admin123
+              <span className="font-medium">Demo:</span> admin@agen.com / admin123
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              <span className="font-medium">Demo:</span> pangkalan@test.com / password123
             </p>
           </div>
         </form>

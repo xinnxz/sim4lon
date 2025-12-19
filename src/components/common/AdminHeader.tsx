@@ -154,12 +154,11 @@ export default function AdminHeader({
         <div className="w-full flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & App Name */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <SafeIcon name="Flame" className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-foreground">SIM4LON</h1>
-            </div>
+            <img
+              src="/src/assets/logo-pertamina.png"
+              alt="Pertamina"
+              className="h-10 object-contain"
+            />
           </div>
 
           {/* Right Section: Notifications & User */}

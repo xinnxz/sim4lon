@@ -19,6 +19,7 @@ class CreatePenerimaanDto {
     qty_kg;
     tanggal;
     sumber;
+    lpg_product_id;
 }
 exports.CreatePenerimaanDto = CreatePenerimaanDto;
 __decorate([
@@ -52,6 +53,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePenerimaanDto.prototype, "sumber", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreatePenerimaanDto.prototype, "lpg_product_id", void 0);
 class GetPenerimaanQueryDto {
     tanggal_awal;
     tanggal_akhir;

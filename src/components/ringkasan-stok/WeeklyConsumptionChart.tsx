@@ -5,57 +5,47 @@
  * 
  * PENJELASAN:
  * Chart ini menampilkan tren pemakaian stok 7 hari terakhir untuk produk LPG AKTIF saja.
- * - Data diambil dari API stock-histories (movement KELUAR dalam 7 hari)
+ * - Data diambil dari API dashboardApi.getStockChart() (sama dengan dashboard)
  * - Warna line sesuai dengan product.color di database
  * - Tooltip dengan info lengkap (nama produk, qty, kategori)
  * - Auto sync dengan perubahan produk via refreshTrigger
+ * - Menggunakan AreaChart dengan premium styling
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Area, AreaChart
 } from 'recharts'
 import SafeIcon from '@/components/common/SafeIcon'
-import { lpgProductsApi, type LpgProductWithStock } from '@/lib/api'
+import { dashboardApi } from '@/lib/api'
 
 interface WeeklyConsumptionChartProps {
   refreshTrigger?: number
 }
 
-// Color palette matching product colors
-const colorMap: Record<string, string> = {
-  hijau: '#22c55e',
-  biru: '#38bdf8',
-  pink: '#ec4899',
-  kuning: '#eab308',
-  merah: '#dc2626',
-  ungu: '#a855f7',
-  orange: '#f97316',
+interface ProductInfo {
+  id: string
+  name: string
+  color: string
 }
 
-const getProductColor = (colorName: string | null): string => {
-  if (!colorName) return '#6b7280'
-  return colorMap[colorName.toLowerCase()] || '#6b7280'
+interface ChartResponse {
+  products: ProductInfo[]
+  data: Record<string, any>[]
 }
 
-// Generate last 7 days labels (Senin, Selasa, etc.)
-const getLast7Days = () => {
-  const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
-  const result = []
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    const dayName = days[date.getDay()]
-    const dateStr = `${date.getDate()}/${date.getMonth() + 1}`
-    result.push({ day: dayName, date: dateStr, fullDate: date.toISOString().split('T')[0] })
-  }
-  return result
+// Fungsi untuk menentukan level pemakaian (sama dengan dashboard)
+const getUsageLevel = (qty: number) => {
+  if (qty <= 0) return { text: 'TIDAK ADA', color: 'text-gray-500 bg-gray-100' }
+  if (qty >= 50) return { text: 'TINGGI', color: 'text-green-600 bg-green-100' }
+  if (qty >= 20) return { text: 'SEDANG', color: 'text-blue-600 bg-blue-100' }
+  return { text: 'RENDAH', color: 'text-yellow-600 bg-yellow-100' }
 }
 
-// Premium Custom Tooltip
+// Premium Custom Tooltip (enhanced from dashboard version)
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null
 
@@ -63,7 +53,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
   return (
     <div
-      className="rounded-xl border shadow-2xl p-4 min-w-[200px]"
+      className="rounded-xl border shadow-2xl p-4 min-w-[240px]"
       style={{
         background: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95))',
         backdropFilter: 'blur(12px)',
@@ -72,30 +62,38 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-        <span className="text-sm font-bold text-gray-800">{label}</span>
-        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-          Total: {totalQty}
+        <span className="text-sm font-bold text-gray-800">📦 Pemakaian - {label}</span>
+        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary font-bold">
+          {totalQty} Unit
         </Badge>
       </div>
 
       {/* Items */}
       <div className="space-y-2">
-        {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full shadow-sm"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-sm text-gray-700 font-medium truncate max-w-[120px]">
-                {entry.name}
-              </span>
+        {payload.map((entry: any, index: number) => {
+          const level = getUsageLevel(entry.value)
+          return (
+            <div key={index} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full shadow-sm"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-sm text-gray-700 font-medium truncate max-w-[100px]">
+                  {entry.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold" style={{ color: entry.color }}>
+                  {entry.value || 0}
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${level.color}`}>
+                  {level.text}
+                </span>
+              </div>
             </div>
-            <span className="text-sm font-bold" style={{ color: entry.color }}>
-              {entry.value || 0} <span className="text-xs font-normal text-gray-400">tabung</span>
-            </span>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -124,53 +122,29 @@ const CustomLegend = ({ payload }: any) => {
 }
 
 export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsumptionChartProps) {
-  const [products, setProducts] = useState<LpgProductWithStock[]>([])
+  const [chartData, setChartData] = useState<ChartResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch only active products
+  // Fetch data from same API as dashboard
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true)
-        // getWithStock already filters to active products only
-        const data = await lpgProductsApi.getWithStock()
-        setProducts(data)
+        // Use SAME API as dashboard chart for consistent data
+        const response = await dashboardApi.getStockChart()
+        setChartData(response as ChartResponse)
         setError(null)
       } catch (err) {
-        console.error('Failed to fetch products for chart:', err)
+        console.error('Failed to fetch stock consumption chart:', err)
         setError('Gagal memuat data')
+        setChartData(null)
       } finally {
         setIsLoading(false)
       }
     }
-    fetchProducts()
+    fetchData()
   }, [refreshTrigger])
-
-  // Generate chart data
-  const chartData = useMemo(() => {
-    const days = getLast7Days()
-
-    // For now, use stock as baseline and simulate daily consumption
-    // In production, this would fetch from stock_histories movement data
-    return days.map((dayInfo, dayIndex) => {
-      const dataPoint: Record<string, any> = {
-        day: `${dayInfo.day} ${dayInfo.date}`,
-        shortDay: dayInfo.day,
-      }
-
-      products.forEach((product) => {
-        // Simulate realistic consumption pattern based on stock
-        // Active products show activity, weighted by current stock
-        const baseConsumption = product.stock?.current || 0
-        const variance = Math.sin((dayIndex + products.indexOf(product)) * 0.8) * 0.3 + 0.7
-        const consumption = Math.round(Math.max(1, baseConsumption * 0.08 * variance))
-        dataPoint[product.id] = consumption
-      })
-
-      return dataPoint
-    })
-  }, [products])
 
   // Loading state with premium skeleton
   if (isLoading) {
@@ -216,7 +190,7 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
   }
 
   // Empty state
-  if (products.length === 0) {
+  if (!chartData || chartData.data.length === 0 || chartData.products.length === 0) {
     return (
       <Card className="overflow-hidden border-0 shadow-lg">
         <div className="h-1 bg-gradient-to-r from-gray-300 to-gray-400" />
@@ -225,8 +199,8 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
             <div className="p-3 rounded-xl bg-gray-100/50">
               <SafeIcon name="BarChart3" className="h-6 w-6 text-gray-400" />
             </div>
-            <p className="text-sm font-medium text-gray-500">Belum ada produk aktif</p>
-            <p className="text-xs text-muted-foreground">Aktifkan produk untuk melihat grafik pemakaian</p>
+            <p className="text-sm font-medium text-gray-500">Belum ada data pemakaian</p>
+            <p className="text-xs text-muted-foreground">Data akan muncul setelah ada pergerakan stok</p>
           </div>
         </CardContent>
       </Card>
@@ -250,7 +224,7 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
             <div>
               <CardTitle className="text-lg font-bold">Tren Pemakaian Mingguan</CardTitle>
               <CardDescription className="text-xs">
-                Pergerakan stok 7 hari terakhir • {products.length} produk aktif
+                Pergerakan stok 7 hari terakhir • {chartData.products.length} produk aktif
               </CardDescription>
             </div>
           </div>
@@ -264,12 +238,12 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
       <CardContent className="pt-0">
         <div className="w-full h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 20, right: 20, left: -10, bottom: 0 }}>
+            <AreaChart data={chartData.data} margin={{ top: 20, right: 20, left: -10, bottom: 0 }}>
               <defs>
-                {products.map((product) => (
-                  <linearGradient key={`gradient-${product.id}`} id={`gradient-${product.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={getProductColor(product.color)} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={getProductColor(product.color)} stopOpacity={0.02} />
+                {chartData.products.map((product) => (
+                  <linearGradient key={`gradient-${product.id}`} id={`gradient-stock-${product.id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={product.color} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={product.color} stopOpacity={0.02} />
                   </linearGradient>
                 ))}
               </defs>
@@ -282,7 +256,7 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
               />
 
               <XAxis
-                dataKey="shortDay"
+                dataKey="day"
                 stroke="hsl(var(--muted-foreground))"
                 style={{ fontSize: '11px', fontWeight: 500 }}
                 tickLine={false}
@@ -304,18 +278,18 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
 
               <Legend content={<CustomLegend />} />
 
-              {/* Dynamic Areas for each active product */}
-              {products.map((product, index) => (
+              {/* Dynamic Areas for each product - same data as dashboard */}
+              {chartData.products.map((product, index) => (
                 <Area
                   key={product.id}
                   type="monotone"
                   dataKey={product.id}
                   name={product.name}
-                  stroke={getProductColor(product.color)}
+                  stroke={product.color}
                   strokeWidth={2.5}
-                  fill={`url(#gradient-${product.id})`}
+                  fill={`url(#gradient-stock-${product.id})`}
                   dot={{
-                    fill: getProductColor(product.color),
+                    fill: product.color,
                     r: 4,
                     strokeWidth: 2,
                     stroke: 'white'
@@ -324,7 +298,7 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
                     r: 7,
                     strokeWidth: 3,
                     stroke: 'white',
-                    style: { filter: `drop-shadow(0 0 6px ${getProductColor(product.color)})` }
+                    style: { filter: `drop-shadow(0 0 6px ${product.color})` }
                   }}
                   animationBegin={index * 100}
                   animationDuration={800}

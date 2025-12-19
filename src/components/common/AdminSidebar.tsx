@@ -23,7 +23,7 @@ const menuGroups = [
     ]
   },
   {
-    label: 'Pertamina',
+    label: 'Operasional',
     items: [
       { name: 'Perencanaan', href: '/perencanaan', icon: 'CalendarDays' },
       { name: 'Penyaluran', href: '/penyaluran', icon: 'Send' },

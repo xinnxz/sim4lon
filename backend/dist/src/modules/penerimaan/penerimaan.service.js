@@ -70,12 +70,21 @@ let PenerimaanService = class PenerimaanService {
                     sumber: dto.sumber,
                 },
             });
+            let productId = dto.lpg_product_id;
+            if (!productId) {
+                const defaultProduct = await tx.lpg_products.findFirst({
+                    where: { size_kg: 3, category: 'SUBSIDI', is_active: true, deleted_at: null },
+                    select: { id: true },
+                });
+                productId = defaultProduct?.id;
+            }
             await tx.stock_histories.create({
                 data: {
                     movement_type: 'MASUK',
                     qty: dto.qty_pcs,
                     note: `Penerimaan SPBE - SO: ${dto.no_so}, LO: ${dto.no_lo}`,
                     lpg_type: client_1.lpg_type.kg3,
+                    lpg_product_id: productId || null,
                     timestamp: new Date(dto.tanggal),
                 },
             });
