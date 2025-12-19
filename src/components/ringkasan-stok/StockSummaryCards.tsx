@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 
 interface StockSummaryCardsProps {
   refreshTrigger?: number
+  showSummary?: boolean
 }
 
 // Map lpg_product size to old lpg_type for stock API
@@ -59,7 +60,7 @@ const getColorHex = (colorName: string | null): string => {
   return colorMap[colorName.toLowerCase()] || '#6b7280';
 }
 
-export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsProps) {
+export default function StockSummaryCards({ refreshTrigger, showSummary = true }: StockSummaryCardsProps) {
   const [products, setProducts] = useState<LpgProductWithStock[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -264,44 +265,44 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
 
   return (
     <div className="space-y-6">
-      {/* Total Stock Summary Section */}
-      <Card className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-primary/20">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Total Keseluruhan */}
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/20">
-                <SafeIcon name="Package" className="h-7 w-7 text-primary" />
+      {/* Total Stock Summary Section - Only show if showSummary is true */}
+      {showSummary && (
+        <div className="glass-card rounded-2xl overflow-hidden animate-fadeInUp">
+          <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              {/* Total Keseluruhan */}
+              <div className="flex items-center gap-4">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600" style={{ boxShadow: '0 4px 20px -4px rgba(34,197,94,0.5)' }}>
+                  <SafeIcon name="Package" className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Stok Keseluruhan</p>
+                  <p className="text-4xl font-bold text-foreground">{totalStock.toLocaleString('id-ID')} <span className="text-lg font-normal text-muted-foreground">unit</span></p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Stok Keseluruhan</p>
-                <p className="text-3xl font-bold text-foreground">{totalStock.toLocaleString('id-ID')} <span className="text-lg font-normal text-muted-foreground">unit</span></p>
-              </div>
-            </div>
 
-            {/* Breakdown by Category */}
-            <div className="flex gap-6 md:gap-8">
-              <div className="text-center md:text-right">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Subsidi</p>
-                <p className="text-xl font-bold text-green-600">{totalSubsidi.toLocaleString('id-ID')}</p>
-                <p className="text-xs text-muted-foreground">unit</p>
-              </div>
-              <div className="h-12 w-px bg-border hidden md:block" />
-              <div className="text-center md:text-right">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Non-Subsidi</p>
-                <p className="text-xl font-bold text-blue-600">{totalNonSubsidi.toLocaleString('id-ID')}</p>
-                <p className="text-xs text-muted-foreground">unit</p>
-              </div>
-              <div className="h-12 w-px bg-border hidden md:block" />
-              <div className="text-center md:text-right">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Jenis Produk</p>
-                <p className="text-xl font-bold text-foreground">{products.length}</p>
-                <p className="text-xs text-muted-foreground">produk aktif</p>
+              {/* Breakdown by Category - Equal Width Grid */}
+              <div className="grid grid-cols-3 gap-3 md:gap-4">
+                <div className="text-center p-4 rounded-xl bg-green-500/10 min-w-[100px]">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Subsidi</p>
+                  <p className="text-2xl font-bold text-green-600">{totalSubsidi.toLocaleString('id-ID')}</p>
+                  <p className="text-xs text-muted-foreground">unit</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-blue-500/10 min-w-[100px]">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Non-Subsidi</p>
+                  <p className="text-2xl font-bold text-blue-600">{totalNonSubsidi.toLocaleString('id-ID')}</p>
+                  <p className="text-xs text-muted-foreground">unit</p>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-purple-500/10 min-w-[100px]">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Jenis Produk</p>
+                  <p className="text-2xl font-bold text-purple-600">{products.length}</p>
+                  <p className="text-xs text-muted-foreground">produk aktif</p>
+                </div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* Product Stock Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -319,55 +320,86 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
               <Card
-                className={`border shadow-soft hover:shadow-card transition-all duration-300 overflow-hidden ${isEditing ? 'ring-2 ring-primary' : ''}`}
-                style={{ borderLeftWidth: '4px', borderLeftColor: getColorHex(product.color) }}
+                className={`overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${isEditing ? 'shadow-2xl scale-[1.02]' : ''}`}
+                style={{
+                  background: `linear-gradient(135deg, ${getColorHex(product.color)}08 0%, transparent 50%)`,
+                }}
               >
-                <CardHeader className="pb-2">
+                {/* Color accent bar at top */}
+                <div
+                  className="h-1.5 w-full"
+                  style={{ background: `linear-gradient(90deg, ${getColorHex(product.color)}, ${getColorHex(product.color)}80)` }}
+                />
+                <CardHeader className="pb-2 pt-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base font-bold truncate">{product.name}</CardTitle>
-                      <div className="text-muted-foreground text-xs">
+                      <CardTitle className="text-lg font-bold truncate">{product.name}</CardTitle>
+                      <div className="text-muted-foreground text-sm font-medium">
                         {product.size_kg} kg
                       </div>
                     </div>
                     <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${getColorHex(product.color)}30, ${getColorHex(product.color)}10)`,
+                        boxShadow: `0 4px 12px -2px ${getColorHex(product.color)}40`,
+                      }}
                     >
-                      <SafeIcon name="Cylinder" className="h-5 w-5 text-muted-foreground" />
+                      <SafeIcon name="Cylinder" className="h-6 w-6" style={{ color: getColorHex(product.color) }} />
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Current Stock - Large Display */}
-                  <div className="text-center py-2">
-                    <span className={`text-4xl font-bold ${product.stock.current < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                <CardContent className="space-y-4">
+                  {/* Current Stock - Large Display with gradient background */}
+                  <div
+                    className="text-center py-4 rounded-xl"
+                    style={{ background: `linear-gradient(135deg, ${getColorHex(product.color)}08, transparent)` }}
+                  >
+                    <span
+                      className={`text-5xl font-bold ${product.stock.current < 0 ? 'text-destructive' : ''}`}
+                      style={{ color: product.stock.current >= 0 ? getColorHex(product.color) : undefined }}
+                    >
                       {product.stock.current}
                     </span>
                     <span className="text-lg text-muted-foreground ml-2">unit</span>
                   </div>
 
-                  {/* Price & Category */}
-                  <div className="flex justify-between items-center text-xs">
-                    <Badge variant="outline" className="text-muted-foreground">
+                  {/* Price & Category with better styling */}
+                  <div className="flex justify-between items-center">
+                    <Badge
+                      variant="outline"
+                      className={`px-3 py-1 font-medium ${product.category === 'SUBSIDI'
+                        ? 'bg-green-500/10 text-green-700 border-green-300'
+                        : 'bg-blue-500/10 text-blue-700 border-blue-300'
+                        }`}
+                    >
                       {getCategoryLabel(product.category)}
                     </Badge>
                     {displayPrice > 0 && (
-                      <span className="font-semibold">{formatPrice(Number(displayPrice))}</span>
+                      <span className="font-bold text-lg">{formatPrice(Number(displayPrice))}</span>
                     )}
                   </div>
 
 
-                  {/* Edit Mode */}
+                  {/* Edit Mode - Enhanced UI */}
                   {isEditing ? (
-                    <div className="space-y-3 pt-2 border-t">
+                    <div
+                      className="space-y-4 pt-4 mt-3 rounded-2xl p-4 -mx-2"
+                      style={{
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)',
+                        boxShadow: '0 4px 20px -4px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.8)',
+                      }}
+                    >
+                      {/* Quantity Stepper */}
                       <div>
-                        <label className="text-xs font-medium text-muted-foreground">Jumlah</label>
-                        <div className="flex items-center gap-1">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
+                          Jumlah Unit
+                        </label>
+                        <div className="flex items-center gap-2">
                           <Button
                             type="button"
                             variant="outline"
-                            size="sm"
-                            className="h-10 w-10 p-0 select-none"
+                            className="h-12 w-12 p-0 select-none rounded-xl border-2 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all"
                             onClick={handleDecrement}
                             onMouseDown={() => startHold('decrement')}
                             onMouseUp={stopHold}
@@ -376,7 +408,7 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                             onTouchEnd={stopHold}
                             disabled={!editQuantity || parseInt(editQuantity) <= 0}
                           >
-                            <SafeIcon name="Minus" className="h-4 w-4" />
+                            <SafeIcon name="Minus" className="h-5 w-5" />
                           </Button>
                           <Input
                             type="text"
@@ -389,14 +421,13 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                             }}
                             onWheel={(e) => e.currentTarget.blur()}
                             placeholder="0"
-                            className="h-10 text-center text-lg font-semibold flex-1"
+                            className="h-12 text-center text-2xl font-bold flex-1 rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
                             autoFocus
                           />
                           <Button
                             type="button"
                             variant="outline"
-                            size="sm"
-                            className="h-10 w-10 p-0 select-none"
+                            className="h-12 w-12 p-0 select-none rounded-xl border-2 hover:bg-green-50 hover:border-green-300 hover:text-green-600 transition-all"
                             onClick={handleIncrement}
                             onMouseDown={() => startHold('increment')}
                             onMouseUp={stopHold}
@@ -404,15 +435,19 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                             onTouchStart={() => startHold('increment')}
                             onTouchEnd={stopHold}
                           >
-                            <SafeIcon name="Plus" className="h-4 w-4" />
+                            <SafeIcon name="Plus" className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-3">
                         <Button
-                          size="sm"
-                          className="bg-red-600 hover:bg-red-700 text-white"
+                          className="h-11 rounded-xl font-semibold gap-2"
+                          style={{
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            boxShadow: '0 4px 12px -2px rgba(239,68,68,0.4)',
+                          }}
                           onClick={() => handleSubmit(product, 'KELUAR')}
                           disabled={isSubmitting || !editQuantity}
                         >
@@ -420,14 +455,17 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                             <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
-                              <SafeIcon name="Minus" className="h-4 w-4 mr-1" />
+                              <SafeIcon name="ArrowDownCircle" className="h-4 w-4" />
                               Keluar
                             </>
                           )}
                         </Button>
                         <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="h-11 rounded-xl font-semibold gap-2"
+                          style={{
+                            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                            boxShadow: '0 4px 12px -2px rgba(34,197,94,0.4)',
+                          }}
                           onClick={() => handleSubmit(product, 'MASUK')}
                           disabled={isSubmitting || !editQuantity}
                         >
@@ -435,22 +473,21 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
                             <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
-                              <SafeIcon name="Plus" className="h-4 w-4 mr-1" />
+                              <SafeIcon name="ArrowUpCircle" className="h-4 w-4" />
                               Masuk
                             </>
                           )}
                         </Button>
                       </div>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full text-muted-foreground"
+                      {/* Cancel Button */}
+                      <button
+                        className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
                         onClick={handleCancelEdit}
                         disabled={isSubmitting}
                       >
                         Batal
-                      </Button>
+                      </button>
                     </div>
                   ) : (
                     <div className="flex justify-between items-center pt-2 border-t">
@@ -472,6 +509,6 @@ export default function StockSummaryCards({ refreshTrigger }: StockSummaryCardsP
           )
         })}
       </div>
-    </div>
+    </div >
   )
 }

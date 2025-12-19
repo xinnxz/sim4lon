@@ -369,6 +369,12 @@ export class OrderService {
         // PANGKALAN STOCK SYNC: Tambah stok pangkalan saat order selesai
         // Best practice: otomatis update inventory pangkalan ketika pesanan dari agen sudah SELESAI
         if (dto.status === 'SELESAI') {
+            // Sum total qty for penyaluran
+            const totalQtyForPenyaluran = updated.order_items.reduce(
+                (sum, item) => sum + (item.lpg_type === 'kg3' ? item.qty : 0),
+                0
+            );
+
             for (const item of updated.order_items) {
                 // Upsert pangkalan_stocks (buat jika belum ada, update jika sudah)
                 await this.prisma.pangkalan_stocks.upsert({
@@ -399,6 +405,32 @@ export class OrderService {
                         source: 'ORDER',
                         reference_id: updated.id,
                         note: `Stok masuk dari Order ${updated.code} - ${item.label || item.lpg_type}`,
+                    },
+                });
+            }
+
+            // PERTAMINA SYNC: Update penyaluran_harian for In-Out Agen reporting
+            // Penyaluran = distribusi dari agen ke pangkalan
+            if (totalQtyForPenyaluran > 0) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                await this.prisma.penyaluran_harian.upsert({
+                    where: {
+                        pangkalan_id_tanggal: {
+                            pangkalan_id: updated.pangkalan_id,
+                            tanggal: today,
+                        }
+                    },
+                    create: {
+                        pangkalan_id: updated.pangkalan_id,
+                        tanggal: today,
+                        jumlah: totalQtyForPenyaluran,
+                        tipe_pembayaran: 'CASHLESS',
+                    },
+                    update: {
+                        jumlah: { increment: totalQtyForPenyaluran },
+                        updated_at: new Date(),
                     },
                 });
             }

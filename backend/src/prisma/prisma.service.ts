@@ -63,6 +63,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     get pangkalan_stock_movements() { return this._client.pangkalan_stock_movements; }
     // New: LPG Price Settings
     get lpg_prices() { return this._client.lpg_prices; }
+    // New: Pertamina Integration
+    get perencanaan_harian() { return this._client.perencanaan_harian; }
+    get penyaluran_harian() { return this._client.penyaluran_harian; }
+    get penerimaan_stok() { return this._client.penerimaan_stok; }
 
     // Transaction support
     $transaction<T>(fn: Parameters<typeof this._client.$transaction>[0]): ReturnType<typeof this._client.$transaction> {

@@ -30,6 +30,7 @@ export declare class PangkalanService {
             pic_name: string | null;
             capacity: number | null;
             agen_id: string | null;
+            alokasi_bulanan: number;
         })[];
         meta: {
             total: number;
@@ -64,6 +65,7 @@ export declare class PangkalanService {
         pic_name: string | null;
         capacity: number | null;
         agen_id: string | null;
+        alokasi_bulanan: number;
     }>;
     create(dto: CreatePangkalanDto): Promise<{
         users: {
@@ -91,6 +93,7 @@ export declare class PangkalanService {
         pic_name: string | null;
         capacity: number | null;
         agen_id: string | null;
+        alokasi_bulanan: number;
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
         id: string;
@@ -108,6 +111,7 @@ export declare class PangkalanService {
         pic_name: string | null;
         capacity: number | null;
         agen_id: string | null;
+        alokasi_bulanan: number;
     }>;
     remove(id: string): Promise<{
         message: string;

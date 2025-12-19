@@ -23,6 +23,15 @@ const menuGroups = [
     ]
   },
   {
+    label: 'Pertamina',
+    items: [
+      { name: 'Perencanaan', href: '/perencanaan', icon: 'CalendarDays' },
+      { name: 'Penyaluran', href: '/penyaluran', icon: 'Send' },
+      { name: 'Penerimaan', href: '/penerimaan', icon: 'PackageCheck' },
+      { name: 'In / Out Agen', href: '/in-out-agen', icon: 'RefreshCw' },
+    ]
+  },
+  {
     label: 'Manajemen',
     items: [
       { name: 'Pangkalan', href: './daftar-pangkalan.html', icon: 'Store' },

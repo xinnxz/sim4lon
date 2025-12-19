@@ -298,6 +298,7 @@ let OrderService = class OrderService {
             }
         }
         if (dto.status === 'SELESAI') {
+            const totalQtyForPenyaluran = updated.order_items.reduce((sum, item) => sum + (item.lpg_type === 'kg3' ? item.qty : 0), 0);
             for (const item of updated.order_items) {
                 await this.prisma.pangkalan_stocks.upsert({
                     where: {
@@ -325,6 +326,28 @@ let OrderService = class OrderService {
                         source: 'ORDER',
                         reference_id: updated.id,
                         note: `Stok masuk dari Order ${updated.code} - ${item.label || item.lpg_type}`,
+                    },
+                });
+            }
+            if (totalQtyForPenyaluran > 0) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                await this.prisma.penyaluran_harian.upsert({
+                    where: {
+                        pangkalan_id_tanggal: {
+                            pangkalan_id: updated.pangkalan_id,
+                            tanggal: today,
+                        }
+                    },
+                    create: {
+                        pangkalan_id: updated.pangkalan_id,
+                        tanggal: today,
+                        jumlah: totalQtyForPenyaluran,
+                        tipe_pembayaran: 'CASHLESS',
+                    },
+                    update: {
+                        jumlah: { increment: totalQtyForPenyaluran },
+                        updated_at: new Date(),
                     },
                 });
             }

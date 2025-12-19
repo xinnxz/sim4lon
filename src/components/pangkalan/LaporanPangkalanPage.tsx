@@ -356,7 +356,7 @@ export default function LaporanPangkalanPage() {
                             <SafeIcon name="Package" className="h-5 w-5 text-slate-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide">Harga Modal</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wide">Harga Beli</p>
                             <p className="text-lg font-bold text-slate-900">Rp 16.000<span className="text-sm font-normal text-slate-500">/tabung</span></p>
                         </div>
                     </div>
