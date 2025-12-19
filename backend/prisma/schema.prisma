@@ -76,6 +76,8 @@ model pangkalans {
   note                      String?
   /// Agen/Distributor for this pangkalan
   agen_id                   String?                     @db.Uuid
+  /// Monthly allocation quota (from Pertamina)
+  alokasi_bulanan           Int                         @default(1000)
   is_active                 Boolean                     @default(true)
   created_at                DateTime                    @default(now()) @db.Timestamptz(6)
   updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
@@ -90,6 +92,9 @@ model pangkalans {
   pangkalan_stock_movements pangkalan_stock_movements[]
   pangkalan_stocks          pangkalan_stocks[]
   users                     users[]
+  /// Pertamina integration relations
+  perencanaan_harian        perencanaan_harian[]
+  penyaluran_harian         penyaluran_harian[]
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
@@ -213,6 +218,8 @@ model lpg_products {
   category        lpg_category      @default(NON_SUBSIDI)
   /// hijau, biru, pink
   color           String?           @db.VarChar(50)
+  /// Elpiji, Bright Gas, Arsy Gas, MyGas, PrimGas, GGA
+  brand           String?           @db.VarChar(50)
   description     String?
   /// Harga jual
   selling_price   Decimal           @default(0) @db.Decimal(15, 2)
@@ -537,4 +544,80 @@ enum stock_movement_type {
 enum consumer_payment_status {
   /// Paid in full
   LUNAS
+}
+
+/// Kondisi/condition type for perencanaan/penyaluran
+enum kondisi_type {
+  /// Normal allocation
+  NORMAL
+  /// Extra/fakultatif allocation
+  FAKULTATIF
+}
+
+/// =====================================================
+/// PERTAMINA INTEGRATION MODELS
+/// =====================================================
+
+/// Daily planning/alokasi for each pangkalan
+model perencanaan_harian {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id  String      @db.Uuid
+  /// Date of the planning
+  tanggal       DateTime    @db.Date
+  /// Planned quantity
+  jumlah        Int         @default(0)
+  /// Condition type: NORMAL or FAKULTATIF
+  kondisi       kondisi_type @default(NORMAL)
+  /// Monthly allocation limit
+  alokasi_bulan Int         @default(0)
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime    @default(now()) @db.Timestamptz(6)
+  pangkalans    pangkalans  @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([pangkalan_id, tanggal], map: "uq_perencanaan_pangkalan_tanggal")
+  @@index([pangkalan_id], map: "idx_perencanaan_pangkalan")
+  @@index([tanggal], map: "idx_perencanaan_tanggal")
+}
+
+/// Daily distribution/penyaluran for each pangkalan
+model penyaluran_harian {
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id    String      @db.Uuid
+  /// Date of the distribution
+  tanggal         DateTime    @db.Date
+  /// Distributed quantity
+  jumlah          Int         @default(0)
+  /// Payment type: CASHLESS, CASH
+  tipe_pembayaran String      @default("CASHLESS") @db.VarChar(20)
+  created_at      DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime    @default(now()) @db.Timestamptz(6)
+  pangkalans      pangkalans  @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([pangkalan_id, tanggal], map: "uq_penyaluran_pangkalan_tanggal")
+  @@index([pangkalan_id], map: "idx_penyaluran_pangkalan")
+  @@index([tanggal], map: "idx_penyaluran_tanggal")
+}
+
+/// Stock receipt/penerimaan from SPBE with SO/LO numbers
+model penerimaan_stok {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Sales Order number
+  no_so         String    @db.VarChar(50)
+  /// Loading Order number
+  no_lo         String    @db.VarChar(50)
+  /// Material name (e.g., "REFILL/ISI LPG @3KG (NET)")
+  nama_material String    @db.VarChar(255)
+  /// Quantity in pieces
+  qty_pcs       Int       @default(0)
+  /// Quantity in KG
+  qty_kg        Decimal   @default(0) @db.Decimal(10, 2)
+  /// Receipt date
+  tanggal       DateTime  @db.Date
+  /// Source/supplier name
+  sumber        String?   @db.VarChar(255)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([tanggal], map: "idx_penerimaan_tanggal")
+  @@index([no_so], map: "idx_penerimaan_no_so")
 }

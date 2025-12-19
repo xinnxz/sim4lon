@@ -599,6 +599,7 @@ export interface LpgProduct {
     size_kg: number;
     category: LpgCategory;
     color: string | null;
+    brand: string | null;
     description: string | null;
     selling_price: number;          // Harga jual default
     cost_price?: number | null;     // Harga beli (untuk profit)
@@ -665,6 +666,7 @@ export const lpgProductsApi = {
         size_kg?: number;
         category?: LpgCategory;
         color?: string;
+        brand?: string;
         description?: string;
         selling_price?: number;  // Harga jual
         cost_price?: number;     // Harga beli
@@ -1760,5 +1762,286 @@ export const agenApi = {
      */
     async getMyAgen(): Promise<Agen | null> {
         return apiRequest('/agen/my-agen');
+    },
+};
+
+// ============================================================
+// PERTAMINA INTEGRATION APIS
+// ============================================================
+
+// --- PERENCANAAN (PLANNING) ---
+
+export interface PerencanaanHarian {
+    id: string;
+    pangkalan_id: string;
+    tanggal: string;
+    jumlah: number;
+    kondisi: 'NORMAL' | 'FAKULTATIF';
+    alokasi_bulan: number;
+    pangkalans?: {
+        id: string;
+        code: string;
+        name: string;
+        alokasi_bulanan: number;
+        is_active: boolean;
+    };
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PerencanaanRekapitulasiItem {
+    id_registrasi: string;
+    nama_pangkalan: string;
+    pangkalan_id: string;
+    alokasi: number;
+    status: string;
+    daily: Record<number, number>;
+    total_normal: number;
+    total_fakultatif: number;
+    sisa_alokasi: number;
+    grand_total: number;
+}
+
+export interface PerencanaanRekapitulasiResponse {
+    bulan: string;
+    days_in_month: number;
+    data: PerencanaanRekapitulasiItem[];
+}
+
+export const perencanaanApi = {
+    async getAll(params?: {
+        pangkalan_id?: string;
+        bulan?: string;
+        tanggal_awal?: string;
+        tanggal_akhir?: string;
+        kondisi?: 'NORMAL' | 'FAKULTATIF';
+    }): Promise<PerencanaanHarian[]> {
+        const urlParams = new URLSearchParams();
+        if (params?.pangkalan_id) urlParams.append('pangkalan_id', params.pangkalan_id);
+        if (params?.bulan) urlParams.append('bulan', params.bulan);
+        if (params?.tanggal_awal) urlParams.append('tanggal_awal', params.tanggal_awal);
+        if (params?.tanggal_akhir) urlParams.append('tanggal_akhir', params.tanggal_akhir);
+        if (params?.kondisi) urlParams.append('kondisi', params.kondisi);
+        return apiRequest(`/perencanaan?${urlParams.toString()}`);
+    },
+
+    async getRekapitulasi(bulan: string, kondisi?: string): Promise<PerencanaanRekapitulasiResponse> {
+        const params = new URLSearchParams({ bulan });
+        if (kondisi) params.append('kondisi', kondisi);
+        return apiRequest(`/perencanaan/rekapitulasi?${params.toString()}`);
+    },
+
+    async create(data: {
+        pangkalan_id: string;
+        tanggal: string;
+        jumlah: number;
+        kondisi?: 'NORMAL' | 'FAKULTATIF';
+        alokasi_bulan?: number;
+    }): Promise<PerencanaanHarian> {
+        return apiRequest('/perencanaan', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async bulkUpdate(data: {
+        pangkalan_id: string;
+        tanggal_awal: string;
+        tanggal_akhir: string;
+        kondisi?: 'NORMAL' | 'FAKULTATIF';
+        data: { tanggal: string; jumlah: number }[];
+    }): Promise<PerencanaanHarian[]> {
+        return apiRequest('/perencanaan/bulk', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: {
+        jumlah?: number;
+        kondisi?: 'NORMAL' | 'FAKULTATIF';
+    }): Promise<PerencanaanHarian> {
+        return apiRequest(`/perencanaan/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string): Promise<void> {
+        return apiRequest(`/perencanaan/${id}`, { method: 'DELETE' });
+    },
+};
+
+// --- PENYALURAN (DISTRIBUTION) ---
+
+export interface PenyaluranHarian {
+    id: string;
+    pangkalan_id: string;
+    tanggal: string;
+    jumlah: number;
+    tipe_pembayaran: string;
+    pangkalans?: {
+        id: string;
+        code: string;
+        name: string;
+        alokasi_bulanan: number;
+        is_active: boolean;
+    };
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PenyaluranRekapitulasiItem {
+    id_registrasi: string;
+    nama_pangkalan: string;
+    pangkalan_id: string;
+    alokasi: number;
+    status: string;
+    daily: Record<number, number>;
+    total: number;
+    sisa_alokasi: number;
+}
+
+export interface PenyaluranRekapitulasiResponse {
+    bulan: string;
+    days_in_month: number;
+    data: PenyaluranRekapitulasiItem[];
+}
+
+export const penyaluranApi = {
+    async getAll(params?: {
+        pangkalan_id?: string;
+        bulan?: string;
+        tanggal_awal?: string;
+        tanggal_akhir?: string;
+        tipe_pembayaran?: string;
+    }): Promise<PenyaluranHarian[]> {
+        const urlParams = new URLSearchParams();
+        if (params?.pangkalan_id) urlParams.append('pangkalan_id', params.pangkalan_id);
+        if (params?.bulan) urlParams.append('bulan', params.bulan);
+        if (params?.tanggal_awal) urlParams.append('tanggal_awal', params.tanggal_awal);
+        if (params?.tanggal_akhir) urlParams.append('tanggal_akhir', params.tanggal_akhir);
+        if (params?.tipe_pembayaran) urlParams.append('tipe_pembayaran', params.tipe_pembayaran);
+        return apiRequest(`/penyaluran?${urlParams.toString()}`);
+    },
+
+    async getRekapitulasi(bulan: string, tipePembayaran?: string): Promise<PenyaluranRekapitulasiResponse> {
+        const params = new URLSearchParams({ bulan });
+        if (tipePembayaran) params.append('tipe_pembayaran', tipePembayaran);
+        return apiRequest(`/penyaluran/rekapitulasi?${params.toString()}`);
+    },
+
+    async create(data: {
+        pangkalan_id: string;
+        tanggal: string;
+        jumlah: number;
+        tipe_pembayaran?: string;
+    }): Promise<PenyaluranHarian> {
+        return apiRequest('/penyaluran', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async bulkUpdate(data: {
+        pangkalan_id: string;
+        tanggal_awal: string;
+        tanggal_akhir: string;
+        tipe_pembayaran?: string;
+        data: { tanggal: string; jumlah: number }[];
+    }): Promise<PenyaluranHarian[]> {
+        return apiRequest('/penyaluran/bulk', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: {
+        jumlah?: number;
+        tipe_pembayaran?: string;
+    }): Promise<PenyaluranHarian> {
+        return apiRequest(`/penyaluran/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string): Promise<void> {
+        return apiRequest(`/penyaluran/${id}`, { method: 'DELETE' });
+    },
+};
+
+// --- PENERIMAAN (STOCK RECEIPT) ---
+
+export interface PenerimaanStok {
+    id: string;
+    no_so: string;
+    no_lo: string;
+    nama_material: string;
+    qty_pcs: number;
+    qty_kg: number;
+    tanggal: string;
+    sumber: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface InOutAgenDaily {
+    stok_awal: number;
+    penerimaan: number;
+    penyaluran: number;
+    stok_akhir: number;
+}
+
+export interface InOutAgenResponse {
+    bulan: string;
+    days_in_month: number;
+    stok_awal_bulan: number;
+    stok_akhir_bulan: number;
+    total_penerimaan: number;
+    total_penyaluran: number;
+    daily: Record<number, InOutAgenDaily>;
+}
+
+export const penerimaanApi = {
+    async getAll(params?: {
+        bulan?: string;
+        tanggal_awal?: string;
+        tanggal_akhir?: string;
+        sumber?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<PaginatedResponse<PenerimaanStok>> {
+        const urlParams = new URLSearchParams();
+        if (params?.bulan) urlParams.append('bulan', params.bulan);
+        if (params?.tanggal_awal) urlParams.append('tanggal_awal', params.tanggal_awal);
+        if (params?.tanggal_akhir) urlParams.append('tanggal_akhir', params.tanggal_akhir);
+        if (params?.sumber) urlParams.append('sumber', params.sumber);
+        if (params?.page) urlParams.append('page', params.page.toString());
+        if (params?.limit) urlParams.append('limit', params.limit.toString());
+        return apiRequest(`/penerimaan?${urlParams.toString()}`);
+    },
+
+    async create(data: {
+        no_so: string;
+        no_lo: string;
+        nama_material: string;
+        qty_pcs: number;
+        qty_kg: number;
+        tanggal: string;
+        sumber?: string;
+    }): Promise<PenerimaanStok> {
+        return apiRequest('/penerimaan', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string): Promise<void> {
+        return apiRequest(`/penerimaan/${id}`, { method: 'DELETE' });
+    },
+
+    async getInOutAgen(bulan: string): Promise<InOutAgenResponse> {
+        return apiRequest(`/penerimaan/in-out-agen?bulan=${bulan}`);
     },
 };

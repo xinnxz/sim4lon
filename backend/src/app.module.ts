@@ -22,6 +22,10 @@ import { PangkalanStockModule } from './modules/pangkalan-stock/pangkalan-stock.
 import { ExpenseModule } from './modules/expense/expense.module';
 import { LpgPriceModule } from './modules/lpg-price/lpg-price.module';
 import { AgenModule } from './modules/agen/agen.module';
+// Pertamina Integration Modules
+import { PerencanaanModule } from './modules/perencanaan/perencanaan.module';
+import { PenyaluranModule } from './modules/penyaluran/penyaluran.module';
+import { PenerimaanModule } from './modules/penerimaan/penerimaan.module';
 
 @Module({
     imports: [
@@ -49,8 +53,13 @@ import { AgenModule } from './modules/agen/agen.module';
         ExpenseModule,
         LpgPriceModule,
         AgenModule,
+        // Pertamina Integration
+        PerencanaanModule,
+        PenyaluranModule,
+        PenerimaanModule,
     ],
     controllers: [AppController],
     providers: [AppService],
 })
 export class AppModule { }
+

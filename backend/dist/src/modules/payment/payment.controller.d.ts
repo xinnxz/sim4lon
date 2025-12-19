@@ -62,6 +62,7 @@ export declare class PaymentController {
                 pic_name: string | null;
                 capacity: number | null;
                 agen_id: string | null;
+                alokasi_bulanan: number;
             };
             order_items: {
                 id: string;

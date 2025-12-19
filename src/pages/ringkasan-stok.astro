@@ -4,7 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
-import StockSummaryContent from '@/components/ringkasan-stok/StockSummaryContent.tsx'
+import RingkasanStokPageContent from '@/components/ringkasan-stok/RingkasanStokPageContent.tsx'
 import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
@@ -12,10 +12,8 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
   <ProtectedDashboard client:load>
     <AdminHeader client:load />
     <AppSidebarLayout client:load headerHeight="64px">
-      <main class="flex-1 flex flex-col">
-        <StockSummaryContent client:idle />
-        <AdminFooter />
-      </main>
+      <RingkasanStokPageContent client:idle />
+      <AdminFooter />
     </AppSidebarLayout>
   </ProtectedDashboard>
 </BaseLayout>

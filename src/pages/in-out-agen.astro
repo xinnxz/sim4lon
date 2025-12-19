@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminHeader from '@/components/common/AdminHeader.tsx'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
+import AdminFooter from '@/components/common/AdminFooter.tsx'
+import InOutAgenPage from '@/components/in-out-agen/InOutAgenPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="In / Out Agen - SIM4LON">
+  <ProtectedDashboard client:load>
+    <AdminHeader client:load />
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col dashboard-gradient-bg">
+        <div class="flex-1 overflow-auto">
+          <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Page Header */}
+            <div class="mb-6 flex items-center gap-3">
+              <div class="h-12 w-1.5 rounded-full bg-gradient-to-b from-orange-500 via-orange-400 to-amber-400"></div>
+              <div>
+                <h1 class="text-3xl font-bold text-gradient-primary">In / Out Agen</h1>
+                <p class="text-muted-foreground/80 mt-1">Rekapitulasi stok harian (Stok Awal, Penerimaan, Penyaluran, Stok Akhir)</p>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div class="animate-fadeInUp">
+              <InOutAgenPage client:load />
+            </div>
+          </div>
+        </div>
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>

@@ -49,6 +49,9 @@ let PrismaService = class PrismaService {
     get pangkalan_stocks() { return this._client.pangkalan_stocks; }
     get pangkalan_stock_movements() { return this._client.pangkalan_stock_movements; }
     get lpg_prices() { return this._client.lpg_prices; }
+    get perencanaan_harian() { return this._client.perencanaan_harian; }
+    get penyaluran_harian() { return this._client.penyaluran_harian; }
+    get penerimaan_stok() { return this._client.penerimaan_stok; }
     $transaction(fn) {
         return this._client.$transaction(fn);
     }

@@ -465,8 +465,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                             type="button"
                                             onClick={() => setReceiveData({ ...receiveData, movementType: 'IN' })}
                                             className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'IN'
-                                                    ? 'border-green-500 bg-green-50 text-green-700'
-                                                    : 'border-slate-200 hover:border-slate-300'
+                                                ? 'border-green-500 bg-green-50 text-green-700'
+                                                : 'border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
                                             <SafeIcon name="Plus" className="h-4 w-4" />
@@ -476,8 +476,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                             type="button"
                                             onClick={() => setReceiveData({ ...receiveData, movementType: 'OUT' })}
                                             className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'OUT'
-                                                    ? 'border-red-500 bg-red-50 text-red-700'
-                                                    : 'border-slate-200 hover:border-slate-300'
+                                                ? 'border-red-500 bg-red-50 text-red-700'
+                                                : 'border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
                                             <SafeIcon name="Minus" className="h-4 w-4" />
@@ -952,7 +952,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                             <div className="grid grid-cols-2 gap-3">
                                                 {/* Cost Price */}
                                                 <div className="bg-slate-50 rounded-xl p-3">
-                                                    <label className="text-xs text-slate-500 mb-1 block">Harga Modal</label>
+                                                    <label className="text-xs text-slate-500 mb-1 block">Harga Beli</label>
                                                     <div className="relative">
                                                         <span className="text-xs text-slate-400 absolute left-0 top-1/2 -translate-y-1/2">Rp</span>
                                                         <Input

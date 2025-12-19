@@ -86,6 +86,7 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
             agen_id: string | null;
+            alokasi_bulanan: number;
         };
         drivers: {
             id: string;
@@ -181,6 +182,7 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
             agen_id: string | null;
+            alokasi_bulanan: number;
         };
         order_items: {
             id: string;
@@ -235,6 +237,7 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
             agen_id: string | null;
+            alokasi_bulanan: number;
         };
         drivers: {
             id: string;
@@ -330,6 +333,7 @@ export declare class OrderService {
             pic_name: string | null;
             capacity: number | null;
             agen_id: string | null;
+            alokasi_bulanan: number;
         };
         drivers: {
             id: string;
