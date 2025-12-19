@@ -69,14 +69,25 @@ export class PenerimaanService {
                 },
             });
 
-            // 2. Sync to stock_histories for accurate stock tracking
-            // Note: This adds to the agen's main stock (LPG 3kg by default for penerimaan)
+            // 2. Get product ID - use provided or find default (LPG 3kg Subsidi)
+            let productId = dto.lpg_product_id;
+            if (!productId) {
+                const defaultProduct = await tx.lpg_products.findFirst({
+                    where: { size_kg: 3, category: 'SUBSIDI', is_active: true, deleted_at: null },
+                    select: { id: true },
+                });
+                productId = defaultProduct?.id;
+            }
+
+            // 3. Sync to stock_histories for accurate stock tracking
+            // Now includes lpg_product_id for chart integration
             await tx.stock_histories.create({
                 data: {
                     movement_type: 'MASUK',
                     qty: dto.qty_pcs,
                     note: `Penerimaan SPBE - SO: ${dto.no_so}, LO: ${dto.no_lo}`,
                     lpg_type: lpg_type.kg3, // Default 3kg for subsidi
+                    lpg_product_id: productId || null, // Link to product for chart
                     timestamp: new Date(dto.tanggal),
                 },
             });

@@ -1,4 +1,4 @@
-import { IsDateString, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 
 export class CreatePenerimaanDto {
     @IsString()
@@ -24,6 +24,10 @@ export class CreatePenerimaanDto {
     @IsOptional()
     @IsString()
     sumber?: string;
+
+    @IsOptional()
+    @IsUUID()
+    lpg_product_id?: string;
 }
 
 export class GetPenerimaanQueryDto {

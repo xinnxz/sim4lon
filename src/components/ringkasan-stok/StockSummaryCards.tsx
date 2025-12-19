@@ -1,27 +1,23 @@
 
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+/**
+ * StockSummaryCards - READ-ONLY Stock Display
+ * 
+ * SECURITY: Stok tidak bisa diedit manual untuk mencegah manipulasi.
+ * - Stok MASUK: Hanya via halaman Penerimaan (dengan dokumen SO/LO)
+ * - Stok KELUAR: Hanya via Order yang SELESAI (otomatis)
+ */
+
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import SafeIcon from '@/components/common/SafeIcon'
-import { lpgProductsApi, stockApi, type LpgProductWithStock, type LpgCategory } from '@/lib/api'
-import { toast } from 'sonner'
+import { lpgProductsApi, type LpgProductWithStock, type LpgCategory } from '@/lib/api'
 
 interface StockSummaryCardsProps {
   refreshTrigger?: number
   showSummary?: boolean
-}
-
-// Map lpg_product size to old lpg_type for stock API
-const sizeToLpgType = (sizeKg: number): string => {
-  if (sizeKg === 3) return '3kg';
-  if (sizeKg === 12) return '12kg';
-  if (sizeKg === 50) return '50kg';
-  if (sizeKg === 5.5) return '3kg'; // Map Bright Gas 5.5kg to 3kg for now
-  return '3kg';
 }
 
 const getStatusFromStock = (current: number, minStock: number): 'normal' | 'warning' | 'critical' => {
@@ -35,9 +31,9 @@ const getStatusBadge = (status: 'normal' | 'warning' | 'critical') => {
     case 'critical':
       return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">Kritis</Badge>
     case 'warning':
-      return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Peringatan</Badge>
+      return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Perhatian</Badge>
     default:
-      return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">Normal</Badge>
+      return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">Aman</Badge>
   }
 }
 
@@ -65,77 +61,6 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Edit mode state
-  const [editingCard, setEditingCard] = useState<string | null>(null)
-  const [editQuantity, setEditQuantity] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // Hold +/- button refs
-  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const holdCountRef = useRef(0)  // Track how long held for acceleration
-
-  // Single click handlers - just +1 or -1
-  const handleIncrement = useCallback(() => {
-    setEditQuantity(prev => String(parseInt(prev || '0') + 1))
-  }, [])
-
-  const handleDecrement = useCallback(() => {
-    setEditQuantity(prev => String(Math.max(0, parseInt(prev || '0') - 1)))
-  }, [])
-
-  // Start holding - with acceleration (longer hold = bigger increments)
-  const startHold = useCallback((action: 'increment' | 'decrement') => {
-    holdCountRef.current = 0
-
-    // Wait 250ms before starting rapid mode
-    holdTimeoutRef.current = setTimeout(() => {
-      const tick = () => {
-        holdCountRef.current++
-
-        // Acceleration: increment amount increases over time
-        // 0-10 ticks: +1, 11-30 ticks: +5, 31+: +10
-        let step = 1
-        if (holdCountRef.current > 30) step = 10
-        else if (holdCountRef.current > 10) step = 5
-
-        if (action === 'increment') {
-          setEditQuantity(prev => String(parseInt(prev || '0') + step))
-        } else {
-          setEditQuantity(prev => String(Math.max(0, parseInt(prev || '0') - step)))
-        }
-
-        // Speed also increases: 100ms → 75ms → 50ms
-        let delay = 100
-        if (holdCountRef.current > 30) delay = 50
-        else if (holdCountRef.current > 10) delay = 75
-
-        holdIntervalRef.current = setTimeout(tick, delay)
-      }
-      tick()
-    }, 250)  // Initial delay before rapid mode
-  }, [])
-
-  // Stop holding
-  const stopHold = useCallback(() => {
-    holdCountRef.current = 0
-    if (holdTimeoutRef.current) {
-      clearTimeout(holdTimeoutRef.current)
-      holdTimeoutRef.current = null
-    }
-    if (holdIntervalRef.current) {
-      clearTimeout(holdIntervalRef.current)
-      holdIntervalRef.current = null
-    }
-  }, [])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopHold()
-    }
-  }, [stopHold])
-
   const fetchData = async () => {
     try {
       setIsLoading(true)
@@ -153,54 +78,6 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
   useEffect(() => {
     fetchData()
   }, [refreshTrigger])
-
-  const handleEdit = (productId: string) => {
-    setEditingCard(productId)
-    setEditQuantity('')
-  }
-
-  const handleCancelEdit = () => {
-    setEditingCard(null)
-    setEditQuantity('')
-  }
-
-  const handleSubmit = async (product: LpgProductWithStock, movementType: 'MASUK' | 'KELUAR') => {
-    const qty = parseInt(editQuantity)
-    if (!qty || qty <= 0) {
-      toast.error('Masukkan jumlah yang valid')
-      return
-    }
-
-    if (movementType === 'KELUAR' && qty > product.stock.current) {
-      toast.error(`Stok tidak mencukupi. Stok saat ini: ${product.stock.current} unit`)
-      return
-    }
-
-    setIsSubmitting(true)
-    try {
-      // Use size to determine lpg_type for legacy compatibility
-      const lpgType = sizeToLpgType(Number(product.size_kg))
-
-      await stockApi.createMovement({
-        lpg_product_id: product.id, // Track by product ID for dynamic products
-        lpg_type: lpgType as any,   // Also set legacy type for dashboard
-        movement_type: movementType,
-        qty: qty,
-      })
-
-      toast.success(
-        `${movementType === 'MASUK' ? '+' : '-'}${qty} unit ${product.name} berhasil disimpan`
-      )
-
-      await fetchData()
-      handleCancelEdit()
-    } catch (error: any) {
-      console.error('Failed to create movement:', error)
-      toast.error(error?.message || 'Gagal menyimpan perubahan stok')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price)
@@ -246,13 +123,9 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
         <CardContent className="p-12 text-center">
           <SafeIcon name="Package" className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-semibold mb-2">Belum Ada Produk LPG</h3>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground">
             Tambahkan produk LPG terlebih dahulu untuk melihat stok.
           </p>
-          <Button onClick={() => window.location.href = '/kelola-produk-lpg'}>
-            <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
-            Kelola Produk LPG
-          </Button>
         </CardContent>
       </Card>
     )
@@ -281,7 +154,7 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                 </div>
               </div>
 
-              {/* Breakdown by Category - Equal Width Grid */}
+              {/* Breakdown by Category */}
               <div className="grid grid-cols-3 gap-3 md:gap-4">
                 <div className="text-center p-4 rounded-xl bg-green-500/10 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Subsidi</p>
@@ -304,13 +177,11 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
         </div>
       )}
 
-      {/* Product Stock Cards Grid */}
+      {/* Product Stock Cards Grid - READ ONLY */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {products.map((product, index) => {
-          const isEditing = editingCard === product.id
           const minStock = product.category === 'SUBSIDI' ? 100 : 50
           const status = getStatusFromStock(product.stock.current, minStock)
-          // Use selling_price directly, fallback to old prices[] for backward compat
           const displayPrice = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
 
           return (
@@ -320,7 +191,7 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
               <Card
-                className={`overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${isEditing ? 'shadow-2xl scale-[1.02]' : ''}`}
+                className="overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 style={{
                   background: `linear-gradient(135deg, ${getColorHex(product.color)}08 0%, transparent 50%)`,
                 }}
@@ -364,7 +235,7 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                     <span className="text-lg text-muted-foreground ml-2">unit</span>
                   </div>
 
-                  {/* Price & Category with better styling */}
+                  {/* Price & Category */}
                   <div className="flex justify-between items-center">
                     <Badge
                       variant="outline"
@@ -380,135 +251,20 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                     )}
                   </div>
 
-
-                  {/* Edit Mode - Enhanced UI */}
-                  {isEditing ? (
-                    <div
-                      className="space-y-4 pt-4 mt-3 rounded-2xl p-4 -mx-2"
-                      style={{
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)',
-                        boxShadow: '0 4px 20px -4px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.8)',
-                      }}
-                    >
-                      {/* Quantity Stepper */}
-                      <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
-                          Jumlah Unit
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-12 w-12 p-0 select-none rounded-xl border-2 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all"
-                            onClick={handleDecrement}
-                            onMouseDown={() => startHold('decrement')}
-                            onMouseUp={stopHold}
-                            onMouseLeave={stopHold}
-                            onTouchStart={() => startHold('decrement')}
-                            onTouchEnd={stopHold}
-                            disabled={!editQuantity || parseInt(editQuantity) <= 0}
-                          >
-                            <SafeIcon name="Minus" className="h-5 w-5" />
-                          </Button>
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={editQuantity}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, '')
-                              setEditQuantity(val)
-                            }}
-                            onWheel={(e) => e.currentTarget.blur()}
-                            placeholder="0"
-                            className="h-12 text-center text-2xl font-bold flex-1 rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                            autoFocus
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-12 w-12 p-0 select-none rounded-xl border-2 hover:bg-green-50 hover:border-green-300 hover:text-green-600 transition-all"
-                            onClick={handleIncrement}
-                            onMouseDown={() => startHold('increment')}
-                            onMouseUp={stopHold}
-                            onMouseLeave={stopHold}
-                            onTouchStart={() => startHold('increment')}
-                            onTouchEnd={stopHold}
-                          >
-                            <SafeIcon name="Plus" className="h-5 w-5" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <Button
-                          className="h-11 rounded-xl font-semibold gap-2"
-                          style={{
-                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                            boxShadow: '0 4px 12px -2px rgba(239,68,68,0.4)',
-                          }}
-                          onClick={() => handleSubmit(product, 'KELUAR')}
-                          disabled={isSubmitting || !editQuantity}
-                        >
-                          {isSubmitting ? (
-                            <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <SafeIcon name="ArrowDownCircle" className="h-4 w-4" />
-                              Keluar
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          className="h-11 rounded-xl font-semibold gap-2"
-                          style={{
-                            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                            boxShadow: '0 4px 12px -2px rgba(34,197,94,0.4)',
-                          }}
-                          onClick={() => handleSubmit(product, 'MASUK')}
-                          disabled={isSubmitting || !editQuantity}
-                        >
-                          {isSubmitting ? (
-                            <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <SafeIcon name="ArrowUpCircle" className="h-4 w-4" />
-                              Masuk
-                            </>
-                          )}
-                        </Button>
-                      </div>
-
-                      {/* Cancel Button */}
-                      <button
-                        className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-                        onClick={handleCancelEdit}
-                        disabled={isSubmitting}
-                      >
-                        Batal
-                      </button>
+                  {/* Status Badge & Info - READ ONLY */}
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    {getStatusBadge(status)}
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <SafeIcon name="Lock" className="h-3 w-3" />
+                      <span>Read-only</span>
                     </div>
-                  ) : (
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      {getStatusBadge(status)}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                        onClick={() => handleEdit(product.id)}
-                      >
-                        <SafeIcon name="Pencil" className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                    </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
           )
         })}
       </div>
-    </div >
+    </div>
   )
 }

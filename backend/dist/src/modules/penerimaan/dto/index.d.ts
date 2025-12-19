@@ -6,6 +6,7 @@ export declare class CreatePenerimaanDto {
     qty_kg: number;
     tanggal: string;
     sumber?: string;
+    lpg_product_id?: string;
 }
 export declare class GetPenerimaanQueryDto {
     tanggal_awal?: string;
