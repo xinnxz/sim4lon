@@ -4,6 +4,7 @@ export declare class DashboardService {
     constructor(prisma: PrismaService);
     getStats(): Promise<{
         todayOrders: number;
+        todaySales: number;
         pendingOrders: number;
         completedOrders: number;
         totalStock: Record<string, number>;

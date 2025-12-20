@@ -422,6 +422,7 @@ export interface Pangkalan {
     phone: string | null;
     email: string | null;  // Email for sending invoices
     capacity: number | null;
+    alokasi_bulanan: number;  // Monthly LPG allocation quota
     note: string | null;
     is_active: boolean;
     created_at: string;
@@ -447,6 +448,7 @@ export interface CreatePangkalanPayload {
     phone?: string;
     email?: string | null;  // Email untuk invoice
     capacity?: number;
+    alokasi_bulanan?: number;  // Monthly allocation
     note?: string;
     // Akun login
     login_email?: string;
@@ -891,6 +893,7 @@ export interface DashboardProductStock {
 
 export interface DashboardStats {
     todayOrders: number;
+    todaySales: number;
     pendingOrders: number;
     completedOrders: number;
     totalStock: {
@@ -1083,6 +1086,7 @@ export interface UpdateOrderStatusDto {
     status: OrderStatus;
     description?: string;
     note?: string;
+    payment_method?: 'TUNAI' | 'TRANSFER';  // For quick cash/transfer confirmation
 }
 
 /**
@@ -1871,6 +1875,32 @@ export const perencanaanApi = {
     async delete(id: string): Promise<void> {
         return apiRequest(`/perencanaan/${id}`, { method: 'DELETE' });
     },
+
+    async autoGenerate(data: {
+        bulan: string;
+        lpg_type?: string;
+        kondisi?: 'NORMAL' | 'FAKULTATIF';
+        overwrite?: boolean;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        details: {
+            bulan: string;
+            lpg_type: string;
+            kondisi: string;
+            total_pangkalan: number;
+            skipped_no_alokasi: number;
+            work_days: number;
+            deleted_records: number;
+            created_records: number;
+            duration_ms: number;
+        };
+    }> {
+        return apiRequest('/perencanaan/auto-generate', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
 };
 
 // --- PENYALURAN (DISTRIBUTION) ---
@@ -1972,6 +2002,27 @@ export const penyaluranApi = {
 
     async delete(id: string): Promise<void> {
         return apiRequest(`/penyaluran/${id}`, { method: 'DELETE' });
+    },
+
+    /**
+     * Create fakultatif (exception) penyaluran
+     * Used for manual penyaluran entries outside of normal order flow
+     */
+    async createFakultatif(data: {
+        pangkalan_id: string;
+        tanggal: string;
+        lpg_type: string;
+        jumlah: number;
+        kondisi: 'FAKULTATIF';
+        catatan?: string;
+    }): Promise<PenyaluranHarian> {
+        return apiRequest('/penyaluran', {
+            method: 'POST',
+            body: JSON.stringify({
+                ...data,
+                tipe_pembayaran: 'CASHLESS', // Default for fakultatif
+            }),
+        });
     },
 };
 

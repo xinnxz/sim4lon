@@ -11,6 +11,34 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetPerencanaanQueryDto = exports.BulkUpdatePerencanaanDto = exports.UpdatePerencanaanDto = exports.CreatePerencanaanDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class PerencanaanDataItemDto {
+    tanggal;
+    jumlah;
+    jumlah_normal;
+    jumlah_fakultatif;
+}
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], PerencanaanDataItemDto.prototype, "tanggal", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], PerencanaanDataItemDto.prototype, "jumlah", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], PerencanaanDataItemDto.prototype, "jumlah_normal", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], PerencanaanDataItemDto.prototype, "jumlah_fakultatif", void 0);
 class CreatePerencanaanDto {
     pangkalan_id;
     tanggal;
@@ -84,6 +112,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], BulkUpdatePerencanaanDto.prototype, "kondisi", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => PerencanaanDataItemDto),
+    __metadata("design:type", Array)
+], BulkUpdatePerencanaanDto.prototype, "data", void 0);
 class GetPerencanaanQueryDto {
     pangkalan_id;
     tanggal_awal;

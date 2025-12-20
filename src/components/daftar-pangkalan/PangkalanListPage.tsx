@@ -10,7 +10,7 @@
  * - Toggle status aktif/nonaktif
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -59,6 +59,64 @@ export default function PangkalanListPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedPangkalan, setSelectedPangkalan] = useState<Pangkalan | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+
+  // State untuk sorting
+  type SortField = 'code' | 'name' | 'email' | 'address' | 'region' | 'phone' | 'pic_name' | 'alokasi_bulanan' | 'is_active'
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  // Handle header click for sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Sorted data using useMemo
+  const sortedPangkalanList = useMemo(() => {
+    if (!sortField) return pangkalanList
+
+    return [...pangkalanList].sort((a, b) => {
+      let aVal: any = (a as any)[sortField]
+      let bVal: any = (b as any)[sortField]
+
+      // Handle null/undefined
+      if (aVal == null) aVal = ''
+      if (bVal == null) bVal = ''
+
+      // String comparison
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase()
+        bVal = bVal.toLowerCase()
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [pangkalanList, sortField, sortDirection])
+
+  // Sortable Header Component
+  const SortableHeader = ({ field, children, className = '', align = 'left' }: { field: SortField; children: React.ReactNode; className?: string; align?: 'left' | 'center' }) => (
+    <TableHead
+      className={`font-semibold text-slate-700 cursor-pointer hover:bg-slate-200/50 transition-colors select-none ${className}`}
+      onClick={() => handleSort(field)}
+    >
+      <div className={`flex items-center gap-1.5 ${align === 'center' ? 'justify-center' : 'justify-start'}`}>
+        {children}
+        {sortField === field ? (
+          sortDirection === 'asc'
+            ? <SafeIcon name="ChevronUp" className="w-4 h-4 text-blue-500" />
+            : <SafeIcon name="ChevronDown" className="w-4 h-4 text-blue-500" />
+        ) : (
+          <SafeIcon name="ChevronsUpDown" className="w-4 h-4 text-slate-400 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   /**
    * Fetch data pangkalan dari API
@@ -134,114 +192,128 @@ export default function PangkalanListPage() {
   const nonaktifCount = pangkalanList.filter(p => !p.is_active).length
 
   return (
-    <div className="flex-1 space-y-6 p-6">
-      {/* Header */}
+    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
+      {/* Header - with Vertical Gradient Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Daftar Pangkalan</h1>
-          <p className="text-muted-foreground mt-1">
-            Kelola semua pangkalan distribusi LPG Anda
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-blue-400 to-cyan-400" />
+          <div>
+            <h1 className="text-3xl font-bold text-gradient-primary">
+              Daftar Pangkalan
+            </h1>
+            <p className="text-muted-foreground/80 mt-1">
+              Kelola semua pangkalan distribusi LPG
+            </p>
+          </div>
         </div>
         <Button
           onClick={() => setShowAddModal(true)}
-          className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+          className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all"
         >
           <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
           Tambah Pangkalan
         </Button>
       </div>
 
-      {/* Summary Stats */}
-      <div id="ikyt24" className="grid gap-4 md:grid-cols-3">
-        <Tilt3DCard className="animate-fadeInUp">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Pangkalan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalItems}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Semua pangkalan terdaftar
-              </p>
+      {/* Gradient Divider Line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+      {/* Summary Stats - Modern Glass Card Style with 3D Tilt */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10">
+                  <SafeIcon name="Building2" className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Pangkalan</p>
+                  <p className="text-2xl font-bold">{totalItems}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pangkalan Aktif
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{aktivCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Siap beroperasi
-              </p>
+
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-green-500/10">
+                  <SafeIcon name="CheckCircle" className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Aktif</p>
+                  <p className="text-2xl font-bold text-green-600">{aktivCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pangkalan Nonaktif
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">{nonaktifCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Memerlukan perhatian
-              </p>
+
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-500/10">
+                  <SafeIcon name="XCircle" className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Nonaktif</p>
+                  <p className="text-2xl font-bold text-red-600">{nonaktifCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
       </div>
 
-      {/* Search and Filter Card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Cari Pangkalan</CardTitle>
-          <CardDescription>
-            Cari berdasarkan nama, alamat, atau wilayah
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-2">
+      {/* Search and Filter - Inline Modern Design */}
+      <Card className="glass-card">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Cari pangkalan..."
+                placeholder="Cari berdasarkan nama, alamat, atau wilayah..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1"
+                className="pl-10 bg-white/50 border-white/20 focus:border-blue-400 focus:ring-blue-400/20"
               />
-              <Button variant="outline" size="icon">
-                <SafeIcon name="Search" className="h-4 w-4" />
-              </Button>
             </div>
-            <div className="flex gap-2">
+
+            {/* Filter Buttons - Gradient Active */}
+            <div className="flex gap-2 p-1 rounded-lg bg-muted/30">
               <Button
-                variant={statusFilter === 'semua' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setStatusFilter('semua')}
-                className="flex-1 sm:flex-none"
+                className={statusFilter === 'semua'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
               >
+                <SafeIcon name="LayoutGrid" className="w-4 h-4 mr-1.5" />
                 Semua
               </Button>
               <Button
-                variant={statusFilter === 'aktif' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setStatusFilter('aktif')}
-                className="flex-1 sm:flex-none"
+                className={statusFilter === 'aktif'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
               >
+                <SafeIcon name="CheckCircle" className="w-4 h-4 mr-1.5" />
                 Aktif
               </Button>
               <Button
-                variant={statusFilter === 'nonaktif' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setStatusFilter('nonaktif')}
-                className="flex-1 sm:flex-none"
+                className={statusFilter === 'nonaktif'
+                  ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
               >
+                <SafeIcon name="XCircle" className="w-4 h-4 mr-1.5" />
                 Nonaktif
               </Button>
             </div>
@@ -249,75 +321,88 @@ export default function PangkalanListPage() {
         </CardContent>
       </Card>
 
-      {/* Table Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Pangkalan</CardTitle>
-          <CardDescription>
-            Menampilkan {pangkalanList.length} dari {totalItems} pangkalan
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {/* Table Card - Enhanced */}
+      <Card className="glass-card overflow-hidden">
+        <CardContent className="p-0">
+          {/* Inline Header Row */}
+          <div className="flex items-center justify-between p-4 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <SafeIcon name="Table" className="w-5 h-5 text-muted-foreground" />
+              <span className="font-semibold">Data Pangkalan</span>
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                {pangkalanList.length} data
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Total: {totalItems} pangkalan
+            </p>
+          </div>
+
           <div className="overflow-x-auto">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2">Memuat data...</span>
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-blue-500" />
+                  <span className="text-muted-foreground">Memuat data pangkalan...</span>
+                </div>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold w-24">Kode</TableHead>
-                    <TableHead className="font-semibold">Nama Pangkalan</TableHead>
-                    <TableHead className="font-semibold">Email Login</TableHead>
-                    <TableHead className="font-semibold">Alamat</TableHead>
-                    <TableHead className="font-semibold">Wilayah</TableHead>
-                    <TableHead className="font-semibold">Telepon</TableHead>
-                    <TableHead className="font-semibold">PIC</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="text-right font-semibold">Aksi</TableHead>
+                  <TableRow className="bg-gradient-to-r from-slate-50 to-slate-100/50">
+                    <SortableHeader field="code" className="w-24">Kode</SortableHeader>
+                    <SortableHeader field="name">Nama</SortableHeader>
+                    <SortableHeader field="email">Email</SortableHeader>
+                    <SortableHeader field="address">Alamat</SortableHeader>
+                    <SortableHeader field="region">Wilayah</SortableHeader>
+                    <SortableHeader field="phone" align="center">Telepon</SortableHeader>
+                    <SortableHeader field="pic_name">PIC</SortableHeader>
+                    <SortableHeader field="alokasi_bulanan" align="center">Alokasi</SortableHeader>
+                    <SortableHeader field="is_active" align="center">Status</SortableHeader>
+                    <TableHead className="text-center font-semibold text-slate-700">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pangkalanList.length > 0 ? (
-                    pangkalanList.map((pangkalan) => (
-                      <TableRow key={pangkalan.id} className="hover:bg-muted/50">
+                  {sortedPangkalanList.length > 0 ? (
+                    sortedPangkalanList.map((pangkalan) => (
+                      <TableRow key={pangkalan.id} className="hover:bg-blue-50/50 transition-colors">
                         <TableCell className="font-mono text-sm text-primary">
                           {(pangkalan as any).code || '-'}
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium text-foreground">
                           {pangkalan.name}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {pangkalan.users && pangkalan.users.length > 0 ? (
-                            <span className="text-blue-600">{pangkalan.users[0].email}</span>
+                          {pangkalan.email ? (
+                            <span className="text-blue-600">{pangkalan.email}</span>
                           ) : (
-                            <span className="text-muted-foreground italic">Belum ada akun</span>
+                            <span className="text-slate-400 italic">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
+                        <TableCell className="text-sm text-foreground/80 max-w-xs truncate">
                           {pangkalan.address}
                         </TableCell>
-                        <TableCell className="text-sm">
+                        <TableCell className="text-sm text-foreground">
                           {pangkalan.region}
                         </TableCell>
-                        <TableCell className="text-sm">
+                        <TableCell className="text-sm text-center text-foreground">
                           {pangkalan.phone}
                         </TableCell>
-                        <TableCell className="text-sm font-medium">
+                        <TableCell className="text-sm font-medium text-foreground">
                           {pangkalan.pic_name}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center text-sm font-semibold text-primary">
+                          {pangkalan.alokasi_bulanan ? pangkalan.alokasi_bulanan.toLocaleString() : '-'}
+                        </TableCell>
+                        <TableCell className="text-center">
                           <Badge
-                            variant={pangkalan.is_active ? 'default' : 'secondary'}
                             className={
                               pangkalan.is_active
-                                ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                                : ''
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm'
+                                : 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm'
                             }
                           >
-                            {pangkalan.is_active ? 'Aktif' : 'Nonaktif'}
+                            {pangkalan.is_active ? '✓ Aktif' : 'Nonaktif'}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -361,7 +446,7 @@ export default function PangkalanListPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={10} className="text-center py-8">
                         <div className="flex flex-col items-center gap-2">
                           <SafeIcon name="Search" className="h-8 w-8 text-muted-foreground" />
                           <p className="text-muted-foreground">

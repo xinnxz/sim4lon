@@ -1,4 +1,25 @@
-import { IsDateString, IsInt, IsOptional, IsString, IsEnum, Min } from 'class-validator';
+import { IsDateString, IsInt, IsOptional, IsString, IsArray, ValidateNested, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+
+// Nested DTO for bulk update items
+class PerencanaanDataItemDto {
+    @IsDateString()
+    tanggal: string;
+
+    @IsInt()
+    @Min(0)
+    jumlah: number;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    jumlah_normal?: number;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    jumlah_fakultatif?: number;
+}
 
 export class CreatePerencanaanDto {
     @IsString()
@@ -47,7 +68,10 @@ export class BulkUpdatePerencanaanDto {
     kondisi?: 'NORMAL' | 'FAKULTATIF';
 
     // Array of date -> jumlah mappings
-    data: { tanggal: string; jumlah: number }[];
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => PerencanaanDataItemDto)
+    data: PerencanaanDataItemDto[];
 }
 
 export class GetPerencanaanQueryDto {

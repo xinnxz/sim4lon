@@ -52,6 +52,46 @@ interface OrderFormData {
   items: OrderItem[]
 }
 
+/**
+ * Convert product size_kg to Prisma lpg_type ENUM NAME
+ * Prisma uses enum names (gr220, kg3, kg5, kg12, kg50) in code
+ * Prisma auto-converts to @map values (220gr, 3kg, 5.5kg, etc) for database storage
+ */
+const sizeKgToLpgType = (sizeKg: number | string): string => {
+  // Convert to number and handle edge cases
+  const size = typeof sizeKg === 'string' ? parseFloat(sizeKg) : sizeKg
+
+  // Debug logging
+  console.log('[sizeKgToLpgType] Input:', sizeKg, '→ Parsed:', size)
+
+  // Handle NaN
+  if (isNaN(size)) {
+    console.warn('[sizeKgToLpgType] Invalid size, defaulting to kg3')
+    return 'kg3'
+  }
+
+  // Use approximate comparison (within 0.1 tolerance) for floating point issues
+  const isApprox = (a: number, b: number) => Math.abs(a - b) < 0.1
+
+  let result: string
+  if (size <= 0.3) {
+    result = 'gr220'  // 0.22kg = 220gr (Bright Gas Can) - ENUM NAME
+  } else if (isApprox(size, 3)) {
+    result = 'kg3'
+  } else if (isApprox(size, 5.5) || isApprox(size, 5)) {
+    result = 'kg5'    // 5.5kg → kg5 (ENUM NAME, not "5.5kg")
+  } else if (isApprox(size, 12)) {
+    result = 'kg12'
+  } else if (isApprox(size, 50)) {
+    result = 'kg50'
+  } else {
+    result = `kg${Math.floor(size)}`  // Fallback: kg + size
+  }
+
+  console.log('[sizeKgToLpgType] Result:', result)
+  return result
+}
+
 export default function CreateOrderForm() {
   // Data state
   const [pangkalanList, setPangkalanList] = useState<Pangkalan[]>([])
@@ -247,7 +287,7 @@ export default function CreateOrderForm() {
           ? {
             ...item,
             productId,
-            lpgType: `${product.size_kg}kg`,
+            lpgType: sizeKgToLpgType(Number(product.size_kg)),
             label: product.name,
             price: Number(defaultPrice),
             isTaxable: product.category === 'NON_SUBSIDI',  // Update tax status
@@ -311,8 +351,19 @@ export default function CreateOrderForm() {
    */
   const handleAddItem = () => {
     if (lpgProducts.length === 0) return
+
+    // Find first product not already selected in existing items
+    const selectedProductIds = formData.items.map(item => item.productId)
+    const availableProducts = lpgProducts.filter(p => !selectedProductIds.includes(p.id))
+
+    // If all products are already selected, don't add more items
+    if (availableProducts.length === 0) {
+      toast.warning('Semua jenis LPG sudah dipilih')
+      return
+    }
+
     const newId = String(Math.max(...formData.items.map(i => parseInt(i.id)), 0) + 1)
-    const defaultProduct = lpgProducts[0]
+    const defaultProduct = availableProducts[0]
     // Use selling_price directly, fallback to old prices[] for backward compat
     const defaultPrice = defaultProduct.selling_price || defaultProduct.prices?.find(p => p.is_default)?.price || defaultProduct.prices?.[0]?.price || 0
     // NON_SUBSIDI products are taxable (12% PPN)
@@ -325,7 +376,7 @@ export default function CreateOrderForm() {
         {
           id: newId,
           productId: defaultProduct.id,
-          lpgType: `${defaultProduct.size_kg}kg`,
+          lpgType: sizeKgToLpgType(Number(defaultProduct.size_kg)),
           label: defaultProduct.name,
           price: defaultPrice,
           quantity: 1,
@@ -572,27 +623,35 @@ export default function CreateOrderForm() {
                                   <SelectValue placeholder="Pilih produk..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {lpgProducts.map(product => {
-                                    // Use selling_price directly, fallback to old prices[]
-                                    const price = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
-                                    const stock = product.stock?.current || 0
-                                    const isOutOfStock = stock <= 0
-                                    return (
-                                      <SelectItem
-                                        key={product.id}
-                                        value={product.id}
-                                        disabled={isOutOfStock}
-                                        className={isOutOfStock ? 'opacity-50' : ''}
-                                      >
-                                        <div className="flex items-center justify-between w-full gap-2">
-                                          <span>{product.name} - {formatCurrency(price)}</span>
-                                          <span className={`text-xs ${isOutOfStock ? 'text-red-500' : 'text-muted-foreground'}`}>
-                                            (Stok: {stock})
-                                          </span>
-                                        </div>
-                                      </SelectItem>
-                                    )
-                                  })}
+                                  {lpgProducts
+                                    // Filter out products already selected in OTHER items (allow current item's product)
+                                    .filter(product => {
+                                      const isSelectedInOtherItem = formData.items.some(
+                                        otherItem => otherItem.id !== item.id && otherItem.productId === product.id
+                                      )
+                                      return !isSelectedInOtherItem
+                                    })
+                                    .map(product => {
+                                      // Use selling_price directly, fallback to old prices[]
+                                      const price = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+                                      const stock = product.stock?.current || 0
+                                      const isOutOfStock = stock <= 0
+                                      return (
+                                        <SelectItem
+                                          key={product.id}
+                                          value={product.id}
+                                          disabled={isOutOfStock}
+                                          className={isOutOfStock ? 'opacity-50' : ''}
+                                        >
+                                          <div className="flex items-center justify-between w-full gap-2">
+                                            <span>{product.name} - {formatCurrency(price)}</span>
+                                            <span className={`text-xs ${isOutOfStock ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                              (Stok: {stock})
+                                            </span>
+                                          </div>
+                                        </SelectItem>
+                                      )
+                                    })}
                                 </SelectContent>
                               </Select>
                             </div>

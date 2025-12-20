@@ -12,59 +12,86 @@ import PangkalanOrderChart from './charts/PangkalanOrderChart'
 import RecentActivitySection from './RecentActivitySection'
 import ChartContainer from './ChartContainer'
 
+/**
+ * Floating Particles - Decorative ambient particles
+ * 8 particles dengan various sizes dan warna untuk efek premium
+ */
+function FloatingParticles() {
+  return (
+    <div className="particles-container">
+      <div className="particle" />
+      <div className="particle" />
+      <div className="particle" />
+      <div className="particle" />
+      <div className="particle" />
+      <div className="particle" />
+      <div className="particle" />
+      <div className="particle" />
+    </div>
+  )
+}
+
 export default function DashboardContent() {
   return (
-    <div id="is6jwg" className="flex-1 space-y-8 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
-      {/* Header with Premium Styling */}
-      <div className="flex flex-col gap-3 sm:gap-4 animate-fadeInDown">
+    <div id="is6jwg" className="relative flex-1 space-y-8 p-4 sm:p-6 lg:p-8 mesh-gradient-bg min-h-screen overflow-hidden">
+      {/* Floating Particles Background Decoration */}
+      <FloatingParticles />
+
+      {/* Header with Premium Animated Gradient */}
+      <div className="relative z-10 flex flex-col gap-3 sm:gap-4 animate-fadeInDown">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent animate-lineGrow" />
           <div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gradient-primary">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gradient-animated">
               Dashboard
             </h1>
           </div>
         </div>
-        <p className="text-base sm:text-lg text-muted-foreground/80 max-w-2xl pl-6">
+        <p className="text-base sm:text-lg text-muted-foreground/80 max-w-2xl pl-6 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
           Selamat datang kembali! Berikut adalah ringkasan operasional Anda hari ini.
         </p>
       </div>
 
       {/* Create Order Button */}
-      <div className="animate-fadeInUp" style={{ animationDelay: '0.05s' }}>
+      <div className="relative z-10 animate-fadeInUp" style={{ animationDelay: '0.05s' }}>
         <CreateOrderButton />
       </div>
 
+
       {/* KPI Cards */}
-      <DashboardKPICards />
+      <div className="relative z-10">
+        <DashboardKPICards />
+      </div>
 
       {/* Sales Chart */}
-      <ChartContainer animationDelay="0.5s">
-        {(isVisible) => (
-          <div className="w-full animate-fadeInUp chart-sales">
-            <Card className="chart-card-premium border-0">
-              <CardHeader className="pb-4 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <CardTitle id="i1oio5" className="text-lg sm:text-xl font-semibold">Pesanan Mingguan</CardTitle>
-                </div>
-                <CardDescription id="iwkknt" className="text-xs sm:text-sm">Ringkasan pemesanan gas 7 hari terakhir</CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-4">
-                <div className="w-full h-64 sm:h-72 lg:h-80">
-                  <SalesChart isVisible={isVisible} />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </ChartContainer>
+      <div className="relative z-10">
+        <ChartContainer animationDelay="0.5s">
+          {(isVisible) => (
+            <div className="w-full animate-fadeInUp chart-sales" style={{ animationDelay: '0.3s' }}>
+              <Card className="chart-card-premium border-0">
+                <CardHeader className="pb-4 border-b border-border/50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <CardTitle id="i1oio5" className="text-lg sm:text-xl font-semibold">Pesanan Mingguan</CardTitle>
+                  </div>
+                  <CardDescription id="iwkknt" className="text-xs sm:text-sm">Ringkasan pemesanan gas 7 hari terakhir</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6 pt-4">
+                  <div className="w-full h-64 sm:h-72 lg:h-80">
+                    <SalesChart isVisible={isVisible} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </ChartContainer>
+      </div>
 
       {/* Stock & Profit Charts */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="relative z-10 grid grid-cols-1 gap-6 md:grid-cols-2">
         <ChartContainer animationDelay="0.6s">
           {(isVisible) => (
-            <div className="animate-fadeInUp chart-stock">
+            <div className="animate-fadeInUp chart-stock" style={{ animationDelay: '0.4s' }}>
               <Card className="chart-card-premium border-0">
                 <CardHeader className="pb-4 border-b border-border/50">
                   <div className="flex items-center gap-2">
@@ -84,7 +111,7 @@ export default function DashboardContent() {
         </ChartContainer>
         <ChartContainer animationDelay="0.65s">
           {(isVisible) => (
-            <div className="animate-fadeInUp chart-profit">
+            <div className="animate-fadeInUp chart-profit" style={{ animationDelay: '0.45s' }}>
               <Card className="chart-card-premium border-0">
                 <CardHeader className="pb-4 border-b border-border/50">
                   <div className="flex items-center gap-2">
@@ -105,11 +132,11 @@ export default function DashboardContent() {
       </div>
 
       {/* Pangkalan Orders & Recent Activity - Side by Side */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="relative z-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Pangkalan Order Chart */}
         <ChartContainer animationDelay="0.7s">
           {(isVisible) => (
-            <div className="animate-fadeInUp h-full">
+            <div className="animate-fadeInUp h-full" style={{ animationDelay: '0.5s' }}>
               <Card className="h-full chart-card-premium border-0 flex flex-col">
                 <CardHeader className="pb-3 border-b border-border/50">
                   <div className="flex items-center gap-2">
@@ -131,7 +158,7 @@ export default function DashboardContent() {
         {/* Recent Activity */}
         <ChartContainer animationDelay="0.75s">
           {(isVisible) => (
-            <div className="animate-fadeInUp h-full">
+            <div className="animate-fadeInUp h-full" style={{ animationDelay: '0.55s' }}>
               <RecentActivitySection />
             </div>
           )}

@@ -26,6 +26,7 @@ export class DashboardService {
      * 
      * Data yang dikembalikan:
      * - todayOrders: Total pesanan hari ini
+     * - todaySales: Total penjualan (Rp) hari ini
      * - pendingOrders: Pesanan yang belum diproses
      * - completedOrders: Pesanan yang sudah selesai hari ini
      * - totalStock: Stok per jenis LPG (legacy)
@@ -41,6 +42,18 @@ export class DashboardService {
                 created_at: { gte: today },
             },
         });
+
+        // Sum today's sales (total_amount) - exclude cancelled orders
+        const salesData = await this.prisma.client.orders.aggregate({
+            where: {
+                created_at: { gte: today },
+                current_status: { not: 'BATAL' },
+            },
+            _sum: {
+                total_amount: true,
+            },
+        });
+        const todaySales = Number(salesData._sum.total_amount) || 0;
 
         // Count pending orders - using IN for multiple pending statuses
         const pendingOrders = await this.prisma.client.orders.count({
@@ -67,6 +80,7 @@ export class DashboardService {
 
         return {
             todayOrders,
+            todaySales,
             pendingOrders,
             completedOrders,
             totalStock: stockSummary,

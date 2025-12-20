@@ -1,3 +1,9 @@
+declare class PerencanaanDataItemDto {
+    tanggal: string;
+    jumlah: number;
+    jumlah_normal?: number;
+    jumlah_fakultatif?: number;
+}
 export declare class CreatePerencanaanDto {
     pangkalan_id: string;
     tanggal: string;
@@ -14,10 +20,7 @@ export declare class BulkUpdatePerencanaanDto {
     tanggal_awal: string;
     tanggal_akhir: string;
     kondisi?: 'NORMAL' | 'FAKULTATIF';
-    data: {
-        tanggal: string;
-        jumlah: number;
-    }[];
+    data: PerencanaanDataItemDto[];
 }
 export declare class GetPerencanaanQueryDto {
     pangkalan_id?: string;
@@ -26,3 +29,4 @@ export declare class GetPerencanaanQueryDto {
     kondisi?: 'NORMAL' | 'FAKULTATIF';
     bulan?: string;
 }
+export {};

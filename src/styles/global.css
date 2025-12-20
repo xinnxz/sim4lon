@@ -126,6 +126,38 @@
      --shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.08);
      --shadow-xl: 0 8px 20px -4px rgb(0 0 0 / 0.15);
    }
+
+  /* ============================================
+     ACCENT COLOR THEMES
+     Gunakan data-accent attribute di html element
+     ============================================ */
+  
+  /* Hijau (Default - Pertamina Green) */
+  :root[data-accent="green"], :root {
+    --primary: 152 100% 30%;
+    --ring: 152 100% 30%;
+    --sidebar-primary: 152 100% 30%;
+    --sidebar-ring: 152 100% 30%;
+    --chart-1: 152 100% 30%;
+  }
+
+  /* Biru (Corporate Blue) */
+  :root[data-accent="blue"] {
+    --primary: 217 91% 50%;
+    --ring: 217 91% 50%;
+    --sidebar-primary: 217 91% 50%;
+    --sidebar-ring: 217 91% 50%;
+    --chart-1: 217 91% 50%;
+  }
+
+  /* Merah (Professional Red) */
+  :root[data-accent="red"] {
+    --primary: 0 72% 51%;
+    --ring: 0 72% 51%;
+    --sidebar-primary: 0 72% 51%;
+    --sidebar-ring: 0 72% 51%;
+    --chart-1: 0 72% 51%;
+  }
 }
 
 @layer base {
@@ -694,5 +726,419 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: rgba(155, 155, 155, 0.7);
+  }
+}
+
+/* ===== PREMIUM DASHBOARD ANIMATIONS ===== */
+
+@layer components {
+  /* 1. Animated Counter - Numbers count up smoothly */
+  @keyframes countUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-countUp {
+    animation: countUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 2. Floating Orbs - Ambient decoration */
+  @keyframes floatOrb {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    25% {
+      transform: translate(10px, -15px) scale(1.05);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translate(-5px, -25px) scale(1);
+      opacity: 0.35;
+    }
+    75% {
+      transform: translate(-15px, -10px) scale(0.95);
+      opacity: 0.3;
+    }
+  }
+
+  .animate-floatOrb {
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+
+  .animate-floatOrb-delayed {
+    animation: floatOrb 10s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  /* 3. Gradient Morph - Animated background gradients */
+  @keyframes gradientMorph {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-gradientMorph {
+    background-size: 200% 200%;
+    animation: gradientMorph 15s ease infinite;
+  }
+
+  /* 4. 3D Card Tilt Effect */
+  .card-3d-tilt {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .card-3d-tilt:hover {
+    transform: perspective(1000px) rotateX(-2deg) rotateY(2deg) translateZ(10px);
+  }
+
+  /* 5. Glow Pulse - Ambient glow effect */
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 
+        0 4px 20px -4px rgba(0, 0, 0, 0.1),
+        0 0 0 0 rgba(22, 163, 74, 0);
+    }
+    50% {
+      box-shadow: 
+        0 8px 30px -4px rgba(0, 0, 0, 0.15),
+        0 0 30px -5px rgba(22, 163, 74, 0.15);
+    }
+  }
+
+  .animate-glowPulse {
+    animation: glowPulse 4s ease-in-out infinite;
+  }
+
+  /* 6. Icon Bounce - Micro-interaction */
+  @keyframes iconBounce {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+  }
+
+  .hover-icon-bounce:hover .icon-bounce-target {
+    animation: iconBounce 0.5s ease-in-out;
+  }
+
+  /* 7. Slide In with Blur - Premium reveal effect */
+  @keyframes slideInBlur {
+    from {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-slideInBlur {
+    animation: slideInBlur 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 8. Shine Effect - Button/Card highlight */
+  @keyframes shine {
+    0% {
+      left: -100%;
+    }
+    50%, 100% {
+      left: 100%;
+    }
+  }
+
+  .shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shine 3s ease-in-out infinite;
+  }
+
+  /* 9. Border Glow Animation */
+  @keyframes borderGlowAnim {
+    0%, 100% {
+      border-color: rgba(22, 163, 74, 0.2);
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+    }
+    50% {
+      border-color: rgba(22, 163, 74, 0.5);
+      box-shadow: 0 0 15px -5px rgba(22, 163, 74, 0.3);
+    }
+  }
+
+  .animate-borderGlow {
+    animation: borderGlowAnim 3s ease-in-out infinite;
+  }
+
+  /* 10. Scale In Bounce - Entrance with bounce */
+  @keyframes scaleInBounce {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleInBounce {
+    animation: scaleInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+
+  /* 11. Floating Particles Container - Enhanced visibility */
+  .particles-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, hsl(152 100% 50% / 0.5), hsl(48 100% 65% / 0.4));
+    box-shadow: 
+      0 0 20px hsl(152 100% 50% / 0.3),
+      0 0 40px hsl(152 100% 50% / 0.15);
+    animation: floatParticle 15s ease-in-out infinite;
+    filter: blur(0.5px);
+  }
+
+  @keyframes floatParticle {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translate(20px, -30px) scale(1.2);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translate(-10px, -50px) scale(0.9);
+      opacity: 0.5;
+    }
+    75% {
+      transform: translate(-30px, -20px) scale(1.1);
+      opacity: 0.7;
+    }
+  }
+
+  .particle:nth-child(1) { 
+    top: 15%; left: 8%; 
+    width: 16px; height: 16px;
+    animation-delay: 0s; 
+    animation-duration: 12s;
+  }
+  .particle:nth-child(2) { 
+    top: 55%; left: 15%; 
+    width: 24px; height: 24px;
+    animation-delay: 2s; 
+    animation-duration: 18s;
+    background: linear-gradient(135deg, hsl(48 100% 60% / 0.5), hsl(152 100% 50% / 0.3));
+  }
+  .particle:nth-child(3) { 
+    top: 35%; left: 75%; 
+    width: 12px; height: 12px;
+    animation-delay: 4s; 
+    animation-duration: 14s;
+  }
+  .particle:nth-child(4) { 
+    top: 75%; left: 85%; 
+    width: 18px; height: 18px;
+    animation-delay: 1s; 
+    animation-duration: 16s;
+    background: linear-gradient(135deg, hsl(220 80% 60% / 0.4), hsl(152 100% 50% / 0.3));
+  }
+  .particle:nth-child(5) { 
+    top: 8%; left: 55%; 
+    width: 20px; height: 20px;
+    animation-delay: 3s; 
+    animation-duration: 20s;
+  }
+  .particle:nth-child(6) { 
+    top: 65%; left: 45%; 
+    width: 10px; height: 10px;
+    animation-delay: 5s; 
+    animation-duration: 13s;
+    background: linear-gradient(135deg, hsl(152 100% 60% / 0.6), hsl(48 100% 55% / 0.4));
+  }
+  .particle:nth-child(7) { 
+    top: 25%; left: 30%; 
+    width: 14px; height: 14px;
+    animation-delay: 2.5s; 
+    animation-duration: 17s;
+  }
+  .particle:nth-child(8) { 
+    top: 85%; left: 25%; 
+    width: 22px; height: 22px;
+    animation-delay: 4.5s; 
+    animation-duration: 19s;
+    background: linear-gradient(135deg, hsl(48 100% 65% / 0.5), hsl(152 80% 55% / 0.4));
+  }
+
+  /* 12. Mesh Gradient Background */
+  .mesh-gradient-bg {
+    background: 
+      radial-gradient(at 40% 20%, hsl(152 100% 95% / 0.6) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(48 100% 95% / 0.4) 0px, transparent 40%),
+      radial-gradient(at 0% 50%, hsl(152 80% 90% / 0.3) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(220 20% 98% / 0.5) 0px, transparent 40%),
+      radial-gradient(at 0% 100%, hsl(48 100% 95% / 0.3) 0px, transparent 40%),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(220 13% 98%) 100%);
+  }
+
+  /* 13. Premium KPI Card Styles */
+  .kpi-card-premium {
+    @apply relative overflow-hidden rounded-2xl border-0;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .kpi-card-premium:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .kpi-card-premium::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .kpi-card-premium:hover::before {
+    opacity: 1;
+  }
+
+  /* 14. Activity Item Hover Effect */
+  .activity-item-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .activity-item-hover:hover {
+    @apply bg-gradient-to-r from-muted/50 to-transparent;
+    transform: translateX(4px);
+  }
+
+  /* 15. Enhanced staggered delays for premium feel */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.3s; }
+
+  /* 16. Number Counter Animation for KPI values */
+  .kpi-number {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 17. Decorative Line Animation */
+  @keyframes lineGrow {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-lineGrow {
+    transform-origin: left;
+    animation: lineGrow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 18. Dashboard Header Gradient Animation */
+  @keyframes headerGradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .text-gradient-animated {
+    background: linear-gradient(
+      135deg, 
+      hsl(152 100% 35%) 0%, 
+      hsl(152 80% 45%) 25%,
+      hsl(48 100% 50%) 50%,
+      hsl(152 80% 45%) 75%,
+      hsl(152 100% 35%) 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: headerGradient 6s ease infinite;
+  }
+
+  /* 19. Chart Reveal Animation */
+  @keyframes chartReveal {
+    from {
+      opacity: 0;
+      clip-path: inset(100% 0 0 0);
+    }
+    to {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .animate-chartReveal {
+    animation: chartReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 20. Icon Rotate on Hover */
+  .icon-rotate-hover {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .group:hover .icon-rotate-hover,
+  .hover-parent:hover .icon-rotate-hover {
+    transform: rotate(12deg) scale(1.1);
   }
 }

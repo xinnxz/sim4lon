@@ -69,10 +69,10 @@ const pangkalanSchema = z.object({
   phone: z.string()
     .regex(/^(\+62|0)[0-9]{9,12}$/, 'Nomor telepon tidak valid (contoh: 08xx atau +62xx)'),
   email: z.string()
-    .email('Format email tidak valid')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Email wajib diisi')
+    .email('Format email tidak valid'),
   capacity: z.string().optional(),
+  alokasi_bulanan: z.string().optional(),
   note: z.string()
     .max(500, 'Catatan maksimal 500 karakter')
     .optional(),
@@ -110,6 +110,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
       phone: '',
       email: '',
       capacity: '',
+      alokasi_bulanan: '',
       note: '',
       login_email: '',
       login_password: '',
@@ -141,6 +142,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
         phone: values.phone,
         email: values.email || null,
         capacity: capacityNum,
+        alokasi_bulanan: values.alokasi_bulanan ? parseInt(values.alokasi_bulanan, 10) : 0,
         note: values.note || '',
         // Akun login
         login_email: values.login_email,
@@ -386,10 +388,36 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                         {...field}
                         disabled={isSubmitting}
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                       />
                     </FormControl>
                     <FormDescription>
                       Kapasitas penyimpanan LPG dalam unit
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Alokasi Bulanan */}
+              <FormField
+                control={form.control}
+                name="alokasi_bulanan"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Alokasi Bulanan (Opsional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: 500"
+                        {...field}
+                        disabled={isSubmitting}
+                        type="number"
+                        min={0}
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Jumlah alokasi tabung LPG per bulan
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

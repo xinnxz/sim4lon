@@ -24,4 +24,5 @@ export declare class UpdateOrderStatusDto {
     status: status_pesanan;
     description?: string;
     note?: string;
+    payment_method?: 'TUNAI' | 'TRANSFER';
 }

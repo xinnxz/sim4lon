@@ -145,6 +145,7 @@ let PangkalanService = class PangkalanService {
                 phone: dto.phone,
                 email: dto.email,
                 capacity: dto.capacity,
+                alokasi_bulanan: dto.alokasi_bulanan || 0,
                 note: dto.note,
             },
         });

@@ -143,15 +143,15 @@ export default function PaymentRecordForm({
           <div className={`flex items-center space-x-2 p-3 border rounded-lg ${isPaymentSuccessful ? 'bg-muted/50 cursor-not-allowed' : 'hover:bg-secondary/50 cursor-pointer'}`}>
             <RadioGroupItem value="cash" id="cash" disabled={isPaymentSuccessful} />
             <Label htmlFor="cash" className={`flex-1 ${isPaymentSuccessful ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
-              <div className="font-medium">Tunai</div>
+              <div className="font-medium">Cash</div>
               <div className="text-sm text-muted-foreground">Pembayaran langsung dengan uang tunai</div>
             </Label>
           </div>
           <div className={`flex items-center space-x-2 p-3 border rounded-lg ${isPaymentSuccessful ? 'bg-muted/50 cursor-not-allowed' : 'hover:bg-secondary/50 cursor-pointer'}`}>
             <RadioGroupItem value="transfer" id="transfer" disabled={isPaymentSuccessful} />
             <Label htmlFor="transfer" className={`flex-1 ${isPaymentSuccessful ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
-              <div className="font-medium">Transfer Bank</div>
-              <div className="text-sm text-muted-foreground">Pembayaran melalui transfer bank dengan bukti</div>
+              <div className="font-medium">Cashless</div>
+              <div className="text-sm text-muted-foreground">Pembayaran melalui transfer bank / non-tunai</div>
             </Label>
           </div>
         </RadioGroup>
@@ -281,7 +281,11 @@ export default function PaymentRecordForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => window.location.href = './detail-pesanan.html'}
+              onClick={() => {
+                const params = new URLSearchParams(window.location.search)
+                const id = params.get('orderId') || params.get('id')
+                window.location.href = id ? `/detail-pesanan?id=${id}` : '/daftar-pesanan'
+              }}
               disabled={isSubmitting}
             >
               Batal
@@ -309,7 +313,11 @@ export default function PaymentRecordForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => window.location.href = './detail-pesanan.html'}
+              onClick={() => {
+                const params = new URLSearchParams(window.location.search)
+                const id = params.get('orderId') || params.get('id')
+                window.location.href = id ? `/detail-pesanan?id=${id}` : '/daftar-pesanan'
+              }}
               className="flex-1"
             >
               <SafeIcon name="ArrowLeft" className="mr-2 h-4 w-4" />

@@ -141,6 +141,14 @@ export default defineConfig({
       warmup: {
         clientFiles: [],
       },
+      // Proxy /api requests to backend during development
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     build: {
       target: "es2022",

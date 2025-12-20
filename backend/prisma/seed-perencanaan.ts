@@ -93,15 +93,18 @@ async function main() {
             }
 
             // 10% chance of fakultatif allocation
-            const kondisi: kondisi_type = Math.random() < 0.1 ? 'FAKULTATIF' : 'NORMAL';
+            const isFakultatif = Math.random() < 0.1;
+            const jumlahNormal = isFakultatif ? 0 : jumlah;
+            const jumlahFakultatif = isFakultatif ? jumlah : 0;
 
             await prisma.perencanaan_harian.create({
                 data: {
                     pangkalan_id: pangkalan.id,
                     tanggal: date,
-                    jumlah,
-                    kondisi,
+                    jumlah_normal: jumlahNormal,
+                    jumlah_fakultatif: jumlahFakultatif,
                     alokasi_bulan: pangkalan.alokasi_bulanan,
+                    lpg_type: 'kg3', // LPG 3 KG Subsidi
                 },
             });
 

@@ -31,7 +31,7 @@ interface OrderItemsTableProps {
 
 export default function OrderItemsTable({ items }: OrderItemsTableProps) {
   return (
-    <Card>
+    <Card className="shadow-none border-0 hover:shadow-none">
       <CardHeader>
         <CardTitle>Item Pesanan</CardTitle>
       </CardHeader>

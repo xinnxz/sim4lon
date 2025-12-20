@@ -85,7 +85,7 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
     customer: {
       name: apiOrder.pangkalans?.name || 'Unknown',
       address: apiOrder.pangkalans?.address || '-',
-      email: '-',
+      email: apiOrder.pangkalans?.email || '-',
       contact: apiOrder.pangkalans?.pic_name || '-',
       contactPhone: apiOrder.pangkalans?.phone || '-'
     },
@@ -205,13 +205,35 @@ export default function OrderDetailContent() {
     }
   }
 
+  // API: Update status with payment method (for Konfirmasi Lunas/Cash)
+  const updateStatusWithPayment = async (newStatus: OrderStatus, description: string, paymentMethod: 'TUNAI' | 'TRANSFER') => {
+    if (!order) return
+
+    try {
+      setIsUpdating(true)
+      const updated = await ordersApi.updateStatus(order.apiId, {
+        status: newStatus,
+        description,
+        payment_method: paymentMethod  // Include payment method in request
+      })
+      setOrder(mapApiToUI(updated))
+      toast.success(`Status diubah ke ${STATUS_MAP[newStatus].label}`)
+    } catch (error: any) {
+      console.error('Failed to update status:', error)
+      toast.error(error.message || 'Gagal mengubah status')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
   // Handlers
   const handlePaymentClick = () => {
     window.location.href = `/catat-pembayaran?id=${order?.apiId}`
   }
 
   const handlePaymentConfirmed = async () => {
-    await updateStatus('DIPROSES', 'Pembayaran dikonfirmasi')
+    // Konfirmasi Lunas (Cash) - set payment_method ke TUNAI di database
+    await updateStatusWithPayment('DIPROSES', 'Pembayaran dikonfirmasi (Cash)', 'TUNAI')
   }
 
   const handlePrintInvoice = () => {

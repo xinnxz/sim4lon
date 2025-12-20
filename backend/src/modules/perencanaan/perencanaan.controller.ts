@@ -75,4 +75,22 @@ export class PerencanaanController {
     delete(@Param('id') id: string) {
         return this.perencanaanService.delete(id);
     }
+
+    /**
+     * POST /perencanaan/auto-generate
+     * Auto-generate perencanaan from pangkalan's alokasi_bulanan
+     */
+    @Post('auto-generate')
+    @UseGuards(RolesGuard)
+    @Roles(user_role.ADMIN, user_role.OPERATOR)
+    autoGenerate(
+        @Body() body: { bulan: string; lpg_type?: string; kondisi?: string; overwrite?: boolean }
+    ) {
+        return this.perencanaanService.autoGenerate(
+            body.bulan,
+            body.lpg_type || 'kg3',
+            body.kondisi || 'NORMAL',
+            body.overwrite || false
+        );
+    }
 }

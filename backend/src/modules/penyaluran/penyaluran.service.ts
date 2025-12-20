@@ -56,12 +56,20 @@ export class PenyaluranService {
         const endDate = new Date(year, month, 0);
         const daysInMonth = endDate.getDate();
 
+        console.log('[Penyaluran] getRekapitulasi called:', { bulan, tipePembayaran, lpgType });
+
         const pangkalans = await this.prisma.pangkalans.findMany({
             where: { is_active: true, deleted_at: null },
             select: { id: true, code: true, name: true, alokasi_bulanan: true },
             orderBy: { name: 'asc' },
         });
 
+        console.log('[Penyaluran] Found pangkalans:', pangkalans.length);
+
+        // Determine if this is a subsidi type (kg3 = 3kg) for alokasi display purposes
+        const isSubsidi = !lpgType || lpgType === 'kg3';
+
+        // UNIFIED QUERY: Use penyaluran_harian for ALL lpg_types
         const where: any = { tanggal: { gte: startDate, lte: endDate } };
         if (tipePembayaran) {
             where.tipe_pembayaran = tipePembayaran;
@@ -70,69 +78,92 @@ export class PenyaluranService {
             where.lpg_type = lpgType;
         }
 
+        console.log('[Penyaluran] Query where:', JSON.stringify(where));
+
         const penyaluran = await this.prisma.penyaluran_harian.findMany({
             where,
             orderBy: { tanggal: 'asc' },
         });
+
+        console.log('[Penyaluran] Found penyaluran records:', penyaluran.length);
 
         const result = pangkalans.map(pangkalan => {
             const dailyData: Record<number, number> = {};
             let totalNormal = 0;
             let totalFakultatif = 0;
 
+            // Initialize all days with 0
             for (let day = 1; day <= daysInMonth; day++) {
                 dailyData[day] = 0;
             }
 
+            // Aggregate data for this pangkalan - now using jumlah_normal + jumlah_fakultatif
             const pangkalanData = penyaluran.filter(p => p.pangkalan_id === pangkalan.id);
             for (const p of pangkalanData) {
-                const day = new Date(p.tanggal).getDate();
-                dailyData[day] += p.jumlah;
-                // Type assertion needed until prisma generate is run
-                const kondisi = (p as any).kondisi || 'NORMAL';
-                if (kondisi === 'NORMAL') {
-                    totalNormal += p.jumlah;
-                } else {
-                    totalFakultatif += p.jumlah;
-                }
+                const day = new Date(p.tanggal).getUTCDate();
+                dailyData[day] += p.jumlah_normal + p.jumlah_fakultatif;
+                totalNormal += p.jumlah_normal;
+                totalFakultatif += p.jumlah_fakultatif;
             }
 
             return {
                 id_registrasi: pangkalan.code,
                 nama_pangkalan: pangkalan.name,
                 pangkalan_id: pangkalan.id,
-                alokasi: pangkalan.alokasi_bulanan,
+                alokasi: isSubsidi ? pangkalan.alokasi_bulanan : 0,  // Only show alokasi for subsidi
                 status: 'AKTIF',
                 daily: dailyData,
                 total_normal: totalNormal,
                 total_fakultatif: totalFakultatif,
-                sisa_alokasi: pangkalan.alokasi_bulanan - totalNormal - totalFakultatif,
+                sisa_alokasi: isSubsidi ? pangkalan.alokasi_bulanan - totalNormal - totalFakultatif : 0,
                 grand_total: totalNormal + totalFakultatif,
             };
         });
 
+        console.log('[Penyaluran] Result count:', result.length);
         return { bulan, days_in_month: daysInMonth, data: result };
     }
 
+    /**
+     * Create single penyaluran entry - uses jumlah_normal and jumlah_fakultatif
+     */
     async create(dto: CreatePenyaluranDto) {
         const lpgType = (dto as any).lpg_type || 'kg3';
-        return this.prisma.penyaluran_harian.upsert({
+        const kondisi = (dto as any).kondisi || 'NORMAL';
+        const jumlahNormal = kondisi === 'NORMAL' ? dto.jumlah : 0;
+        const jumlahFakultatif = kondisi === 'FAKULTATIF' ? dto.jumlah : 0;
+
+        // Check if record exists
+        const existing = await this.prisma.penyaluran_harian.findFirst({
             where: {
-                pangkalan_id_tanggal_lpg_type: {
-                    pangkalan_id: dto.pangkalan_id,
-                    tanggal: new Date(dto.tanggal),
-                    lpg_type: lpgType,
-                },
-            },
-            update: {
-                jumlah: dto.jumlah,
-                tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-            },
-            create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(dto.tanggal),
                 lpg_type: lpgType,
-                jumlah: dto.jumlah,
+            },
+        });
+
+        if (existing) {
+            // Update existing record
+            return this.prisma.penyaluran_harian.update({
+                where: { id: existing.id },
+                data: {
+                    jumlah_normal: kondisi === 'NORMAL' ? dto.jumlah : existing.jumlah_normal,
+                    jumlah_fakultatif: kondisi === 'FAKULTATIF'
+                        ? existing.jumlah_fakultatif + dto.jumlah  // Add for fakultatif
+                        : existing.jumlah_fakultatif,
+                    tipe_pembayaran: dto.tipe_pembayaran || existing.tipe_pembayaran,
+                },
+            });
+        }
+
+        // No existing record - create new
+        return this.prisma.penyaluran_harian.create({
+            data: {
+                pangkalan_id: dto.pangkalan_id,
+                tanggal: new Date(dto.tanggal),
+                lpg_type: lpgType,
+                jumlah_normal: jumlahNormal,
+                jumlah_fakultatif: jumlahFakultatif,
                 tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
             },
         });
@@ -140,30 +171,42 @@ export class PenyaluranService {
 
     async bulkUpdate(dto: BulkUpdatePenyaluranDto) {
         const lpgType = (dto as any).lpg_type || 'kg3';
-        const operations = dto.data.map(item =>
-            this.prisma.penyaluran_harian.upsert({
+        const results: any[] = [];
+
+        for (const item of dto.data) {
+            const existing = await this.prisma.penyaluran_harian.findFirst({
                 where: {
-                    pangkalan_id_tanggal_lpg_type: {
-                        pangkalan_id: dto.pangkalan_id,
-                        tanggal: new Date(item.tanggal),
-                        lpg_type: lpgType,
-                    },
-                },
-                update: {
-                    jumlah: item.jumlah,
-                    tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-                },
-                create: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(item.tanggal),
                     lpg_type: lpgType,
-                    jumlah: item.jumlah,
-                    tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
                 },
-            })
-        );
+            });
 
-        return this.prisma.client.$transaction(operations);
+            if (existing) {
+                const updated = await this.prisma.penyaluran_harian.update({
+                    where: { id: existing.id },
+                    data: {
+                        jumlah_normal: item.jumlah,  // Default to normal for bulk updates
+                        tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
+                    },
+                });
+                results.push(updated);
+            } else {
+                const created = await this.prisma.penyaluran_harian.create({
+                    data: {
+                        pangkalan_id: dto.pangkalan_id,
+                        tanggal: new Date(item.tanggal),
+                        lpg_type: lpgType,
+                        jumlah_normal: item.jumlah,
+                        jumlah_fakultatif: 0,
+                        tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
+                    },
+                });
+                results.push(created);
+            }
+        }
+
+        return results;
     }
 
     async update(id: string, dto: UpdatePenyaluranDto) {

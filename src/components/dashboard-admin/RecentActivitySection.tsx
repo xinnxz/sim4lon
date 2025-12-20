@@ -133,14 +133,14 @@ export default function RecentActivitySection() {
               return (
                 <div
                   key={activity.id}
-                  className="transition-all duration-300 ease-out hover:bg-muted/50 p-3 rounded-lg cursor-pointer animate-fadeInUp"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className="activity-item-hover p-3 rounded-lg cursor-pointer animate-fadeInUp group"
+                  style={{ animationDelay: `${index * 0.08}s` }}
                 >
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.bg} transition-all duration-300`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.bg} transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
                       <SafeIcon
                         name={icon}
-                        className={`h-5 w-5 ${style.text}`}
+                        className={`h-5 w-5 ${style.text} transition-transform duration-300 group-hover:scale-110`}
                       />
                     </div>
                     <div className="flex-1 space-y-1.5 min-w-0">
