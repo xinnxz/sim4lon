@@ -40,21 +40,25 @@ const themeOptions = [
 ]
 
 const accentColors = [
-    { value: 'green', label: 'Hijau (Default)', color: 'bg-emerald-500' },
-    { value: 'blue', label: 'Biru', color: 'bg-blue-500' },
-    { value: 'purple', label: 'Ungu', color: 'bg-purple-500' },
-    { value: 'orange', label: 'Oranye', color: 'bg-orange-500' }
+    { value: 'green', label: 'Hijau', color: 'bg-emerald-600', description: 'Default Pertamina' },
+    { value: 'blue', label: 'Biru', color: 'bg-blue-600', description: 'Professional Blue' },
+    { value: 'red', label: 'Merah', color: 'bg-red-600', description: 'Bold & Modern' }
 ]
 
 export default function AppearanceSettings() {
     const [settings, setSettings] = useState<AppearanceState>(initialSettings)
     const [isSaving, setIsSaving] = useState(false)
 
-    // Load saved theme on mount
+    // Load saved theme and accent on mount
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') as Theme
+        const savedAccent = localStorage.getItem('accentColor')
         if (savedTheme) {
             setSettings(prev => ({ ...prev, theme: savedTheme }))
+        }
+        if (savedAccent) {
+            setSettings(prev => ({ ...prev, accentColor: savedAccent }))
+            document.documentElement.setAttribute('data-accent', savedAccent)
         }
     }, [])
 
@@ -79,6 +83,14 @@ export default function AppearanceSettings() {
 
     const handleChange = (field: keyof AppearanceState, value: string) => {
         setSettings(prev => ({ ...prev, [field]: value }))
+
+        // Apply accent color immediately
+        if (field === 'accentColor') {
+            document.documentElement.setAttribute('data-accent', value)
+            localStorage.setItem('accentColor', value)
+            const colorLabel = accentColors.find(c => c.value === value)?.label
+            toast.success(`Warna aksen diubah ke ${colorLabel}`)
+        }
     }
 
     const handleSave = async () => {
@@ -186,9 +198,6 @@ export default function AppearanceSettings() {
                             </button>
                         ))}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-3">
-                        * Perubahan warna aksen memerlukan reload halaman
-                    </p>
                 </CardContent>
             </Card>
 

@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import { lpgProductsApi, type LpgProductWithStock, type LpgCategory } from '@/lib/api'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 interface StockSummaryCardsProps {
   refreshTrigger?: number
@@ -150,7 +151,7 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Stok Keseluruhan</p>
-                  <p className="text-4xl font-bold text-foreground">{totalStock.toLocaleString('id-ID')} <span className="text-lg font-normal text-muted-foreground">unit</span></p>
+                  <p className="text-4xl font-bold text-foreground"><AnimatedNumber value={totalStock} delay={100} /> <span className="text-lg font-normal text-muted-foreground">unit</span></p>
                 </div>
               </div>
 
@@ -158,17 +159,17 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
               <div className="grid grid-cols-3 gap-3 md:gap-4">
                 <div className="text-center p-4 rounded-xl bg-green-500/10 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Subsidi</p>
-                  <p className="text-2xl font-bold text-green-600">{totalSubsidi.toLocaleString('id-ID')}</p>
+                  <p className="text-2xl font-bold text-green-600"><AnimatedNumber value={totalSubsidi} delay={200} /></p>
                   <p className="text-xs text-muted-foreground">unit</p>
                 </div>
                 <div className="text-center p-4 rounded-xl bg-blue-500/10 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Non-Subsidi</p>
-                  <p className="text-2xl font-bold text-blue-600">{totalNonSubsidi.toLocaleString('id-ID')}</p>
+                  <p className="text-2xl font-bold text-blue-600"><AnimatedNumber value={totalNonSubsidi} delay={300} /></p>
                   <p className="text-xs text-muted-foreground">unit</p>
                 </div>
                 <div className="text-center p-4 rounded-xl bg-purple-500/10 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Jenis Produk</p>
-                  <p className="text-2xl font-bold text-purple-600">{products.length}</p>
+                  <p className="text-2xl font-bold text-purple-600"><AnimatedNumber value={products.length} delay={400} /></p>
                   <p className="text-xs text-muted-foreground">produk aktif</p>
                 </div>
               </div>
@@ -230,7 +231,7 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                       className={`text-5xl font-bold ${product.stock.current < 0 ? 'text-destructive' : ''}`}
                       style={{ color: product.stock.current >= 0 ? getColorHex(product.color) : undefined }}
                     >
-                      {product.stock.current}
+                      <AnimatedNumber value={product.stock.current} delay={500 + index * 100} />
                     </span>
                     <span className="text-lg text-muted-foreground ml-2">unit</span>
                   </div>

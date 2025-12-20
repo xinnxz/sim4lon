@@ -42,6 +42,7 @@ import TambahPangkalanForm from '@/components/tambah-pangkalan/TambahPangkalanFo
 import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { pangkalanApi, type Pangkalan } from '@/lib/api'
 import { toast } from 'sonner'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 export default function PangkalanListPage() {
   // State untuk data
@@ -229,7 +230,7 @@ export default function PangkalanListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Total Pangkalan</p>
-                  <p className="text-2xl font-bold">{totalItems}</p>
+                  <p className="text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
                 </div>
               </div>
             </CardContent>
@@ -245,7 +246,7 @@ export default function PangkalanListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Aktif</p>
-                  <p className="text-2xl font-bold text-green-600">{aktivCount}</p>
+                  <p className="text-2xl font-bold text-green-600"><AnimatedNumber value={aktivCount} delay={200} /></p>
                 </div>
               </div>
             </CardContent>
@@ -261,7 +262,7 @@ export default function PangkalanListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Nonaktif</p>
-                  <p className="text-2xl font-bold text-red-600">{nonaktifCount}</p>
+                  <p className="text-2xl font-bold text-red-600"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
                 </div>
               </div>
             </CardContent>

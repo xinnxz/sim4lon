@@ -80,4 +80,75 @@ export declare class ReportsService {
             end: Date;
         };
     }>;
+    getPangkalanReport(startDate: Date, endDate: Date): Promise<{
+        summary: {
+            total_pangkalan: number;
+            total_orders_subsidi: number;
+            total_tabung_subsidi: number;
+            total_revenue: number;
+            total_consumers: number;
+            active_consumers: number;
+            top_pangkalan: string;
+        };
+        data: {
+            id: string;
+            code: string;
+            name: string;
+            address: string;
+            region: string;
+            pic_name: string;
+            phone: string;
+            alokasi_bulanan: number;
+            total_orders_from_agen: number;
+            total_tabung_from_agen: number;
+            total_consumer_orders: number;
+            total_tabung_to_consumers: number;
+            total_revenue: number;
+            total_registered_consumers: number;
+            active_consumers: number;
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+    }>;
+    getSubsidiConsumers(pangkalanId: string, startDate: Date, endDate: Date): Promise<{
+        error: string;
+        summary?: undefined;
+        data?: undefined;
+        period?: undefined;
+    } | {
+        summary: {
+            pangkalan_id: string;
+            pangkalan_code: string;
+            pangkalan_name: string;
+            total_consumers: number;
+            registered_consumers: number;
+            walk_in_count: number;
+            total_transactions: number;
+            total_tabung: number;
+        };
+        data: {
+            id: string;
+            name: string;
+            nik: string | null;
+            kk: string | null;
+            phone: string | null;
+            address: string | null;
+            consumer_type: string;
+            total_purchases: number;
+            total_tabung: number;
+            last_purchase: Date;
+            purchases: Array<{
+                date: Date;
+                qty: number;
+                amount: number;
+            }>;
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+        error?: undefined;
+    }>;
 }

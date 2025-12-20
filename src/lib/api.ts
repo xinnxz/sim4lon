@@ -384,6 +384,73 @@ export interface StockMovementResponse {
     period: ReportPeriod;
 }
 
+// Pangkalan Analytics Report Types
+export interface PangkalanReportSummary {
+    total_pangkalan: number;
+    total_orders_subsidi: number;
+    total_tabung_subsidi: number;
+    total_revenue: number;
+    total_consumers: number;
+    active_consumers: number;
+    top_pangkalan: string;
+}
+
+export interface PangkalanReportItem {
+    id: string;
+    code: string;
+    name: string;
+    address: string;
+    region: string;
+    pic_name: string;
+    phone: string;
+    alokasi_bulanan: number;
+    total_orders_from_agen: number;
+    total_tabung_from_agen: number;
+    total_consumer_orders: number;
+    total_tabung_to_consumers: number;
+    total_revenue: number;
+    total_registered_consumers: number;
+    active_consumers: number;
+}
+
+export interface PangkalanReportResponse {
+    summary: PangkalanReportSummary;
+    data: PangkalanReportItem[];
+    period: ReportPeriod;
+}
+
+// Subsidi Consumers Audit Types
+export interface SubsidiConsumersSummary {
+    pangkalan_id: string;
+    pangkalan_code: string;
+    pangkalan_name: string;
+    total_consumers: number;
+    registered_consumers: number;
+    walk_in_count: number;
+    total_transactions: number;
+    total_tabung: number;
+}
+
+export interface SubsidiConsumerItem {
+    id: string;
+    name: string;
+    nik: string | null;
+    kk: string | null;
+    phone: string | null;
+    address: string | null;
+    consumer_type: string;
+    total_purchases: number;
+    total_tabung: number;
+    last_purchase: string;
+    purchases: Array<{ date: string; qty: number; amount: number }>;
+}
+
+export interface SubsidiConsumersResponse {
+    summary: SubsidiConsumersSummary;
+    data: SubsidiConsumerItem[];
+    period: ReportPeriod;
+}
+
 export const reportsApi = {
     async getSalesReport(startDate?: string, endDate?: string): Promise<SalesReportResponse> {
         const params = new URLSearchParams();
@@ -406,7 +473,28 @@ export const reportsApi = {
         if (productId) params.append('productId', productId);
         return apiRequest<StockMovementResponse>(`/reports/stock-movement?${params.toString()}`);
     },
+
+    /**
+     * Get pangkalan analytics report with subsidi distribution stats
+     */
+    async getPangkalanReport(startDate?: string, endDate?: string): Promise<PangkalanReportResponse> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        return apiRequest<PangkalanReportResponse>(`/reports/pangkalan?${params.toString()}`);
+    },
+
+    /**
+     * Get subsidi consumers for a specific pangkalan (for audit)
+     */
+    async getSubsidiConsumers(pangkalanId: string, startDate?: string, endDate?: string): Promise<SubsidiConsumersResponse> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        return apiRequest<SubsidiConsumersResponse>(`/reports/pangkalan/${pangkalanId}/consumers?${params.toString()}`);
+    },
 };
+
 
 // ============================================================
 // PANGKALAN API

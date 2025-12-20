@@ -4,11 +4,12 @@
  * PENJELASAN:
  * API endpoints untuk laporan:
  * GET /reports/sales - Laporan penjualan
- * GET /reports/payments - Laporan pembayaran
+ * GET /reports/pangkalan - Laporan analytics pangkalan & subsidi
+ * GET /reports/pangkalan/:id/consumers - Detail konsumen subsidi per pangkalan
  * GET /reports/stock-movement - Laporan stok
  */
 
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/guards';
 
@@ -31,15 +32,30 @@ export class ReportsController {
     }
 
     /**
-     * Get payments report
+     * Get pangkalan analytics report
+     * Shows performance stats and subsidi distribution per pangkalan
      */
-    @Get('payments')
-    async getPaymentsReport(
+    @Get('pangkalan')
+    async getPangkalanReport(
         @Query('startDate') startDate?: string,
         @Query('endDate') endDate?: string,
     ) {
         const { start, end } = this.parseDateRange(startDate, endDate);
-        return this.reportsService.getPaymentsReport(start, end);
+        return this.reportsService.getPangkalanReport(start, end);
+    }
+
+    /**
+     * Get subsidi consumers for a specific pangkalan
+     * For audit purposes - shows who bought subsidized LPG
+     */
+    @Get('pangkalan/:id/consumers')
+    async getSubsidiConsumers(
+        @Param('id') pangkalanId: string,
+        @Query('startDate') startDate?: string,
+        @Query('endDate') endDate?: string,
+    ) {
+        const { start, end } = this.parseDateRange(startDate, endDate);
+        return this.reportsService.getSubsidiConsumers(pangkalanId, start, end);
     }
 
     /**
@@ -74,3 +90,4 @@ export class ReportsController {
         return { start, end };
     }
 }
+

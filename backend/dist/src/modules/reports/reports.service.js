@@ -206,6 +206,161 @@ let ReportsService = class ReportsService {
             },
         };
     }
+    async getPangkalanReport(startDate, endDate) {
+        const pangkalans = await this.prisma.pangkalans.findMany({
+            where: {
+                is_active: true,
+                deleted_at: null,
+            },
+            include: {
+                orders: {
+                    where: {
+                        created_at: {
+                            gte: startDate,
+                            lte: endDate,
+                        },
+                        current_status: 'SELESAI',
+                        deleted_at: null,
+                    },
+                    include: {
+                        order_items: true,
+                    },
+                },
+                consumer_orders: {
+                    where: {
+                        sale_date: {
+                            gte: startDate,
+                            lte: endDate,
+                        },
+                        lpg_type: 'kg3',
+                    },
+                },
+                consumers: {
+                    where: {
+                        is_active: true,
+                    },
+                },
+            },
+            orderBy: { name: 'asc' },
+        });
+        const pangkalanStats = pangkalans.map(p => {
+            const subsidiOrders = p.orders.filter(o => o.order_items.some(item => item.lpg_type === 'kg3'));
+            const subsidiTabung = subsidiOrders.reduce((sum, o) => sum + o.order_items.filter(item => item.lpg_type === 'kg3').reduce((s, i) => s + i.qty, 0), 0);
+            const consumerOrderCount = p.consumer_orders.length;
+            const consumerTabung = p.consumer_orders.reduce((sum, o) => sum + o.qty, 0);
+            const consumerRevenue = p.consumer_orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+            const uniqueConsumerIds = new Set(p.consumer_orders.filter(o => o.consumer_id).map(o => o.consumer_id));
+            return {
+                id: p.id,
+                code: p.code,
+                name: p.name,
+                address: p.address,
+                region: p.region || '-',
+                pic_name: p.pic_name || '-',
+                phone: p.phone || '-',
+                alokasi_bulanan: p.alokasi_bulanan,
+                total_orders_from_agen: subsidiOrders.length,
+                total_tabung_from_agen: subsidiTabung,
+                total_consumer_orders: consumerOrderCount,
+                total_tabung_to_consumers: consumerTabung,
+                total_revenue: consumerRevenue,
+                total_registered_consumers: p.consumers.length,
+                active_consumers: uniqueConsumerIds.size,
+            };
+        });
+        pangkalanStats.sort((a, b) => b.total_tabung_to_consumers - a.total_tabung_to_consumers);
+        const summary = {
+            total_pangkalan: pangkalans.length,
+            total_orders_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_consumer_orders, 0),
+            total_tabung_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_tabung_to_consumers, 0),
+            total_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_revenue, 0),
+            total_consumers: pangkalanStats.reduce((sum, p) => sum + p.total_registered_consumers, 0),
+            active_consumers: pangkalanStats.reduce((sum, p) => sum + p.active_consumers, 0),
+            top_pangkalan: pangkalanStats[0]?.name || '-',
+        };
+        return {
+            summary,
+            data: pangkalanStats,
+            period: {
+                start: startDate,
+                end: endDate,
+            },
+        };
+    }
+    async getSubsidiConsumers(pangkalanId, startDate, endDate) {
+        const pangkalan = await this.prisma.pangkalans.findUnique({
+            where: { id: pangkalanId },
+            select: { id: true, code: true, name: true },
+        });
+        if (!pangkalan) {
+            return { error: 'Pangkalan not found' };
+        }
+        const consumerOrders = await this.prisma.consumer_orders.findMany({
+            where: {
+                pangkalan_id: pangkalanId,
+                lpg_type: 'kg3',
+                sale_date: {
+                    gte: startDate,
+                    lte: endDate,
+                },
+            },
+            include: {
+                consumers: true,
+            },
+            orderBy: { sale_date: 'desc' },
+        });
+        const consumerMap = new Map();
+        for (const order of consumerOrders) {
+            const consumerId = order.consumer_id || 'WALK_IN';
+            const consumerName = order.consumers?.name || order.consumer_name || 'Walk-in Customer';
+            if (!consumerMap.has(consumerId)) {
+                consumerMap.set(consumerId, {
+                    id: consumerId,
+                    name: consumerName,
+                    nik: order.consumers?.nik || null,
+                    kk: order.consumers?.kk || null,
+                    phone: order.consumers?.phone || null,
+                    address: order.consumers?.address || null,
+                    consumer_type: order.consumers?.consumer_type || 'WALK_IN',
+                    total_purchases: 0,
+                    total_tabung: 0,
+                    last_purchase: order.sale_date,
+                    purchases: [],
+                });
+            }
+            const consumer = consumerMap.get(consumerId);
+            consumer.total_purchases += 1;
+            consumer.total_tabung += order.qty;
+            consumer.purchases.push({
+                date: order.sale_date,
+                qty: order.qty,
+                amount: Number(order.total_amount),
+            });
+            if (order.sale_date > consumer.last_purchase) {
+                consumer.last_purchase = order.sale_date;
+            }
+        }
+        const consumers = Array.from(consumerMap.values());
+        consumers.sort((a, b) => b.total_tabung - a.total_tabung);
+        const summary = {
+            pangkalan_id: pangkalan.id,
+            pangkalan_code: pangkalan.code,
+            pangkalan_name: pangkalan.name,
+            total_consumers: consumers.length,
+            registered_consumers: consumers.filter(c => c.id !== 'WALK_IN').length,
+            walk_in_count: consumers.filter(c => c.id === 'WALK_IN').length ? 1 : 0,
+            total_transactions: consumerOrders.length,
+            total_tabung: consumers.reduce((sum, c) => sum + c.total_tabung, 0),
+        };
+        return {
+            summary,
+            data: consumers,
+            period: {
+                start: startDate,
+                end: endDate,
+            },
+        };
+    }
 };
 exports.ReportsService = ReportsService;
 exports.ReportsService = ReportsService = __decorate([

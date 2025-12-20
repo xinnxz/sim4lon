@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import SafeIcon from '@/components/common/SafeIcon'
 import { penyaluranApi, lpgProductsApi, pangkalanApi, type PenyaluranRekapitulasiResponse, type LpgProduct, type Pangkalan } from '@/lib/api'
 import { toast } from 'sonner'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 export default function PenyaluranPage() {
     const [activeTab, setActiveTab] = useState<'form' | 'rekapitulasi'>('rekapitulasi')
@@ -405,7 +406,7 @@ export default function PenyaluranPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Total Pangkalan</p>
-                                        <p className="text-xl font-bold">{summaryStats.totalPangkalan}</p>
+                                        <p className="text-xl font-bold"><AnimatedNumber value={summaryStats.totalPangkalan} delay={100} /></p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -419,7 +420,7 @@ export default function PenyaluranPage() {
                                         </div>
                                         <div>
                                             <p className="text-xs text-muted-foreground">Total Alokasi</p>
-                                            <p className="text-xl font-bold">{summaryStats.totalAlokasi.toLocaleString()}</p>
+                                            <p className="text-xl font-bold"><AnimatedNumber value={summaryStats.totalAlokasi} delay={200} /></p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -433,7 +434,7 @@ export default function PenyaluranPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Total Penyaluran</p>
-                                        <p className="text-xl font-bold text-purple-600">{summaryStats.totalRealisasi.toLocaleString()}</p>
+                                        <p className="text-xl font-bold text-purple-600"><AnimatedNumber value={summaryStats.totalRealisasi} delay={300} /></p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -448,7 +449,7 @@ export default function PenyaluranPage() {
                                         <div>
                                             <p className="text-xs text-muted-foreground">Sisa Alokasi</p>
                                             <p className={`text-xl font-bold ${summaryStats.sisaAlokasi < 0 ? 'text-red-500' : 'text-orange-600'}`}>
-                                                {summaryStats.sisaAlokasi.toLocaleString()}
+                                                <AnimatedNumber value={summaryStats.sisaAlokasi} delay={400} />
                                             </p>
                                         </div>
                                     </div>

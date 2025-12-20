@@ -7,6 +7,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import { penerimaanApi, type InOutAgenResponse } from '@/lib/api'
 import { toast } from 'sonner'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 export default function InOutAgenPage() {
     const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -73,7 +74,7 @@ export default function InOutAgenPage() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Stok Awal Bulan</p>
-                                    <p className="text-xl font-bold">{data?.stok_awal_bulan.toLocaleString() || 0}</p>
+                                    <p className="text-xl font-bold"><AnimatedNumber value={data?.stok_awal_bulan || 0} delay={100} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -89,7 +90,7 @@ export default function InOutAgenPage() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Total Penerimaan</p>
-                                    <p className="text-xl font-bold text-green-600">{data?.total_penerimaan.toLocaleString() || 0}</p>
+                                    <p className="text-xl font-bold text-green-600"><AnimatedNumber value={data?.total_penerimaan || 0} delay={200} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -105,7 +106,7 @@ export default function InOutAgenPage() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Total Penyaluran</p>
-                                    <p className="text-xl font-bold text-orange-600">{data?.total_penyaluran.toLocaleString() || 0}</p>
+                                    <p className="text-xl font-bold text-orange-600"><AnimatedNumber value={data?.total_penyaluran || 0} delay={300} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -121,7 +122,7 @@ export default function InOutAgenPage() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Stok Akhir Bulan</p>
-                                    <p className="text-xl font-bold text-purple-600">{data?.stok_akhir_bulan.toLocaleString() || 0}</p>
+                                    <p className="text-xl font-bold text-purple-600"><AnimatedNumber value={data?.stok_akhir_bulan || 0} delay={400} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -211,27 +212,26 @@ export default function InOutAgenPage() {
                                     </tr>
                                 ) : (
                                     ROWS.map(row => {
-                                        // Use solid background colors for sticky columns
-                                        const bgColors: Record<string, string> = {
-                                            blue: '#eff6ff',    // blue-50
-                                            green: '#f0fdf4',   // green-50
-                                            orange: '#fff7ed',  // orange-50
-                                            purple: '#faf5ff'   // purple-50
+                                        // Use class-based colors that support dark mode
+                                        const bgClasses: Record<string, string> = {
+                                            blue: 'bg-blue-50',
+                                            green: 'bg-green-50',
+                                            orange: 'bg-orange-50',
+                                            purple: 'bg-purple-50'
                                         }
                                         const dotColors: Record<string, string> = {
-                                            blue: 'rgb(59, 130, 246)',
-                                            green: 'rgb(34, 197, 94)',
-                                            orange: 'rgb(249, 115, 22)',
-                                            purple: 'rgb(168, 85, 247)'
+                                            blue: 'bg-blue-500',
+                                            green: 'bg-green-500',
+                                            orange: 'bg-orange-500',
+                                            purple: 'bg-purple-500'
                                         }
                                         return (
                                             <tr key={row.key} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
                                                 <td
-                                                    className="sticky left-0 z-10 bg-background px-4 py-3 font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"
-                                                    style={{ backgroundColor: bgColors[row.color] }}
+                                                    className={`sticky left-0 z-10 px-4 py-3 font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${bgClasses[row.color]}`}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColors[row.color] }} />
+                                                        <div className={`w-2 h-2 rounded-full ${dotColors[row.color]}`} />
                                                         {row.label}
                                                     </div>
                                                 </td>
