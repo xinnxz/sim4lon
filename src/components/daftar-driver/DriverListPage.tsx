@@ -42,6 +42,7 @@ import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { driversApi, type Driver } from '@/lib/api'
 import { toast } from 'sonner'
 import AddDriverModal from './AddDriverModal'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 export default function DriverListPage() {
   // State untuk data
@@ -255,7 +256,7 @@ export default function DriverListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Total Supir</p>
-                  <p className="text-2xl font-bold">{totalItems}</p>
+                  <p className="text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
                 </div>
               </div>
             </CardContent>
@@ -271,7 +272,7 @@ export default function DriverListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Aktif</p>
-                  <p className="text-2xl font-bold text-green-600">{aktivCount}</p>
+                  <p className="text-2xl font-bold text-green-600"><AnimatedNumber value={aktivCount} delay={200} /></p>
                 </div>
               </div>
             </CardContent>
@@ -287,7 +288,7 @@ export default function DriverListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Nonaktif</p>
-                  <p className="text-2xl font-bold text-red-600">{nonaktifCount}</p>
+                  <p className="text-2xl font-bold text-red-600"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
                 </div>
               </div>
             </CardContent>

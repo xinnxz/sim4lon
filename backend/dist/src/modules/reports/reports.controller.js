@@ -25,9 +25,13 @@ let ReportsController = class ReportsController {
         const { start, end } = this.parseDateRange(startDate, endDate);
         return this.reportsService.getSalesReport(start, end);
     }
-    async getPaymentsReport(startDate, endDate) {
+    async getPangkalanReport(startDate, endDate) {
         const { start, end } = this.parseDateRange(startDate, endDate);
-        return this.reportsService.getPaymentsReport(start, end);
+        return this.reportsService.getPangkalanReport(start, end);
+    }
+    async getSubsidiConsumers(pangkalanId, startDate, endDate) {
+        const { start, end } = this.parseDateRange(startDate, endDate);
+        return this.reportsService.getSubsidiConsumers(pangkalanId, start, end);
     }
     async getStockMovementReport(startDate, endDate, productId) {
         const { start, end } = this.parseDateRange(startDate, endDate);
@@ -54,13 +58,22 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getSalesReport", null);
 __decorate([
-    (0, common_1.Get)('payments'),
+    (0, common_1.Get)('pangkalan'),
     __param(0, (0, common_1.Query)('startDate')),
     __param(1, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], ReportsController.prototype, "getPaymentsReport", null);
+], ReportsController.prototype, "getPangkalanReport", null);
+__decorate([
+    (0, common_1.Get)('pangkalan/:id/consumers'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('startDate')),
+    __param(2, (0, common_1.Query)('endDate')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], ReportsController.prototype, "getSubsidiConsumers", null);
 __decorate([
     (0, common_1.Get)('stock-movement'),
     __param(0, (0, common_1.Query)('startDate')),

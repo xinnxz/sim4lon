@@ -35,6 +35,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import { toast } from 'sonner'
 import { ordersApi, type Order, type OrderStatus, type OrderStats } from '@/lib/api'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 /**
  * Status labels for display
@@ -224,12 +225,12 @@ export default function OrderListPage() {
 
       {/* Summary Stats - Hari Ini with Tilt3D + Premium Styling */}
       <div className="grid gap-4 sm:grid-cols-5">
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow">
           <div className="p-5 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Hari Ini</p>
-                <p className="text-3xl font-bold mt-2">{isLoadingStats ? '-' : stats?.total || 0}</p>
+                <p className="text-3xl font-bold mt-2"><AnimatedNumber value={stats?.total || 0} delay={100} /></p>
                 <p className="text-xs text-muted-foreground mt-1">pesanan</p>
               </div>
               <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200" style={{ boxShadow: '0 4px 12px -2px rgba(0,0,0,0.1)' }}>
@@ -240,12 +241,12 @@ export default function OrderListPage() {
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
           <div className="p-5 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menunggu Bayar</p>
-                <p className="text-3xl font-bold mt-2 text-amber-600">{isLoadingStats ? '-' : stats?.menunggu_pembayaran || 0}</p>
+                <p className="text-3xl font-bold mt-2 text-amber-600"><AnimatedNumber value={stats?.menunggu_pembayaran || 0} delay={200} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
               <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200" style={{ boxShadow: '0 4px 12px -2px rgba(245,158,11,0.3)' }}>
@@ -256,12 +257,12 @@ export default function OrderListPage() {
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
           <div className="p-5 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Diproses</p>
-                <p className="text-3xl font-bold mt-2 text-blue-600">{isLoadingStats ? '-' : stats?.diproses || 0}</p>
+                <p className="text-3xl font-bold mt-2 text-blue-600"><AnimatedNumber value={stats?.diproses || 0} delay={300} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
               <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
@@ -272,12 +273,12 @@ export default function OrderListPage() {
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
           <div className="p-5 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dikirim</p>
-                <p className="text-3xl font-bold mt-2 text-indigo-600">{isLoadingStats ? '-' : stats?.dikirim || 0}</p>
+                <p className="text-3xl font-bold mt-2 text-indigo-600"><AnimatedNumber value={stats?.dikirim || 0} delay={400} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
               <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200" style={{ boxShadow: '0 4px 12px -2px rgba(99,102,241,0.3)' }}>
@@ -288,12 +289,12 @@ export default function OrderListPage() {
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden">
+        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-5 card-hover-glow">
           <div className="p-5 relative">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Selesai</p>
-                <p className="text-3xl font-bold mt-2 text-green-600">{isLoadingStats ? '-' : stats?.selesai || 0}</p>
+                <p className="text-3xl font-bold mt-2 text-green-600"><AnimatedNumber value={stats?.selesai || 0} delay={500} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
               <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>

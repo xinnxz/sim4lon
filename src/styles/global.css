@@ -158,6 +158,289 @@
     --sidebar-ring: 0 72% 51%;
     --chart-1: 0 72% 51%;
   }
+
+  /* ============================================
+     DARK MODE THEME
+     Diaktifkan dengan menambahkan class .dark pada html element
+     ============================================ */
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 152 100% 40%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 48 100% 50%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 152 100% 40%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 152 100% 40%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 22%;
+    --sidebar-ring: 152 100% 40%;
+    --chart-2: 48 100% 50%;
+    --chart-3: 215 20% 50%;
+    --chart-4: 152 60% 45%;
+    --chart-5: 48 80% 45%;
+  }
+
+  /* Dark mode accent colors */
+  .dark[data-accent="green"] {
+    --primary: 152 100% 40%;
+    --ring: 152 100% 40%;
+    --sidebar-primary: 152 100% 40%;
+    --sidebar-ring: 152 100% 40%;
+    --chart-1: 152 100% 40%;
+  }
+
+  .dark[data-accent="blue"] {
+    --primary: 217 91% 60%;
+    --ring: 217 91% 60%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-ring: 217 91% 60%;
+    --chart-1: 217 91% 60%;
+  }
+
+  .dark[data-accent="red"] {
+    --primary: 0 72% 55%;
+    --ring: 0 72% 55%;
+    --sidebar-primary: 0 72% 55%;
+    --sidebar-ring: 0 72% 55%;
+    --chart-1: 0 72% 55%;
+  }
+
+  /* ============================================
+     DARK MODE OVERRIDES
+     Override hardcoded Tailwind colors in dark mode
+     ============================================ */
+  
+  /* Override bg-white in dark mode */
+  .dark .bg-white {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  /* Override bg-gray-50 in dark mode */
+  .dark .bg-gray-50,
+  .dark .bg-slate-50 {
+    background-color: hsl(var(--muted)) !important;
+  }
+  
+  /* Override bg-gray-100 in dark mode */
+  .dark .bg-gray-100,
+  .dark .bg-slate-100 {
+    background-color: hsl(217 33% 20%) !important;
+  }
+  
+  /* Override border colors in dark mode */
+  .dark .border-gray-100,
+  .dark .border-gray-200,
+  .dark .border-slate-100,
+  .dark .border-slate-200 {
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  /* Override text colors that become invisible in dark mode */
+  .dark .text-gray-900,
+  .dark .text-slate-900 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-800,
+  .dark .text-slate-800 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-700,
+  .dark .text-slate-700 {
+    color: hsl(215 20% 75%) !important;
+  }
+  
+  .dark .text-gray-600,
+  .dark .text-slate-600 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+  
+  /* Override specific card shadows for dark mode */
+  .dark .shadow-lg {
+    --tw-shadow-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Override hover states */
+  .dark .hover\:bg-gray-50:hover,
+  .dark .hover\:bg-slate-50:hover {
+    background-color: hsl(217 33% 20%) !important;
+  }
+  
+  .dark .hover\:bg-gray-100:hover,
+  .dark .hover\:bg-slate-100:hover {
+    background-color: hsl(217 33% 22%) !important;
+  }
+
+  /* Override info/blue backgrounds */
+  .dark .bg-blue-50 {
+    background-color: hsl(217 91% 15%) !important;
+  }
+  .dark .bg-blue-100 {
+    background-color: hsl(217 91% 20%) !important;
+  }
+  .dark .border-blue-200 {
+    border-color: hsl(217 91% 30%) !important;
+  }
+  .dark .text-blue-600,
+  .dark .text-blue-700 {
+    color: hsl(217 91% 70%) !important;
+  }
+  
+  /* Override green backgrounds for status */
+  .dark .bg-green-50 {
+    background-color: hsl(152 100% 12%) !important;
+  }
+  .dark .bg-green-100 {
+    background-color: hsl(152 100% 18%) !important;
+  }
+  
+  /* Override yellow/warning backgrounds */
+  .dark .bg-yellow-50,
+  .dark .bg-amber-50 {
+    background-color: hsl(45 100% 12%) !important;
+  }
+  .dark .bg-yellow-100,
+  .dark .bg-amber-100 {
+    background-color: hsl(45 100% 18%) !important;
+  }
+  
+  /* Override orange backgrounds */
+  .dark .bg-orange-50 {
+    background-color: hsl(25 100% 12%) !important;
+  }
+  .dark .bg-orange-100 {
+    background-color: hsl(25 100% 18%) !important;
+  }
+  
+  /* Override purple backgrounds */
+  .dark .bg-purple-50 {
+    background-color: hsl(270 100% 12%) !important;
+  }
+  .dark .bg-purple-100 {
+    background-color: hsl(270 100% 18%) !important;
+  }
+  
+  /* Override red backgrounds */
+  .dark .bg-red-50 {
+    background-color: hsl(0 100% 12%) !important;
+  }
+  .dark .bg-red-100 {
+    background-color: hsl(0 100% 18%) !important;
+  }
+
+  /* Override gradient for LPG subtle */
+  .dark .gradient-lpg-subtle {
+    background: hsl(var(--card)) !important;
+  }
+  
+  /* ============================================
+     DARK MODE - FLAT SOLID DESIGN
+     Professional dark mode uses solid colors, not gradients
+     ============================================ */
+  
+  /* Dashboard background - pure solid dark */
+  .dark .dashboard-gradient-bg {
+    background: hsl(var(--background)) !important;
+  }
+  
+  /* Mesh gradient for dark mode */
+  .dark .mesh-gradient-bg {
+    background: hsl(var(--background)) !important;
+  }
+  
+  /* Card premium styling for dark mode - FLAT SOLID COLOR */
+  .dark .card-premium {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: 
+      0 4px 12px -2px rgba(0, 0, 0, 0.25),
+      0 0 0 0 transparent !important;
+  }
+  
+  .dark .card-premium:hover {
+    border-color: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 
+      0 8px 24px -4px rgba(0, 0, 0, 0.4),
+      0 0 0 0 transparent !important;
+  }
+  
+  /* Chart card premium for dark mode - FLAT SOLID */
+  .dark .chart-card-premium {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: 
+      0 2px 8px -2px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  .dark .chart-card-premium:hover {
+    border-color: hsl(var(--primary) / 0.2) !important;
+    box-shadow: 
+      0 8px 20px -4px rgba(0, 0, 0, 0.35) !important;
+  }
+  
+  /* Glass card for dark mode - FLAT with subtle border */
+  .dark .glass-card {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  /* Override shimmer effect background colors */
+  .dark .shimmer-effect::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    ) !important;
+  }
+  
+  /* Particles for dark mode */
+  .dark .particle {
+    background: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 
+      0 0 20px hsl(var(--primary) / 0.2),
+      0 0 40px hsl(var(--primary) / 0.1) !important;
+  }
+  
+  /* Card gradient - SOLID in dark mode */
+  .dark .card-gradient {
+    background: hsl(var(--card)) !important;
+  }
+  
+  /* Card interactive - NO gradient overlay in dark mode */
+  .dark .card-interactive::before {
+    display: none !important;
+  }
+  
+  /* Override any remaining Tailwind gradients in dark mode */
+  .dark .from-card,
+  .dark .via-card,
+  .dark .to-card\/70,
+  .dark .to-card\/80 {
+    --tw-gradient-from: hsl(var(--card)) !important;
+    --tw-gradient-to: hsl(var(--card)) !important;
+    --tw-gradient-via: hsl(var(--card)) !important;
+  }
 }
 
 @layer base {
@@ -1141,4 +1424,144 @@
   .hover-parent:hover .icon-rotate-hover {
     transform: rotate(12deg) scale(1.1);
   }
+
+  /* ============================================
+     PREMIUM CARD ENTRANCE ANIMATIONS
+     Modern, elegant animations for summary cards
+     ============================================ */
+
+  /* 21. Fade In Up - Classic elegant entrance */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 22. Slide In Blur - Modern glass effect entrance */
+  @keyframes slideInBlur {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      filter: blur(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  .animate-slideInBlur {
+    animation: slideInBlur 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 23. Scale Fade In - Subtle pop effect */
+  @keyframes scaleFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleFadeIn {
+    animation: scaleFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 24. Premium Bounce In - Elegant pop with bounce */
+  @keyframes bounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) translateY(20px);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05) translateY(-5px);
+    }
+    70% {
+      transform: scale(0.95) translateY(2px);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .animate-bounceIn {
+    animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 25. Float In - Smooth 3D floating effect */
+  @keyframes floatIn {
+    from {
+      opacity: 0;
+      transform: translateY(60px) rotateX(10deg);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotateX(0);
+    }
+  }
+
+  .animate-floatIn {
+    animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    perspective: 1000px;
+  }
+
+  /* ============================================
+     STAGGERED ANIMATION DELAYS
+     For sequential card entrance effect
+     ============================================ */
+  
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+
+  /* ============================================
+     PREMIUM CARD HOVER EFFECTS
+     Enhanced hover states for interactive cards
+     ============================================ */
+
+  .card-hover-lift {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .card-hover-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 20px 40px -15px rgba(0, 0, 0, 0.15),
+      0 10px 20px -10px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-hover-glow:hover {
+    box-shadow: 
+      0 0 30px rgba(34, 197, 94, 0.15),
+      0 10px 30px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .card-hover-glow:hover {
+    box-shadow: 
+      0 0 40px rgba(34, 197, 94, 0.2),
+      0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  }
 }
+

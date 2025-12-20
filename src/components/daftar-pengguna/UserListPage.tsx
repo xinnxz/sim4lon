@@ -45,6 +45,7 @@ import { usersApi, type User, type UserRole } from '@/lib/api'
 import { toast } from 'sonner'
 import AddUserModal from './AddUserModal'
 import EditUserModal from './EditUserModal'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
 
 const roleLabels: Record<UserRole, string> = {
   ADMIN: 'Administrator',
@@ -306,7 +307,7 @@ export default function UserListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Total Pengguna</p>
-                  <p className="text-2xl font-bold">{totalItems}</p>
+                  <p className="text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
                 </div>
               </div>
             </CardContent>
@@ -322,7 +323,7 @@ export default function UserListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Administrator</p>
-                  <p className="text-2xl font-bold text-purple-600">{adminCount}</p>
+                  <p className="text-2xl font-bold text-purple-600"><AnimatedNumber value={adminCount} delay={200} /></p>
                 </div>
               </div>
             </CardContent>
@@ -338,7 +339,7 @@ export default function UserListPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Operator</p>
-                  <p className="text-2xl font-bold text-blue-600">{operatorCount}</p>
+                  <p className="text-2xl font-bold text-blue-600"><AnimatedNumber value={operatorCount} delay={300} /></p>
                 </div>
               </div>
             </CardContent>

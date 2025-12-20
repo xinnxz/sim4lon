@@ -32,31 +32,76 @@ export declare class ReportsController {
             end: Date;
         };
     }>;
-    getPaymentsReport(startDate?: string, endDate?: string): Promise<{
+    getPangkalanReport(startDate?: string, endDate?: string): Promise<{
         summary: {
-            total_payments: number;
-            total_amount: number;
-            average_payment: number;
-            method_breakdown: Record<string, {
-                count: number;
-                amount: number;
-            }>;
+            total_pangkalan: number;
+            total_orders_subsidi: number;
+            total_tabung_subsidi: number;
+            total_revenue: number;
+            total_consumers: number;
+            active_consumers: number;
+            top_pangkalan: string;
         };
         data: {
             id: string;
-            date: Date;
-            invoice_number: string;
-            order_code: string;
-            pangkalan: string;
-            amount: number;
-            method: import("@prisma/client").$Enums.payment_method;
-            note: string | null;
-            recorded_by: string;
+            code: string;
+            name: string;
+            address: string;
+            region: string;
+            pic_name: string;
+            phone: string;
+            alokasi_bulanan: number;
+            total_orders_from_agen: number;
+            total_tabung_from_agen: number;
+            total_consumer_orders: number;
+            total_tabung_to_consumers: number;
+            total_revenue: number;
+            total_registered_consumers: number;
+            active_consumers: number;
         }[];
         period: {
             start: Date;
             end: Date;
         };
+    }>;
+    getSubsidiConsumers(pangkalanId: string, startDate?: string, endDate?: string): Promise<{
+        error: string;
+        summary?: undefined;
+        data?: undefined;
+        period?: undefined;
+    } | {
+        summary: {
+            pangkalan_id: string;
+            pangkalan_code: string;
+            pangkalan_name: string;
+            total_consumers: number;
+            registered_consumers: number;
+            walk_in_count: number;
+            total_transactions: number;
+            total_tabung: number;
+        };
+        data: {
+            id: string;
+            name: string;
+            nik: string | null;
+            kk: string | null;
+            phone: string | null;
+            address: string | null;
+            consumer_type: string;
+            total_purchases: number;
+            total_tabung: number;
+            last_purchase: Date;
+            purchases: {
+                date: Date;
+                qty: number;
+                amount: number;
+            }[];
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+        error?: undefined;
     }>;
     getStockMovementReport(startDate?: string, endDate?: string, productId?: string): Promise<{
         summary: {
