@@ -95,4 +95,8 @@ export class UpdateOrderStatusDto {
     @IsOptional()
     @IsString()
     note?: string;
+
+    @IsOptional()
+    @IsString()
+    payment_method?: 'TUNAI' | 'TRANSFER';  // For quick cash confirmation
 }

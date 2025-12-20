@@ -4,6 +4,7 @@ export declare class DashboardController {
     constructor(dashboardService: DashboardService);
     getStats(): Promise<{
         todayOrders: number;
+        todaySales: number;
         pendingOrders: number;
         completedOrders: number;
         totalStock: Record<string, number>;

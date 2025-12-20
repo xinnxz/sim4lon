@@ -133,6 +133,7 @@ export class PangkalanService {
                 phone: dto.phone,
                 email: dto.email,  // Email for invoices
                 capacity: dto.capacity,
+                alokasi_bulanan: dto.alokasi_bulanan || 0,
                 note: dto.note,
             },
         });

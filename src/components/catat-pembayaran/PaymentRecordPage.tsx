@@ -202,7 +202,20 @@ export default function PaymentRecordPage() {
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => window.location.href = `/detail-pesanan?id=${orderId}`}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            // Read from URL directly to avoid hydration/state issues
+            const params = new URLSearchParams(window.location.search)
+            const id = params.get('orderId') || params.get('id')
+            if (id) {
+              window.location.href = `/detail-pesanan?id=${id}`
+            } else {
+              window.location.href = '/daftar-pesanan'
+            }
+          }}
+        >
           <SafeIcon name="ArrowLeft" className="h-5 w-5" />
         </Button>
         <div>

@@ -25,6 +25,16 @@ let DashboardService = class DashboardService {
                 created_at: { gte: today },
             },
         });
+        const salesData = await this.prisma.client.orders.aggregate({
+            where: {
+                created_at: { gte: today },
+                current_status: { not: 'BATAL' },
+            },
+            _sum: {
+                total_amount: true,
+            },
+        });
+        const todaySales = Number(salesData._sum.total_amount) || 0;
         const pendingOrders = await this.prisma.client.orders.count({
             where: {
                 current_status: {
@@ -42,6 +52,7 @@ let DashboardService = class DashboardService {
         const dynamicProducts = await this.getDynamicProductsStock();
         return {
             todayOrders,
+            todaySales,
             pendingOrders,
             completedOrders,
             totalStock: stockSummary,

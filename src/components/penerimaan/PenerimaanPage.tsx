@@ -26,6 +26,10 @@ export default function PenerimaanPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [page, setPage] = useState(1)
 
+    // Sort state
+    const [sortField, setSortField] = useState<'tanggal' | 'no_so' | 'no_lo' | 'nama_material' | 'qty_pcs' | 'qty_kg'>('tanggal')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+
     // Modal state
     const [showAddModal, setShowAddModal] = useState(false)
     const [products, setProducts] = useState<LpgProduct[]>([])
@@ -102,6 +106,60 @@ export default function PenerimaanPage() {
         }
         return options
     }, [])
+
+    // Sorted data
+    const sortedData = useMemo(() => {
+        if (!data?.data) return []
+        return [...data.data].sort((a, b) => {
+            let aVal: any = a[sortField]
+            let bVal: any = b[sortField]
+
+            // Handle date comparison
+            if (sortField === 'tanggal') {
+                aVal = new Date(aVal).getTime()
+                bVal = new Date(bVal).getTime()
+            }
+            // Handle numeric comparison
+            if (sortField === 'qty_pcs' || sortField === 'qty_kg') {
+                aVal = Number(aVal) || 0
+                bVal = Number(bVal) || 0
+            }
+            // String comparison
+            if (typeof aVal === 'string') {
+                aVal = aVal.toLowerCase()
+                bVal = bVal.toLowerCase()
+            }
+
+            if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1
+            if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1
+            return 0
+        })
+    }, [data?.data, sortField, sortOrder])
+
+    // Toggle sort
+    const handleSort = (field: typeof sortField) => {
+        if (sortField === field) {
+            setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortField(field)
+            setSortOrder('asc')
+        }
+    }
+
+    // Sort icon component
+    const SortIcon = ({ field }: { field: typeof sortField }) => (
+        <span className="ml-1 inline-flex">
+            {sortField === field ? (
+                sortOrder === 'asc' ? (
+                    <SafeIcon name="ChevronUp" className="w-4 h-4" />
+                ) : (
+                    <SafeIcon name="ChevronDown" className="w-4 h-4" />
+                )
+            ) : (
+                <SafeIcon name="ChevronsUpDown" className="w-4 h-4 opacity-30" />
+            )}
+        </span>
+    )
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('id-ID', {
@@ -252,12 +310,24 @@ export default function PenerimaanPage() {
                         <table className="w-full text-sm">
                             <thead className="bg-muted/50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left font-medium">Tanggal</th>
-                                    <th className="px-4 py-3 text-left font-medium">No SO</th>
-                                    <th className="px-4 py-3 text-left font-medium">No LO</th>
-                                    <th className="px-4 py-3 text-left font-medium">Nama Material</th>
-                                    <th className="px-4 py-3 text-center font-medium">Qty Tabung</th>
-                                    <th className="px-4 py-3 text-center font-medium">Qty Kg</th>
+                                    <th className="px-4 py-3 text-left font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('tanggal')}>
+                                        <span className="flex items-center">Tanggal<SortIcon field="tanggal" /></span>
+                                    </th>
+                                    <th className="px-4 py-3 text-left font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('no_so')}>
+                                        <span className="flex items-center">No SO<SortIcon field="no_so" /></span>
+                                    </th>
+                                    <th className="px-4 py-3 text-left font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('no_lo')}>
+                                        <span className="flex items-center">No LO<SortIcon field="no_lo" /></span>
+                                    </th>
+                                    <th className="px-4 py-3 text-left font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('nama_material')}>
+                                        <span className="flex items-center">Nama Material<SortIcon field="nama_material" /></span>
+                                    </th>
+                                    <th className="px-4 py-3 text-center font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('qty_pcs')}>
+                                        <span className="flex items-center justify-center">Qty Tabung<SortIcon field="qty_pcs" /></span>
+                                    </th>
+                                    <th className="px-4 py-3 text-center font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('qty_kg')}>
+                                        <span className="flex items-center justify-center">Qty Kg<SortIcon field="qty_kg" /></span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -275,7 +345,7 @@ export default function PenerimaanPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    data?.data.map((item) => (
+                                    sortedData.map((item) => (
                                         <tr key={item.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
                                             <td className="px-4 py-3">{formatDate(item.tanggal)}</td>
                                             <td className="px-4 py-3 font-mono text-xs">{item.no_so}</td>

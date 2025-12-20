@@ -65,8 +65,8 @@ export const MOCK_GENERAL_SETTINGS: GeneralSettingsModel[] = [
                 value: ['TUNAI', 'TRANSFER_BANK'],
                 type: 'select_multiple',
                 options: [
-                    { label: "Tunai", value: "TUNAI" },
-                    { label: "Transfer Bank", value: "TRANSFER_BANK" },
+                    { label: "Cash", value: "TUNAI" },
+                    { label: "Cashless", value: "TRANSFER_BANK" },
                     { label: "Virtual Account", value: "VIRTUAL_ACCOUNT" },
                 ],
                 description: "Pilih metode pembayaran yang tersedia untuk pelanggan."

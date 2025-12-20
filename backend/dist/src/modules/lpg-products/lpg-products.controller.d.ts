@@ -14,9 +14,9 @@ export declare class LpgProductsController {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        brand: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
+        brand: string | null;
     }[]>;
     getWithStock(): Promise<{
         stock: {
@@ -34,9 +34,9 @@ export declare class LpgProductsController {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        brand: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
+        brand: string | null;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
@@ -49,9 +49,9 @@ export declare class LpgProductsController {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        brand: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
+        brand: string | null;
     }>;
     create(dto: CreateLpgProductDto): Promise<{
         id: string;
@@ -64,9 +64,9 @@ export declare class LpgProductsController {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        brand: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
+        brand: string | null;
     }>;
     update(id: string, dto: UpdateLpgProductDto): Promise<{
         id: string;
@@ -79,9 +79,9 @@ export declare class LpgProductsController {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
-        brand: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
+        brand: string | null;
     }>;
     remove(id: string): Promise<{
         message: string;

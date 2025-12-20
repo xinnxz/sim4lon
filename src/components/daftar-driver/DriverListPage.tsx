@@ -10,7 +10,7 @@
  * - Toggle status aktif/nonaktif
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,6 +61,64 @@ export default function DriverListPage() {
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
+
+  // State untuk sorting
+  type SortField = 'code' | 'name' | 'phone' | 'vehicle_id' | 'note' | 'is_active'
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  // Handle header click for sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Sorted data using useMemo
+  const sortedDriverList = useMemo(() => {
+    if (!sortField) return driverList
+
+    return [...driverList].sort((a, b) => {
+      let aVal: any = (a as any)[sortField]
+      let bVal: any = (b as any)[sortField]
+
+      // Handle null/undefined
+      if (aVal == null) aVal = ''
+      if (bVal == null) bVal = ''
+
+      // String comparison
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase()
+        bVal = bVal.toLowerCase()
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [driverList, sortField, sortDirection])
+
+  // Sortable Header Component
+  const SortableHeader = ({ field, children, className = '', align = 'left' }: { field: SortField; children: React.ReactNode; className?: string; align?: 'left' | 'center' }) => (
+    <TableHead
+      className={`font-semibold text-slate-700 cursor-pointer hover:bg-slate-200/50 transition-colors select-none ${className}`}
+      onClick={() => handleSort(field)}
+    >
+      <div className={`flex items-center gap-1.5 ${align === 'center' ? 'justify-center' : 'justify-start'}`}>
+        {children}
+        {sortField === field ? (
+          sortDirection === 'asc'
+            ? <SafeIcon name="ChevronUp" className="w-4 h-4 text-red-500" />
+            : <SafeIcon name="ChevronDown" className="w-4 h-4 text-red-500" />
+        ) : (
+          <SafeIcon name="ChevronsUpDown" className="w-4 h-4 text-slate-400 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   /**
    * Fetch data driver dari API
@@ -160,94 +218,128 @@ export default function DriverListPage() {
   const nonaktifCount = driverList.filter(d => !d.is_active).length
 
   return (
-    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Daftar Supir</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Kelola data driver dan status ketersediaan mereka
-          </p>
+    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
+      {/* Header - with Vertical Gradient Bar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-red-500 via-red-400 to-rose-400" />
+          <div>
+            <h1 className="text-3xl font-bold text-gradient-primary">
+              Daftar Supir
+            </h1>
+            <p className="text-muted-foreground/80 mt-1">
+              Kelola data driver dan status ketersediaan mereka
+            </p>
+          </div>
         </div>
         <Button
           onClick={() => { setEditingDriver(null); setShowAddModal(true) }}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 w-full sm:w-auto"
+          className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all"
         >
-          <SafeIcon name="Plus" className="h-4 w-4" />
+          <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
           Tambah Supir
         </Button>
       </div>
 
-      {/* Summary Stats */}
+      {/* Gradient Divider Line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+      {/* Summary Stats - Modern Glass Card Style with 3D Tilt */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Tilt3DCard className="animate-fadeInUp">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Supir</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalItems}</div>
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-500/10">
+                  <SafeIcon name="Truck" className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Supir</p>
+                  <p className="text-2xl font-bold">{totalItems}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Supir Aktif</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{aktivCount}</div>
+
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-green-500/10">
+                  <SafeIcon name="CheckCircle" className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Aktif</p>
+                  <p className="text-2xl font-bold text-green-600">{aktivCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Supir Nonaktif</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">{nonaktifCount}</div>
+
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-500/10">
+                  <SafeIcon name="XCircle" className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Nonaktif</p>
+                  <p className="text-2xl font-bold text-red-600">{nonaktifCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
       </div>
 
-      {/* Search and Filter */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Cari Supir</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="relative">
+      {/* Search and Filter - Inline Modern Design */}
+      <Card className="glass-card">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+            {/* Search Input */}
+            <div className="relative flex-1">
               <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Cari berdasarkan nama atau telepon..."
+                placeholder="Cari nama atau telepon..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white/50 border-white/20 focus:border-red-400 focus:ring-red-400/20"
               />
             </div>
-            <div className="flex gap-2">
+
+            {/* Filter Buttons - Gradient Active */}
+            <div className="flex gap-2 p-1 rounded-lg bg-muted/30">
               <Button
-                variant={statusFilter === 'semua' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setStatusFilter('semua')}
-                className="flex-1 sm:flex-none"
+                className={statusFilter === 'semua'
+                  ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
               >
+                <SafeIcon name="LayoutGrid" className="w-4 h-4 mr-1.5" />
                 Semua
               </Button>
               <Button
-                variant={statusFilter === 'aktif' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setStatusFilter('aktif')}
-                className="flex-1 sm:flex-none"
+                className={statusFilter === 'aktif'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
               >
+                <SafeIcon name="CheckCircle" className="w-4 h-4 mr-1.5" />
                 Aktif
               </Button>
               <Button
-                variant={statusFilter === 'nonaktif' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setStatusFilter('nonaktif')}
-                className="flex-1 sm:flex-none"
+                className={statusFilter === 'nonaktif'
+                  ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
               >
+                <SafeIcon name="XCircle" className="w-4 h-4 mr-1.5" />
                 Nonaktif
               </Button>
             </div>
@@ -255,48 +347,64 @@ export default function DriverListPage() {
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Supir</CardTitle>
-          <CardDescription>
-            Menampilkan {driverList.length} dari {totalItems} supir
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {/* Table Card - Enhanced */}
+      <Card className="glass-card overflow-hidden">
+        <CardContent className="p-0">
+          {/* Inline Header Row */}
+          <div className="flex items-center justify-between p-4 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <SafeIcon name="Table" className="w-5 h-5 text-muted-foreground" />
+              <span className="font-semibold">Data Supir</span>
+              <Badge variant="secondary" className="bg-red-500/10 text-red-600">
+                {driverList.length} data
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Total: {totalItems} supir
+            </p>
+          </div>
+
           <div className="overflow-x-auto">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2">Memuat data...</span>
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-red-500" />
+                  <span className="text-muted-foreground">Memuat data supir...</span>
+                </div>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold w-24">Kode</TableHead>
-                    <TableHead className="font-semibold">Nama</TableHead>
-                    <TableHead className="font-semibold">Telepon</TableHead>
-                    <TableHead className="font-semibold">Kendaraan</TableHead>
-                    <TableHead className="font-semibold">Catatan</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="text-right font-semibold">Aksi</TableHead>
+                  <TableRow className="bg-gradient-to-r from-slate-50 to-slate-100/50">
+                    <SortableHeader field="code" className="w-24">Kode</SortableHeader>
+                    <SortableHeader field="name">Nama</SortableHeader>
+                    <SortableHeader field="phone" align="center">Telepon</SortableHeader>
+                    <SortableHeader field="vehicle_id" align="center">Kendaraan</SortableHeader>
+                    <SortableHeader field="note">Catatan</SortableHeader>
+                    <SortableHeader field="is_active" align="center">Status</SortableHeader>
+                    <TableHead className="text-center font-semibold text-slate-700">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {driverList.length > 0 ? (
-                    driverList.map((driver) => (
-                      <TableRow key={driver.id} className="hover:bg-muted/50">
+                  {sortedDriverList.length > 0 ? (
+                    sortedDriverList.map((driver) => (
+                      <TableRow key={driver.id} className="hover:bg-blue-50/50 transition-colors">
                         <TableCell className="font-mono text-sm text-primary">
                           {(driver as any).code || '-'}
                         </TableCell>
-                        <TableCell className="font-medium">{driver.name}</TableCell>
-                        <TableCell>{driver.phone || '-'}</TableCell>
-                        <TableCell>{driver.vehicle_id || '-'}</TableCell>
-                        <TableCell className="max-w-xs truncate">{driver.note || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={driver.is_active ? 'default' : 'secondary'}>
-                            {driver.is_active ? 'Aktif' : 'Nonaktif'}
+                        <TableCell className="font-medium text-foreground">{driver.name}</TableCell>
+                        <TableCell className="text-center text-foreground">{driver.phone || '-'}</TableCell>
+                        <TableCell className="text-center text-foreground">{driver.vehicle_id || '-'}</TableCell>
+                        <TableCell className="max-w-xs truncate text-foreground/80">{driver.note || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            className={
+                              driver.is_active
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm'
+                                : 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm'
+                            }
+                          >
+                            {driver.is_active ? '✓ Aktif' : 'Nonaktif'}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">

@@ -59,11 +59,14 @@ let PenyaluranService = class PenyaluranService {
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0);
         const daysInMonth = endDate.getDate();
+        console.log('[Penyaluran] getRekapitulasi called:', { bulan, tipePembayaran, lpgType });
         const pangkalans = await this.prisma.pangkalans.findMany({
             where: { is_active: true, deleted_at: null },
             select: { id: true, code: true, name: true, alokasi_bulanan: true },
             orderBy: { name: 'asc' },
         });
+        console.log('[Penyaluran] Found pangkalans:', pangkalans.length);
+        const isSubsidi = !lpgType || lpgType === 'kg3';
         const where = { tanggal: { gte: startDate, lte: endDate } };
         if (tipePembayaran) {
             where.tipe_pembayaran = tipePembayaran;
@@ -71,10 +74,12 @@ let PenyaluranService = class PenyaluranService {
         if (lpgType) {
             where.lpg_type = lpgType;
         }
+        console.log('[Penyaluran] Query where:', JSON.stringify(where));
         const penyaluran = await this.prisma.penyaluran_harian.findMany({
             where,
             orderBy: { tanggal: 'asc' },
         });
+        console.log('[Penyaluran] Found penyaluran records:', penyaluran.length);
         const result = pangkalans.map(pangkalan => {
             const dailyData = {};
             let totalNormal = 0;
@@ -84,77 +89,98 @@ let PenyaluranService = class PenyaluranService {
             }
             const pangkalanData = penyaluran.filter(p => p.pangkalan_id === pangkalan.id);
             for (const p of pangkalanData) {
-                const day = new Date(p.tanggal).getDate();
-                dailyData[day] += p.jumlah;
-                const kondisi = p.kondisi || 'NORMAL';
-                if (kondisi === 'NORMAL') {
-                    totalNormal += p.jumlah;
-                }
-                else {
-                    totalFakultatif += p.jumlah;
-                }
+                const day = new Date(p.tanggal).getUTCDate();
+                dailyData[day] += p.jumlah_normal + p.jumlah_fakultatif;
+                totalNormal += p.jumlah_normal;
+                totalFakultatif += p.jumlah_fakultatif;
             }
             return {
                 id_registrasi: pangkalan.code,
                 nama_pangkalan: pangkalan.name,
                 pangkalan_id: pangkalan.id,
-                alokasi: pangkalan.alokasi_bulanan,
+                alokasi: isSubsidi ? pangkalan.alokasi_bulanan : 0,
                 status: 'AKTIF',
                 daily: dailyData,
                 total_normal: totalNormal,
                 total_fakultatif: totalFakultatif,
-                sisa_alokasi: pangkalan.alokasi_bulanan - totalNormal - totalFakultatif,
+                sisa_alokasi: isSubsidi ? pangkalan.alokasi_bulanan - totalNormal - totalFakultatif : 0,
                 grand_total: totalNormal + totalFakultatif,
             };
         });
+        console.log('[Penyaluran] Result count:', result.length);
         return { bulan, days_in_month: daysInMonth, data: result };
     }
     async create(dto) {
         const lpgType = dto.lpg_type || 'kg3';
-        return this.prisma.penyaluran_harian.upsert({
+        const kondisi = dto.kondisi || 'NORMAL';
+        const jumlahNormal = kondisi === 'NORMAL' ? dto.jumlah : 0;
+        const jumlahFakultatif = kondisi === 'FAKULTATIF' ? dto.jumlah : 0;
+        const existing = await this.prisma.penyaluran_harian.findFirst({
             where: {
-                pangkalan_id_tanggal_lpg_type: {
-                    pangkalan_id: dto.pangkalan_id,
-                    tanggal: new Date(dto.tanggal),
-                    lpg_type: lpgType,
-                },
-            },
-            update: {
-                jumlah: dto.jumlah,
-                tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-            },
-            create: {
                 pangkalan_id: dto.pangkalan_id,
                 tanggal: new Date(dto.tanggal),
                 lpg_type: lpgType,
-                jumlah: dto.jumlah,
+            },
+        });
+        if (existing) {
+            return this.prisma.penyaluran_harian.update({
+                where: { id: existing.id },
+                data: {
+                    jumlah_normal: kondisi === 'NORMAL' ? dto.jumlah : existing.jumlah_normal,
+                    jumlah_fakultatif: kondisi === 'FAKULTATIF'
+                        ? existing.jumlah_fakultatif + dto.jumlah
+                        : existing.jumlah_fakultatif,
+                    tipe_pembayaran: dto.tipe_pembayaran || existing.tipe_pembayaran,
+                },
+            });
+        }
+        return this.prisma.penyaluran_harian.create({
+            data: {
+                pangkalan_id: dto.pangkalan_id,
+                tanggal: new Date(dto.tanggal),
+                lpg_type: lpgType,
+                jumlah_normal: jumlahNormal,
+                jumlah_fakultatif: jumlahFakultatif,
                 tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
             },
         });
     }
     async bulkUpdate(dto) {
         const lpgType = dto.lpg_type || 'kg3';
-        const operations = dto.data.map(item => this.prisma.penyaluran_harian.upsert({
-            where: {
-                pangkalan_id_tanggal_lpg_type: {
+        const results = [];
+        for (const item of dto.data) {
+            const existing = await this.prisma.penyaluran_harian.findFirst({
+                where: {
                     pangkalan_id: dto.pangkalan_id,
                     tanggal: new Date(item.tanggal),
                     lpg_type: lpgType,
                 },
-            },
-            update: {
-                jumlah: item.jumlah,
-                tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-            },
-            create: {
-                pangkalan_id: dto.pangkalan_id,
-                tanggal: new Date(item.tanggal),
-                lpg_type: lpgType,
-                jumlah: item.jumlah,
-                tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-            },
-        }));
-        return this.prisma.client.$transaction(operations);
+            });
+            if (existing) {
+                const updated = await this.prisma.penyaluran_harian.update({
+                    where: { id: existing.id },
+                    data: {
+                        jumlah_normal: item.jumlah,
+                        tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
+                    },
+                });
+                results.push(updated);
+            }
+            else {
+                const created = await this.prisma.penyaluran_harian.create({
+                    data: {
+                        pangkalan_id: dto.pangkalan_id,
+                        tanggal: new Date(item.tanggal),
+                        lpg_type: lpgType,
+                        jumlah_normal: item.jumlah,
+                        jumlah_fakultatif: 0,
+                        tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
+                    },
+                });
+                results.push(created);
+            }
+        }
+        return results;
     }
     async update(id, dto) {
         const existing = await this.prisma.penyaluran_harian.findUnique({ where: { id } });

@@ -32,16 +32,10 @@ export default function PangkalanInfoCard({ pangkalan }: PangkalanInfoCardProps)
       {/* A. Informasi Utama */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <SafeIcon name="Store" className="h-5 w-5 text-primary" />
-                </div>
-                Informasi Utama
-              </CardTitle>
-            </div>
-          </div>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <SafeIcon name="Store" className="h-5 w-5 text-primary" />
+            Informasi Utama
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -74,12 +68,18 @@ export default function PangkalanInfoCard({ pangkalan }: PangkalanInfoCardProps)
               </div>
             </div>
           </div>
-          {pangkalan.capacity && (
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Kapasitas</p>
-              <p className="text-base text-foreground mt-1">{pangkalan.capacity} unit</p>
+              <p className="text-base text-foreground mt-1">{pangkalan.capacity ? `${pangkalan.capacity} unit` : '-'}</p>
             </div>
-          )}
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Alokasi Bulanan</p>
+              <p className="text-base text-foreground mt-1 font-semibold">
+                {pangkalan.alokasi_bulanan ? `${pangkalan.alokasi_bulanan.toLocaleString()} tabung` : '-'}
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

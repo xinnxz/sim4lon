@@ -15,6 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import SafeIcon from '@/components/common/SafeIcon'
 import PangkalanInfoCard from '@/components/detail-edit-pangkalan/PangkalanInfoCard'
 import PangkalanEditForm from '@/components/detail-edit-pangkalan/PangkalanEditForm'
@@ -52,6 +54,9 @@ export default function DetailEditPangkalanContent() {
   const [isSaving, setIsSaving] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false)
+  const [isResettingPassword, setIsResettingPassword] = useState(false)
+  const [newPassword, setNewPassword] = useState<string | null>(null)
 
   // Get pangkalan ID from URL
   const getPangkalanId = () => {
@@ -119,9 +124,40 @@ export default function DetailEditPangkalanContent() {
   }
 
   /**
-   * Handle delete pangkalan (soft delete)
-   * Data disembunyikan dari UI tapi tetap tersimpan di database
+   * Handle reset password untuk akun pangkalan
    */
+  const handleResetPassword = async () => {
+    if (!pangkalan || !pangkalan.users || pangkalan.users.length === 0) {
+      toast.error('Pangkalan ini belum memiliki akun login')
+      return
+    }
+
+    setIsResettingPassword(true)
+    try {
+      const token = localStorage.getItem('sim4lon_token')
+      const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/users/${pangkalan.users[0].id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reset password')
+      }
+
+      const result = await response.json()
+      setNewPassword(result.newPassword)
+      toast.success('Password berhasil direset!')
+    } catch (error) {
+      console.error('Failed to reset password:', error)
+      toast.error('Gagal reset password')
+    } finally {
+      setIsResettingPassword(false)
+    }
+  }
+
   const handleDelete = async () => {
     if (!pangkalan) return
 
@@ -218,6 +254,19 @@ export default function DetailEditPangkalanContent() {
               <SafeIcon name={isEditing ? "X" : "Pencil"} className="h-3.5 w-3.5" />
               {isEditing ? 'Batal' : 'Edit'}
             </Button>
+            {/* Reset Password button */}
+            {pangkalan.users && pangkalan.users.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 h-8 px-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                onClick={() => setShowResetPasswordModal(true)}
+                title="Reset password akun pangkalan"
+              >
+                <SafeIcon name="KeyRound" className="h-3.5 w-3.5" />
+                Reset Password
+              </Button>
+            )}
             {/* Delete button - soft delete (data tetap tersimpan) */}
             <Button
               variant="ghost"
@@ -350,6 +399,89 @@ export default function DetailEditPangkalanContent() {
         isDangerous={true}
         isLoading={isDeleting}
       />
+
+      {/* Reset Password Modal */}
+      <Dialog open={showResetPasswordModal} onOpenChange={(open) => {
+        setShowResetPasswordModal(open)
+        if (!open) setNewPassword(null) // Reset password when closing
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <SafeIcon name="KeyRound" className="h-5 w-5 text-amber-600" />
+              Reset Password Akun Pangkalan
+            </DialogTitle>
+            <DialogDescription>
+              {newPassword
+                ? 'Password berhasil direset. Salin dan berikan ke pangkalan.'
+                : `Apakah Anda yakin ingin reset password untuk akun "${pangkalan?.users?.[0]?.email}"?`
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          {newPassword ? (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm font-medium text-green-800 mb-2">Password Baru:</p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={newPassword}
+                    className="font-mono bg-white"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(newPassword)
+                      toast.success('Password disalin!')
+                    }}
+                  >
+                    <SafeIcon name="Copy" className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-green-600 mt-2">
+                  ⚠️ Simpan password ini, tidak akan bisa dilihat lagi!
+                </p>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => {
+                  setShowResetPasswordModal(false)
+                  setNewPassword(null)
+                }}>
+                  Tutup
+                </Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowResetPasswordModal(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={handleResetPassword}
+                disabled={isResettingPassword}
+              >
+                {isResettingPassword ? (
+                  <>
+                    <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
+                    Mereset...
+                  </>
+                ) : (
+                  <>
+                    <SafeIcon name="KeyRound" className="mr-2 h-4 w-4" />
+                    Reset Password
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

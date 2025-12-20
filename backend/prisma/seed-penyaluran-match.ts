@@ -50,8 +50,8 @@ async function main() {
             data: {
                 pangkalan_id: p.pangkalan_id,
                 tanggal: p.tanggal,
-                jumlah: p.jumlah,
-                kondisi: p.kondisi,
+                jumlah_normal: p.jumlah_normal,
+                jumlah_fakultatif: p.jumlah_fakultatif,
                 tipe_pembayaran: 'CASHLESS',
             },
         });

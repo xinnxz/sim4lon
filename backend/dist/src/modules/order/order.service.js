@@ -81,37 +81,49 @@ let OrderService = class OrderService {
         const mapStringToLpgType = (strType) => {
             const normalized = strType.toLowerCase().trim();
             const mapping = {
+                'gr220': 'gr220',
+                '220gr': 'gr220',
+                '0.22kg': 'gr220',
+                '0.22': 'gr220',
                 '3kg': 'kg3',
-                '12kg': 'kg12',
-                '50kg': 'kg50',
                 'kg3': 'kg3',
-                'kg12': 'kg12',
-                'kg50': 'kg50',
                 '3': 'kg3',
-                '12': 'kg12',
-                '50': 'kg50',
                 '3.0': 'kg3',
-                '3.00': 'kg3',
+                'kg5': 'kg5',
+                '5.5kg': 'kg5',
+                '5.5': 'kg5',
+                '5kg': 'kg5',
+                '5': 'kg5',
+                '12kg': 'kg12',
+                'kg12': 'kg12',
+                '12': 'kg12',
                 '12.0': 'kg12',
-                '12.00': 'kg12',
+                '50kg': 'kg50',
+                'kg50': 'kg50',
+                '50': 'kg50',
                 '50.0': 'kg50',
-                '50.00': 'kg50',
             };
             const result = mapping[normalized];
             if (result) {
+                console.log(`[mapStringToLpgType] Direct match: ${strType} → ${result}`);
                 return result;
             }
             const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
             if (numberMatch) {
                 const size = parseFloat(numberMatch[1]);
-                if (size <= 5)
+                console.log(`[mapStringToLpgType] Fallback numeric: ${strType} → size=${size}`);
+                if (size < 1)
+                    return 'gr220';
+                if (size <= 4)
                     return 'kg3';
+                if (size <= 8)
+                    return 'kg5';
                 if (size <= 30)
                     return 'kg12';
                 return 'kg50';
             }
-            console.warn(`Unable to map lpg_type: ${strType}, defaulting to kg12`);
-            return 'kg12';
+            console.warn(`[mapStringToLpgType] Unable to map: ${strType}, defaulting to kg3`);
+            return 'kg3';
         };
         const orderCount = await this.prisma.orders.count();
         const orderCode = `ORD-${String(orderCount + 1).padStart(4, '0')}`;
@@ -276,6 +288,26 @@ let OrderService = class OrderService {
                 },
             },
         });
+        if (dto.status === 'DIPROSES' && dto.payment_method) {
+            await this.prisma.order_payment_details.upsert({
+                where: { order_id: id },
+                create: {
+                    order_id: id,
+                    is_paid: true,
+                    is_dp: false,
+                    payment_method: dto.payment_method,
+                    amount_paid: updated.total_amount,
+                    payment_date: new Date(),
+                },
+                update: {
+                    is_paid: true,
+                    payment_method: dto.payment_method,
+                    amount_paid: updated.total_amount,
+                    payment_date: new Date(),
+                    updated_at: new Date(),
+                },
+            });
+        }
         if (dto.status === 'BATAL') {
             const orderNote = `Order ${updated.code}`;
             for (const item of updated.order_items) {
@@ -296,6 +328,13 @@ let OrderService = class OrderService {
                     },
                 });
             }
+            await this.prisma.order_payment_details.updateMany({
+                where: { order_id: id, is_paid: true },
+                data: {
+                    is_paid: false,
+                    updated_at: new Date(),
+                },
+            });
         }
         if (dto.status === 'SELESAI') {
             const totalQtyForPenyaluran = updated.order_items.reduce((sum, item) => sum + (item.lpg_type === 'kg3' ? item.qty : 0), 0);
@@ -329,30 +368,49 @@ let OrderService = class OrderService {
                     },
                 });
             }
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const now = new Date();
+            const wibOffset = 7 * 60;
+            const wibTime = new Date(now.getTime() + (wibOffset * 60 * 1000));
+            const wibDateOnly = new Date(Date.UTC(wibTime.getUTCFullYear(), wibTime.getUTCMonth(), wibTime.getUTCDate(), 0, 0, 0, 0));
+            console.log('[PENYALURAN SYNC] Order SELESAI triggered. Items:', updated.order_items.length);
+            console.log('[PENYALURAN SYNC] WIB date:', wibDateOnly.toISOString());
             for (const item of updated.order_items) {
-                await this.prisma.penyaluran_harian.upsert({
-                    where: {
-                        pangkalan_id_tanggal_lpg_type: {
+                console.log(`[PENYALURAN SYNC] Upserting item: lpg_type=${item.lpg_type}, qty=${item.qty}`);
+                try {
+                    const existing = await this.prisma.penyaluran_harian.findFirst({
+                        where: {
                             pangkalan_id: updated.pangkalan_id,
-                            tanggal: today,
+                            tanggal: wibDateOnly,
                             lpg_type: item.lpg_type,
                         }
-                    },
-                    create: {
-                        pangkalan_id: updated.pangkalan_id,
-                        tanggal: today,
-                        lpg_type: item.lpg_type,
-                        jumlah: item.qty,
-                        kondisi: 'NORMAL',
-                        tipe_pembayaran: 'CASHLESS',
-                    },
-                    update: {
-                        jumlah: { increment: item.qty },
-                        updated_at: new Date(),
-                    },
-                });
+                    });
+                    let result;
+                    if (existing) {
+                        result = await this.prisma.penyaluran_harian.update({
+                            where: { id: existing.id },
+                            data: {
+                                jumlah_normal: existing.jumlah_normal + item.qty,
+                                updated_at: new Date(),
+                            },
+                        });
+                    }
+                    else {
+                        result = await this.prisma.penyaluran_harian.create({
+                            data: {
+                                pangkalan_id: updated.pangkalan_id,
+                                tanggal: wibDateOnly,
+                                lpg_type: item.lpg_type,
+                                jumlah_normal: item.qty,
+                                jumlah_fakultatif: 0,
+                                tipe_pembayaran: 'CASHLESS',
+                            },
+                        });
+                    }
+                    console.log(`[PENYALURAN SYNC] Upsert SUCCESS: id=${result.id}, jumlah_normal=${result.jumlah_normal}`);
+                }
+                catch (err) {
+                    console.error(`[PENYALURAN SYNC] Upsert FAILED for ${item.lpg_type}:`, err);
+                }
             }
         }
         const pangkalanName = updated.pangkalans?.name || 'Unknown';

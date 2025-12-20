@@ -8,19 +8,19 @@ export declare class PenyaluranService {
             id: string;
             code: string;
             name: string;
-            alokasi_bulanan: number;
             is_active: boolean;
+            alokasi_bulanan: number;
         };
     } & {
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        jumlah: number;
-        kondisi: import("@prisma/client").$Enums.kondisi_type;
-        tipe_pembayaran: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        jumlah_fakultatif: number;
+        jumlah_normal: number;
+        tipe_pembayaran: string;
     })[]>;
     getRekapitulasi(bulan: string, tipePembayaran?: string, lpgType?: string): Promise<{
         bulan: string;
@@ -41,45 +41,35 @@ export declare class PenyaluranService {
     create(dto: CreatePenyaluranDto): Promise<{
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        jumlah: number;
-        kondisi: import("@prisma/client").$Enums.kondisi_type;
-        tipe_pembayaran: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        jumlah_fakultatif: number;
+        jumlah_normal: number;
+        tipe_pembayaran: string;
     }>;
-    bulkUpdate(dto: BulkUpdatePenyaluranDto): Promise<{
-        id: string;
-        pangkalan_id: string;
-        tanggal: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        jumlah: number;
-        kondisi: import("@prisma/client").$Enums.kondisi_type;
-        tipe_pembayaran: string;
-        created_at: Date;
-        updated_at: Date;
-    }[]>;
+    bulkUpdate(dto: BulkUpdatePenyaluranDto): Promise<any[]>;
     update(id: string, dto: UpdatePenyaluranDto): Promise<{
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        jumlah: number;
-        kondisi: import("@prisma/client").$Enums.kondisi_type;
-        tipe_pembayaran: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        jumlah_fakultatif: number;
+        jumlah_normal: number;
+        tipe_pembayaran: string;
     }>;
     delete(id: string): Promise<{
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        jumlah: number;
-        kondisi: import("@prisma/client").$Enums.kondisi_type;
-        tipe_pembayaran: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        jumlah_fakultatif: number;
+        jumlah_normal: number;
+        tipe_pembayaran: string;
     }>;
 }

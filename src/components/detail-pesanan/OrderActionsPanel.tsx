@@ -88,7 +88,7 @@ export default function OrderActionsPanel({
                             className="w-full"
                         >
                             <SafeIcon name="CheckCircle" className="mr-2 h-4 w-4" />
-                            Konfirmasi Lunas
+                            Konfirmasi Lunas (Cash)
                         </Button>
                     </>
                 )}

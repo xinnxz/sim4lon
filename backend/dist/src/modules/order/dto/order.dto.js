@@ -122,6 +122,7 @@ class UpdateOrderStatusDto {
     status;
     description;
     note;
+    payment_method;
 }
 exports.UpdateOrderStatusDto = UpdateOrderStatusDto;
 __decorate([
@@ -138,4 +139,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateOrderStatusDto.prototype, "note", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "payment_method", void 0);
 //# sourceMappingURL=order.dto.js.map

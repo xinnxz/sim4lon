@@ -12,7 +12,7 @@
  * NOTE: Endpoint /users memerlukan role ADMIN
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -80,6 +80,64 @@ export default function UserListPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
+
+  // State untuk sorting
+  type SortField = 'code' | 'name' | 'email' | 'phone' | 'role' | 'is_active'
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  // Handle header click for sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Sorted data using useMemo
+  const sortedUserList = useMemo(() => {
+    if (!sortField) return userList
+
+    return [...userList].sort((a, b) => {
+      let aVal: any = (a as any)[sortField]
+      let bVal: any = (b as any)[sortField]
+
+      // Handle null/undefined
+      if (aVal == null) aVal = ''
+      if (bVal == null) bVal = ''
+
+      // String comparison
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase()
+        bVal = bVal.toLowerCase()
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [userList, sortField, sortDirection])
+
+  // Sortable Header Component
+  const SortableHeader = ({ field, children, className = '', align = 'left' }: { field: SortField; children: React.ReactNode; className?: string; align?: 'left' | 'center' }) => (
+    <TableHead
+      className={`font-semibold text-slate-700 cursor-pointer hover:bg-slate-200/50 transition-colors select-none ${className}`}
+      onClick={() => handleSort(field)}
+    >
+      <div className={`flex items-center gap-1.5 ${align === 'center' ? 'justify-center' : 'justify-start'}`}>
+        {children}
+        {sortField === field ? (
+          sortDirection === 'asc'
+            ? <SafeIcon name="ChevronUp" className="w-4 h-4 text-green-500" />
+            : <SafeIcon name="ChevronDown" className="w-4 h-4 text-green-500" />
+        ) : (
+          <SafeIcon name="ChevronsUpDown" className="w-4 h-4 text-slate-400 opacity-50" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   /**
    * Fetch current user ID saat component mount
@@ -211,146 +269,211 @@ export default function UserListPage() {
   const operatorCount = userList.filter(u => u.role === 'OPERATOR').length
 
   return (
-    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Daftar Pengguna</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Kelola semua pengguna sistem SIM4LON
-          </p>
+    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
+      {/* Header - with Vertical Gradient Bar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-green-500 via-green-400 to-emerald-400" />
+          <div>
+            <h1 className="text-3xl font-bold text-gradient-primary">
+              Daftar Pengguna
+            </h1>
+            <p className="text-muted-foreground/80 mt-1">
+              Kelola semua pengguna sistem SIM4LON
+            </p>
+          </div>
         </div>
         <Button
           onClick={() => setShowAddModal(true)}
-          className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+          className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
         >
-          <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
+          <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
           Tambah Pengguna
         </Button>
       </div>
 
-      {/* Summary Stats */}
+      {/* Gradient Divider Line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+      {/* Summary Stats - Modern Glass Card Style with 3D Tilt */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Tilt3DCard className="animate-fadeInUp">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Pengguna</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalItems}</div>
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-slate-500/10">
+                  <SafeIcon name="Users" className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Pengguna</p>
+                  <p className="text-2xl font-bold">{totalItems}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Administrator</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{adminCount}</div>
+
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-500/10">
+                  <SafeIcon name="Shield" className="w-5 h-5 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Administrator</p>
+                  <p className="text-2xl font-bold text-purple-600">{adminCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
-        <Tilt3DCard className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Operator</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{operatorCount}</div>
+
+        <Tilt3DCard>
+          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10">
+                  <SafeIcon name="UserCog" className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Operator</p>
+                  <p className="text-2xl font-bold text-blue-600">{operatorCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </Tilt3DCard>
       </div>
 
-      {/* Search and Filter */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Cari Pengguna</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
+      {/* Search and Filter - Inline Modern Design */}
+      <Card className="glass-card">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Cari berdasarkan nama, email, atau telepon..."
+                placeholder="Cari nama, email, atau telepon..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-white/50 border-white/20 focus:border-green-400 focus:ring-green-400/20"
               />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Peran</SelectItem>
-                <SelectItem value="ADMIN">Administrator</SelectItem>
-                <SelectItem value="OPERATOR">Operator Lapangan</SelectItem>
-              </SelectContent>
-            </Select>
+
+            {/* Filter Buttons - Gradient Active */}
+            <div className="flex gap-2 p-1 rounded-lg bg-muted/30">
+              <Button
+                size="sm"
+                onClick={() => setRoleFilter('all')}
+                className={roleFilter === 'all'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
+              >
+                <SafeIcon name="Users" className="w-4 h-4 mr-1.5" />
+                Semua
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setRoleFilter('ADMIN')}
+                className={roleFilter === 'ADMIN'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
+              >
+                <SafeIcon name="Shield" className="w-4 h-4 mr-1.5" />
+                Admin
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setRoleFilter('OPERATOR')}
+                className={roleFilter === 'OPERATOR'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
+              >
+                <SafeIcon name="UserCog" className="w-4 h-4 mr-1.5" />
+                Operator
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Pengguna</CardTitle>
-          <CardDescription>
-            Menampilkan {userList.length} dari {totalItems} pengguna
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {/* Table Card - Enhanced */}
+      <Card className="glass-card overflow-hidden">
+        <CardContent className="p-0">
+          {/* Inline Header Row */}
+          <div className="flex items-center justify-between p-4 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <SafeIcon name="Table" className="w-5 h-5 text-muted-foreground" />
+              <span className="font-semibold">Data Pengguna</span>
+              <Badge variant="secondary" className="bg-green-500/10 text-green-600">
+                {userList.length} data
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Total: {totalItems} pengguna
+            </p>
+          </div>
+
           <div className="overflow-x-auto">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2">Memuat data...</span>
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-green-500" />
+                  <span className="text-muted-foreground">Memuat data pengguna...</span>
+                </div>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold w-24">Kode</TableHead>
-                    <TableHead className="font-semibold">Nama</TableHead>
-                    <TableHead className="font-semibold">Email</TableHead>
-                    <TableHead className="font-semibold">Telepon</TableHead>
-                    <TableHead className="font-semibold">Peran</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="text-right font-semibold">Aksi</TableHead>
+                  <TableRow className="bg-gradient-to-r from-slate-50 to-slate-100/50">
+                    <SortableHeader field="code" className="w-24">Kode</SortableHeader>
+                    <SortableHeader field="name">Nama</SortableHeader>
+                    <SortableHeader field="email">Email</SortableHeader>
+                    <SortableHeader field="phone" align="center">Telepon</SortableHeader>
+                    <SortableHeader field="role" align="center">Peran</SortableHeader>
+                    <SortableHeader field="is_active" align="center">Status</SortableHeader>
+                    <TableHead className="text-center font-semibold text-slate-700">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {userList.length > 0 ? (
-                    userList.map((user) => {
+                  {sortedUserList.length > 0 ? (
+                    sortedUserList.map((user) => {
                       const isCurrentUser = user.id === currentUserId
                       return (
                         <TableRow
                           key={user.id}
-                          className={`hover:bg-muted/50 ${isCurrentUser ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
+                          className={`hover:bg-blue-50/50 transition-colors ${isCurrentUser ? 'bg-purple-50/50 border-l-2 border-l-purple-500' : ''}`}
                         >
                           <TableCell className="font-mono text-sm text-primary">
                             {(user as any).code || '-'}
                           </TableCell>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-foreground">
                             <div className="flex items-center gap-2">
                               {user.name}
                               {isCurrentUser && (
-                                <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+                                <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-600 border-purple-300">
                                   Anda
                                 </Badge>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>{user.phone || '-'}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-foreground">{user.email}</TableCell>
+                          <TableCell className="text-center text-foreground">{user.phone || '-'}</TableCell>
+                          <TableCell className="text-center">
                             <Badge className={roleBadgeColors[user.role]}>
                               {roleLabels[user.role]}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                              {user.is_active ? 'Aktif' : 'Nonaktif'}
+                          <TableCell className="text-center">
+                            <Badge
+                              className={
+                                user.is_active
+                                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm'
+                                  : 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm'
+                              }
+                            >
+                              {user.is_active ? '✓ Aktif' : 'Nonaktif'}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">

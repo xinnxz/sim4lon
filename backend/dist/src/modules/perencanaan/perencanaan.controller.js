@@ -42,6 +42,9 @@ let PerencanaanController = class PerencanaanController {
     delete(id) {
         return this.perencanaanService.delete(id);
     }
+    autoGenerate(body) {
+        return this.perencanaanService.autoGenerate(body.bulan, body.lpg_type || 'kg3', body.kondisi || 'NORMAL', body.overwrite || false);
+    }
 };
 exports.PerencanaanController = PerencanaanController;
 __decorate([
@@ -97,6 +100,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PerencanaanController.prototype, "delete", null);
+__decorate([
+    (0, common_1.Post)('auto-generate'),
+    (0, common_1.UseGuards)(guards_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.user_role.ADMIN, client_1.user_role.OPERATOR),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PerencanaanController.prototype, "autoGenerate", null);
 exports.PerencanaanController = PerencanaanController = __decorate([
     (0, common_1.Controller)('perencanaan'),
     (0, common_1.UseGuards)(guards_1.JwtAuthGuard),

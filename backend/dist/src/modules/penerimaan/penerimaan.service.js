@@ -107,7 +107,7 @@ let PenerimaanService = class PenerimaanService {
         const penyaluran = await this.prisma.penyaluran_harian.groupBy({
             by: ['tanggal'],
             where: { tanggal: { gte: startDate, lte: endDate } },
-            _sum: { jumlah: true },
+            _sum: { jumlah_normal: true, jumlah_fakultatif: true },
         });
         const [prevPenerimaan, prevPenyaluran] = await Promise.all([
             this.prisma.penerimaan_stok.aggregate({
@@ -116,17 +116,18 @@ let PenerimaanService = class PenerimaanService {
             }),
             this.prisma.penyaluran_harian.aggregate({
                 where: { tanggal: { lt: startDate } },
-                _sum: { jumlah: true },
+                _sum: { jumlah_normal: true, jumlah_fakultatif: true },
             }),
         ]);
-        const initialStock = (prevPenerimaan._sum.qty_pcs || 0) - (prevPenyaluran._sum.jumlah || 0);
+        const prevPenyaluranTotal = (prevPenyaluran._sum?.jumlah_normal || 0) + (prevPenyaluran._sum?.jumlah_fakultatif || 0);
+        const initialStock = (prevPenerimaan._sum.qty_pcs || 0) - prevPenyaluranTotal;
         const dailyData = {};
         let runningStock = initialStock;
         for (let day = 1; day <= daysInMonth; day++) {
             const penerimaanDay = penerimaan.find(p => new Date(p.tanggal).getDate() === day);
             const penyaluranDay = penyaluran.find(p => new Date(p.tanggal).getDate() === day);
             const penerimaanQty = penerimaanDay?._sum.qty_pcs || 0;
-            const penyaluranQty = penyaluranDay?._sum.jumlah || 0;
+            const penyaluranQty = (penyaluranDay?._sum?.jumlah_normal || 0) + (penyaluranDay?._sum?.jumlah_fakultatif || 0);
             dailyData[day] = {
                 stok_awal: runningStock,
                 penerimaan: penerimaanQty,

@@ -34,6 +34,10 @@ export class CreatePangkalanDto {
     capacity?: number;
 
     @IsOptional()
+    @IsInt()
+    alokasi_bulanan?: number;
+
+    @IsOptional()
     @IsString()
     note?: string;
 
@@ -78,6 +82,10 @@ export class UpdatePangkalanDto {
     @IsOptional()
     @IsInt()
     capacity?: number;
+
+    @IsOptional()
+    @IsInt()
+    alokasi_bulanan?: number;
 
     @IsOptional()
     @IsString()
