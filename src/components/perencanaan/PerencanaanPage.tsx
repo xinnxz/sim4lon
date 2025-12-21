@@ -16,15 +16,42 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import SafeIcon from '@/components/common/SafeIcon'
 import { perencanaanApi, lpgProductsApi, type PerencanaanRekapitulasiResponse, type LpgProduct } from '@/lib/api'
 import { toast } from 'sonner'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
+import PageHeader from '@/components/common/PageHeader'
+import { exportPertaminaPDF, exportPertaminaExcel, getAgenProfileFromAPI, type RekapRow } from '@/lib/pertamina-export'
 
 export default function PerencanaanPage() {
-    const [activeTab, setActiveTab] = useState<'form' | 'rekapitulasi'>('rekapitulasi')
+    // Read initial tab from URL hash or default to 'rekapitulasi'
+    const getInitialTab = () => {
+        if (typeof window !== 'undefined') {
+            const hash = window.location.hash.replace('#', '')
+            if (['form', 'rekapitulasi'].includes(hash)) {
+                return hash as 'form' | 'rekapitulasi'
+            }
+        }
+        return 'rekapitulasi'
+    }
+
+    const [activeTab, setActiveTab] = useState<'form' | 'rekapitulasi'>(getInitialTab)
+
+    // Update URL hash when tab changes
+    const handleTabChange = (value: string) => {
+        setActiveTab(value as 'form' | 'rekapitulasi')
+        if (typeof window !== 'undefined') {
+            window.history.replaceState(null, '', `#${value}`)
+        }
+    }
     const [selectedMonth, setSelectedMonth] = useState(() => {
         const now = new Date()
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -275,6 +302,90 @@ export default function PerencanaanPage() {
         fetchRekapitulasi()
     }, [selectedMonth, kondisi, selectedLpgType])
 
+    // Handle Download PDF
+    const handleDownloadPDF = async () => {
+        if (!rekapData || rekapData.data.length === 0) {
+            toast.error('Tidak ada data untuk di-download')
+            return
+        }
+
+        try {
+            toast.loading('Generating PDF...', { id: 'pdf-export' })
+
+            // Convert data to RekapRow format
+            const exportData: RekapRow[] = (computedRekapData?.data || rekapData.data).map(row => ({
+                id_registrasi: row.id_registrasi,
+                nama_pangkalan: row.nama_pangkalan,
+                alokasi: row.alokasi,
+                daily: row.daily,
+                total_normal: row.total_normal,
+                total_fakultatif: row.total_fakultatif,
+                sisa_alokasi: row.sisa_alokasi,
+                grand_total: row.grand_total
+            }))
+
+            // Get agen profile from API (with fallback to defaults)
+            const agenProfile = await getAgenProfileFromAPI()
+
+            await exportPertaminaPDF({
+                bulan: selectedMonth,
+                data: exportData,
+                daysInMonth: daysInMonth,
+                agenProfile: agenProfile,
+                tipe: 'perencanaan',
+                lpgType: selectedLpgType,
+                category: 'SUBSIDI' // Perencanaan selalu untuk LPG Subsidi
+            })
+
+            toast.success('PDF berhasil di-download!', { id: 'pdf-export' })
+        } catch (error) {
+            console.error('PDF export error:', error)
+            toast.error('Gagal export PDF', { id: 'pdf-export' })
+        }
+    }
+
+    // Handle Download Excel
+    const handleDownloadExcel = async () => {
+        if (!rekapData || rekapData.data.length === 0) {
+            toast.error('Tidak ada data untuk di-download')
+            return
+        }
+
+        try {
+            toast.loading('Generating Excel...', { id: 'excel-export' })
+
+            // Convert data to RekapRow format
+            const exportData: RekapRow[] = (computedRekapData?.data || rekapData.data).map(row => ({
+                id_registrasi: row.id_registrasi,
+                nama_pangkalan: row.nama_pangkalan,
+                alokasi: row.alokasi,
+                daily: row.daily,
+                total_normal: row.total_normal,
+                total_fakultatif: row.total_fakultatif,
+                sisa_alokasi: row.sisa_alokasi,
+                grand_total: row.grand_total
+            }))
+
+            // Get agen profile from API (with fallback to defaults)
+            const agenProfile = await getAgenProfileFromAPI()
+
+            await exportPertaminaExcel({
+                bulan: selectedMonth,
+                data: exportData,
+                daysInMonth: daysInMonth,
+                agenProfile: agenProfile,
+                tipe: 'perencanaan',
+                lpgType: selectedLpgType,
+                category: 'SUBSIDI' // Perencanaan selalu untuk LPG Subsidi
+            })
+
+            toast.success('Excel berhasil di-download!', { id: 'excel-export' })
+        } catch (error) {
+            console.error('Excel export error:', error)
+            toast.error('Gagal export Excel', { id: 'excel-export' })
+        }
+    }
+
     // Generate day headers for the month (memoized for performance)
     const { dayHeaders, isCurrentMonth, today, daysInMonth } = useMemo(() => {
         const [year, month] = selectedMonth.split('-').map(Number)
@@ -406,8 +517,14 @@ export default function PerencanaanPage() {
 
     return (
         <div className="space-y-6">
+            {/* Page Header */}
+            <PageHeader
+                title="Perencanaan"
+                subtitle="Kelola perencanaan distribusi LPG bulanan ke pangkalan"
+            />
+
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'form' | 'rekapitulasi')}>
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
                 <TabsList className="glass-card p-1 mb-4">
                     <TabsTrigger value="rekapitulasi" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
                         <SafeIcon name="Table" className="w-4 h-4 mr-2" />
@@ -540,10 +657,25 @@ export default function PerencanaanPage() {
                                     </AlertDialogContent>
                                 </AlertDialog>
 
-                                <Button variant="outline" size="sm">
-                                    <SafeIcon name="Download" className="w-4 h-4 mr-1" />
-                                    Download
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                            <SafeIcon name="Download" className="w-4 h-4 mr-1" />
+                                            Download
+                                            <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={handleDownloadPDF}>
+                                            <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
+                                            Download PDF
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleDownloadExcel}>
+                                            <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+                                            Download Excel
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
                     </CardContent>

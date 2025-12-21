@@ -47,12 +47,15 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const prisma_1 = require("../../prisma");
+const activity_service_1 = require("../activity/activity.service");
 let AuthService = class AuthService {
     prisma;
     jwtService;
-    constructor(prisma, jwtService) {
+    activityService;
+    constructor(prisma, jwtService, activityService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
+        this.activityService = activityService;
     }
     async register(dto) {
         const existingUser = await this.prisma.users.findUnique({
@@ -81,6 +84,10 @@ let AuthService = class AuthService {
                 role: true,
                 created_at: true,
             },
+        });
+        await this.activityService.logActivity('system_create', 'User Baru Dibuat', {
+            userId: user.id,
+            description: `User ${user.name} (${user.role}) telah didaftarkan`,
         });
         return {
             message: 'Registrasi berhasil',
@@ -117,6 +124,10 @@ let AuthService = class AuthService {
             pangkalan_id: user.pangkalan_id,
         };
         const accessToken = this.jwtService.sign(payload);
+        await this.activityService.logActivity('user_login', 'User Login', {
+            userId: user.id,
+            description: `${user.name} berhasil login`,
+        });
         return {
             message: 'Login berhasil',
             access_token: accessToken,
@@ -217,6 +228,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_1.PrismaService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        activity_service_1.ActivityService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

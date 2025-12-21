@@ -1,8 +1,10 @@
 import { PrismaService } from '../../prisma';
 import { CreatePenerimaanDto, GetPenerimaanQueryDto } from './dto';
+import { ActivityService } from '../activity/activity.service';
 export declare class PenerimaanService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private activityService;
+    constructor(prisma: PrismaService, activityService: ActivityService);
     findAll(query: GetPenerimaanQueryDto): Promise<{
         data: {
             id: string;

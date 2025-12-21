@@ -51,6 +51,7 @@ import { KABUPATEN_DATA, getKecamatanByKabupaten } from '@/data/regions'
  * Validation schema dengan Zod
  * Semua field divalidasi sebelum submit
  * Note: capacity jadi string untuk hindari type issue dengan react-hook-form
+ * Note: email untuk login sekaligus untuk invoice (tidak perlu 2 email)
  */
 const pangkalanSchema = z.object({
   name: z.string()
@@ -68,17 +69,15 @@ const pangkalanSchema = z.object({
     .max(100, 'Nama PIC maksimal 100 karakter'),
   phone: z.string()
     .regex(/^(\+62|0)[0-9]{9,12}$/, 'Nomor telepon tidak valid (contoh: 08xx atau +62xx)'),
-  email: z.string()
-    .min(1, 'Email wajib diisi')
-    .email('Format email tidak valid'),
   capacity: z.string().optional(),
   alokasi_bulanan: z.string().optional(),
   note: z.string()
     .max(500, 'Catatan maksimal 500 karakter')
     .optional(),
-  // Field untuk akun login
+  // Field untuk akun login (sekaligus email untuk invoice)
   login_email: z.string()
-    .email('Format email login tidak valid'),
+    .min(1, 'Email wajib diisi')
+    .email('Format email tidak valid'),
   login_password: z.string()
     .min(6, 'Password minimal 6 karakter'),
   confirm_password: z.string()
@@ -108,7 +107,6 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
       kecamatan: '',
       pic_name: '',
       phone: '',
-      email: '',
       capacity: '',
       alokasi_bulanan: '',
       note: '',
@@ -140,7 +138,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
         region: region,
         pic_name: values.pic_name,
         phone: values.phone,
-        email: values.email || null,
+        email: values.login_email, // Use login email for invoice too
         capacity: capacityNum,
         alokasi_bulanan: values.alokasi_bulanan ? parseInt(values.alokasi_bulanan, 10) : 0,
         note: values.note || '',
@@ -352,28 +350,6 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                 )}
               />
 
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Email (Opsional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: pangkalan@email.com"
-                        {...field}
-                        disabled={isSubmitting}
-                        type="email"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Untuk kirim invoice/nota
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               {/* Kapasitas */}
               <FormField
@@ -454,7 +430,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                   <h3 className="text-lg font-semibold">Akun Login Pangkalan</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Buat akun untuk login ke dashboard pangkalan
+                  Buat akun untuk login ke dashboard pangkalan. Email ini juga digunakan untuk invoice.
                 </p>
 
                 {/* Email Login */}

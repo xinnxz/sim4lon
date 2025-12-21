@@ -16,11 +16,15 @@ export class UserController {
         @Query('page') page?: string,
         @Query('limit') limit?: string,
         @Query('search') search?: string,
+        @Query('exclude_roles') excludeRoles?: string,
     ) {
+        // Parse exclude_roles from comma-separated string to array
+        const excludeRolesArray = excludeRoles ? excludeRoles.split(',') : undefined;
         return this.userService.findAll(
             page ? parseInt(page, 10) : 1,
             limit ? parseInt(limit, 10) : 10,
             search,
+            excludeRolesArray,
         );
     }
 

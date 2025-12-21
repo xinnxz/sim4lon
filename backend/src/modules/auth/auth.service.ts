@@ -3,12 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma';
 import { LoginDto, RegisterDto, UpdateProfileDto } from './dto';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
+        private activityService: ActivityService,
     ) { }
 
     async register(dto: RegisterDto) {
@@ -46,6 +48,12 @@ export class AuthService {
                 role: true,
                 created_at: true,
             },
+        });
+
+        // Log system activity for user creation
+        await this.activityService.logActivity('system_create', 'User Baru Dibuat', {
+            userId: user.id,
+            description: `User ${user.name} (${user.role}) telah didaftarkan`,
         });
 
         return {
@@ -95,6 +103,12 @@ export class AuthService {
         };
 
         const accessToken = this.jwtService.sign(payload);
+
+        // Log user login activity
+        await this.activityService.logActivity('user_login', 'User Login', {
+            userId: user.id,
+            description: `${user.name} berhasil login`,
+        });
 
         return {
             message: 'Login berhasil',

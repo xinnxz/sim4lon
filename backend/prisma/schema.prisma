@@ -620,3 +620,26 @@ enum kondisi_type {
   /// Extra/fakultatif allocation
   FAKULTATIF
 }
+
+/// Company profile for reports and invoices (singleton - only one record)
+model company_profile {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Nama agen/distributor
+  company_name String   @db.VarChar(255)
+  /// Alamat lengkap
+  address      String
+  /// Nomor telepon
+  phone        String?  @db.VarChar(50)
+  /// Email perusahaan
+  email        String?  @db.VarChar(255)
+  /// Person In Charge
+  pic_name     String?  @db.VarChar(255)
+  /// Nomor SPPBE/SIID
+  sppbe_number String?  @db.VarChar(50)
+  /// Wilayah/Region
+  region       String?  @db.VarChar(255)
+  /// Logo URL atau base64
+  logo_url     String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+}

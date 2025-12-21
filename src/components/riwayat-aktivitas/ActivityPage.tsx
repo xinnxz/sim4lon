@@ -1,3 +1,14 @@
+/**
+ * ActivityPage - Riwayat Aktivitas dengan UI Modern
+ * 
+ * PENJELASAN:
+ * Component ini menampilkan riwayat aktivitas sistem dengan fitur:
+ * - Timeline view aktivitas
+ * - Filter berdasarkan tipe aktivitas
+ * - Pagination
+ * - Summary cards dengan AnimatedNumber
+ * - Skeleton loading yang elegan
+ */
 
 import { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -5,9 +16,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/ui/pagination'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Input } from '@/components/ui/input'
 import SafeIcon from '@/components/common/SafeIcon'
+import AnimatedNumber from '@/components/common/AnimatedNumber'
+import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import { activityApi, type ActivityLog, type ActivityResponse } from '@/lib/api'
 
 /**
@@ -32,84 +43,181 @@ const formatRelativeTime = (timestamp: string): string => {
 
 /**
  * Get icon and style based on activity type
+ * Supports both uppercase (ORDER_NEW) and lowercase (order_new) types
  */
 const getActivityConfig = (type: string, iconOverride?: string | null) => {
-  const configs: Record<string, { icon: string; color: string; bgColor: string; borderColor: string; label: string }> = {
+  const configs: Record<string, { icon: string; color: string; bgColor: string; borderColor: string; label: string; gradient: string }> = {
+    // Order activities
     'ORDER_NEW': {
       icon: 'ShoppingCart',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
-      label: 'Pesanan Baru'
+      label: 'Pesanan Baru',
+      gradient: 'from-blue-500 to-blue-600'
+    },
+    'ORDER_CREATED': {
+      icon: 'ShoppingCart',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      label: 'Pesanan Dibuat',
+      gradient: 'from-blue-500 to-blue-600'
     },
     'ORDER_UPDATED': {
       icon: 'RefreshCw',
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
       borderColor: 'border-amber-200',
-      label: 'Update Pesanan'
+      label: 'Update Pesanan',
+      gradient: 'from-amber-500 to-amber-600'
+    },
+    'ORDER_STATUS_UPDATED': {
+      icon: 'RefreshCw',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-200',
+      label: 'Status Diperbarui',
+      gradient: 'from-amber-500 to-amber-600'
     },
     'ORDER_COMPLETED': {
       icon: 'CheckCircle2',
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       borderColor: 'border-green-200',
-      label: 'Selesai'
+      label: 'Selesai',
+      gradient: 'from-green-500 to-green-600'
+    },
+    'ORDER_DELIVERED': {
+      icon: 'Truck',
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+      borderColor: 'border-cyan-200',
+      label: 'Dikirim',
+      gradient: 'from-cyan-500 to-cyan-600'
     },
     'ORDER_CANCELLED': {
       icon: 'XCircle',
       color: 'text-red-600',
       bgColor: 'bg-red-50',
       borderColor: 'border-red-200',
-      label: 'Dibatalkan'
+      label: 'Dibatalkan',
+      gradient: 'from-red-500 to-red-600'
     },
-    'PAYMENT_RECEIVED': {
-      icon: 'Banknote',
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      borderColor: 'border-emerald-200',
-      label: 'Pembayaran'
-    },
+    // Stock activities
     'STOCK_IN': {
       icon: 'PackagePlus',
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-200',
-      label: 'Stok Masuk'
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      borderColor: 'border-primary/20',
+      label: 'Stok Masuk',
+      gradient: 'from-primary to-primary/80'
     },
     'STOCK_OUT': {
       icon: 'PackageMinus',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       borderColor: 'border-orange-200',
-      label: 'Stok Keluar'
+      label: 'Stok Keluar',
+      gradient: 'from-orange-500 to-orange-600'
     },
+    // System activities
     'USER_LOGIN': {
       icon: 'LogIn',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
-      label: 'Login'
+      color: 'text-slate-600',
+      bgColor: 'bg-slate-50',
+      borderColor: 'border-slate-200',
+      label: 'Login',
+      gradient: 'from-slate-500 to-slate-600'
+    },
+    'SYSTEM_CREATE': {
+      icon: 'Plus',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
+      label: 'Data Dibuat',
+      gradient: 'from-green-500 to-green-600'
+    },
+    'SYSTEM_UPDATE': {
+      icon: 'Edit',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-200',
+      label: 'Data Diperbarui',
+      gradient: 'from-amber-500 to-amber-600'
+    },
+    'SYSTEM_DELETE': {
+      icon: 'Trash2',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200',
+      label: 'Data Dihapus',
+      gradient: 'from-red-500 to-red-600'
     }
   }
-  const config = configs[type] || {
+  // Case-insensitive lookup
+  const normalizedType = type.toUpperCase()
+  const config = configs[normalizedType] || {
     icon: 'Activity',
     color: 'text-gray-600',
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-200',
-    label: 'Aktivitas'
+    label: 'Aktivitas',
+    gradient: 'from-gray-500 to-gray-600'
   }
   return { ...config, icon: iconOverride || config.icon }
 }
 
 const activityFilters = [
-  { value: 'all', label: 'Semua', icon: 'ListFilter' },
-  { value: 'ORDER', label: 'Pesanan', icon: 'ShoppingCart' },
-  { value: 'PAYMENT', label: 'Pembayaran', icon: 'Banknote' },
-  { value: 'STOCK', label: 'Stok', icon: 'Package' },
+  { value: 'all', label: 'Semua', icon: 'ListFilter', color: 'from-slate-500 to-slate-600' },
+  { value: 'ORDER', label: 'Pesanan', icon: 'ShoppingCart', color: 'from-cyan-500 to-blue-600' },
+  { value: 'STOCK', label: 'Stok LPG', icon: 'Package', color: 'from-primary to-primary/80' },
+  { value: 'SYSTEM', label: 'Sistem', icon: 'Settings', color: 'from-slate-600 to-slate-700' },
 ]
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50]
+
+// Skeleton Card Component
+const StatCardSkeleton = ({ delay = 0 }: { delay?: number }) => (
+  <div className="animate-pulse" style={{ animationDelay: `${delay}ms` }}>
+    <Card className="border-0 glass-card h-full">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-slate-200 w-10 h-10 animate-shimmer" />
+          <div className="space-y-2 flex-1">
+            <div className="h-3 w-20 bg-slate-200 rounded animate-shimmer" />
+            <div className="h-7 w-14 bg-slate-200 rounded animate-shimmer" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+)
+
+// Timeline Skeleton Component
+const TimelineSkeleton = () => (
+  <div className="space-y-4">
+    {Array.from({ length: 5 }).map((_, i) => (
+      <div key={i} className="flex gap-4 animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
+        <div className="hidden sm:flex flex-col items-center">
+          <div className="h-12 w-12 rounded-full bg-slate-200 animate-shimmer" />
+          <div className="w-0.5 h-16 bg-slate-200 mt-2 animate-shimmer" />
+        </div>
+        <div className="flex-1 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+          <div className="flex items-center justify-between mb-3">
+            <div className="h-5 w-40 bg-slate-200 rounded animate-shimmer" />
+            <div className="h-5 w-20 bg-slate-200 rounded animate-shimmer" />
+          </div>
+          <div className="h-4 w-3/4 bg-slate-200 rounded animate-shimmer mb-3" />
+          <div className="flex gap-4">
+            <div className="h-3 w-24 bg-slate-200 rounded animate-shimmer" />
+            <div className="h-3 w-20 bg-slate-200 rounded animate-shimmer" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)
 
 export default function ActivityPage() {
   const [selectedFilter, setSelectedFilter] = useState<string>('all')
@@ -130,11 +238,11 @@ export default function ActivityPage() {
         // Map filter to API type parameter
         let typeParam: string | undefined
         if (selectedFilter === 'ORDER') {
-          typeParam = 'ORDER_NEW' // API will need to handle wildcards or we fetch all order types
-        } else if (selectedFilter === 'PAYMENT') {
-          typeParam = 'PAYMENT_RECEIVED'
+          typeParam = 'ORDER_NEW' // Will filter ORDER_* types on backend
         } else if (selectedFilter === 'STOCK') {
-          typeParam = 'STOCK_IN' // Similar issue
+          typeParam = 'STOCK_IN' // Will filter STOCK_* types on backend
+        } else if (selectedFilter === 'SYSTEM') {
+          typeParam = 'USER_LOGIN' // Will filter USER_* types on backend
         } else if (selectedFilter !== 'all') {
           typeParam = selectedFilter
         }
@@ -144,7 +252,9 @@ export default function ActivityPage() {
         setMeta(response.meta)
       } catch (err) {
         console.error('Failed to fetch activities:', err)
-        setError('Gagal memuat riwayat aktivitas')
+        setError('Gagal memuat riwayat aktivitas. Silakan coba lagi.')
+        setActivities([])
+        setMeta(null)
       } finally {
         setIsLoading(false)
       }
@@ -155,13 +265,23 @@ export default function ActivityPage() {
   // Stats for current page
   const stats = useMemo(() => ({
     total: meta?.total || 0,
-    showing: activities.length
+    showing: activities.length,
+    orderCount: activities.filter(a => a.type.startsWith('ORDER')).length,
+    stockCount: activities.filter(a => a.type.startsWith('STOCK')).length,
+    systemCount: activities.filter(a => a.type.startsWith('USER') || a.type.startsWith('SYSTEM')).length,
   }), [meta, activities])
 
   // Handle filter change
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter)
     setCurrentPage(1)
+  }
+
+  // Retry function
+  const handleRetry = () => {
+    setError(null)
+    setIsLoading(true)
+    window.location.reload()
   }
 
   // Pagination helpers
@@ -183,60 +303,70 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-            <SafeIcon name="History" className="h-7 w-7 text-primary" />
-            Riwayat Aktivitas
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Pantau semua aktivitas sistem secara real-time
-          </p>
+    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
+      {/* Header - with Vertical Gradient Bar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-purple-500 via-purple-400 to-pink-400" />
+          <div>
+            <h1 className="text-3xl font-bold text-gradient-primary">
+              Riwayat Aktivitas
+            </h1>
+            <p className="text-muted-foreground/80 mt-1">
+              Pantau semua aktivitas sistem secara real-time
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="px-3 py-1.5 text-sm font-medium">
-            <SafeIcon name="Database" className="h-4 w-4 mr-1.5" />
-            {stats.total.toLocaleString('id-ID')} Total
-          </Badge>
-        </div>
+        <Badge variant="outline" className="px-4 py-2 text-sm font-medium bg-white/50 backdrop-blur-sm w-fit">
+          <SafeIcon name="Database" className="h-4 w-4 mr-2" />
+          {isLoading ? '... ' : <AnimatedNumber value={stats.total} delay={0} />} Total
+        </Badge>
       </div>
+
+      {/* Gradient Divider Line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       {/* Filter Chips */}
-      <div className="flex flex-wrap gap-2">
-        {activityFilters.map((filter) => (
-          <Button
-            key={filter.value}
-            variant={selectedFilter === filter.value ? "default" : "outline"}
-            size="sm"
-            className={`gap-2 transition-all duration-200 ${selectedFilter === filter.value
-                ? 'shadow-md scale-105'
-                : 'hover:scale-[1.02]'
-              }`}
-            onClick={() => handleFilterChange(filter.value)}
-          >
-            <SafeIcon name={filter.icon} className="h-4 w-4" />
-            {filter.label}
-          </Button>
-        ))}
-      </div>
+      <Card className="glass-card">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-2">
+            {activityFilters.map((filter) => (
+              <Button
+                key={filter.value}
+                variant={selectedFilter === filter.value ? "default" : "outline"}
+                size="sm"
+                className={`gap-2 transition-all duration-200 ${selectedFilter === filter.value
+                  ? `bg-gradient-to-r ${filter.color} text-white shadow-md hover:shadow-lg`
+                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'
+                  }`}
+                onClick={() => handleFilterChange(filter.value)}
+              >
+                <SafeIcon name={filter.icon} className="h-4 w-4" />
+                {filter.label}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content */}
-      <Card className="shadow-lg border-0 bg-card/50 backdrop-blur">
-        <CardHeader className="pb-4">
+      <Card className="glass-card overflow-hidden">
+        <CardHeader className="pb-4 border-b border-border/50">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Timeline Aktivitas</CardTitle>
-              <CardDescription>
-                Menampilkan {stats.showing} dari {stats.total} aktivitas
-              </CardDescription>
+            <div className="flex items-center gap-3">
+              <SafeIcon name="Clock" className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <CardTitle className="text-lg">Timeline Aktivitas</CardTitle>
+                <CardDescription>
+                  {isLoading ? 'Memuat...' : `Menampilkan ${stats.showing} dari ${stats.total} aktivitas`}
+                </CardDescription>
+              </div>
             </div>
             <Select
               value={itemsPerPage.toString()}
               onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1) }}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-36 bg-white/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -247,33 +377,18 @@ export default function ActivityPage() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           {isLoading ? (
-            // Skeleton Loading
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex gap-4 animate-pulse">
-                  <div className="flex flex-col items-center">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <Skeleton className="w-0.5 h-12 mt-2" />
-                  </div>
-                  <div className="flex-1 space-y-2 pb-4">
-                    <Skeleton className="h-5 w-1/3" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-3 w-1/4" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <TimelineSkeleton />
           ) : error ? (
             // Error State
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-                <SafeIcon name="AlertTriangle" className="h-8 w-8 text-destructive" />
+              <div className="h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                <SafeIcon name="AlertTriangle" className="h-10 w-10 text-destructive" />
               </div>
-              <h3 className="font-semibold text-lg mb-1">Terjadi Kesalahan</h3>
-              <p className="text-muted-foreground mb-4">{error}</p>
-              <Button onClick={() => window.location.reload()}>
+              <h3 className="font-semibold text-xl mb-2">Terjadi Kesalahan</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">{error}</p>
+              <Button onClick={handleRetry} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                 <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
                 Coba Lagi
               </Button>
@@ -281,11 +396,11 @@ export default function ActivityPage() {
           ) : activities.length === 0 ? (
             // Empty State
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-4">
-                <SafeIcon name="Inbox" className="h-10 w-10 text-muted-foreground" />
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
+                <SafeIcon name="Inbox" className="h-12 w-12 text-purple-400" />
               </div>
-              <h3 className="font-semibold text-lg mb-1">Belum Ada Aktivitas</h3>
-              <p className="text-muted-foreground max-w-sm">
+              <h3 className="font-semibold text-xl mb-2">Belum Ada Aktivitas</h3>
+              <p className="text-muted-foreground max-w-md">
                 Aktivitas sistem akan muncul di sini saat pesanan dibuat, pembayaran diterima, atau stok diperbarui.
               </p>
             </div>
@@ -293,57 +408,57 @@ export default function ActivityPage() {
             // Timeline View
             <div className="relative">
               {/* Timeline Line */}
-              <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 via-primary/20 to-transparent hidden sm:block" />
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500 via-purple-300 to-transparent hidden sm:block" />
 
-              <div className="space-y-1">
+              <div className="space-y-4">
                 {activities.map((activity, index) => {
                   const config = getActivityConfig(activity.type, activity.icon_name)
 
                   return (
                     <div
                       key={activity.id}
-                      className="relative flex gap-4 group"
+                      className="relative flex gap-4 group animate-fadeInUp"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       {/* Timeline Dot */}
                       <div className="hidden sm:flex flex-col items-center z-10">
-                        <div className={`h-10 w-10 rounded-full ${config.bgColor} border-2 ${config.borderColor} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-200`}>
-                          <SafeIcon name={config.icon} className={`h-5 w-5 ${config.color}`} />
+                        <div className={`h-12 w-12 rounded-full bg-gradient-to-br ${config.gradient} shadow-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300`}>
+                          <SafeIcon name={config.icon} className="h-5 w-5 text-white" />
                         </div>
                       </div>
 
                       {/* Content Card */}
-                      <div className={`flex-1 p-4 rounded-xl border ${config.borderColor} ${config.bgColor} group-hover:shadow-md transition-all duration-200 mb-3`}>
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                      <div className={`flex-1 p-5 rounded-xl border ${config.borderColor} bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group-hover:translate-x-1`}>
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-3">
                           <div className="flex items-center gap-2">
                             {/* Mobile Icon */}
-                            <div className={`sm:hidden h-8 w-8 rounded-full ${config.bgColor} border ${config.borderColor} flex items-center justify-center`}>
-                              <SafeIcon name={config.icon} className={`h-4 w-4 ${config.color}`} />
+                            <div className={`sm:hidden h-10 w-10 rounded-xl bg-gradient-to-br ${config.gradient} shadow-sm flex items-center justify-center`}>
+                              <SafeIcon name={config.icon} className="h-5 w-5 text-white" />
                             </div>
-                            <h4 className="font-semibold text-foreground">{activity.title}</h4>
+                            <h4 className="font-semibold text-foreground text-lg">{activity.title}</h4>
                           </div>
-                          <Badge variant="secondary" className={`text-xs ${config.bgColor} ${config.color} border ${config.borderColor} w-fit`}>
+                          <Badge className={`text-xs bg-gradient-to-r ${config.gradient} text-white border-0 shadow-sm w-fit`}>
                             {config.label}
                           </Badge>
                         </div>
 
-                        <p className="text-sm text-muted-foreground mb-3">
+                        <p className="text-sm text-muted-foreground mb-4">
                           {activity.description || activity.pangkalan_name || 'Tidak ada detail'}
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1.5 bg-slate-100 rounded-full px-3 py-1">
                             <SafeIcon name="Clock" className="h-3.5 w-3.5" />
                             {formatRelativeTime(activity.timestamp)}
                           </span>
                           {activity.users && (
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1.5 bg-slate-100 rounded-full px-3 py-1">
                               <SafeIcon name="User" className="h-3.5 w-3.5" />
                               {activity.users.name}
                             </span>
                           )}
                           {activity.detail_numeric && (
-                            <span className="font-semibold text-primary flex items-center gap-1">
+                            <span className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-3 py-1 font-medium">
                               <SafeIcon name="Package" className="h-3.5 w-3.5" />
                               {activity.detail_numeric.toLocaleString('id-ID')} tabung
                             </span>
@@ -359,41 +474,58 @@ export default function ActivityPage() {
 
           {/* Pagination */}
           {meta && meta.totalPages > 1 && !isLoading && !error && (
-            <div className="mt-6 pt-6 border-t">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => { e.preventDefault(); if (currentPage > 1) setCurrentPage(p => p - 1) }}
-                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                    />
-                  </PaginationItem>
-                  {getPaginationItems().map((item, i) => (
-                    <PaginationItem key={i}>
-                      {item === 'ellipsis' ? (
-                        <PaginationEllipsis />
-                      ) : (
-                        <PaginationLink
-                          href="#"
-                          isActive={item === currentPage}
-                          onClick={(e) => { e.preventDefault(); setCurrentPage(item as number) }}
-                          className="cursor-pointer"
-                        >
-                          {item}
-                        </PaginationLink>
-                      )}
+            <div className="mt-8 pt-6 border-t border-border/50">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Halaman {currentPage} dari {totalPages}
+                </p>
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => p - 1)}
+                        className="hover:bg-purple-50"
+                      >
+                        <SafeIcon name="ChevronLeft" className="h-4 w-4 mr-1" />
+                        Prev
+                      </Button>
                     </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => { e.preventDefault(); if (currentPage < totalPages) setCurrentPage(p => p + 1) }}
-                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                    <div className="flex items-center gap-1 mx-2">
+                      {getPaginationItems().map((item, i) => (
+                        <PaginationItem key={i}>
+                          {item === 'ellipsis' ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <Button
+                              variant={item === currentPage ? 'default' : 'ghost'}
+                              size="sm"
+                              onClick={() => setCurrentPage(item as number)}
+                              className={item === currentPage ? 'bg-purple-500 hover:bg-purple-600' : ''}
+                            >
+                              {item}
+                            </Button>
+                          )}
+                        </PaginationItem>
+                      ))}
+                    </div>
+                    <PaginationItem>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => p + 1)}
+                        className="hover:bg-purple-50"
+                      >
+                        Next
+                        <SafeIcon name="ChevronRight" className="h-4 w-4 ml-1" />
+                      </Button>
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           )}
         </CardContent>

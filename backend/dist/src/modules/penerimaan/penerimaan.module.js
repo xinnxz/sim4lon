@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const penerimaan_controller_1 = require("./penerimaan.controller");
 const penerimaan_service_1 = require("./penerimaan.service");
 const prisma_1 = require("../../prisma");
+const activity_module_1 = require("../activity/activity.module");
 let PenerimaanModule = class PenerimaanModule {
 };
 exports.PenerimaanModule = PenerimaanModule;
 exports.PenerimaanModule = PenerimaanModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_1.PrismaModule],
+        imports: [prisma_1.PrismaModule, activity_module_1.ActivityModule],
         controllers: [penerimaan_controller_1.PenerimaanController],
         providers: [penerimaan_service_1.PenerimaanService],
         exports: [penerimaan_service_1.PenerimaanService],

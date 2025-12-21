@@ -46,10 +46,13 @@ exports.PangkalanService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const bcrypt = __importStar(require("bcryptjs"));
+const activity_service_1 = require("../activity/activity.service");
 let PangkalanService = class PangkalanService {
     prisma;
-    constructor(prisma) {
+    activityService;
+    constructor(prisma, activityService) {
         this.prisma = prisma;
+        this.activityService = activityService;
     }
     async findAll(page = 1, limit = 10, isActive, search) {
         const skip = (page - 1) * limit;
@@ -64,7 +67,7 @@ let PangkalanService = class PangkalanService {
                 { pic_name: { contains: search, mode: 'insensitive' } },
             ];
         }
-        const [pangkalans, total] = await Promise.all([
+        const [pangkalans, total, totalActive, totalInactive] = await Promise.all([
             this.prisma.pangkalans.findMany({
                 where,
                 skip,
@@ -87,6 +90,8 @@ let PangkalanService = class PangkalanService {
                 },
             }),
             this.prisma.pangkalans.count({ where }),
+            this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: true } }),
+            this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: false } }),
         ]);
         return {
             data: pangkalans,
@@ -95,6 +100,9 @@ let PangkalanService = class PangkalanService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+                totalActive,
+                totalInactive,
+                totalAll: totalActive + totalInactive,
             },
         };
     }
@@ -165,10 +173,14 @@ let PangkalanService = class PangkalanService {
                 },
             });
         }
+        await this.activityService.logActivity('system_create', 'Pangkalan Baru Dibuat', {
+            description: `Pangkalan ${dto.name} (${pangkalanCode}) berhasil ditambahkan`,
+            pangkalanName: dto.name,
+        });
         return this.findOne(pangkalan.id);
     }
     async update(id, dto) {
-        await this.findOne(id);
+        const existing = await this.findOne(id);
         const pangkalan = await this.prisma.pangkalans.update({
             where: { id },
             data: {
@@ -176,13 +188,21 @@ let PangkalanService = class PangkalanService {
                 updated_at: new Date(),
             },
         });
+        await this.activityService.logActivity('system_update', 'Data Pangkalan Diperbarui', {
+            description: `Data ${existing.name} berhasil diperbarui`,
+            pangkalanName: existing.name,
+        });
         return pangkalan;
     }
     async remove(id) {
-        await this.findOne(id);
+        const existing = await this.findOne(id);
         await this.prisma.pangkalans.update({
             where: { id },
             data: { deleted_at: new Date() },
+        });
+        await this.activityService.logActivity('system_delete', 'Pangkalan Dihapus', {
+            description: `Pangkalan ${existing.name} berhasil dihapus`,
+            pangkalanName: existing.name,
         });
         return { message: 'Pangkalan berhasil dihapus' };
     }
@@ -190,6 +210,7 @@ let PangkalanService = class PangkalanService {
 exports.PangkalanService = PangkalanService;
 exports.PangkalanService = PangkalanService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        activity_service_1.ActivityService])
 ], PangkalanService);
 //# sourceMappingURL=pangkalan.service.js.map

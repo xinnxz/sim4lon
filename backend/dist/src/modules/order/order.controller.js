@@ -23,8 +23,8 @@ let OrderController = class OrderController {
     constructor(orderService) {
         this.orderService = orderService;
     }
-    findAll(page, limit, status, pangkalanId, driverId) {
-        return this.orderService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, status, pangkalanId, driverId);
+    findAll(page, limit, status, pangkalanId, driverId, sortBy, sortOrder) {
+        return this.orderService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, status, pangkalanId, driverId, sortBy || 'created_at', sortOrder || 'desc');
     }
     getStats(today) {
         const todayOnly = today === 'true';
@@ -54,8 +54,10 @@ __decorate([
     __param(2, (0, common_1.Query)('status')),
     __param(3, (0, common_1.Query)('pangkalan_id')),
     __param(4, (0, common_1.Query)('driver_id')),
+    __param(5, (0, common_1.Query)('sort_by')),
+    __param(6, (0, common_1.Query)('sort_order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], OrderController.prototype, "findAll", null);
 __decorate([

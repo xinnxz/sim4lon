@@ -52,6 +52,7 @@ let PrismaService = class PrismaService {
     get perencanaan_harian() { return this._client.perencanaan_harian; }
     get penyaluran_harian() { return this._client.penyaluran_harian; }
     get penerimaan_stok() { return this._client.penerimaan_stok; }
+    get company_profile() { return this._client.company_profile; }
     $transaction(fn) {
         return this._client.$transaction(fn);
     }

@@ -51,9 +51,12 @@ let UserService = class UserService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async findAll(page = 1, limit = 10, search) {
+    async findAll(page = 1, limit = 10, search, excludeRoles) {
         const skip = (page - 1) * limit;
         const where = { deleted_at: null };
+        if (excludeRoles && excludeRoles.length > 0) {
+            where.role = { notIn: excludeRoles };
+        }
         if (search) {
             where.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
@@ -61,7 +64,7 @@ let UserService = class UserService {
                 { phone: { contains: search, mode: 'insensitive' } },
             ];
         }
-        const [users, total] = await Promise.all([
+        const [users, total, totalAdmin, totalOperator, totalPangkalan] = await Promise.all([
             this.prisma.users.findMany({
                 where,
                 skip,
@@ -81,6 +84,9 @@ let UserService = class UserService {
                 },
             }),
             this.prisma.users.count({ where }),
+            this.prisma.users.count({ where: { deleted_at: null, role: 'ADMIN' } }),
+            this.prisma.users.count({ where: { deleted_at: null, role: 'OPERATOR' } }),
+            this.prisma.users.count({ where: { deleted_at: null, role: 'PANGKALAN' } }),
         ]);
         return {
             data: users,
@@ -89,6 +95,10 @@ let UserService = class UserService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+                totalAdmin,
+                totalOperator,
+                totalPangkalan,
+                totalAll: totalAdmin + totalOperator + totalPangkalan,
             },
         };
     }

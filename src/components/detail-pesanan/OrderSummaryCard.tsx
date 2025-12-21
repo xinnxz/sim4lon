@@ -4,7 +4,7 @@
  * PENJELASAN:
  * Component ini menampilkan:
  * - Tanggal pesanan
- * - Daftar item pesanan
+ * - Daftar item pesanan dengan total row
  * - Breakdown harga: Subtotal, PPN 12% (jika ada), Total
  * - Menggunakan formatCurrency untuk format uang yang konsisten
  */
@@ -49,22 +49,25 @@ export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
 
         <Separator />
 
-        {/* Order Items Table */}
-        <OrderItemsTable items={order.items} />
+        {/* Order Items Table with Total Row */}
+        <OrderItemsTable items={order.items} showTotalRow={true} />
 
         <Separator />
 
-        {/* Price Breakdown */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
+        {/* Price Breakdown - Enhanced Visual Hierarchy */}
+        <div className="space-y-3 px-1">
+          {/* Subtotal */}
+          <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
             <span className="font-medium">{formatCurrency(order.subtotal)}</span>
           </div>
+
+          {/* PPN 12% - highlighted with orange accent */}
           {order.tax > 0 && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground flex items-center gap-1">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-2">
                 PPN 12%
-                <Badge variant="outline" className="text-[10px] px-1 py-0 bg-orange-50 text-orange-600 border-orange-200">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-orange-50 text-orange-600 border-orange-200">
                   Non-Subsidi
                 </Badge>
               </span>
@@ -73,14 +76,13 @@ export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
           )}
         </div>
 
-        <Separator />
-
-        {/* Total */}
-        <div className="flex justify-between items-center bg-primary/5 p-3 rounded-lg">
-          <span className="font-semibold">Total</span>
-          <span className="text-lg font-bold text-primary">{formatCurrency(order.total)}</span>
+        {/* Total - Prominent styling */}
+        <div className="flex justify-between items-center bg-primary/10 p-4 rounded-lg border border-primary/20">
+          <span className="font-bold text-base">Total</span>
+          <span className="text-xl font-bold text-primary">{formatCurrency(order.total)}</span>
         </div>
       </CardContent>
     </Card>
   )
 }
+

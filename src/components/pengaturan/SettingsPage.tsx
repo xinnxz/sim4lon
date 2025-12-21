@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import SafeIcon from '@/components/common/SafeIcon'
+import PageHeader from '@/components/common/PageHeader'
 import CompanyProfileSettings from './CompanyProfileSettings'
 import AppearanceSettings from './AppearanceSettings'
 import ApplicationSettings from './ApplicationSettings'
@@ -27,20 +28,11 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-background to-secondary/5">
-      {/* Page Header - Elegant style */}
-      <div className="space-y-2 animate-fadeInDown">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Pengaturan
-            </h1>
-            <p className="text-sm text-muted-foreground/80">
-              Kelola konfigurasi dan preferensi aplikasi SIM4LON
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Page Header - Using reusable PageHeader component */}
+      <PageHeader
+        title="Pengaturan"
+        subtitle="Kelola konfigurasi dan preferensi aplikasi SIM4LON"
+      />
 
       {/* Settings Content */}
       <Card className="border-0 shadow-lg animate-fadeInUp overflow-hidden" style={{ animationDelay: '0.1s' }}>

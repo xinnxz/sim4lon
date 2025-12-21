@@ -9,8 +9,35 @@ export class ActivityService {
     async findAll(page = 1, limit = 20, type?: string, userId?: string) {
         const skip = (page - 1) * limit;
 
-        const where: any = {};
-        if (type) where.type = type;
+        const where: any = {
+            // Always exclude non-core order types from all views
+            NOT: {
+                type: { in: ['order_delivered', 'order_status_updated'] },
+            },
+        };
+
+        // Handle type filtering with special cases for categories
+        if (type) {
+            const prefix = type.split('_')[0].toLowerCase();
+
+            // SYSTEM category should match both user_ and system_ types
+            if (prefix === 'system' || prefix === 'user') {
+                where.OR = [
+                    { type: { startsWith: 'user_', mode: 'insensitive' } },
+                    { type: { startsWith: 'system_', mode: 'insensitive' } },
+                ];
+            } else if (prefix === 'order') {
+                // ORDER category - only show core statuses: created, completed, cancelled
+                where.OR = [
+                    { type: { equals: 'order_created', mode: 'insensitive' } },
+                    { type: { equals: 'order_completed', mode: 'insensitive' } },
+                    { type: { equals: 'order_cancelled', mode: 'insensitive' } },
+                ];
+            } else {
+                // Standard prefix matching for STOCK, etc.
+                where.type = { startsWith: prefix + '_', mode: 'insensitive' };
+            }
+        }
         if (userId) where.user_id = userId;
 
         const [logs, total] = await Promise.all([

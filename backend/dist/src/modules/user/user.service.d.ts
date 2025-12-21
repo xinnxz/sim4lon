@@ -3,7 +3,7 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 export declare class UserService {
     private prisma;
     constructor(prisma: PrismaService);
-    findAll(page?: number, limit?: number, search?: string): Promise<{
+    findAll(page?: number, limit?: number, search?: string, excludeRoles?: string[]): Promise<{
         data: {
             id: string;
             code: string;
@@ -21,6 +21,10 @@ export declare class UserService {
             page: number;
             limit: number;
             totalPages: number;
+            totalAdmin: number;
+            totalOperator: number;
+            totalPangkalan: number;
+            totalAll: number;
         };
     }>;
     findOne(id: string): Promise<{

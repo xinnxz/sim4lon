@@ -14,11 +14,11 @@ export declare class PerencanaanService {
     } & {
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        alokasi_bulan: number;
         created_at: Date;
         updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
     })[]>;
@@ -41,11 +41,11 @@ export declare class PerencanaanService {
     create(dto: CreatePerencanaanDto): Promise<{
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        alokasi_bulan: number;
         created_at: Date;
         updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
     }>;
@@ -53,22 +53,22 @@ export declare class PerencanaanService {
     update(id: string, dto: UpdatePerencanaanDto): Promise<{
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        alokasi_bulan: number;
         created_at: Date;
         updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
     }>;
     delete(id: string): Promise<{
         id: string;
         pangkalan_id: string;
-        tanggal: Date;
-        alokasi_bulan: number;
         created_at: Date;
         updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        tanggal: Date;
+        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
     }>;

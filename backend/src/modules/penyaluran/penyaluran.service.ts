@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
 import { CreatePenyaluranDto, UpdatePenyaluranDto, BulkUpdatePenyaluranDto, GetPenyaluranQueryDto } from './dto';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class PenyaluranService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private activityService: ActivityService,
+    ) { }
 
     async findAll(query: GetPenyaluranQueryDto) {
         const where: any = {};
@@ -133,6 +137,12 @@ export class PenyaluranService {
         const jumlahNormal = kondisi === 'NORMAL' ? dto.jumlah : 0;
         const jumlahFakultatif = kondisi === 'FAKULTATIF' ? dto.jumlah : 0;
 
+        // Get pangkalan name for activity log
+        const pangkalan = await this.prisma.pangkalans.findUnique({
+            where: { id: dto.pangkalan_id },
+            select: { name: true },
+        });
+
         // Check if record exists
         const existing = await this.prisma.penyaluran_harian.findFirst({
             where: {
@@ -142,9 +152,10 @@ export class PenyaluranService {
             },
         });
 
+        let result;
         if (existing) {
             // Update existing record
-            return this.prisma.penyaluran_harian.update({
+            result = await this.prisma.penyaluran_harian.update({
                 where: { id: existing.id },
                 data: {
                     jumlah_normal: kondisi === 'NORMAL' ? dto.jumlah : existing.jumlah_normal,
@@ -154,19 +165,28 @@ export class PenyaluranService {
                     tipe_pembayaran: dto.tipe_pembayaran || existing.tipe_pembayaran,
                 },
             });
+        } else {
+            // No existing record - create new
+            result = await this.prisma.penyaluran_harian.create({
+                data: {
+                    pangkalan_id: dto.pangkalan_id,
+                    tanggal: new Date(dto.tanggal),
+                    lpg_type: lpgType,
+                    jumlah_normal: jumlahNormal,
+                    jumlah_fakultatif: jumlahFakultatif,
+                    tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
+                },
+            });
         }
 
-        // No existing record - create new
-        return this.prisma.penyaluran_harian.create({
-            data: {
-                pangkalan_id: dto.pangkalan_id,
-                tanggal: new Date(dto.tanggal),
-                lpg_type: lpgType,
-                jumlah_normal: jumlahNormal,
-                jumlah_fakultatif: jumlahFakultatif,
-                tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-            },
+        // Log stock_out activity
+        await this.activityService.logActivity('stock_out', 'Stok Keluar', {
+            description: `Penyaluran ${dto.jumlah} tabung ke ${pangkalan?.name || 'Pangkalan'}`,
+            pangkalanName: pangkalan?.name,
+            detailNumeric: dto.jumlah,
         });
+
+        return result;
     }
 
     async bulkUpdate(dto: BulkUpdatePenyaluranDto) {

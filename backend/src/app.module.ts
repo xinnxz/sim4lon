@@ -26,6 +26,7 @@ import { AgenModule } from './modules/agen/agen.module';
 import { PerencanaanModule } from './modules/perencanaan/perencanaan.module';
 import { PenyaluranModule } from './modules/penyaluran/penyaluran.module';
 import { PenerimaanModule } from './modules/penerimaan/penerimaan.module';
+import { CompanyProfileModule } from './modules/company-profile/company-profile.module';
 
 @Module({
     imports: [
@@ -57,6 +58,8 @@ import { PenerimaanModule } from './modules/penerimaan/penerimaan.module';
         PerencanaanModule,
         PenyaluranModule,
         PenerimaanModule,
+        // Settings
+        CompanyProfileModule,
     ],
     controllers: [AppController],
     providers: [AppService],

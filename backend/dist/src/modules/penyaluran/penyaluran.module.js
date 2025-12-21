@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const penyaluran_controller_1 = require("./penyaluran.controller");
 const penyaluran_service_1 = require("./penyaluran.service");
 const prisma_1 = require("../../prisma");
+const activity_module_1 = require("../activity/activity.module");
 let PenyaluranModule = class PenyaluranModule {
 };
 exports.PenyaluranModule = PenyaluranModule;
 exports.PenyaluranModule = PenyaluranModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_1.PrismaModule],
+        imports: [prisma_1.PrismaModule, activity_module_1.ActivityModule],
         controllers: [penyaluran_controller_1.PenyaluranController],
         providers: [penyaluran_service_1.PenyaluranService],
         exports: [penyaluran_service_1.PenyaluranService],

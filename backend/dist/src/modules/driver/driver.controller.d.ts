@@ -25,6 +25,9 @@ export declare class DriverController {
             page: number;
             limit: number;
             totalPages: number;
+            totalActive: number;
+            totalInactive: number;
+            totalAll: number;
         };
     }>;
     findOne(id: string): Promise<{

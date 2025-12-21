@@ -387,9 +387,27 @@ export interface StockMovementResponse {
 // Pangkalan Analytics Report Types
 export interface PangkalanReportSummary {
     total_pangkalan: number;
+    // Subsidi (3kg)
     total_orders_subsidi: number;
     total_tabung_subsidi: number;
-    total_revenue: number;
+    total_revenue_subsidi: number;
+    // Non-Subsidi (5.5kg+)
+    total_nonsubsidi_orders: number;
+    total_nonsubsidi_tabung: number;
+    total_nonsubsidi_revenue: number;
+    // All products combined
+    total_all_orders: number;
+    total_all_tabung: number;
+    total_all_revenue: number;
+    // Per-type tabung breakdown
+    tabung_by_type: {
+        kg3: number;   // 3kg subsidi
+        kg5: number;   // 5.5kg 
+        kg12: number;  // 12kg
+        kg50: number;  // 50kg
+        gr220: number; // Bright Gas Can 220g
+    };
+    // Consumer stats
     total_consumers: number;
     active_consumers: number;
     top_pangkalan: string;
@@ -409,6 +427,15 @@ export interface PangkalanReportItem {
     total_consumer_orders: number;
     total_tabung_to_consumers: number;
     total_revenue: number;
+    // Non-subsidi
+    total_nonsubsidi_orders: number;
+    total_nonsubsidi_tabung: number;
+    total_nonsubsidi_revenue: number;
+    // All products
+    total_all_orders: number;
+    total_all_tabung: number;
+    total_all_revenue: number;
+    // Stats
     total_registered_consumers: number;
     active_consumers: number;
 }
@@ -550,6 +577,14 @@ export interface PaginatedResponse<T> {
         page: number;
         limit: number;
         totalPages: number;
+        // Optional stats for summary cards (e.g., pangkalan/driver list)
+        totalActive?: number;
+        totalInactive?: number;
+        totalAll?: number;
+        // Optional stats for user list (by role)
+        totalAdmin?: number;
+        totalOperator?: number;
+        totalPangkalan?: number;
     };
 }
 
@@ -905,16 +940,21 @@ export const usersApi = {
     /**
      * Get all users with pagination
      * Requires ADMIN role
+     * @param excludeRoles - Array of roles to exclude (e.g., ['PANGKALAN'])
      */
     async getAll(
         page = 1,
         limit = 10,
-        search?: string
+        search?: string,
+        excludeRoles?: string[]
     ): Promise<PaginatedResponse<User>> {
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('limit', limit.toString());
         if (search) params.append('search', search);
+        if (excludeRoles && excludeRoles.length > 0) {
+            params.append('exclude_roles', excludeRoles.join(','));
+        }
 
         return apiRequest(`/users?${params.toString()}`);
     },
@@ -1201,14 +1241,16 @@ export interface OrdersResponse {
  */
 export const ordersApi = {
     /**
-     * Get all orders with pagination and filters
+     * Get all orders with pagination, filters, and sorting
      */
     async getAll(
         page = 1,
         limit = 10,
         status?: OrderStatus,
         pangkalanId?: string,
-        driverId?: string
+        driverId?: string,
+        sortBy: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name' = 'created_at',
+        sortOrder: 'asc' | 'desc' = 'desc'
     ): Promise<OrdersResponse> {
         const params = new URLSearchParams({
             page: page.toString(),
@@ -1217,6 +1259,8 @@ export const ordersApi = {
         if (status) params.append('status', status);
         if (pangkalanId) params.append('pangkalan_id', pangkalanId);
         if (driverId) params.append('driver_id', driverId);
+        params.append('sort_by', sortBy);
+        params.append('sort_order', sortOrder);
 
         return apiRequest(`/orders?${params.toString()}`);
     },
@@ -2187,5 +2231,53 @@ export const penerimaanApi = {
 
     async getInOutAgen(bulan: string): Promise<InOutAgenResponse> {
         return apiRequest(`/penerimaan/in-out-agen?bulan=${bulan}`);
+    },
+};
+
+// ============================================================
+// COMPANY PROFILE API
+// ============================================================
+
+export interface CompanyProfile {
+    id: string;
+    company_name: string;
+    address: string;
+    phone: string | null;
+    email: string | null;
+    pic_name: string | null;
+    sppbe_number: string | null;
+    region: string | null;
+    logo_url: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface UpdateCompanyProfilePayload {
+    company_name: string;
+    address: string;
+    phone?: string;
+    email?: string;
+    pic_name?: string;
+    sppbe_number?: string;
+    region?: string;
+    logo_url?: string;
+}
+
+export const companyProfileApi = {
+    /**
+     * Get company profile (singleton - creates default if not exists)
+     */
+    async get(): Promise<CompanyProfile> {
+        return apiRequest('/company-profile');
+    },
+
+    /**
+     * Update company profile
+     */
+    async update(data: UpdateCompanyProfilePayload): Promise<CompanyProfile> {
+        return apiRequest('/company-profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
     },
 };

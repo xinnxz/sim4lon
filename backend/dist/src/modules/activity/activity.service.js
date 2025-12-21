@@ -19,9 +19,30 @@ let ActivityService = class ActivityService {
     }
     async findAll(page = 1, limit = 20, type, userId) {
         const skip = (page - 1) * limit;
-        const where = {};
-        if (type)
-            where.type = type;
+        const where = {
+            NOT: {
+                type: { in: ['order_delivered', 'order_status_updated'] },
+            },
+        };
+        if (type) {
+            const prefix = type.split('_')[0].toLowerCase();
+            if (prefix === 'system' || prefix === 'user') {
+                where.OR = [
+                    { type: { startsWith: 'user_', mode: 'insensitive' } },
+                    { type: { startsWith: 'system_', mode: 'insensitive' } },
+                ];
+            }
+            else if (prefix === 'order') {
+                where.OR = [
+                    { type: { equals: 'order_created', mode: 'insensitive' } },
+                    { type: { equals: 'order_completed', mode: 'insensitive' } },
+                    { type: { equals: 'order_cancelled', mode: 'insensitive' } },
+                ];
+            }
+            else {
+                where.type = { startsWith: prefix + '_', mode: 'insensitive' };
+            }
+        }
         if (userId)
             where.user_id = userId;
         const [logs, total] = await Promise.all([
