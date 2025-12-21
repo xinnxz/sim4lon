@@ -37,7 +37,20 @@ export declare class ReportsController {
             total_pangkalan: number;
             total_orders_subsidi: number;
             total_tabung_subsidi: number;
-            total_revenue: number;
+            total_revenue_subsidi: number;
+            total_nonsubsidi_orders: number;
+            total_nonsubsidi_tabung: number;
+            total_nonsubsidi_revenue: number;
+            total_all_orders: number;
+            total_all_tabung: number;
+            total_all_revenue: number;
+            tabung_by_type: {
+                kg3: number;
+                kg5: number;
+                kg12: number;
+                kg50: number;
+                gr220: number;
+            };
             total_consumers: number;
             active_consumers: number;
             top_pangkalan: string;
@@ -56,6 +69,12 @@ export declare class ReportsController {
             total_consumer_orders: number;
             total_tabung_to_consumers: number;
             total_revenue: number;
+            total_nonsubsidi_orders: number;
+            total_nonsubsidi_tabung: number;
+            total_nonsubsidi_revenue: number;
+            total_all_orders: number;
+            total_all_tabung: number;
+            total_all_revenue: number;
             total_registered_consumers: number;
             active_consumers: number;
         }[];

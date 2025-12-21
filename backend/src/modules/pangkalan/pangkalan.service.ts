@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePangkalanDto, UpdatePangkalanDto } from './dto';
 import * as bcrypt from 'bcryptjs';
+import { ActivityService } from '../activity/activity.service';
 
 /**
  * PangkalanService
@@ -12,7 +13,10 @@ import * as bcrypt from 'bcryptjs';
  */
 @Injectable()
 export class PangkalanService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private activityService: ActivityService,
+    ) { }
 
     /**
      * Get all pangkalans with user data (email login)
@@ -32,7 +36,8 @@ export class PangkalanService {
             ];
         }
 
-        const [pangkalans, total] = await Promise.all([
+        // Get data, filtered count, and stats counts in parallel
+        const [pangkalans, total, totalActive, totalInactive] = await Promise.all([
             this.prisma.pangkalans.findMany({
                 where,
                 skip,
@@ -56,6 +61,10 @@ export class PangkalanService {
                 },
             }),
             this.prisma.pangkalans.count({ where }),
+            // Get total active pangkalans (ignoring current filter)
+            this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: true } }),
+            // Get total inactive pangkalans (ignoring current filter)
+            this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: false } }),
         ]);
 
         return {
@@ -65,6 +74,10 @@ export class PangkalanService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+                // Stats for summary cards (always show true totals)
+                totalActive,
+                totalInactive,
+                totalAll: totalActive + totalInactive,
             },
         };
     }
@@ -159,12 +172,18 @@ export class PangkalanService {
             });
         }
 
+        // Log system_create activity
+        await this.activityService.logActivity('system_create', 'Pangkalan Baru Dibuat', {
+            description: `Pangkalan ${dto.name} (${pangkalanCode}) berhasil ditambahkan`,
+            pangkalanName: dto.name,
+        });
+
         // Return pangkalan with user data
         return this.findOne(pangkalan.id);
     }
 
     async update(id: string, dto: UpdatePangkalanDto) {
-        await this.findOne(id);
+        const existing = await this.findOne(id);
 
         const pangkalan = await this.prisma.pangkalans.update({
             where: { id },
@@ -174,15 +193,27 @@ export class PangkalanService {
             },
         });
 
+        // Log system_update activity
+        await this.activityService.logActivity('system_update', 'Data Pangkalan Diperbarui', {
+            description: `Data ${existing.name} berhasil diperbarui`,
+            pangkalanName: existing.name,
+        });
+
         return pangkalan;
     }
 
     async remove(id: string) {
-        await this.findOne(id);
+        const existing = await this.findOne(id);
 
         await this.prisma.pangkalans.update({
             where: { id },
             data: { deleted_at: new Date() },
+        });
+
+        // Log system_delete activity
+        await this.activityService.logActivity('system_delete', 'Pangkalan Dihapus', {
+            description: `Pangkalan ${existing.name} berhasil dihapus`,
+            pangkalanName: existing.name,
         });
 
         return { message: 'Pangkalan berhasil dihapus' };

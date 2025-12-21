@@ -361,12 +361,18 @@ export default function DetailEditPangkalanContent() {
                         </TableBody>
                       </Table>
                     </div>
-                    {/* Show indicator if more orders available */}
-                    {orders.length > 10 && (
-                      <p className="text-xs text-muted-foreground text-center mt-2">
-                        Menampilkan 10 dari {orders.length} pesanan
+                    {/* Footer with count and Lihat Semua button */}
+                    <div className="flex items-center justify-between mt-3">
+                      <p className="text-xs text-muted-foreground">
+                        Menampilkan {Math.min(orders.length, 10)} pesanan terbaru
                       </p>
-                    )}
+                      <a href={`/daftar-pesanan?pangkalan_id=${pangkalan.id}`}>
+                        <Button variant="outline" size="sm" className="gap-1">
+                          <SafeIcon name="List" className="h-3.5 w-3.5" />
+                          Lihat Semua Pesanan
+                        </Button>
+                      </a>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">

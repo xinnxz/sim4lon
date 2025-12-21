@@ -274,7 +274,7 @@ export class ReportsService {
                             gte: startDate,
                             lte: endDate,
                         },
-                        lpg_type: 'kg3', // Subsidi only (3kg)
+                        // Note: Fetch all products, filter in stats calculation
                     },
                 },
                 consumers: {
@@ -296,14 +296,26 @@ export class ReportsService {
                 sum + o.order_items.filter(item => item.lpg_type === 'kg3').reduce((s, i) => s + i.qty, 0), 0
             );
 
-            // Consumer orders (pangkalan -> konsumen)
-            const consumerOrderCount = p.consumer_orders.length;
-            const consumerTabung = p.consumer_orders.reduce((sum, o) => sum + o.qty, 0);
-            const consumerRevenue = p.consumer_orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+            // Consumer orders - Subsidi only (kg3)
+            const subsidiConsumerOrders = p.consumer_orders.filter(o => o.lpg_type === 'kg3');
+            const subsidiConsumerOrderCount = subsidiConsumerOrders.length;
+            const subsidiConsumerTabung = subsidiConsumerOrders.reduce((sum, o) => sum + o.qty, 0);
+            const subsidiConsumerRevenue = subsidiConsumerOrders.reduce((sum, o) => sum + Number(o.total_amount), 0);
 
-            // Unique consumers who bought within period
-            const uniqueConsumerIds = new Set(
-                p.consumer_orders.filter(o => o.consumer_id).map(o => o.consumer_id)
+            // Consumer orders - ALL products
+            const allConsumerOrderCount = p.consumer_orders.length;
+            const allConsumerTabung = p.consumer_orders.reduce((sum, o) => sum + o.qty, 0);
+            const allConsumerRevenue = p.consumer_orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+
+            // Consumer orders - NON-SUBSIDI (5.5kg, 12kg, 50kg, etc.)
+            const nonSubsidiConsumerOrders = p.consumer_orders.filter(o => o.lpg_type !== 'kg3');
+            const nonSubsidiConsumerOrderCount = nonSubsidiConsumerOrders.length;
+            const nonSubsidiConsumerTabung = nonSubsidiConsumerOrders.reduce((sum, o) => sum + o.qty, 0);
+            const nonSubsidiConsumerRevenue = nonSubsidiConsumerOrders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+
+            // Unique consumers who bought subsidi within period
+            const uniqueSubsidiConsumerIds = new Set(
+                subsidiConsumerOrders.filter(o => o.consumer_id).map(o => o.consumer_id)
             );
 
             return {
@@ -315,28 +327,58 @@ export class ReportsService {
                 pic_name: p.pic_name || '-',
                 phone: p.phone || '-',
                 alokasi_bulanan: p.alokasi_bulanan,
-                // From agen
+                // From agen (subsidi)
                 total_orders_from_agen: subsidiOrders.length,
                 total_tabung_from_agen: subsidiTabung,
-                // To consumers  
-                total_consumer_orders: consumerOrderCount,
-                total_tabung_to_consumers: consumerTabung,
-                total_revenue: consumerRevenue,
+                // To consumers - SUBSIDI (3kg)
+                total_consumer_orders: subsidiConsumerOrderCount,
+                total_tabung_to_consumers: subsidiConsumerTabung,
+                total_revenue: subsidiConsumerRevenue,
+                // To consumers - NON-SUBSIDI
+                total_nonsubsidi_orders: nonSubsidiConsumerOrderCount,
+                total_nonsubsidi_tabung: nonSubsidiConsumerTabung,
+                total_nonsubsidi_revenue: nonSubsidiConsumerRevenue,
+                // To consumers - ALL PRODUCTS
+                total_all_orders: allConsumerOrderCount,
+                total_all_tabung: allConsumerTabung,
+                total_all_revenue: allConsumerRevenue,
                 // Stats
                 total_registered_consumers: p.consumers.length,
-                active_consumers: uniqueConsumerIds.size,
+                active_consumers: uniqueSubsidiConsumerIds.size,
             };
         });
 
         // Sort by total tabung desc
         pangkalanStats.sort((a, b) => b.total_tabung_to_consumers - a.total_tabung_to_consumers);
 
+        // Calculate per-type breakdown from all consumer orders
+        const allConsumerOrders = pangkalans.flatMap(p => p.consumer_orders);
+        const tabungByType = {
+            kg3: allConsumerOrders.filter(o => o.lpg_type === 'kg3').reduce((sum, o) => sum + o.qty, 0),
+            kg5: allConsumerOrders.filter(o => o.lpg_type === 'kg5').reduce((sum, o) => sum + o.qty, 0),
+            kg12: allConsumerOrders.filter(o => o.lpg_type === 'kg12').reduce((sum, o) => sum + o.qty, 0),
+            kg50: allConsumerOrders.filter(o => o.lpg_type === 'kg50').reduce((sum, o) => sum + o.qty, 0),
+            gr220: allConsumerOrders.filter(o => o.lpg_type === 'gr220').reduce((sum, o) => sum + o.qty, 0),
+        };
+
         // Summary
         const summary = {
             total_pangkalan: pangkalans.length,
+            // Subsidi (3kg) - untuk focus audit
             total_orders_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_consumer_orders, 0),
             total_tabung_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_tabung_to_consumers, 0),
-            total_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_revenue, 0),
+            total_revenue_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_revenue, 0),
+            // Non-Subsidi (5.5kg+) - untuk business overview
+            total_nonsubsidi_orders: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_orders, 0),
+            total_nonsubsidi_tabung: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_tabung, 0),
+            total_nonsubsidi_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_revenue, 0),
+            // All products - combined totals
+            total_all_orders: pangkalanStats.reduce((sum, p) => sum + p.total_all_orders, 0),
+            total_all_tabung: pangkalanStats.reduce((sum, p) => sum + p.total_all_tabung, 0),
+            total_all_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_all_revenue, 0),
+            // Per-type tabung breakdown
+            tabung_by_type: tabungByType,
+            // Consumer stats
             total_consumers: pangkalanStats.reduce((sum, p) => sum + p.total_registered_consumers, 0),
             active_consumers: pangkalanStats.reduce((sum, p) => sum + p.active_consumers, 0),
             top_pangkalan: pangkalanStats[0]?.name || '-',

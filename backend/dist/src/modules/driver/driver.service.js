@@ -23,7 +23,7 @@ let DriverService = class DriverService {
         if (isActive !== undefined) {
             where.is_active = isActive;
         }
-        const [drivers, total] = await Promise.all([
+        const [drivers, total, totalActive, totalInactive] = await Promise.all([
             this.prisma.drivers.findMany({
                 where,
                 skip,
@@ -36,6 +36,8 @@ let DriverService = class DriverService {
                 },
             }),
             this.prisma.drivers.count({ where }),
+            this.prisma.drivers.count({ where: { deleted_at: null, is_active: true } }),
+            this.prisma.drivers.count({ where: { deleted_at: null, is_active: false } }),
         ]);
         return {
             data: drivers,
@@ -44,6 +46,9 @@ let DriverService = class DriverService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+                totalActive,
+                totalInactive,
+                totalAll: totalActive + totalInactive,
             },
         };
     }

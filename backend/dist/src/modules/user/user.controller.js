@@ -24,8 +24,9 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    findAll(page, limit, search) {
-        return this.userService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, search);
+    findAll(page, limit, search, excludeRoles) {
+        const excludeRolesArray = excludeRoles ? excludeRoles.split(',') : undefined;
+        return this.userService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, search, excludeRolesArray);
     }
     findOne(id) {
         return this.userService.findOne(id);
@@ -50,8 +51,9 @@ __decorate([
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('exclude_roles')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "findAll", null);
 __decorate([

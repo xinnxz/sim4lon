@@ -17,6 +17,8 @@ export class OrderService {
         status?: status_pesanan,
         pangkalanId?: string,
         driverId?: string,
+        sortBy: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name' = 'created_at',
+        sortOrder: 'asc' | 'desc' = 'desc',
     ) {
         const skip = (page - 1) * limit;
 
@@ -25,12 +27,20 @@ export class OrderService {
         if (pangkalanId) where.pangkalan_id = pangkalanId;
         if (driverId) where.driver_id = driverId;
 
+        // Handle sorting - pangkalan_name requires nested relation sort
+        let orderBy: any;
+        if (sortBy === 'pangkalan_name') {
+            orderBy = { pangkalans: { name: sortOrder } };
+        } else {
+            orderBy = { [sortBy]: sortOrder };
+        }
+
         const [orders, total] = await Promise.all([
             this.prisma.orders.findMany({
                 where,
                 skip,
                 take: limit,
-                orderBy: { created_at: 'desc' },
+                orderBy,
                 include: {
                     pangkalans: {
                         select: { id: true, code: true, name: true, region: true, address: true, phone: true },
@@ -229,10 +239,15 @@ export class OrderService {
         const totalQty = order.order_items.reduce((sum, item) => sum + item.qty, 0);
         const pangkalanName = order.pangkalans?.name || 'Unknown';
 
+        // Build product breakdown for description
+        const productBreakdown = order.order_items.map(item =>
+            `${item.label || item.lpg_type} (${item.qty})`
+        ).join(', ');
+
         await this.activityService.create({
             type: 'order_created',
             title: 'Pesanan Baru Dibuat',
-            description: `Pesanan untuk ${pangkalanName} - ${totalQty} tabung`,
+            description: `${pangkalanName} - ${productBreakdown} - Rp ${totalAmount.toLocaleString('id-ID')}`,
             order_id: order.id,
             pangkalan_name: pangkalanName,
             detail_numeric: totalQty,
@@ -510,38 +525,55 @@ export class OrderService {
             }
         }
 
-        // ACTIVITY LOG: Catat perubahan status
+        // ACTIVITY LOG: Catat perubahan status - ONLY for core statuses
+        // Skip logging for intermediate statuses (DIKIRIM, status updates)
+        if (dto.status !== 'SELESAI' && dto.status !== 'BATAL') {
+            return updated;
+        }
+
         const pangkalanName = updated.pangkalans?.name || 'Unknown';
         const totalQty = updated.order_items.reduce((sum, item) => sum + item.qty, 0);
+        const totalAmount = Number(updated.total_amount) || 0;
 
-        let activityType = 'order_status_updated';
-        let activityTitle = 'Status Pesanan Diperbarui';
-        let activityIcon = 'RefreshCw';
+        // Build product breakdown for description
+        const productBreakdown = updated.order_items.map(item =>
+            `${item.label || item.lpg_type} (${item.qty})`
+        ).join(', ');
 
-        if (dto.status === 'SELESAI') {
-            activityType = 'order_completed';
-            activityTitle = 'Pesanan Selesai';
-            activityIcon = 'CheckCircle';
-        } else if (dto.status === 'BATAL') {
+        let activityType = 'order_completed';
+        let activityTitle = 'Pesanan Selesai';
+        let activityIcon = 'CheckCircle';
+
+        if (dto.status === 'BATAL') {
             activityType = 'order_cancelled';
             activityTitle = 'Pesanan Dibatalkan';
             activityIcon = 'XCircle';
-        } else if (dto.status === 'DIKIRIM') {
-            activityType = 'order_delivered';
-            activityTitle = 'Pesanan Dikirim';
-            activityIcon = 'Truck';
         }
 
         await this.activityService.create({
             type: activityType,
             title: activityTitle,
-            description: `${pangkalanName} - ${totalQty} tabung (${updated.code})`,
+            description: `${pangkalanName} - ${productBreakdown} - Rp ${totalAmount.toLocaleString('id-ID')}`,
             order_id: updated.id,
             pangkalan_name: pangkalanName,
             detail_numeric: totalQty,
             icon_name: activityIcon,
             order_status: dto.status,
         });
+
+        // STOCK OUT LOG: Catat stok keluar saat order selesai
+        // Best practice: log saat stok benar-benar keluar (order selesai, bukan saat dibuat)
+        if (dto.status === 'SELESAI') {
+            await this.activityService.create({
+                type: 'stock_out',
+                title: 'Stok Keluar',
+                description: `Pengiriman ke ${pangkalanName} - ${productBreakdown}`,
+                order_id: updated.id,
+                pangkalan_name: pangkalanName,
+                detail_numeric: totalQty,
+                icon_name: 'PackageMinus',
+            });
+        }
 
         return updated;
     }

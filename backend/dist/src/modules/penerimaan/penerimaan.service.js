@@ -13,10 +13,13 @@ exports.PenerimaanService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../prisma");
 const client_1 = require("@prisma/client");
+const activity_service_1 = require("../activity/activity.service");
 let PenerimaanService = class PenerimaanService {
     prisma;
-    constructor(prisma) {
+    activityService;
+    constructor(prisma, activityService) {
         this.prisma = prisma;
+        this.activityService = activityService;
     }
     async findAll(query) {
         const page = query.page ? parseInt(query.page, 10) : 1;
@@ -58,7 +61,7 @@ let PenerimaanService = class PenerimaanService {
         };
     }
     async create(dto) {
-        return this.prisma.client.$transaction(async (tx) => {
+        const result = await this.prisma.client.$transaction(async (tx) => {
             const penerimaan = await tx.penerimaan_stok.create({
                 data: {
                     no_so: dto.no_so,
@@ -90,6 +93,11 @@ let PenerimaanService = class PenerimaanService {
             });
             return penerimaan;
         });
+        await this.activityService.logActivity('stock_in', 'Stok Masuk', {
+            description: `Penerimaan ${dto.qty_pcs} tabung ${dto.nama_material} dari ${dto.sumber}`,
+            detailNumeric: dto.qty_pcs,
+        });
+        return result;
     }
     async delete(id) {
         return this.prisma.penerimaan_stok.delete({ where: { id } });
@@ -152,6 +160,7 @@ let PenerimaanService = class PenerimaanService {
 exports.PenerimaanService = PenerimaanService;
 exports.PenerimaanService = PenerimaanService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_1.PrismaService,
+        activity_service_1.ActivityService])
 ], PenerimaanService);
 //# sourceMappingURL=penerimaan.service.js.map

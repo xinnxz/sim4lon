@@ -48,7 +48,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 
         {/* Total Modal */}
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs text-muted-foreground">Total Modal:</span>
+          <span className="text-xs text-muted-foreground">Total Beli:</span>
           <span className="text-sm font-semibold text-orange-600">{formatRupiah(data.totalCost)}</span>
         </div>
 

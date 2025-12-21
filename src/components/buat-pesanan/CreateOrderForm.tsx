@@ -348,6 +348,7 @@ export default function CreateOrderForm() {
 
   /**
    * Add new item
+   * PRIORITAS: LPG 3kg Subsidi sebagai default pertama kali
    */
   const handleAddItem = () => {
     if (lpgProducts.length === 0) return
@@ -362,8 +363,26 @@ export default function CreateOrderForm() {
       return
     }
 
+    // Sort available products: 3kg Subsidi first, then other Subsidi, then Non-Subsidi
+    const sortedProducts = [...availableProducts].sort((a, b) => {
+      // Priority 1: SUBSIDI before NON_SUBSIDI
+      if (a.category !== b.category) {
+        return a.category === 'SUBSIDI' ? -1 : 1
+      }
+      // Priority 2: 3kg first within SUBSIDI category
+      const aSize = parseFloat(String(a.size_kg)) || 0
+      const bSize = parseFloat(String(b.size_kg)) || 0
+      if (a.category === 'SUBSIDI') {
+        // 3kg gets highest priority
+        if (Math.abs(aSize - 3) < 0.5) return -1
+        if (Math.abs(bSize - 3) < 0.5) return 1
+      }
+      // Default: sort by size ascending
+      return aSize - bSize
+    })
+
     const newId = String(Math.max(...formData.items.map(i => parseInt(i.id)), 0) + 1)
-    const defaultProduct = availableProducts[0]
+    const defaultProduct = sortedProducts[0]  // Now LPG 3kg Subsidi will be first!
     // Use selling_price directly, fallback to old prices[] for backward compat
     const defaultPrice = defaultProduct.selling_price || defaultProduct.prices?.find(p => p.is_default)?.price || defaultProduct.prices?.[0]?.price || 0
     // NON_SUBSIDI products are taxable (12% PPN)

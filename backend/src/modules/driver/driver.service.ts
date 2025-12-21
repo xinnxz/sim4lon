@@ -14,7 +14,8 @@ export class DriverService {
             where.is_active = isActive;
         }
 
-        const [drivers, total] = await Promise.all([
+        // Get data, filtered count, and stats counts in parallel
+        const [drivers, total, totalActive, totalInactive] = await Promise.all([
             this.prisma.drivers.findMany({
                 where,
                 skip,
@@ -27,6 +28,10 @@ export class DriverService {
                 },
             }),
             this.prisma.drivers.count({ where }),
+            // Get total active drivers (ignoring current filter)
+            this.prisma.drivers.count({ where: { deleted_at: null, is_active: true } }),
+            // Get total inactive drivers (ignoring current filter)
+            this.prisma.drivers.count({ where: { deleted_at: null, is_active: false } }),
         ]);
 
         return {
@@ -36,6 +41,10 @@ export class DriverService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+                // Stats for summary cards (always show true totals)
+                totalActive,
+                totalInactive,
+                totalAll: totalActive + totalInactive,
             },
         };
     }

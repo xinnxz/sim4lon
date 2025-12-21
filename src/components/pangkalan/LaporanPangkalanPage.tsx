@@ -420,7 +420,7 @@ export default function LaporanPangkalanPage() {
                         <CardHeader className="pb-2 relative">
                             <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
                                 <SafeIcon name="Wallet" className="h-4 w-4" />
-                                Total Modal
+                                Total Beli
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="relative">
@@ -491,7 +491,7 @@ export default function LaporanPangkalanPage() {
                                     <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                                         <SafeIcon name="BarChart3" className="h-4 w-4 text-blue-600" />
                                     </div>
-                                    Penjualan vs Modal
+                                    Penjualan vs Pembelian
                                 </CardTitle>
                                 <CardDescription className="mt-1">Perbandingan harian selama 7 hari</CardDescription>
                             </div>
@@ -517,7 +517,7 @@ export default function LaporanPangkalanPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-slate-300" />
-                                <span className="text-sm text-slate-600">Modal</span>
+                                <span className="text-sm text-slate-600">Pembelian</span>
                             </div>
                         </div>
                     </CardContent>
@@ -591,7 +591,7 @@ export default function LaporanPangkalanPage() {
                                 <tr className="bg-slate-50 border-b border-slate-200">
                                     <th className="text-left py-4 px-6 font-semibold text-slate-700">Tanggal</th>
                                     <th className="text-right py-4 px-6 font-semibold text-slate-700">Qty</th>
-                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Modal</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Pembelian</th>
                                     <th className="text-right py-4 px-6 font-semibold text-slate-700">Penjualan</th>
                                     <th className="text-right py-4 px-6 font-semibold text-cyan-600">Margin Kotor</th>
                                     <th className="text-right py-4 px-6 font-semibold text-orange-600">Pengeluaran</th>

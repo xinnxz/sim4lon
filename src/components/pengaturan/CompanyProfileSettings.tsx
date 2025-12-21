@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
+import { companyProfileApi, type CompanyProfile } from '@/lib/api'
 
 /**
  * CompanyProfileSettings - Tab Profil Perusahaan
@@ -19,34 +20,71 @@ import { toast } from 'sonner'
  * - PIC (Person In Charge)
  * - Logo perusahaan
  * - Nomor SPPBE
+ * - Wilayah/Region
+ * 
+ * Data disimpan di database via API /company-profile
  */
 
-interface CompanyProfile {
+interface ProfileFormData {
     companyName: string
     address: string
     phone: string
     email: string
     picName: string
     sppbeNumber: string
+    region: string
     logo: string | null
 }
 
-const initialProfile: CompanyProfile = {
+const initialProfile: ProfileFormData = {
     companyName: '',
     address: '',
     phone: '',
     email: '',
     picName: '',
     sppbeNumber: '',
+    region: '',
     logo: null
 }
 
 export default function CompanyProfileSettings() {
-    const [profile, setProfile] = useState<CompanyProfile>(initialProfile)
+    const [profile, setProfile] = useState<ProfileFormData>(initialProfile)
+    const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
-    const handleChange = (field: keyof CompanyProfile, value: string) => {
+    // Load profile from API on mount
+    useEffect(() => {
+        loadProfile()
+    }, [])
+
+    const loadProfile = async () => {
+        setIsLoading(true)
+        try {
+            const data = await companyProfileApi.get()
+            // Map API response to form data
+            setProfile({
+                companyName: data.company_name || '',
+                address: data.address || '',
+                phone: data.phone || '',
+                email: data.email || '',
+                picName: data.pic_name || '',
+                sppbeNumber: data.sppbe_number || '',
+                region: data.region || '',
+                logo: data.logo_url || null
+            })
+            if (data.logo_url) {
+                setLogoPreview(data.logo_url)
+            }
+        } catch (error) {
+            console.error('Failed to load company profile:', error)
+            toast.error('Gagal memuat profil perusahaan')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleChange = (field: keyof ProfileFormData, value: string) => {
         setProfile(prev => ({ ...prev, [field]: value }))
     }
 
@@ -67,16 +105,43 @@ export default function CompanyProfileSettings() {
     }
 
     const handleSave = async () => {
+        // Validation
+        if (!profile.companyName.trim()) {
+            toast.error('Nama perusahaan wajib diisi')
+            return
+        }
+        if (!profile.address.trim()) {
+            toast.error('Alamat wajib diisi')
+            return
+        }
+
         setIsSaving(true)
         try {
-            // TODO: API call to save company profile
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await companyProfileApi.update({
+                company_name: profile.companyName,
+                address: profile.address,
+                phone: profile.phone || undefined,
+                email: profile.email || undefined,
+                pic_name: profile.picName || undefined,
+                sppbe_number: profile.sppbeNumber || undefined,
+                region: profile.region || undefined,
+                logo_url: profile.logo || undefined,
+            })
             toast.success('Profil perusahaan berhasil disimpan')
-        } catch (error) {
-            toast.error('Gagal menyimpan profil')
+        } catch (error: any) {
+            toast.error(error.message || 'Gagal menyimpan profil')
         } finally {
             setIsSaving(false)
         }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-3 text-muted-foreground">Memuat profil...</span>
+            </div>
+        )
     }
 
     return (
@@ -90,7 +155,7 @@ export default function CompanyProfileSettings() {
                         </div>
                         <div>
                             <CardTitle className="text-lg">Informasi Perusahaan</CardTitle>
-                            <CardDescription>Data distributor yang muncul di invoice dan laporan</CardDescription>
+                            <CardDescription>Data distributor yang muncul di invoice dan laporan PDF</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
@@ -140,16 +205,16 @@ export default function CompanyProfileSettings() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="sppbeNumber" className="text-sm font-medium">
-                                Nomor SPPBE
+                                Nomor SPPBE/SIID
                             </Label>
                             <Input
                                 id="sppbeNumber"
                                 value={profile.sppbeNumber}
                                 onChange={(e) => handleChange('sppbeNumber', e.target.value)}
-                                placeholder="SPPBE/2024/001"
+                                placeholder="997904"
                                 className="h-10"
                             />
-                            <p className="text-xs text-muted-foreground">Surat Penunjukan Penyalur BBM Tertentu</p>
+                            <p className="text-xs text-muted-foreground">Nomor Surat Penunjukan / SIID To</p>
                         </div>
                     </div>
 
@@ -165,6 +230,21 @@ export default function CompanyProfileSettings() {
                             placeholder="Jl. HR Rasuna Said Kav. X-8, No. 5E, Jakarta Selatan"
                             className="min-h-[80px] resize-none"
                         />
+                    </div>
+
+                    {/* Region */}
+                    <div className="space-y-2">
+                        <Label htmlFor="region" className="text-sm font-medium">
+                            Wilayah/Region
+                        </Label>
+                        <Input
+                            id="region"
+                            value={profile.region}
+                            onChange={(e) => handleChange('region', e.target.value)}
+                            placeholder="JAWA BARAT, KABUPATEN CIANJUR"
+                            className="h-10"
+                        />
+                        <p className="text-xs text-muted-foreground">Wilayah operasional untuk laporan Pertamina</p>
                     </div>
                 </CardContent>
             </Card>
@@ -186,7 +266,7 @@ export default function CompanyProfileSettings() {
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                             <Label htmlFor="phone" className="text-sm font-medium">
-                                Nomor Telepon <span className="text-destructive">*</span>
+                                Nomor Telepon
                             </Label>
                             <Input
                                 id="phone"
@@ -231,8 +311,9 @@ export default function CompanyProfileSettings() {
             <div className="flex justify-end gap-3 pt-2">
                 <Button
                     variant="outline"
-                    onClick={() => setProfile(initialProfile)}
+                    onClick={loadProfile}
                     className="gap-2"
+                    disabled={isLoading}
                 >
                     <SafeIcon name="RotateCcw" className="h-4 w-4" />
                     Reset

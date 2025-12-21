@@ -7,11 +7,17 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 export class UserService {
     constructor(private prisma: PrismaService) { }
 
-    async findAll(page = 1, limit = 10, search?: string) {
+    async findAll(page = 1, limit = 10, search?: string, excludeRoles?: string[]) {
         const skip = (page - 1) * limit;
 
-        // Build where clause with optional search
+        // Build where clause with optional search and role exclusion
         const where: any = { deleted_at: null };
+
+        // Exclude specific roles (e.g., PANGKALAN users managed in separate page)
+        if (excludeRoles && excludeRoles.length > 0) {
+            where.role = { notIn: excludeRoles };
+        }
+
         if (search) {
             where.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
@@ -20,7 +26,8 @@ export class UserService {
             ];
         }
 
-        const [users, total] = await Promise.all([
+        // Get data, filtered count, and stats counts in parallel
+        const [users, total, totalAdmin, totalOperator, totalPangkalan] = await Promise.all([
             this.prisma.users.findMany({
                 where,
                 skip,
@@ -40,6 +47,12 @@ export class UserService {
                 },
             }),
             this.prisma.users.count({ where }),
+            // Get total admin users (ignoring current filter)
+            this.prisma.users.count({ where: { deleted_at: null, role: 'ADMIN' } }),
+            // Get total operator users (ignoring current filter)
+            this.prisma.users.count({ where: { deleted_at: null, role: 'OPERATOR' } }),
+            // Get total pangkalan users (ignoring current filter)
+            this.prisma.users.count({ where: { deleted_at: null, role: 'PANGKALAN' } }),
         ]);
 
         return {
@@ -49,6 +62,11 @@ export class UserService {
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
+                // Stats for summary cards (always show true totals)
+                totalAdmin,
+                totalOperator,
+                totalPangkalan,
+                totalAll: totalAdmin + totalOperator + totalPangkalan,
             },
         };
     }

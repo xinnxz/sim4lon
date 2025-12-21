@@ -6,9 +6,43 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import SafeIcon from '@/components/common/SafeIcon'
 import { penerimaanApi, lpgProductsApi, type PenerimaanStok, type PaginatedResponse, type LpgProduct } from '@/lib/api'
 import { toast } from 'sonner'
+import { exportToExcel, createFooterRow, type TableColumn } from '@/lib/export-utils'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import pertaminaLogo from '@/assets/logo-pertamina.png'
+import { getAgenProfileFromAPI } from '@/lib/pertamina-export'
+import PageHeader from '@/components/common/PageHeader'
+
+// Helper to load image as base64
+const loadImageAsBase64 = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.crossOrigin = 'Anonymous'
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+                ctx.drawImage(img, 0, 0)
+                resolve(canvas.toDataURL('image/png'))
+            } else {
+                reject(new Error('Cannot get canvas context'))
+            }
+        }
+        img.onerror = () => reject(new Error('Failed to load image'))
+        img.src = url
+    })
+}
 
 // Type for each item in the receipt
 interface PenerimaanItem {
@@ -254,8 +288,246 @@ export default function PenerimaanPage() {
         }
     }
 
+    // Export columns definition
+    const exportColumns: TableColumn[] = [
+        { header: 'Tanggal', key: 'tanggal_formatted', width: 12, align: 'center' },
+        { header: 'No SO', key: 'no_so', width: 15, align: 'left' },
+        { header: 'No LO', key: 'no_lo', width: 15, align: 'left' },
+        { header: 'Nama Material', key: 'nama_material', width: 20, align: 'left' },
+        { header: 'Qty Tabung', key: 'qty_pcs', width: 12, align: 'center' },
+        { header: 'Qty Kg', key: 'qty_kg', width: 12, align: 'center' },
+    ]
+
+    // Handle Download PDF - Pertamina Format
+    const handleDownloadPDF = async () => {
+        if (!data || data.data.length === 0) {
+            toast.error('Tidak ada data untuk di-download')
+            return
+        }
+
+        try {
+            toast.loading('Generating PDF...', { id: 'pdf-export' })
+
+            const doc = new jsPDF({ orientation: 'portrait' })
+            const pageWidth = doc.internal.pageSize.getWidth()
+            const pageHeight = doc.internal.pageSize.getHeight()
+            const margin = 14
+
+            // Get agen profile from API
+            const agenProfile = await getAgenProfileFromAPI()
+
+            // ========== HEADER PERTAMINA ==========
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(10)
+            doc.text('PT. Pertamina (Persero)', margin, 15)
+            doc.setFontSize(8)
+            doc.text('Jl.Medan Merdeka Timur No. 1A Jakarta 10110', margin, 20)
+            doc.text('Telp: 021 3815111 FAX: 021 3633585', margin, 25)
+
+            // Add Pertamina logo at top-right corner
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const logoData = pertaminaLogo as any
+                const logoUrl: string = typeof logoData === 'string' ? logoData : logoData.src
+                const logoBase64 = await loadImageAsBase64(logoUrl)
+                doc.addImage(logoBase64, 'PNG', pageWidth - 55, 10, 40, 10)
+            } catch (logoError) {
+                console.warn('[PDF Export] Could not load Pertamina logo:', logoError)
+            }
+
+            // ========== TITLE ==========
+            const [year, month] = selectedMonth.split('-')
+            const monthName = new Date(parseInt(year), parseInt(month) - 1, 1)
+                .toLocaleDateString('id-ID', { month: 'long' }).toUpperCase()
+
+            doc.setFontSize(11)
+            doc.setFont('helvetica', 'bold')
+            doc.text('REKAPITULASI SURAT PENGANTAR PENGIRIMAN PRODUK', pageWidth / 2, 40, { align: 'center' })
+            doc.text(`PSO PERIODE BULAN ${monthName} ${year}`, pageWidth / 2, 46, { align: 'center' })
+
+            // ========== INFO AGEN ==========
+            let yPos = 58
+            doc.setFontSize(8)
+            doc.setFont('helvetica', 'normal')
+
+            const agenFields = [
+                { label: 'SP(P)BE', value: '-' },
+                { label: 'Kode Plant', value: '-' },
+                { label: 'Nama Agen', value: agenProfile.nama_agen },
+                { label: 'Alamat Agen', value: agenProfile.alamat_agen },
+                { label: 'Email', value: agenProfile.email },
+                { label: 'No. Sold To', value: agenProfile.no_siid },
+                { label: 'Wilayah', value: agenProfile.wilayah },
+            ]
+
+            agenFields.forEach(field => {
+                doc.text(`${field.label}`, margin, yPos)
+                doc.text(`:`, margin + 25, yPos)
+                doc.text(field.value, margin + 28, yPos)
+                yPos += 4
+            })
+
+            // ========== TABLE ==========
+            yPos += 5
+
+            // Build table headers
+            const headers = ['NO', 'Tanggal', 'No SO', 'No LO', 'Nama Material', 'Qty Pcs', 'Qty Kg']
+
+            // Calculate totals
+            const totalPcs = sortedData.reduce((sum, item) => sum + item.qty_pcs, 0)
+            const totalKg = sortedData.reduce((sum, item) => sum + Number(item.qty_kg), 0)
+
+            // Build table data with row numbers
+            const tableData = sortedData.map((item, index) => [
+                String(index + 1),
+                formatDate(item.tanggal),
+                item.no_so,
+                item.no_lo,
+                item.nama_material,
+                item.qty_pcs.toLocaleString(),
+                Number(item.qty_kg).toLocaleString(),
+            ])
+
+            // Add total row
+            tableData.push(['Total', '', '', '', '', totalPcs.toLocaleString(), totalKg.toLocaleString()])
+
+            autoTable(doc, {
+                startY: yPos,
+                head: [headers],
+                body: tableData,
+                theme: 'grid',
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    halign: 'center',
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                },
+                headStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0],
+                    fontStyle: 'bold',
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.2,
+                },
+                columnStyles: {
+                    0: { cellWidth: 12 },
+                    1: { cellWidth: 22 },
+                    4: { halign: 'left', cellWidth: 45 },
+                    5: { cellWidth: 18 },
+                    6: { cellWidth: 18 },
+                },
+                alternateRowStyles: { fillColor: [255, 255, 255] },
+            })
+
+            // ========== SIGNATURE AREA ==========
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const finalY = (doc as any).lastAutoTable?.finalY || yPos + 50
+            const signY = finalY + 15
+
+            // Check if signature area fits, if not add new page
+            if (signY + 50 > pageHeight) {
+                doc.addPage()
+                yPos = 20
+            } else {
+                yPos = signY
+            }
+
+            doc.setFontSize(8)
+            doc.setFont('helvetica', 'normal')
+
+            // Three columns for signatures
+            const col1X = margin
+            const col2X = pageWidth / 2 - 20
+            const col3X = pageWidth - 60
+
+            // Pengirim
+            doc.text('Pengirim', col1X, yPos)
+            doc.text('SP(P)BE :', col1X, yPos + 40)
+            doc.text('Nama :', col1X, yPos + 46)
+            doc.text('Jabatan :', col1X, yPos + 52)
+
+            // Mengetahui
+            doc.text('Mengetahui', col2X, yPos)
+            doc.text('PT.Pertamina(Persero)', col2X, yPos + 6)
+            doc.text('Nama :', col2X, yPos + 46)
+            doc.text('Jabatan :', col2X, yPos + 52)
+
+            // Penerima
+            doc.text('Penerima', col3X, yPos)
+            doc.text('Agen :', col3X, yPos + 40)
+            doc.text('Nama :', col3X, yPos + 46)
+            doc.text('Jabatan :', col3X, yPos + 52)
+
+            doc.save(`Laporan_Penerimaan_${selectedMonth}.pdf`)
+            toast.success('PDF berhasil di-download!', { id: 'pdf-export' })
+        } catch (error) {
+            console.error('PDF export error:', error)
+            toast.error('Gagal export PDF', { id: 'pdf-export' })
+        }
+    }
+
+    // Handle Download Excel
+    const handleDownloadExcel = () => {
+        if (!data || data.data.length === 0) {
+            toast.error('Tidak ada data untuk di-download')
+            return
+        }
+
+        try {
+            toast.loading('Generating Excel...', { id: 'excel-export' })
+
+            // Format data for export
+            const exportData = sortedData.map(item => ({
+                ...item,
+                tanggal_formatted: formatDate(item.tanggal),
+                qty_pcs: item.qty_pcs,
+                qty_kg: Number(item.qty_kg),
+            }))
+
+            // Calculate totals
+            const totalPcs = sortedData.reduce((sum, item) => sum + item.qty_pcs, 0)
+            const totalKg = sortedData.reduce((sum, item) => sum + Number(item.qty_kg), 0)
+
+            // Summary for header
+            const summary = [
+                { label: 'Total Entries', value: data.data.length },
+                { label: 'Total Tabung', value: totalPcs },
+                { label: 'Total Kg', value: totalKg },
+            ]
+
+            // Footer row
+            const footerRow = createFooterRow('TOTAL', {
+                qty_pcs: totalPcs,
+                qty_kg: totalKg,
+            }, 'tanggal_formatted')
+
+            // Get month label
+            const [year, month] = selectedMonth.split('-')
+            const monthLabel = new Date(parseInt(year), parseInt(month) - 1, 1)
+                .toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+
+            exportToExcel(exportData, exportColumns, summary, {
+                title: 'Laporan Penerimaan LPG',
+                period: monthLabel,
+                filename: `Laporan_Penerimaan_${selectedMonth}`,
+            }, [footerRow])
+
+            toast.success('Excel berhasil di-download!', { id: 'excel-export' })
+        } catch (error) {
+            console.error('Excel export error:', error)
+            toast.error('Gagal export Excel', { id: 'excel-export' })
+        }
+    }
+
     return (
         <div className="space-y-6">
+            {/* Page Header */}
+            <PageHeader
+                title="Penerimaan"
+                subtitle="Catat dan kelola penerimaan stok LPG dari SPBE"
+            />
+
             {/* Filter Bar */}
             <Card className="glass-card">
                 <CardContent className="p-4">
@@ -286,10 +558,25 @@ export default function PenerimaanPage() {
                             Tambah Penerimaan
                         </Button>
 
-                        <Button variant="outline">
-                            <SafeIcon name="Download" className="w-4 h-4 mr-2" />
-                            Download
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    <SafeIcon name="Download" className="w-4 h-4 mr-2" />
+                                    Download
+                                    <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleDownloadPDF}>
+                                    <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
+                                    Download PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleDownloadExcel}>
+                                    <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+                                    Download Excel
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </CardContent>
             </Card>

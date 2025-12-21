@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PenyaluranService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../prisma");
+const activity_service_1 = require("../activity/activity.service");
 let PenyaluranService = class PenyaluranService {
     prisma;
-    constructor(prisma) {
+    activityService;
+    constructor(prisma, activityService) {
         this.prisma = prisma;
+        this.activityService = activityService;
     }
     async findAll(query) {
         const where = {};
@@ -115,6 +118,10 @@ let PenyaluranService = class PenyaluranService {
         const kondisi = dto.kondisi || 'NORMAL';
         const jumlahNormal = kondisi === 'NORMAL' ? dto.jumlah : 0;
         const jumlahFakultatif = kondisi === 'FAKULTATIF' ? dto.jumlah : 0;
+        const pangkalan = await this.prisma.pangkalans.findUnique({
+            where: { id: dto.pangkalan_id },
+            select: { name: true },
+        });
         const existing = await this.prisma.penyaluran_harian.findFirst({
             where: {
                 pangkalan_id: dto.pangkalan_id,
@@ -122,8 +129,9 @@ let PenyaluranService = class PenyaluranService {
                 lpg_type: lpgType,
             },
         });
+        let result;
         if (existing) {
-            return this.prisma.penyaluran_harian.update({
+            result = await this.prisma.penyaluran_harian.update({
                 where: { id: existing.id },
                 data: {
                     jumlah_normal: kondisi === 'NORMAL' ? dto.jumlah : existing.jumlah_normal,
@@ -134,16 +142,24 @@ let PenyaluranService = class PenyaluranService {
                 },
             });
         }
-        return this.prisma.penyaluran_harian.create({
-            data: {
-                pangkalan_id: dto.pangkalan_id,
-                tanggal: new Date(dto.tanggal),
-                lpg_type: lpgType,
-                jumlah_normal: jumlahNormal,
-                jumlah_fakultatif: jumlahFakultatif,
-                tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
-            },
+        else {
+            result = await this.prisma.penyaluran_harian.create({
+                data: {
+                    pangkalan_id: dto.pangkalan_id,
+                    tanggal: new Date(dto.tanggal),
+                    lpg_type: lpgType,
+                    jumlah_normal: jumlahNormal,
+                    jumlah_fakultatif: jumlahFakultatif,
+                    tipe_pembayaran: dto.tipe_pembayaran || 'CASHLESS',
+                },
+            });
+        }
+        await this.activityService.logActivity('stock_out', 'Stok Keluar', {
+            description: `Penyaluran ${dto.jumlah} tabung ke ${pangkalan?.name || 'Pangkalan'}`,
+            pangkalanName: pangkalan?.name,
+            detailNumeric: dto.jumlah,
         });
+        return result;
     }
     async bulkUpdate(dto) {
         const lpgType = dto.lpg_type || 'kg3';
@@ -202,6 +218,7 @@ let PenyaluranService = class PenyaluranService {
 exports.PenyaluranService = PenyaluranService;
 exports.PenyaluranService = PenyaluranService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_1.PrismaService,
+        activity_service_1.ActivityService])
 ], PenyaluranService);
 //# sourceMappingURL=penyaluran.service.js.map

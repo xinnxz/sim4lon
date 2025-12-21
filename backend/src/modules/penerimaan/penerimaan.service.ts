@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
 import { CreatePenerimaanDto, GetPenerimaanQueryDto } from './dto';
 import { lpg_type } from '@prisma/client';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class PenerimaanService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private activityService: ActivityService,
+    ) { }
 
     async findAll(query: GetPenerimaanQueryDto) {
         const page = query.page ? parseInt(query.page, 10) : 1;
@@ -55,7 +59,7 @@ export class PenerimaanService {
 
     async create(dto: CreatePenerimaanDto) {
         // Use transaction to ensure both records are created atomically
-        return this.prisma.client.$transaction(async (tx) => {
+        const result = await this.prisma.client.$transaction(async (tx) => {
             // 1. Create penerimaan record
             const penerimaan = await tx.penerimaan_stok.create({
                 data: {
@@ -94,6 +98,14 @@ export class PenerimaanService {
 
             return penerimaan;
         });
+
+        // Log stock_in activity
+        await this.activityService.logActivity('stock_in', 'Stok Masuk', {
+            description: `Penerimaan ${dto.qty_pcs} tabung ${dto.nama_material} dari ${dto.sumber}`,
+            detailNumeric: dto.qty_pcs,
+        });
+
+        return result;
     }
 
     async delete(id: string) {

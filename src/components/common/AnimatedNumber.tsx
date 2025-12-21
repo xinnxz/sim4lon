@@ -9,9 +9,10 @@ function formatNumber(num: number): string {
 
 /**
  * Format angka sebagai currency Rupiah
+ * Dibulatkan ke bilangan bulat (tanpa desimal)
  */
 function formatCurrency(num: number): string {
-    return `Rp ${formatNumber(num)}`
+    return `Rp ${formatNumber(Math.round(num))}`
 }
 
 interface AnimatedNumberProps {

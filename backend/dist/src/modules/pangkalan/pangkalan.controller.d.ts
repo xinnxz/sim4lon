@@ -16,12 +16,12 @@ export declare class PangkalanController {
             };
         } & {
             id: string;
+            created_at: Date;
             code: string;
             email: string | null;
             name: string;
             phone: string | null;
             is_active: boolean;
-            created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
@@ -37,6 +37,9 @@ export declare class PangkalanController {
             page: number;
             limit: number;
             totalPages: number;
+            totalActive: number;
+            totalInactive: number;
+            totalAll: number;
         };
     }>;
     findOne(id: string): Promise<{
@@ -51,12 +54,12 @@ export declare class PangkalanController {
         };
     } & {
         id: string;
+        created_at: Date;
         code: string;
         email: string | null;
         name: string;
         phone: string | null;
         is_active: boolean;
-        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
@@ -79,12 +82,12 @@ export declare class PangkalanController {
         };
     } & {
         id: string;
+        created_at: Date;
         code: string;
         email: string | null;
         name: string;
         phone: string | null;
         is_active: boolean;
-        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
@@ -97,12 +100,12 @@ export declare class PangkalanController {
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
         id: string;
+        created_at: Date;
         code: string;
         email: string | null;
         name: string;
         phone: string | null;
         is_active: boolean;
-        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;

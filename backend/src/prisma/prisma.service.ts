@@ -67,6 +67,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     get perencanaan_harian() { return this._client.perencanaan_harian; }
     get penyaluran_harian() { return this._client.penyaluran_harian; }
     get penerimaan_stok() { return this._client.penerimaan_stok; }
+    // New: Company Profile (Settings)
+    get company_profile() { return this._client.company_profile; }
 
     // Transaction support
     $transaction<T>(fn: Parameters<typeof this._client.$transaction>[0]): ReturnType<typeof this._client.$transaction> {

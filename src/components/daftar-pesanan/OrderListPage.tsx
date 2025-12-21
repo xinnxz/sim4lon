@@ -36,6 +36,7 @@ import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import { toast } from 'sonner'
 import { ordersApi, type Order, type OrderStatus, type OrderStats } from '@/lib/api'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
+import PageHeader from '@/components/common/PageHeader'
 
 /**
  * Status labels for display
@@ -74,10 +75,28 @@ export default function OrderListPage() {
   // Filter state
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [pangkalanFilter, setPangkalanFilter] = useState<string | null>(null)
+  const [pangkalanName, setPangkalanName] = useState<string | null>(null)
+  const [isUrlParsed, setIsUrlParsed] = useState(false) // Flag to prevent race condition
+  const [pageSize, setPageSize] = useState(10) // Items per page
+  const [sortBy, setSortBy] = useState<'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name'>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   // Stats state - fetch from API for accurate counts (today only)
   const [stats, setStats] = useState<OrderStats | null>(null)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
+
+  // Read pangkalan_id from URL on mount - MUST complete before fetchOrders
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const pangkalanId = params.get('pangkalan_id')
+      if (pangkalanId) {
+        setPangkalanFilter(pangkalanId)
+      }
+      setIsUrlParsed(true) // Mark URL parsing as complete
+    }
+  }, [])
 
   /**
    * Fetch orders from API
@@ -86,11 +105,16 @@ export default function OrderListPage() {
     try {
       setIsLoading(true)
       const status = statusFilter === 'all' ? undefined : statusFilter as OrderStatus
-      const response = await ordersApi.getAll(currentPage, 10, status)
+      const response = await ordersApi.getAll(currentPage, pageSize, status, pangkalanFilter || undefined, undefined, sortBy, sortOrder)
 
       setOrders(response.data)
       setTotalOrders(response.meta.total)
       setTotalPages(response.meta.totalPages)
+
+      // If filtered by pangkalan, get the name from first result
+      if (pangkalanFilter && response.data.length > 0 && !pangkalanName) {
+        setPangkalanName(response.data[0].pangkalans?.name || 'Pangkalan')
+      }
 
     } catch (error) {
       console.error('Failed to fetch orders:', error)
@@ -120,10 +144,33 @@ export default function OrderListPage() {
     fetchStats()
   }, [])
 
-  // Fetch orders on page/filter change
+  // Fetch orders on page/filter/sort change - ONLY after URL is parsed
   useEffect(() => {
-    fetchOrders()
-  }, [currentPage, statusFilter])
+    if (isUrlParsed) {
+      fetchOrders()
+    }
+  }, [currentPage, pageSize, statusFilter, pangkalanFilter, isUrlParsed, sortBy, sortOrder])
+
+  /**
+   * Handle column sort toggle
+   */
+  const handleSort = (column: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name') => {
+    if (sortBy === column) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(column)
+      setSortOrder('desc')
+    }
+    setCurrentPage(1) // Reset to first page when sorting changes
+  }
+
+  /**
+   * Get sort icon for column header
+   */
+  const getSortIcon = (column: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name') => {
+    if (sortBy !== column) return 'ArrowUpDown'
+    return sortOrder === 'asc' ? 'ArrowUp' : 'ArrowDown'
+  }
 
   // Debounce search - in future can add search to API
   useEffect(() => {
@@ -200,21 +247,15 @@ export default function OrderListPage() {
 
   return (
     <div className="flex-1 space-y-6 p-6 dashboard-gradient-bg min-h-screen">
-      {/* Header with Premium Styling */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gradient-primary">Daftar Pesanan</h1>
-            <p className="text-muted-foreground/80 mt-1">
-              Kelola semua pesanan masuk dengan mudah
-            </p>
-          </div>
-        </div>
+      {/* Header with Theme-Aware PageHeader */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader
+          title={pangkalanFilter ? `Pesanan ${pangkalanName || 'Pangkalan'}` : 'Daftar Pesanan'}
+          subtitle={pangkalanFilter ? 'Riwayat pesanan pangkalan ini' : 'Kelola semua pesanan masuk dengan mudah'}
+        />
         <Button
           asChild
           className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
-          style={{ boxShadow: '0 4px 15px -3px rgba(22, 163, 74, 0.4)' }}
         >
           <a href="/buat-pesanan">
             <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
@@ -313,6 +354,28 @@ export default function OrderListPage() {
           Filter & Pencarian
         </h3>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+          {/* Pangkalan Filter Indicator */}
+          {pangkalanFilter && (
+            <div className="sm:col-span-3 flex items-center gap-2 p-3 bg-primary/10 rounded-lg">
+              <SafeIcon name="Store" className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Filter: {pangkalanName || 'Pangkalan'}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 ml-auto text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => {
+                  setPangkalanFilter(null)
+                  setPangkalanName(null)
+                  // Remove from URL
+                  window.history.replaceState({}, '', '/daftar-pesanan')
+                }}
+              >
+                <SafeIcon name="X" className="h-3 w-3 mr-1" />
+                Hapus Filter
+              </Button>
+            </div>
+          )}
+
           {/* Search Input */}
           <div className="relative sm:col-span-2">
             <SafeIcon
@@ -366,13 +429,53 @@ export default function OrderListPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-semibold">ID Pesanan</TableHead>
-                    <TableHead className="font-semibold">Pangkalan</TableHead>
+                    <TableHead
+                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                      onClick={() => handleSort('code')}
+                    >
+                      <span className="flex items-center gap-1">
+                        ID Pesanan
+                        <SafeIcon name={getSortIcon('code')} className="h-3.5 w-3.5" />
+                      </span>
+                    </TableHead>
+                    <TableHead
+                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                      onClick={() => handleSort('pangkalan_name')}
+                    >
+                      <span className="flex items-center gap-1">
+                        Pangkalan
+                        <SafeIcon name={getSortIcon('pangkalan_name')} className="h-3.5 w-3.5" />
+                      </span>
+                    </TableHead>
                     <TableHead className="font-semibold">Item</TableHead>
                     <TableHead className="text-right font-semibold">Qty</TableHead>
-                    <TableHead className="text-right font-semibold">Total</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Tanggal</TableHead>
+                    <TableHead
+                      className="text-right font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                      onClick={() => handleSort('total_amount')}
+                    >
+                      <span className="flex items-center justify-end gap-1">
+                        Total
+                        <SafeIcon name={getSortIcon('total_amount')} className="h-3.5 w-3.5" />
+                      </span>
+                    </TableHead>
+                    <TableHead
+                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                      onClick={() => handleSort('current_status')}
+                    >
+                      <span className="flex items-center gap-1">
+                        Status
+                        <SafeIcon name={getSortIcon('current_status')} className="h-3.5 w-3.5" />
+                      </span>
+                    </TableHead>
+                    <TableHead
+                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                      onClick={() => handleSort('created_at')}
+                    >
+                      <span className="flex items-center gap-1">
+                        Tanggal
+                        <SafeIcon name={getSortIcon('created_at')} className="h-3.5 w-3.5" />
+                      </span>
+                    </TableHead>
                     <TableHead className="text-right font-semibold">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -433,9 +536,24 @@ export default function OrderListPage() {
             </div>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4">
+          {/* Professional Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+            {/* Left: Info */}
+            <div className="text-sm text-muted-foreground">
+              Menampilkan {Math.min((currentPage - 1) * pageSize + 1, totalOrders)} - {Math.min(currentPage * pageSize, totalOrders)} dari {totalOrders} data
+            </div>
+
+            {/* Center: Pagination */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="hidden sm:flex"
+              >
+                <SafeIcon name="ChevronsLeft" className="h-4 w-4" />
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -444,19 +562,46 @@ export default function OrderListPage() {
               >
                 <SafeIcon name="ChevronLeft" className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-muted-foreground">
-                Halaman {currentPage} dari {totalPages}
+              <span className="text-sm font-medium px-3 py-1 bg-muted rounded">
+                {currentPage} / {totalPages || 1}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || totalPages === 0}
               >
                 <SafeIcon name="ChevronRight" className="h-4 w-4" />
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="hidden sm:flex"
+              >
+                <SafeIcon name="ChevronsRight" className="h-4 w-4" />
+              </Button>
             </div>
-          )}
+
+            {/* Right: Page Size Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Per halaman:</span>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={(v) => { setPageSize(parseInt(v)); setCurrentPage(1); }}
+              >
+                <SelectTrigger className="w-[70px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       </div>
     </div>

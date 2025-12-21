@@ -1,8 +1,10 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePangkalanDto, UpdatePangkalanDto } from './dto';
+import { ActivityService } from '../activity/activity.service';
 export declare class PangkalanService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private activityService;
+    constructor(prisma: PrismaService, activityService: ActivityService);
     findAll(page?: number, limit?: number, isActive?: boolean, search?: string): Promise<{
         data: ({
             users: {
@@ -16,12 +18,12 @@ export declare class PangkalanService {
             };
         } & {
             id: string;
+            created_at: Date;
             code: string;
             email: string | null;
             name: string;
             phone: string | null;
             is_active: boolean;
-            created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
@@ -37,6 +39,9 @@ export declare class PangkalanService {
             page: number;
             limit: number;
             totalPages: number;
+            totalActive: number;
+            totalInactive: number;
+            totalAll: number;
         };
     }>;
     findOne(id: string): Promise<{
@@ -51,12 +56,12 @@ export declare class PangkalanService {
         };
     } & {
         id: string;
+        created_at: Date;
         code: string;
         email: string | null;
         name: string;
         phone: string | null;
         is_active: boolean;
-        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
@@ -79,12 +84,12 @@ export declare class PangkalanService {
         };
     } & {
         id: string;
+        created_at: Date;
         code: string;
         email: string | null;
         name: string;
         phone: string | null;
         is_active: boolean;
-        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;
@@ -97,12 +102,12 @@ export declare class PangkalanService {
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
         id: string;
+        created_at: Date;
         code: string;
         email: string | null;
         name: string;
         phone: string | null;
         is_active: boolean;
-        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         note: string | null;

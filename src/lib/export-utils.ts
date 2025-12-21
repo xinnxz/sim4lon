@@ -4,11 +4,16 @@
  * PENJELASAN:
  * Utility functions untuk export laporan ke PDF dan Excel
  * Menggunakan custom download function untuk reliable filename
+ * Mendukung footer row untuk menampilkan total di bawah tabel
+ * Termasuk logo Pertamina di sudut kanan atas PDF
  */
 
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import * as XLSX from 'xlsx'
+
+// Import logo Pertamina (akan di-bundle sebagai base64 atau URL)
+import pertaminaLogo from '@/assets/logo-pertamina.png'
 
 interface ExportOptions {
     title: string
@@ -16,10 +21,11 @@ interface ExportOptions {
     filename: string
 }
 
-interface TableColumn {
+export interface TableColumn {
     header: string
     key: string
     width?: number
+    align?: 'left' | 'center' | 'right'
 }
 
 interface SummaryItem {
@@ -28,15 +34,44 @@ interface SummaryItem {
 }
 
 /**
+ * Footer row untuk menampilkan total di bawah tabel
+ * Key harus sesuai dengan column key, value adalah nilai yang ditampilkan
+ */
+interface FooterRow {
+    [key: string]: string | number
+}
+
+/**
+ * Load image sebagai base64 untuk digunakan di PDF
+ */
+const loadImageAsBase64 = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.crossOrigin = 'Anonymous'
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+                ctx.drawImage(img, 0, 0)
+                resolve(canvas.toDataURL('image/png'))
+            } else {
+                reject(new Error('Cannot get canvas context'))
+            }
+        }
+        img.onerror = () => reject(new Error('Failed to load image'))
+        img.src = url
+    })
+}
+
+/**
  * Custom download function - lebih reliable untuk semua browser
+ * PENTING: Delay cleanup harus cukup lama agar browser sempat memproses download
  */
 const downloadFile = (blob: Blob, filename: string) => {
-    console.log('[Download] Creating download for:', filename)
-    console.log('[Download] Blob size:', blob.size, 'bytes')
-
     // Create object URL
     const url = window.URL.createObjectURL(blob)
-
     // Create anchor element
     const a = document.createElement('a')
     a.style.display = 'none'
@@ -48,26 +83,48 @@ const downloadFile = (blob: Blob, filename: string) => {
 
     // Trigger click
     a.click()
-    console.log('[Download] Click triggered for:', filename)
 
-    // Cleanup
+    // Cleanup - PENTING: delay 1500ms agar browser punya waktu memproses download
     setTimeout(() => {
         document.body.removeChild(a)
         window.URL.revokeObjectURL(url)
-        console.log('[Download] Cleanup done')
-    }, 100)
+    }, 1500)
 }
 
 /**
  * Export data ke PDF
+ * @param data - Array of data rows
+ * @param columns - Column definitions
+ * @param summary - Summary items shown at top
+ * @param options - Export options (title, period, filename)
+ * @param footerRows - Optional footer rows for totals (displayed at bottom of table)
  */
-export const exportToPDF = (
+export const exportToPDF = async (
     data: Record<string, any>[],
     columns: TableColumn[],
     summary: SummaryItem[],
-    options: ExportOptions
+    options: ExportOptions,
+    footerRows?: FooterRow[]
 ) => {
     const doc = new jsPDF()
+
+    // Try to add Pertamina logo at top-right corner
+    try {
+        // Astro imports gambar sebagai ImageMetadata, ambil URL dari .src
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const logoData = pertaminaLogo as any
+        const logoUrl: string = typeof logoData === 'string' ? logoData : logoData.src
+        const logoBase64 = await loadImageAsBase64(logoUrl)
+        // Logo Pertamina berbentuk horizontal, jadi lebar > tinggi
+        // Ukuran: 40mm lebar x 15mm tinggi, posisi di kanan atas
+        const logoWidth = 40
+        const logoHeight = 15
+        const pageWidth = doc.internal.pageSize.getWidth()
+        doc.addImage(logoBase64, 'PNG', pageWidth - 75, 8, 55, 13)
+    } catch (error) {
+        console.warn('[PDF Export] Could not load Pertamina logo:', error)
+        // Continue without logo
+    }
 
     // Title
     doc.setFontSize(18)
@@ -104,7 +161,7 @@ export const exportToPDF = (
 
     yPos += 15
 
-    // Table
+    // Table data
     const tableData = data.map(row =>
         columns.map(col => {
             const value = row[col.key]
@@ -116,10 +173,28 @@ export const exportToPDF = (
         })
     )
 
+    // Footer rows - ditambahkan ke body agar hanya muncul di akhir (bukan setiap halaman)
+    const footerData = footerRows?.map(row =>
+        columns.map(col => {
+            const value = row[col.key]
+            if (value === null || value === undefined) return ''
+            if (typeof value === 'number') {
+                return value.toLocaleString('id-ID')
+            }
+            return String(value)
+        })
+    ) || []
+
+    // Gabungkan data dengan footer rows
+    const allBodyData = [...tableData, ...footerData]
+
+    // Hitung index awal footer untuk styling khusus
+    const footerStartIndex = tableData.length
+
     autoTable(doc, {
         startY: yPos,
         head: [columns.map(col => col.header)],
-        body: tableData,
+        body: allBodyData, // Footer sekarang bagian dari body, muncul hanya di akhir
         theme: 'grid',
         headStyles: {
             fillColor: [34, 139, 34],
@@ -133,9 +208,23 @@ export const exportToPDF = (
         alternateRowStyles: {
             fillColor: [245, 245, 245]
         },
+        columnStyles: columns.reduce((acc, col, index) => {
+            if (col.align) {
+                acc[index] = { halign: col.align }
+            }
+            return acc
+        }, {} as Record<number, { halign: 'left' | 'center' | 'right' }>),
+        // Style khusus untuk baris footer (TOTAL)
+        didParseCell: (data) => {
+            // Cek apakah ini baris footer
+            if (data.section === 'body' && data.row.index >= footerStartIndex) {
+                data.cell.styles.fontStyle = 'bold'
+                data.cell.styles.fillColor = [255, 255, 255] // Light gray, mirip tabel
+            }
+        },
     })
 
-    // Footer
+    // Page footer
     const pageCount = doc.getNumberOfPages()
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
@@ -160,12 +249,18 @@ export const exportToPDF = (
 
 /**
  * Export data ke Excel
+ * @param data - Array of data rows
+ * @param columns - Column definitions
+ * @param summary - Summary items shown in separate sheet
+ * @param options - Export options (title, period, filename)
+ * @param footerRows - Optional footer rows for totals (displayed at bottom of data)
  */
 export const exportToExcel = (
     data: Record<string, any>[],
     columns: TableColumn[],
     summary: SummaryItem[],
-    options: ExportOptions
+    options: ExportOptions,
+    footerRows?: FooterRow[]
 ) => {
     // Create workbook
     const wb = XLSX.utils.book_new()
@@ -187,10 +282,58 @@ export const exportToExcel = (
     const rows = data.map(row =>
         columns.map(col => row[col.key] ?? '-')
     )
-    const dataSheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
+
+    // Footer rows for totals
+    const footerRowsData = footerRows?.map(row =>
+        columns.map(col => row[col.key] ?? '')
+    ) || []
+
+    // Combine: headers + data + empty row + footer
+    const allData = [
+        headers,
+        ...rows
+    ]
+
+    // Add footer rows with separator
+    if (footerRowsData.length > 0) {
+        allData.push(columns.map(() => ''))  // Empty separator row
+        allData.push(...footerRowsData)
+    }
+
+    const dataSheet = XLSX.utils.aoa_to_sheet(allData)
 
     // Set column widths
     dataSheet['!cols'] = columns.map(col => ({ wch: col.width || 15 }))
+
+    // Apply cell styles: borders and alignment
+    const totalRows = allData.length
+    const totalCols = columns.length
+
+    // Style all table cells (starting from row 0 since header is included)
+    for (let r = 0; r < totalRows; r++) {
+        for (let c = 0; c < totalCols; c++) {
+            const cellAddr = XLSX.utils.encode_cell({ r, c })
+            if (!dataSheet[cellAddr]) continue
+
+            // Initialize style object if not exists
+            if (!dataSheet[cellAddr].s) dataSheet[cellAddr].s = {}
+
+            // Add border to all cells
+            dataSheet[cellAddr].s.border = {
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } }
+            }
+
+            // Alignment based on column definition
+            const colAlign = columns[c]?.align || 'center'
+            dataSheet[cellAddr].s.alignment = {
+                horizontal: colAlign,
+                vertical: 'center'
+            }
+        }
+    }
 
     XLSX.utils.book_append_sheet(wb, dataSheet, 'Data')
 
@@ -206,9 +349,10 @@ export const exportToExcel = (
 
 /**
  * Format currency for export
+ * Dibulatkan ke bilangan bulat (tanpa desimal/comma)
  */
 export const formatCurrencyExport = (value: number): string => {
-    return `Rp ${value.toLocaleString('id-ID')}`
+    return `Rp ${Math.round(value).toLocaleString('id-ID')}`
 }
 
 /**
@@ -221,3 +365,21 @@ export const formatDateExport = (dateString: string): string => {
         year: 'numeric'
     })
 }
+
+/**
+ * Helper untuk membuat footer row untuk tabel export
+ * @param label - Label untuk kolom pertama (misal: "TOTAL")
+ * @param totals - Object dengan key column dan value total
+ * @param firstColumnKey - Key dari kolom pertama untuk label
+ */
+export const createFooterRow = (
+    label: string,
+    totals: Record<string, string | number>,
+    firstColumnKey: string = 'date'
+): FooterRow => {
+    return {
+        [firstColumnKey]: label,
+        ...totals
+    }
+}
+

@@ -3,7 +3,7 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    findAll(page?: string, limit?: string, search?: string): Promise<{
+    findAll(page?: string, limit?: string, search?: string, excludeRoles?: string): Promise<{
         data: {
             id: string;
             code: string;
@@ -21,6 +21,10 @@ export declare class UserController {
             page: number;
             limit: number;
             totalPages: number;
+            totalAdmin: number;
+            totalOperator: number;
+            totalPangkalan: number;
+            totalAll: number;
         };
     }>;
     findOne(id: string): Promise<{

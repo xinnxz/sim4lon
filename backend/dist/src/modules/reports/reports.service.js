@@ -232,7 +232,6 @@ let ReportsService = class ReportsService {
                             gte: startDate,
                             lte: endDate,
                         },
-                        lpg_type: 'kg3',
                     },
                 },
                 consumers: {
@@ -246,10 +245,18 @@ let ReportsService = class ReportsService {
         const pangkalanStats = pangkalans.map(p => {
             const subsidiOrders = p.orders.filter(o => o.order_items.some(item => item.lpg_type === 'kg3'));
             const subsidiTabung = subsidiOrders.reduce((sum, o) => sum + o.order_items.filter(item => item.lpg_type === 'kg3').reduce((s, i) => s + i.qty, 0), 0);
-            const consumerOrderCount = p.consumer_orders.length;
-            const consumerTabung = p.consumer_orders.reduce((sum, o) => sum + o.qty, 0);
-            const consumerRevenue = p.consumer_orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
-            const uniqueConsumerIds = new Set(p.consumer_orders.filter(o => o.consumer_id).map(o => o.consumer_id));
+            const subsidiConsumerOrders = p.consumer_orders.filter(o => o.lpg_type === 'kg3');
+            const subsidiConsumerOrderCount = subsidiConsumerOrders.length;
+            const subsidiConsumerTabung = subsidiConsumerOrders.reduce((sum, o) => sum + o.qty, 0);
+            const subsidiConsumerRevenue = subsidiConsumerOrders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+            const allConsumerOrderCount = p.consumer_orders.length;
+            const allConsumerTabung = p.consumer_orders.reduce((sum, o) => sum + o.qty, 0);
+            const allConsumerRevenue = p.consumer_orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+            const nonSubsidiConsumerOrders = p.consumer_orders.filter(o => o.lpg_type !== 'kg3');
+            const nonSubsidiConsumerOrderCount = nonSubsidiConsumerOrders.length;
+            const nonSubsidiConsumerTabung = nonSubsidiConsumerOrders.reduce((sum, o) => sum + o.qty, 0);
+            const nonSubsidiConsumerRevenue = nonSubsidiConsumerOrders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+            const uniqueSubsidiConsumerIds = new Set(subsidiConsumerOrders.filter(o => o.consumer_id).map(o => o.consumer_id));
             return {
                 id: p.id,
                 code: p.code,
@@ -261,19 +268,40 @@ let ReportsService = class ReportsService {
                 alokasi_bulanan: p.alokasi_bulanan,
                 total_orders_from_agen: subsidiOrders.length,
                 total_tabung_from_agen: subsidiTabung,
-                total_consumer_orders: consumerOrderCount,
-                total_tabung_to_consumers: consumerTabung,
-                total_revenue: consumerRevenue,
+                total_consumer_orders: subsidiConsumerOrderCount,
+                total_tabung_to_consumers: subsidiConsumerTabung,
+                total_revenue: subsidiConsumerRevenue,
+                total_nonsubsidi_orders: nonSubsidiConsumerOrderCount,
+                total_nonsubsidi_tabung: nonSubsidiConsumerTabung,
+                total_nonsubsidi_revenue: nonSubsidiConsumerRevenue,
+                total_all_orders: allConsumerOrderCount,
+                total_all_tabung: allConsumerTabung,
+                total_all_revenue: allConsumerRevenue,
                 total_registered_consumers: p.consumers.length,
-                active_consumers: uniqueConsumerIds.size,
+                active_consumers: uniqueSubsidiConsumerIds.size,
             };
         });
         pangkalanStats.sort((a, b) => b.total_tabung_to_consumers - a.total_tabung_to_consumers);
+        const allConsumerOrders = pangkalans.flatMap(p => p.consumer_orders);
+        const tabungByType = {
+            kg3: allConsumerOrders.filter(o => o.lpg_type === 'kg3').reduce((sum, o) => sum + o.qty, 0),
+            kg5: allConsumerOrders.filter(o => o.lpg_type === 'kg5').reduce((sum, o) => sum + o.qty, 0),
+            kg12: allConsumerOrders.filter(o => o.lpg_type === 'kg12').reduce((sum, o) => sum + o.qty, 0),
+            kg50: allConsumerOrders.filter(o => o.lpg_type === 'kg50').reduce((sum, o) => sum + o.qty, 0),
+            gr220: allConsumerOrders.filter(o => o.lpg_type === 'gr220').reduce((sum, o) => sum + o.qty, 0),
+        };
         const summary = {
             total_pangkalan: pangkalans.length,
             total_orders_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_consumer_orders, 0),
             total_tabung_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_tabung_to_consumers, 0),
-            total_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_revenue, 0),
+            total_revenue_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_revenue, 0),
+            total_nonsubsidi_orders: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_orders, 0),
+            total_nonsubsidi_tabung: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_tabung, 0),
+            total_nonsubsidi_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_revenue, 0),
+            total_all_orders: pangkalanStats.reduce((sum, p) => sum + p.total_all_orders, 0),
+            total_all_tabung: pangkalanStats.reduce((sum, p) => sum + p.total_all_tabung, 0),
+            total_all_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_all_revenue, 0),
+            tabung_by_type: tabungByType,
             total_consumers: pangkalanStats.reduce((sum, p) => sum + p.total_registered_consumers, 0),
             active_consumers: pangkalanStats.reduce((sum, p) => sum + p.active_consumers, 0),
             top_pangkalan: pangkalanStats[0]?.name || '-',

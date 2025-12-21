@@ -43,6 +43,7 @@ import { driversApi, type Driver } from '@/lib/api'
 import { toast } from 'sonner'
 import AddDriverModal from './AddDriverModal'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
+import PageHeader from '@/components/common/PageHeader'
 
 export default function DriverListPage() {
   // State untuk data
@@ -51,6 +52,9 @@ export default function DriverListPage() {
   const [totalItems, setTotalItems] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  // Stats counts (dari backend - selalu menampilkan total sebenarnya)
+  const [aktivCount, setAktivCount] = useState(0)
+  const [nonaktifCount, setNonaktifCount] = useState(0)
 
   // State untuk filter dan search
   const [searchTerm, setSearchTerm] = useState('')
@@ -131,8 +135,11 @@ export default function DriverListPage() {
       const response = await driversApi.getAll(currentPage, 10, searchTerm || undefined, isActive)
 
       setDriverList(response.data)
-      setTotalItems(response.meta.total)
+      setTotalItems(response.meta.totalAll || response.meta.total)
       setTotalPages(response.meta.totalPages)
+      // Set stats from backend meta (true totals, not affected by filter)
+      setAktivCount(response.meta.totalActive || 0)
+      setNonaktifCount(response.meta.totalInactive || 0)
     } catch (error) {
       console.error('Failed to fetch drivers:', error)
       toast.error('Gagal memuat data driver')
@@ -214,28 +221,17 @@ export default function DriverListPage() {
     fetchDrivers()
   }
 
-  // Hitung summary stats
-  const aktivCount = driverList.filter(d => d.is_active).length
-  const nonaktifCount = driverList.filter(d => !d.is_active).length
-
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
-      {/* Header - with Vertical Gradient Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-red-500 via-red-400 to-rose-400" />
-          <div>
-            <h1 className="text-3xl font-bold text-gradient-primary">
-              Daftar Supir
-            </h1>
-            <p className="text-muted-foreground/80 mt-1">
-              Kelola data driver dan status ketersediaan mereka
-            </p>
-          </div>
-        </div>
+      {/* Header - Theme-Aware PageHeader + Action Button */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader
+          title="Daftar Supir"
+          subtitle="Kelola data driver dan status ketersediaan mereka"
+        />
         <Button
           onClick={() => { setEditingDriver(null); setShowAddModal(true) }}
-          className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all"
+          className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all"
         >
           <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
           Tambah Supir
@@ -247,53 +243,77 @@ export default function DriverListPage() {
 
       {/* Summary Stats - Modern Glass Card Style with 3D Tilt */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Tilt3DCard>
-          <Card className="border-0 glass-card animate-fadeInUp h-full">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-red-500/10">
-                  <SafeIcon name="Truck" className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Supir</p>
-                  <p className="text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
-                </div>
+        {isLoading ? (
+          // Skeleton Cards during loading
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
+                <Card className="border-0 glass-card h-full">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-slate-200 w-10 h-10 animate-shimmer" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 w-16 bg-slate-200 rounded animate-shimmer" />
+                        <div className="h-7 w-12 bg-slate-200 rounded animate-shimmer" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-        </Tilt3DCard>
+            ))}
+          </>
+        ) : (
+          // Actual Cards
+          <>
+            <Tilt3DCard>
+              <Card className="border-0 glass-card animate-fadeInUp h-full">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-red-500/10">
+                      <SafeIcon name="Truck" className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Total Supir</p>
+                      <p className="text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Tilt3DCard>
 
-        <Tilt3DCard>
-          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-green-500/10">
-                  <SafeIcon name="CheckCircle" className="w-5 h-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Aktif</p>
-                  <p className="text-2xl font-bold text-green-600"><AnimatedNumber value={aktivCount} delay={200} /></p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Tilt3DCard>
+            <Tilt3DCard>
+              <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-green-500/10">
+                      <SafeIcon name="CheckCircle" className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Aktif</p>
+                      <p className="text-2xl font-bold text-green-600"><AnimatedNumber value={aktivCount} delay={200} /></p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Tilt3DCard>
 
-        <Tilt3DCard>
-          <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-red-500/10">
-                  <SafeIcon name="XCircle" className="w-5 h-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Nonaktif</p>
-                  <p className="text-2xl font-bold text-red-600"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Tilt3DCard>
+            <Tilt3DCard>
+              <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-red-500/10">
+                      <SafeIcon name="XCircle" className="w-5 h-5 text-red-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Nonaktif</p>
+                      <p className="text-2xl font-bold text-red-600"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Tilt3DCard>
+          </>
+        )}
       </div>
 
       {/* Search and Filter - Inline Modern Design */}
@@ -468,9 +488,9 @@ export default function DriverListPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between p-4 border-t border-border/50">
               <p className="text-sm text-muted-foreground">
-                Halaman {currentPage} dari {totalPages}
+                Halaman {currentPage} dari {totalPages} • Total {totalItems} supir
               </p>
               <div className="flex gap-2">
                 <Button
@@ -478,18 +498,45 @@ export default function DriverListPage() {
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => p - 1)}
+                  className="hover:bg-red-50"
                 >
-                  <SafeIcon name="ChevronLeft" className="h-4 w-4" />
+                  <SafeIcon name="ChevronLeft" className="h-4 w-4 mr-1" />
                   Prev
                 </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum: number;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={currentPage === pageNum ? 'bg-red-500 hover:bg-red-600' : ''}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => p + 1)}
+                  className="hover:bg-red-50"
                 >
                   Next
-                  <SafeIcon name="ChevronRight" className="h-4 w-4" />
+                  <SafeIcon name="ChevronRight" className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             </div>

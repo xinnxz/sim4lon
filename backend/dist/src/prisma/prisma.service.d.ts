@@ -29,6 +29,7 @@ export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
     get perencanaan_harian(): import("@prisma/client").Prisma.perencanaan_harianDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get penyaluran_harian(): import("@prisma/client").Prisma.penyaluran_harianDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     get penerimaan_stok(): import("@prisma/client").Prisma.penerimaan_stokDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get company_profile(): import("@prisma/client").Prisma.company_profileDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     $transaction<T>(fn: Parameters<typeof this._client.$transaction>[0]): ReturnType<typeof this._client.$transaction>;
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
