@@ -218,7 +218,7 @@ _SIM4LON - Sistem Manajemen LPG_`
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="text-center">
           <SafeIcon name="Loader2" className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="mt-2 text-muted-foreground">Memuat dokumen...</p>
@@ -230,8 +230,8 @@ _SIM4LON - Sistem Manajemen LPG_`
   // Error state
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <Card className="max-w-md glass-card">
           <CardContent className="pt-6 text-center space-y-4">
             <SafeIcon name="AlertCircle" className="h-12 w-12 mx-auto text-destructive" />
             <h2 className="text-xl font-semibold">Gagal Memuat Dokumen</h2>
@@ -251,7 +251,7 @@ _SIM4LON - Sistem Manajemen LPG_`
     : `INV-${data.orderCode.replace('ORD-', '')}`
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Action Bar - Hidden on Print */}
         <div className="mb-6 flex flex-wrap gap-3 print:hidden">
@@ -318,13 +318,13 @@ _SIM4LON - Sistem Manajemen LPG_`
           </Button>
         </div>
 
-        {/* Document Card */}
-        <Card className="bg-white shadow-lg print:shadow-none print:border-0 relative overflow-hidden print:overflow-visible">
+        {/* Document Card - Premium with shadow and dark mode */}
+        <Card className="bg-white dark:bg-card shadow-xl dark:shadow-2xl print:shadow-none print:border-0 relative overflow-hidden print:overflow-visible border-0">
           {/* LUNAS Watermark for Nota - Diagonal Green */}
           {isNota && data.isPaid && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
               <div
-                className="text-green-500/15 print:text-green-500/15"
+                className="text-green-500/10 dark:text-green-400/10 print:text-green-500/15"
                 style={{
                   fontSize: 'clamp(100px, 20vw, 180px)',
                   fontWeight: 900,
@@ -344,18 +344,11 @@ _SIM4LON - Sistem Manajemen LPG_`
             {/* Header */}
             <div className="flex justify-between items-start mb-8">
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center">
-                    <SafeIcon name="Flame" className="h-7 w-7 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-primary">SIM4LON</h1>
-                    <p className="text-sm text-muted-foreground">Sistem Manajemen LPG</p>
-                  </div>
-                </div>
+                <h1 className="text-2xl font-bold text-primary">SIM4LON</h1>
+                <p className="text-sm text-muted-foreground">Sistem Manajemen LPG</p>
               </div>
               <div className="text-right">
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                   {isNota ? 'NOTA PEMBAYARAN' : 'INVOICE'}
                 </h2>
                 <p className="text-sm font-mono mt-1">{docNumber}</p>
@@ -399,10 +392,10 @@ _SIM4LON - Sistem Manajemen LPG_`
               </div>
             </div>
 
-            {/* Items Table */}
-            <div className="border rounded-lg overflow-hidden mb-8">
+            {/* Items Table - Premium styling */}
+            <div className="border dark:border-border/50 rounded-lg overflow-hidden mb-8 shadow-sm">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-muted/50">
                   <tr>
                     <th className="text-left p-3 text-sm font-semibold">Item</th>
                     <th className="text-center p-3 text-sm font-semibold w-20">Qty</th>
@@ -412,7 +405,7 @@ _SIM4LON - Sistem Manajemen LPG_`
                 </thead>
                 <tbody>
                   {data.items.map((item, index) => (
-                    <tr key={index} className="border-t">
+                    <tr key={index} className="border-t dark:border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="p-3 text-sm">{item.name}</td>
                       <td className="p-3 text-sm text-center">{item.quantity}</td>
                       <td className="p-3 text-sm text-right">{formatCurrency(item.unitPrice)}</td>
@@ -449,11 +442,11 @@ _SIM4LON - Sistem Manajemen LPG_`
             </div>
 
             {/* Footer */}
-            <div className="mt-12 pt-6 border-t">
+            <div className="mt-12 pt-6 border-t dark:border-border/50">
               <div className="grid grid-cols-2 gap-8">
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Catatan:</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     {isNota
                       ? 'Terima kasih atas pembayaran Anda. Simpan nota ini sebagai bukti transaksi.'
                       : 'Pembayaran dapat dilakukan melalui transfer bank. Harap sertakan nomor order saat transfer.'
@@ -468,22 +461,77 @@ _SIM4LON - Sistem Manajemen LPG_`
               </div>
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card >
+      </div >
 
-      {/* Print Styles - Professional Single Page Output */}
+      {/* Print Styles - Force White Background for Print */}
       <style>{`
         @media print {
-          /* Hide everything except document */
-          body { 
-            background: white !important; 
-            margin: 0 !important; 
-            padding: 0 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+          /* CRITICAL: Force light theme for print regardless of dark mode */
+          html, body, .dark, :root { 
+            background: white !important;
+            background-color: white !important;
+            color: #1f2937 !important;
+            color-scheme: light !important;
           }
           
-          /* Hide navigation, header, footer, action buttons */
+          /* Override dark mode variables for print */
+          :root, .dark {
+            --background: 0 0% 100% !important;
+            --foreground: 222.2 84% 4.9% !important;
+            --card: 0 0% 100% !important;
+            --card-foreground: 222.2 84% 4.9% !important;
+            --muted: 210 40% 96.1% !important;
+            --muted-foreground: 215.4 16.3% 46.9% !important;
+            --border: 214.3 31.8% 91.4% !important;
+          }
+          
+          /* Force white background on all elements */
+          *, *::before, *::after {
+            background-color: transparent !important;
+          }
+          
+          /* Card must be white */
+          .bg-white, 
+          [class*="bg-card"],
+          [class*="dark:bg-card"],
+          .dark .bg-white,
+          .dark [class*="bg-card"] {
+            background: white !important;
+            background-color: white !important;
+            color: #1f2937 !important;
+          }
+          
+          /* Page background */
+          .min-h-screen,
+          [class*="from-slate"],
+          [class*="dark:from-slate"] {
+            background: white !important;
+          }
+          
+          /* Text colors for print */
+          h1, h2, h3, h4, h5, h6, p, span, td, th, label {
+            color: #1f2937 !important;
+          }
+          
+          .text-muted-foreground,
+          [class*="text-gray"] {
+            color: #6b7280 !important;
+          }
+          
+          .text-primary {
+            color: #16a34a !important;
+          }
+          
+          /* Table styling for print */
+          table { border-collapse: collapse !important; }
+          thead { background: #f9fafb !important; }
+          th, td { 
+            border-color: #e5e7eb !important;
+            background: transparent !important;
+          }
+          
+          /* Hide action bar and non-print elements */
           header, footer, nav, aside,
           .print\\:hidden,
           [data-radix-portal],
@@ -495,7 +543,6 @@ _SIM4LON - Sistem Manajemen LPG_`
           /* Document container */
           .print\\:shadow-none { box-shadow: none !important; }
           .print\\:border-0 { border: none !important; }
-          .print\\:p-6 { padding: 1.5rem !important; }
           
           /* Ensure content fits on one page */
           .max-w-4xl { 
@@ -509,14 +556,18 @@ _SIM4LON - Sistem Manajemen LPG_`
             page-break-inside: avoid !important; 
           }
           
-          /* Card styling for print */
-          .bg-white {
-            background: white !important;
+          /* Watermark visibility on print */
+          [class*="text-green-500/10"],
+          [class*="text-green-400/10"] {
+            color: rgba(34, 197, 94, 0.15) !important;
           }
           
-          /* Watermark print visibility */
-          .text-green-500\\/20 {
-            color: rgba(34, 197, 94, 0.12) !important;
+          /* Badge styling */
+          .bg-green-500 {
+            background-color: #22c55e !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
         

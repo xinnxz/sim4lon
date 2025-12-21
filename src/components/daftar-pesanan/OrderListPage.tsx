@@ -52,16 +52,16 @@ const statusLabels: Record<OrderStatus, string> = {
 }
 
 /**
- * Status badge colors
+ * Status badge colors - Dark mode compatible
  */
 const statusColors: Record<OrderStatus, string> = {
-  DRAFT: 'bg-gray-100 text-gray-700',
-  MENUNGGU_PEMBAYARAN: 'bg-amber-100 text-amber-700',
-  DIPROSES: 'bg-blue-100 text-blue-700',
-  SIAP_KIRIM: 'bg-purple-100 text-purple-700', // Legacy
-  DIKIRIM: 'bg-indigo-100 text-indigo-700',
-  SELESAI: 'bg-green-100 text-green-700',
-  BATAL: 'bg-red-100 text-red-700',
+  DRAFT: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  MENUNGGU_PEMBAYARAN: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  DIPROSES: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  SIAP_KIRIM: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', // Legacy
+  DIKIRIM: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  SELESAI: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  BATAL: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
 export default function OrderListPage() {
@@ -274,11 +274,11 @@ export default function OrderListPage() {
                 <p className="text-3xl font-bold mt-2"><AnimatedNumber value={stats?.total || 0} delay={100} /></p>
                 <p className="text-xs text-muted-foreground mt-1">pesanan</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200" style={{ boxShadow: '0 4px 12px -2px rgba(0,0,0,0.1)' }}>
-                <SafeIcon name="ShoppingCart" className="h-5 w-5 text-gray-600" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
+                <SafeIcon name="ShoppingCart" className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700" />
           </div>
         </Tilt3DCard>
 
@@ -287,14 +287,14 @@ export default function OrderListPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menunggu Bayar</p>
-                <p className="text-3xl font-bold mt-2 text-amber-600"><AnimatedNumber value={stats?.menunggu_pembayaran || 0} delay={200} /></p>
+                <p className="text-3xl font-bold mt-2 text-amber-600 dark:text-amber-400"><AnimatedNumber value={stats?.menunggu_pembayaran || 0} delay={200} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200" style={{ boxShadow: '0 4px 12px -2px rgba(245,158,11,0.3)' }}>
-                <SafeIcon name="Clock" className="h-5 w-5 text-amber-600" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/50 dark:to-amber-800/50">
+                <SafeIcon name="Clock" className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300 dark:from-amber-700 dark:via-amber-500 dark:to-amber-700" />
           </div>
         </Tilt3DCard>
 
@@ -303,14 +303,14 @@ export default function OrderListPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Diproses</p>
-                <p className="text-3xl font-bold mt-2 text-blue-600"><AnimatedNumber value={stats?.diproses || 0} delay={300} /></p>
+                <p className="text-3xl font-bold mt-2 text-blue-600 dark:text-blue-400"><AnimatedNumber value={stats?.diproses || 0} delay={300} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
-                <SafeIcon name="RefreshCw" className="h-5 w-5 text-blue-600" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50">
+                <SafeIcon name="RefreshCw" className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300 dark:from-blue-700 dark:via-blue-500 dark:to-blue-700" />
           </div>
         </Tilt3DCard>
 
@@ -319,14 +319,14 @@ export default function OrderListPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dikirim</p>
-                <p className="text-3xl font-bold mt-2 text-indigo-600"><AnimatedNumber value={stats?.dikirim || 0} delay={400} /></p>
+                <p className="text-3xl font-bold mt-2 text-indigo-600 dark:text-indigo-400"><AnimatedNumber value={stats?.dikirim || 0} delay={400} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200" style={{ boxShadow: '0 4px 12px -2px rgba(99,102,241,0.3)' }}>
-                <SafeIcon name="Truck" className="h-5 w-5 text-indigo-600" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/50 dark:to-indigo-800/50">
+                <SafeIcon name="Truck" className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-300" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-300 dark:from-indigo-700 dark:via-indigo-500 dark:to-indigo-700" />
           </div>
         </Tilt3DCard>
 
@@ -335,14 +335,14 @@ export default function OrderListPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Selesai</p>
-                <p className="text-3xl font-bold mt-2 text-green-600"><AnimatedNumber value={stats?.selesai || 0} delay={500} /></p>
+                <p className="text-3xl font-bold mt-2 text-green-600 dark:text-green-400"><AnimatedNumber value={stats?.selesai || 0} delay={500} /></p>
                 <p className="text-xs text-muted-foreground mt-1">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
-                <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50">
+                <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300 dark:from-green-700 dark:via-green-500 dark:to-green-700" />
           </div>
         </Tilt3DCard>
       </div>

@@ -218,8 +218,9 @@ export default function PaymentRecordPage() {
         >
           <SafeIcon name="ArrowLeft" className="h-5 w-5" />
         </Button>
+        <div className="h-10 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
         <div>
-          <h1 className="text-3xl font-bold">Catat Pembayaran</h1>
+          <h1 className="text-3xl font-bold text-gradient-primary">Catat Pembayaran</h1>
           <p className="text-muted-foreground">Pencatatan pembayaran untuk pesanan {order.id}</p>
         </div>
       </div>
@@ -227,7 +228,7 @@ export default function PaymentRecordPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Form */}
         <div className="lg:col-span-2">
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle>Detail Pembayaran</CardTitle>
               <CardDescription>
@@ -249,8 +250,8 @@ export default function PaymentRecordPage() {
         <div className="space-y-4">
           <PaymentSummary order={order} />
 
-          {/* Info Box */}
-          <Card className="border-primary/20 bg-primary/5">
+          {/* Info Box - Dark mode compatible */}
+          <Card className="border-primary/20 bg-primary/5 dark:bg-primary/10 dark:border-primary/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <SafeIcon name="Info" className="h-4 w-4 text-primary" />

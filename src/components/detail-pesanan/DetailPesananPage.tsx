@@ -43,16 +43,16 @@ const statusLabels: Record<OrderStatus, string> = {
 }
 
 /**
- * Status badge colors
+ * Status badge colors - Dark mode compatible
  */
 const statusColors: Record<OrderStatus, string> = {
-  DRAFT: 'bg-gray-100 text-gray-700',
-  MENUNGGU_PEMBAYARAN: 'bg-amber-100 text-amber-700',
-  DIPROSES: 'bg-blue-100 text-blue-700',
-  SIAP_KIRIM: 'bg-purple-100 text-purple-700', // Legacy
-  DIKIRIM: 'bg-indigo-100 text-indigo-700',
-  SELESAI: 'bg-green-100 text-green-700',
-  BATAL: 'bg-red-100 text-red-700',
+  DRAFT: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  MENUNGGU_PEMBAYARAN: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  DIPROSES: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  SIAP_KIRIM: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', // Legacy
+  DIKIRIM: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  SELESAI: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  BATAL: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
 export default function DetailPesananPage() {
@@ -254,8 +254,9 @@ Status: ${statusLabels[order.current_status]}
               <SafeIcon name="ArrowLeft" className="h-5 w-5" />
             </Button>
           </a>
+          <div className="h-10 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
           <div>
-            <h1 className="text-3xl font-bold">Detail Pesanan</h1>
+            <h1 className="text-3xl font-bold text-gradient-primary">Detail Pesanan</h1>
             <p className="text-muted-foreground">{order.id.slice(0, 8)}...</p>
           </div>
         </div>
@@ -269,7 +270,7 @@ Status: ${statusLabels[order.current_status]}
         {/* Left Column - Order Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Pangkalan Info */}
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle>Informasi Pangkalan</CardTitle>
             </CardHeader>
