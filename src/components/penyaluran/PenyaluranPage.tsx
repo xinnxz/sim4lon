@@ -19,6 +19,7 @@ import { penyaluranApi, lpgProductsApi, pangkalanApi, type PenyaluranRekapitulas
 import { toast } from 'sonner'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
 import { exportPertaminaPDF, exportPertaminaExcel, getAgenProfileFromAPI, type RekapRow } from '@/lib/pertamina-export'
+import PageHeader from '@/components/common/PageHeader'
 
 export default function PenyaluranPage() {
     // Read initial tab from URL hash or default to 'rekapitulasi'
@@ -366,6 +367,12 @@ export default function PenyaluranPage() {
 
     return (
         <div className="space-y-6">
+            {/* Page Header */}
+            <PageHeader
+                title="Penyaluran"
+                subtitle="Input dan rekapitulasi penyaluran harian"
+            />
+
             <Tabs value={activeTab} onValueChange={handleTabChange}>
                 <TabsList className="glass-card p-1 mb-4">
                     <TabsTrigger value="rekapitulasi" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">

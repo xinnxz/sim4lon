@@ -46,6 +46,7 @@ import { toast } from 'sonner'
 import AddUserModal from './AddUserModal'
 import EditUserModal from './EditUserModal'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
+import PageHeader from '@/components/common/PageHeader'
 
 const roleLabels: Record<UserRole, string> = {
   ADMIN: 'Administrator',
@@ -273,22 +274,15 @@ export default function UserListPage() {
 
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
-      {/* Header - with Vertical Gradient Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-green-500 via-green-400 to-emerald-400" />
-          <div>
-            <h1 className="text-3xl font-bold text-gradient-primary">
-              Daftar Pengguna
-            </h1>
-            <p className="text-muted-foreground/80 mt-1">
-              Kelola semua pengguna sistem SIM4LON
-            </p>
-          </div>
-        </div>
+      {/* Header - Theme-Aware PageHeader + Action Button */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader
+          title="Daftar Pengguna"
+          subtitle="Kelola semua pengguna sistem SIM4LON"
+        />
         <Button
           onClick={() => setShowAddModal(true)}
-          className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
+          className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all"
         >
           <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
           Tambah Pengguna

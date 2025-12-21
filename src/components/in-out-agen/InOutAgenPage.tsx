@@ -19,6 +19,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import pertaminaLogo from '@/assets/logo-pertamina.png'
 import { getAgenProfileFromAPI } from '@/lib/pertamina-export'
+import PageHeader from '@/components/common/PageHeader'
 
 // Helper to load image as base64
 const loadImageAsBase64 = (url: string): Promise<string> => {
@@ -280,6 +281,12 @@ export default function InOutAgenPage() {
 
     return (
         <div className="space-y-6">
+            {/* Page Header */}
+            <PageHeader
+                title="In / Out Agen"
+                subtitle="Rekapitulasi stok harian (Stok Awal, Penerimaan, Penyaluran, Stok Akhir)"
+            />
+
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Tilt3DCard>

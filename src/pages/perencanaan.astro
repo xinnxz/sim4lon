@@ -14,15 +14,6 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
       <main class="flex-1 flex flex-col dashboard-gradient-bg min-w-0">
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-[calc(100vw-16rem)]">
-            {/* Page Header */}
-            <div class="mb-6 flex items-center gap-3">
-              <div class="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-blue-400 to-cyan-400"></div>
-              <div>
-                <h1 class="text-3xl font-bold text-gradient-primary">Perencanaan</h1>
-                <p class="text-muted-foreground/80 mt-1">Input dan rekapitulasi perencanaan alokasi harian</p>
-              </div>
-            </div>
-
             {/* Content */}
             <div class="animate-fadeInUp">
               <PerencanaanPage client:load />

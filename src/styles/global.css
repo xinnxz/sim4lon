@@ -396,12 +396,35 @@
       0 8px 20px -4px rgba(0, 0, 0, 0.35) !important;
   }
   
-  /* Glass card for dark mode - FLAT with subtle border */
+  /* ========== DARK MODE ENHANCED CARDS ========== */
+  
+  /* Glass card for dark mode - Premium solid look */
   .dark .glass-card {
     background: hsl(var(--card)) !important;
-    border: 1px solid hsl(var(--border)) !important;
+    border: 1px solid hsl(var(--border) / 0.4) !important;
+    border-top-color: hsl(var(--border) / 0.6) !important;
     backdrop-filter: none !important;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2) !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 
+      0 4px 16px -4px rgba(0, 0, 0, 0.4),
+      0 2px 4px -2px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 hsl(var(--border) / 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  /* Subtle hover effect with primary color glow */
+  .dark .glass-card:hover {
+    border-color: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 
+      0 8px 24px -6px rgba(0, 0, 0, 0.5),
+      0 4px 8px -4px rgba(0, 0, 0, 0.3),
+      0 0 0 1px hsl(var(--primary) / 0.1),
+      inset 0 1px 0 hsl(var(--border) / 0.2) !important;
+  }
+  
+  /* Remove gradient overlay in dark mode */
+  .dark .glass-card::before {
+    display: none !important;
   }
   
   /* Override shimmer effect background colors */
@@ -441,6 +464,40 @@
     --tw-gradient-to: hsl(var(--card)) !important;
     --tw-gradient-via: hsl(var(--card)) !important;
   }
+  
+  /* Dark mode input focus - themed ring */
+  .dark input:focus,
+  .dark select:focus,
+  .dark textarea:focus {
+    border-color: hsl(var(--primary) / 0.5) !important;
+    box-shadow: 
+      0 0 0 2px hsl(var(--primary) / 0.15),
+      0 2px 8px -2px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Dark mode table rows - subtle hover */
+  .dark tbody tr:hover {
+    background: hsl(var(--muted) / 0.5) !important;
+  }
+  
+  /* Dark mode badge/pill glow on primary variants */
+  .dark .bg-primary {
+    box-shadow: 0 2px 8px -2px hsl(var(--primary) / 0.4) !important;
+  }
+  
+  /* Dark mode button hover enhancement */
+  .dark button:hover:not(:disabled) {
+    transition: all 0.2s ease !important;
+  }
+  
+  /* Premium card wrapper for charts in dark mode */
+  .dark [class*="chart-card"] {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border) / 0.3) !important;
+    box-shadow: 
+      0 4px 20px -6px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 hsl(var(--border) / 0.1) !important;
+  }
 }
 
 @layer base {
@@ -459,6 +516,85 @@
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
+  }
+  
+  /* ========== SLIM SCROLLBAR STYLING ========== */
+  
+  /* Scrollbar container - thin by default, visible on hover */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+  }
+  
+  .scrollbar-thin:hover {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+  
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Table container specific - extra slim */
+  .overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  
+  .overflow-x-auto:hover {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+  
+  .overflow-x-auto:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+  }
+  
+  .overflow-x-auto:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
+  
+  /* Dark mode scrollbar adjustments */
+  .dark .scrollbar-thin:hover::-webkit-scrollbar-thumb,
+  .dark .overflow-x-auto:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+  }
+  
+  .dark .scrollbar-thin:hover::-webkit-scrollbar-thumb:hover,
+  .dark .overflow-x-auto:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
   }
 }
 
@@ -690,7 +826,7 @@
 
   /* Header Gradient Text - Theme Aware */
   .text-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--accent)) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 20%, hsl(var(--accent)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -1386,11 +1522,11 @@
   .text-gradient-animated {
     background: linear-gradient(
       135deg, 
-      hsl(152 100% 35%) 0%, 
-      hsl(152 80% 45%) 25%,
-      hsl(48 100% 50%) 50%,
-      hsl(152 80% 45%) 75%,
-      hsl(152 100% 35%) 100%
+      hsl(var(--primary)) 0%, 
+      hsl(var(--primary) / 0.7) 25%,
+      hsl(var(--accent)) 50%,
+      hsl(var(--primary) / 0.7) 75%,
+      hsl(var(--primary)) 100%
     );
     background-size: 200% 200%;
     -webkit-background-clip: text;
