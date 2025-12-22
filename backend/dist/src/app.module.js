@@ -31,6 +31,7 @@ const pangkalan_stock_module_1 = require("./modules/pangkalan-stock/pangkalan-st
 const expense_module_1 = require("./modules/expense/expense.module");
 const lpg_price_module_1 = require("./modules/lpg-price/lpg-price.module");
 const agen_module_1 = require("./modules/agen/agen.module");
+const agen_orders_module_1 = require("./modules/agen-orders/agen-orders.module");
 const perencanaan_module_1 = require("./modules/perencanaan/perencanaan.module");
 const penyaluran_module_1 = require("./modules/penyaluran/penyaluran.module");
 const penerimaan_module_1 = require("./modules/penerimaan/penerimaan.module");
@@ -64,6 +65,7 @@ exports.AppModule = AppModule = __decorate([
             expense_module_1.ExpenseModule,
             lpg_price_module_1.LpgPriceModule,
             agen_module_1.AgenModule,
+            agen_orders_module_1.AgenOrdersModule,
             perencanaan_module_1.PerencanaanModule,
             penyaluran_module_1.PenyaluranModule,
             penerimaan_module_1.PenerimaanModule,

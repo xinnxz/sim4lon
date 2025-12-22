@@ -22,6 +22,7 @@ import { PangkalanStockModule } from './modules/pangkalan-stock/pangkalan-stock.
 import { ExpenseModule } from './modules/expense/expense.module';
 import { LpgPriceModule } from './modules/lpg-price/lpg-price.module';
 import { AgenModule } from './modules/agen/agen.module';
+import { AgenOrdersModule } from './modules/agen-orders/agen-orders.module';
 // Pertamina Integration Modules
 import { PerencanaanModule } from './modules/perencanaan/perencanaan.module';
 import { PenyaluranModule } from './modules/penyaluran/penyaluran.module';
@@ -54,6 +55,7 @@ import { CompanyProfileModule } from './modules/company-profile/company-profile.
         ExpenseModule,
         LpgPriceModule,
         AgenModule,
+        AgenOrdersModule,
         // Pertamina Integration
         PerencanaanModule,
         PenyaluranModule,

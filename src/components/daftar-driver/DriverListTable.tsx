@@ -67,18 +67,18 @@ export default function DriverListTable({
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={driver.status === 'Aktif' ? 'default' : 'secondary'}
+                    variant={driver.status === 'active' ? 'default' : 'secondary'}
                     className={
-                      driver.status === 'Aktif'
+                      driver.status === 'active'
                         ? 'bg-primary/10 text-primary hover:bg-primary/20'
                         : 'bg-muted text-muted-foreground'
                     }
                   >
-                    {driver.status}
+                    {driver.status === 'active' ? 'Aktif' : 'Nonaktif'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {driver.totalDeliveries} pengiriman
+                  -
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
@@ -99,14 +99,14 @@ export default function DriverListTable({
                       >
                         <SafeIcon
                           name={
-                            driver.status === 'Aktif'
+                            driver.status === 'active'
                               ? 'XCircle'
                               : 'CheckCircle'
                           }
                           className="mr-2 h-4 w-4"
                         />
                         <span>
-                          {driver.status === 'Aktif'
+                          {driver.status === 'active'
                             ? 'Nonaktifkan'
                             : 'Aktifkan'}
                         </span>
