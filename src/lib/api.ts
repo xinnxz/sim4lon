@@ -1786,6 +1786,100 @@ export const pangkalanStockApi = {
 };
 
 // ============================================================
+// AGEN ORDERS API (Orders from Pangkalan to Agen)
+// ============================================================
+
+export type AgenOrderStatus = 'PENDING' | 'DIKIRIM' | 'DITERIMA' | 'BATAL';
+
+export interface AgenOrder {
+    id: string;
+    code: string;
+    pangkalan_id: string;
+    agen_id: string | null;
+    lpg_type: LpgType;
+    qty_ordered: number;
+    qty_received: number;
+    status: AgenOrderStatus;
+    order_date: string;
+    received_date: string | null;
+    note: string | null;
+    created_at: string;
+    updated_at: string;
+    agen?: {
+        name: string;
+        phone: string | null;
+    };
+}
+
+export interface AgenOrderStats {
+    pending: number;
+    dikirim: number;
+    diterima: number;
+    batal: number;
+    total: number;
+}
+
+export const agenOrdersApi = {
+    /**
+     * Get all agen orders for pangkalan
+     */
+    async getOrders(status?: string): Promise<AgenOrder[]> {
+        const params = status && status !== 'all' ? `?status=${status}` : '';
+        return apiRequest(`/agen-orders${params}`);
+    },
+
+    /**
+     * Get order statistics
+     */
+    async getStats(): Promise<AgenOrderStats> {
+        return apiRequest('/agen-orders/stats');
+    },
+
+    /**
+     * Get single order
+     */
+    async getOrder(id: string): Promise<AgenOrder> {
+        return apiRequest(`/agen-orders/${id}`);
+    },
+
+    /**
+     * Create new order to agen
+     */
+    async createOrder(data: {
+        lpg_type: string;
+        qty: number;
+        note?: string;
+    }): Promise<AgenOrder> {
+        return apiRequest('/agen-orders', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    /**
+     * Receive order and update stock
+     */
+    async receiveOrder(id: string, data: {
+        qty_received: number;
+        note?: string;
+    }): Promise<AgenOrder> {
+        return apiRequest(`/agen-orders/${id}/receive`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    },
+
+    /**
+     * Cancel order
+     */
+    async cancelOrder(id: string): Promise<AgenOrder> {
+        return apiRequest(`/agen-orders/${id}/cancel`, {
+            method: 'PATCH',
+        });
+    },
+};
+
+// ============================================================
 // EXPENSE API (Pangkalan Dashboard)
 // ============================================================
 

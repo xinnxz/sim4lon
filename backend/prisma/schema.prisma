@@ -53,6 +53,7 @@ model agen {
   updated_at DateTime     @default(now()) @db.Timestamptz(6)
   deleted_at DateTime?    @db.Timestamptz(6)
   pangkalans pangkalans[]
+  agen_orders agen_orders[]
 
   @@index([is_active], map: "idx_agen_active")
 }
@@ -92,6 +93,7 @@ model pangkalans {
   penyaluran_harian         penyaluran_harian[]
   perencanaan_harian        perencanaan_harian[]
   users                     users[]
+  agen_orders               agen_orders[]
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
@@ -653,4 +655,43 @@ model company_profile {
   
   created_at           DateTime @default(now()) @db.Timestamptz(6)
   updated_at           DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// Status for agen orders
+enum agen_order_status {
+  /// New order, waiting for agen
+  PENDING
+  /// Agen has shipped
+  DIKIRIM
+  /// Pangkalan received
+  DITERIMA
+  /// Order cancelled
+  BATAL
+}
+
+/// LPG Order from Pangkalan to Agen
+model agen_orders {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Display code: AO-001
+  code           String            @unique @db.VarChar(20)
+  pangkalan_id   String            @db.Uuid
+  agen_id        String?           @db.Uuid
+  lpg_type       lpg_type
+  /// Quantity ordered
+  qty_ordered    Int
+  /// Quantity actually received
+  qty_received   Int               @default(0)
+  status         agen_order_status @default(PENDING)
+  order_date     DateTime          @default(now()) @db.Timestamptz(6)
+  received_date  DateTime?         @db.Timestamptz(6)
+  note           String?
+  created_at     DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime          @default(now()) @db.Timestamptz(6)
+  
+  pangkalans     pangkalans        @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agen_orders_pangkalan")
+  agen           agen?             @relation(fields: [agen_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agen_orders_agen")
+
+  @@index([pangkalan_id], map: "idx_agen_orders_pangkalan")
+  @@index([status], map: "idx_agen_orders_status")
+  @@index([order_date(sort: Desc)], map: "idx_agen_orders_date")
 }

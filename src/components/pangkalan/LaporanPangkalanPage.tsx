@@ -12,7 +12,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,9 +20,11 @@ import SafeIcon from '@/components/common/SafeIcon'
 import {
     authApi,
     consumerOrdersApi,
+    lpgPricesApi,
     type UserProfile,
     type ConsumerOrder,
     type ChartDataPoint,
+    type PangkalanLpgPrice,
 } from '@/lib/api'
 import {
     LineChart,
@@ -38,11 +40,18 @@ import {
     AreaChart,
     ComposedChart,
 } from 'recharts'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import { toast } from 'sonner'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-// Fixed prices for calculation
-const HARGA_MODAL = 16000
-const HARGA_JUAL = 18000
-const MARGIN_PER_UNIT = HARGA_JUAL - HARGA_MODAL
+// Note: All prices are fetched dynamically from lpgPricesApi
 
 // Custom tooltip component
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -76,23 +85,37 @@ export default function LaporanPangkalanPage() {
     const [customEndDate, setCustomEndDate] = useState('')
     const [showCustom, setShowCustom] = useState(false)
     const [allSales, setAllSales] = useState<ConsumerOrder[]>([]) // Store all sales for filtering
+    const [prices, setPrices] = useState<PangkalanLpgPrice[]>([]) // Dynamic prices from API
 
     // Calculate date range based on selected period
     const getDateRange = () => {
         const now = new Date()
+        // Create today at midnight in LOCAL timezone
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
         switch (selectedPeriod) {
             case 'hariini':
                 return { start: today, end: now }
-            case 'mingguini':
-                const dayOfWeek = today.getDay()
-                const startOfWeek = new Date(today)
-                startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)) // Start from Monday
+            case 'mingguini': {
+                // Get day of week (0=Sunday, 1=Monday, etc.)
+                const dayOfWeek = now.getDay()
+                // Calculate days to subtract to get to Monday
+                // Sunday (0) -> subtract 6, Monday (1) -> subtract 0, etc.
+                const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+                // Create start of week (Monday at midnight)
+                const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToSubtract, 0, 0, 0)
+                console.log('📅 Week calc:', {
+                    dayOfWeek,
+                    daysToSubtract,
+                    now: now.toISOString(),
+                    startOfWeek: startOfWeek.toISOString()
+                })
                 return { start: startOfWeek, end: now }
-            case 'bulanini':
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+            }
+            case 'bulanini': {
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
                 return { start: startOfMonth, end: now }
+            }
             case 'custom':
                 if (customStartDate && customEndDate) {
                     return {
@@ -109,10 +132,27 @@ export default function LaporanPangkalanPage() {
     // Filter sales based on date range
     const filterSalesByDateRange = (sales: ConsumerOrder[]) => {
         const { start, end } = getDateRange()
-        return sales.filter(sale => {
-            const saleDate = new Date(sale.sale_date)
-            return saleDate >= start && saleDate <= end
+
+        // Get timestamps for comparison
+        const startTime = start.getTime()
+        const endTime = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999).getTime()
+
+        // Debug log
+        console.log('🔍 Filter Debug:', {
+            period: selectedPeriod,
+            startTime: new Date(startTime).toISOString(),
+            endTime: new Date(endTime).toISOString(),
+            totalSales: sales.length,
         })
+
+        const filtered = sales.filter(sale => {
+            const saleTime = new Date(sale.sale_date).getTime()
+            const match = saleTime >= startTime && saleTime <= endTime
+            return match
+        })
+
+        console.log('🔍 Filtered result:', filtered.length)
+        return filtered
     }
 
     // Initial fetch all data
@@ -125,13 +165,15 @@ export default function LaporanPangkalanPage() {
                 const profileData = await authApi.getProfile()
                 setProfile(profileData)
 
-                const [chartDataResult, allSalesResult] = await Promise.all([
+                const [chartDataResult, allSalesResult, pricesData] = await Promise.all([
                     consumerOrdersApi.getChartData(),
                     consumerOrdersApi.getRecent(200), // Get more sales for filtering
+                    lpgPricesApi.getAll(), // Fetch dynamic prices
                 ])
 
                 setChartData(chartDataResult || [])
                 setAllSales(allSalesResult || [])
+                setPrices(pricesData || [])
             } catch (err: any) {
                 console.error('❌ [Laporan] Error:', err)
                 setError(`Gagal memuat data: ${err?.message || 'Unknown error'}`)
@@ -144,10 +186,50 @@ export default function LaporanPangkalanPage() {
 
     // Apply filter when period changes
     useEffect(() => {
-        if (allSales.length > 0) {
-            const filtered = filterSalesByDateRange(allSales)
-            setRecentSales(filtered)
+        if (allSales.length === 0) return
+
+        // Calculate date range based on selected period
+        const now = new Date()
+        let startDate: Date
+        let endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+
+        switch (selectedPeriod) {
+            case 'hariini':
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+                break
+            case '7hari':
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0)
+                break
+            case 'mingguini': {
+                const dayOfWeek = now.getDay()
+                const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToSubtract, 0, 0, 0)
+                break
+            }
+            case 'bulanini':
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+                break
+            case 'custom':
+                if (customStartDate && customEndDate) {
+                    startDate = new Date(customStartDate)
+                    endDate = new Date(customEndDate + 'T23:59:59')
+                } else {
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+                }
+                break
+            default:
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
         }
+
+        const startTime = startDate.getTime()
+        const endTime = endDate.getTime()
+
+        const filtered = allSales.filter(sale => {
+            const saleTime = new Date(sale.sale_date).getTime()
+            return saleTime >= startTime && saleTime <= endTime
+        })
+
+        setRecentSales(filtered)
     }, [selectedPeriod, customStartDate, customEndDate, allSales])
 
     // Handle custom date apply
@@ -174,28 +256,59 @@ export default function LaporanPangkalanPage() {
         return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
     }
 
-    // HPP (Harga Pokok Pembelian) per type for calculation
-    const COST_PRICES: Record<string, number> = {
-        'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
-        '3kg': 16000, '5kg': 52000, '12kg': 142000, '50kg': 590000,
+    // Get cost price for a given lpg_type from dynamic prices
+    const getCostPrice = (lpgType: string): number => {
+        const priceData = prices.find(p => p.lpg_type === lpgType)
+        if (priceData) return Number(priceData.cost_price)
+        // Fallback defaults if not found
+        const fallbacks: Record<string, number> = {
+            'kg022': 17000, 'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
+        }
+        return fallbacks[lpgType] || 16000
     }
 
-    // Calculate totals from FILTERED sales data (not chartData)
-    // This makes summary cards reflect the selected filter period
-    const filteredTotals = recentSales.reduce((acc, sale) => {
-        const costPrice = COST_PRICES[sale.lpg_type] || 16000
-        const modal = sale.qty * costPrice
-        const penjualan = Number(sale.total_amount)
-        const marginKotor = penjualan - modal
+    // Calculate totals from FILTERED sales data using ACTUAL prices (MEMOIZED)
+    const filteredTotals = useMemo(() => {
+        return recentSales.reduce((acc, sale) => {
+            const costPrice = getCostPrice(sale.lpg_type)
+            const modal = sale.qty * costPrice
+            const penjualan = Number(sale.total_amount)
+            const marginKotor = penjualan - modal
 
-        return {
-            qty: acc.qty + sale.qty,
-            penjualan: acc.penjualan + penjualan,
-            modal: acc.modal + modal,
-            marginKotor: acc.marginKotor + marginKotor,
-            laba: acc.laba + marginKotor, // Simplified: laba = margin kotor (without pengeluaran)
-        }
-    }, { qty: 0, penjualan: 0, modal: 0, marginKotor: 0, laba: 0 })
+            return {
+                qty: acc.qty + sale.qty,
+                penjualan: acc.penjualan + penjualan,
+                modal: acc.modal + modal,
+                marginKotor: acc.marginKotor + marginKotor,
+                laba: acc.laba + marginKotor,
+            }
+        }, { qty: 0, penjualan: 0, modal: 0, marginKotor: 0, laba: 0 })
+    }, [recentSales, prices])
+
+    // Calculate daily summary from recentSales (MEMOIZED)
+    const dailySummaryArray = useMemo(() => {
+        const summary = recentSales.reduce((acc, sale) => {
+            const dateKey = new Date(sale.sale_date).toISOString().split('T')[0]
+            if (!acc[dateKey]) {
+                acc[dateKey] = { date: dateKey, qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, laba: 0 }
+            }
+            const costPrice = getCostPrice(sale.lpg_type)
+            const modal = sale.qty * costPrice
+            const penjualan = Number(sale.total_amount)
+            const margin = penjualan - modal
+
+            acc[dateKey].qty += sale.qty
+            acc[dateKey].penjualan += penjualan
+            acc[dateKey].modal += modal
+            acc[dateKey].laba += margin
+            return acc
+        }, {} as Record<string, { date: string; qty: number; penjualan: number; modal: number; pengeluaran: number; laba: number }>)
+
+        // Sort by date (newest first)
+        return Object.values(summary).sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+    }, [recentSales, prices])
 
     // For backward compatibility - use filtered totals for summary cards
     const totals = {
@@ -213,6 +326,7 @@ export default function LaporanPangkalanPage() {
     const getPeriodLabel = () => {
         switch (selectedPeriod) {
             case 'hariini': return 'Hari Ini'
+            case '7hari': return '7 Hari'
             case 'mingguini': return 'Minggu Ini'
             case 'bulanini': return 'Bulan Ini'
             case 'custom': return `${customStartDate} - ${customEndDate}`
@@ -220,16 +334,345 @@ export default function LaporanPangkalanPage() {
         }
     }
 
-    // Prepare chart data (stays as 7-day trend)
-    const enhancedChartData = chartData.map(day => ({
-        name: formatDate(day.date),
-        fullDate: day.date,
-        penjualan: day.penjualan,
-        modal: day.modal,
-        margin: day.penjualan - day.modal,
-        pengeluaran: day.pengeluaran,
-        laba: day.laba,
-    }))
+    // Prepare chart data (MEMOIZED)
+    const enhancedChartData = useMemo(() => {
+        return chartData.map(day => ({
+            name: formatDate(day.date),
+            fullDate: day.date,
+            penjualan: day.penjualan,
+            modal: day.modal,
+            margin: day.penjualan - day.modal,
+            pengeluaran: day.pengeluaran,
+            laba: day.laba,
+        }))
+    }, [chartData])
+
+    // Export to Excel - Always exports CURRENT MONTH data with proper number/date formats
+    const handleExportExcel = useCallback(() => {
+        if (allSales.length === 0) {
+            toast.error('Tidak ada data untuk di-export')
+            return
+        }
+
+        try {
+            toast.loading('Generating Excel...', { id: 'excel-export' })
+
+            const wb = XLSX.utils.book_new()
+            const now = new Date()
+            const pangkalanName = profile?.pangkalans?.name || profile?.name || 'PANGKALAN'
+            const monthName = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase()
+
+            // Helper: Format date as DD/MM/YYYY (Excel-friendly)
+            const formatDateExcel = (dateStr: string) => {
+                const date = new Date(dateStr)
+                const day = date.getDate().toString().padStart(2, '0')
+                const month = (date.getMonth() + 1).toString().padStart(2, '0')
+                const year = date.getFullYear()
+                return `${day}/${month}/${year}`
+            }
+
+            // Filter sales for CURRENT MONTH only (ignores UI filter)
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+            const monthlySales = allSales.filter(sale => {
+                const saleTime = new Date(sale.sale_date).getTime()
+                return saleTime >= monthStart.getTime() && saleTime <= monthEnd.getTime()
+            })
+
+            const wsData: (string | number)[][] = []
+
+            // Title row
+            wsData.push([`DATA PENJUALAN ${pangkalanName.toUpperCase()} BULAN ${monthName}`])
+            wsData.push([]) // Empty row
+
+            // Headers
+            wsData.push([
+                'NO', 'TANGGAL', 'NAMA PELANGGAN', 'QTY',
+                'HARGA BELI', 'HARGA JUAL', 'MARGIN SATUAN', 'TOTAL BELI', 'TOTAL JUAL',
+                'MARGIN KOTOR', 'PENGELUARAN', 'LABA BERSIH', 'TIPE LPG'
+            ])
+
+            let rowNo = 1
+            let grandTotalQty = 0
+            let grandTotalModal = 0
+            let grandTotalPenjualan = 0
+            let grandTotalMargin = 0
+
+            // Group sales by date (sorted)
+            const salesByDate = monthlySales.reduce((acc, sale) => {
+                const dateKey = formatDateExcel(sale.sale_date)
+                if (!acc[dateKey]) acc[dateKey] = []
+                acc[dateKey].push(sale)
+                return acc
+            }, {} as Record<string, typeof monthlySales>)
+
+            // Process each date group
+            Object.entries(salesByDate)
+                .sort(([a], [b]) => {
+                    const [dayA, monthA, yearA] = a.split('/').map(Number)
+                    const [dayB, monthB, yearB] = b.split('/').map(Number)
+                    return new Date(yearA, monthA - 1, dayA).getTime() - new Date(yearB, monthB - 1, dayB).getTime()
+                })
+                .forEach(([dateLabel, dateSales]) => {
+                    dateSales.forEach((sale) => {
+                        const costPrice = getCostPrice(sale.lpg_type)
+                        const hargaJual = Number(sale.price_per_unit)
+                        const marginSatuan = hargaJual - costPrice
+                        const totalModal = sale.qty * costPrice
+                        const totalPenjualan = Number(sale.total_amount)
+                        const marginKotor = totalPenjualan - totalModal
+                        const pengeluaran = 0
+                        const labaBersih = marginKotor - pengeluaran
+
+                        grandTotalQty += sale.qty
+                        grandTotalModal += totalModal
+                        grandTotalPenjualan += totalPenjualan
+                        grandTotalMargin += marginKotor
+
+                        // All currency values as pure numbers (best practice for Excel formulas)
+                        wsData.push([
+                            rowNo++,
+                            dateLabel, // DD/MM/YYYY format
+                            sale.consumer_name || sale.consumers?.name || 'Walk-in',
+                            sale.qty,
+                            costPrice,       // Pure number
+                            hargaJual,       // Pure number
+                            marginSatuan,    // Pure number
+                            totalModal,      // Pure number
+                            totalPenjualan,  // Pure number
+                            marginKotor,     // Pure number
+                            pengeluaran,     // Pure number
+                            labaBersih,      // Pure number
+                            sale.lpg_type.toUpperCase()
+                        ])
+                    })
+                })
+
+            // Total row with pure numbers
+            wsData.push([])
+            wsData.push([
+                'TOTAL', '', '', grandTotalQty,
+                '', '', '', grandTotalModal, grandTotalPenjualan,
+                grandTotalMargin, 0, grandTotalMargin, ''
+            ])
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData)
+
+            // Column widths
+            ws['!cols'] = [
+                { wch: 5 },   // NO
+                { wch: 15 },  // TANGGAL
+                { wch: 20 },  // NAMA PELANGGAN
+                { wch: 6 },   // QTY
+                { wch: 16 },  // HARGA BELI
+                { wch: 16 },  // HARGA JUAL
+                { wch: 16 },  // MARGIN SATUAN
+                { wch: 18 },  // TOTAL BELI
+                { wch: 18 },  // TOTAL JUAL
+                { wch: 16 },  // MARGIN KOTOR
+                { wch: 14 },  // PENGELUARAN
+                { wch: 16 },  // LABA BERSIH
+                { wch: 10 },  // TIPE LPG
+            ]
+
+            // Merge title
+            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }]
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Laporan Penjualan')
+
+            const fileName = `Laporan_${pangkalanName.replace(/\s/g, '_')}_${monthName.replace(/\s/g, '_')}.xlsx`
+            XLSX.writeFile(wb, fileName)
+
+            toast.success('Excel berhasil di-download!', { id: 'excel-export' })
+        } catch (error) {
+            console.error('Excel export error:', error)
+            toast.error('Gagal export Excel', { id: 'excel-export' })
+        }
+    }, [allSales, prices, profile])
+
+    // Export to PDF - Always exports CURRENT MONTH data with Rp currency format
+    const handleExportPDF = useCallback(() => {
+        if (allSales.length === 0) {
+            toast.error('Tidak ada data untuk di-export')
+            return
+        }
+
+        try {
+            toast.loading('Generating PDF...', { id: 'pdf-export' })
+
+            const doc = new jsPDF({ orientation: 'landscape' })
+            const pageWidth = doc.internal.pageSize.getWidth()
+            const margin = 14
+            const now = new Date()
+
+            // Helpers
+            const formatRp = (value: number) => `Rp ${value.toLocaleString('id-ID')}`
+            const formatDatePremium = (dateStr: string) => {
+                return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })
+            }
+
+            // Filter for CURRENT MONTH only (ignores UI filter)
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+            const monthlySales = allSales.filter(sale => {
+                const saleTime = new Date(sale.sale_date).getTime()
+                return saleTime >= monthStart.getTime() && saleTime <= monthEnd.getTime()
+            })
+
+            const monthName = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase()
+            const pangkalanName = profile?.pangkalans?.name || profile?.name || 'PANGKALAN'
+
+            // Calculate totals
+            let totalQty = 0, totalModal = 0, totalPenjualan = 0, totalLaba = 0
+            monthlySales.forEach(sale => {
+                const costPrice = getCostPrice(sale.lpg_type)
+                const modal = sale.qty * costPrice
+                const penjualan = Number(sale.total_amount)
+                totalQty += sale.qty
+                totalModal += modal
+                totalPenjualan += penjualan
+                totalLaba += penjualan - modal
+            })
+
+            // ========== HEADER ==========
+            // Watermark/branding in top right
+            doc.setFont('helvetica', 'italic')
+            doc.setFontSize(9)
+            doc.setTextColor(150)
+            doc.text('Sim4lon by Luthfi', pageWidth - margin, 10, { align: 'right' })
+
+            // Main title
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(14)
+            doc.setTextColor(30, 64, 175)
+            doc.text(`LAPORAN PENJUALAN ${pangkalanName.toUpperCase()}`, pageWidth / 2, 15, { align: 'center' })
+
+            doc.setFontSize(10)
+            doc.setTextColor(100)
+            doc.text(`Bulan: ${monthName}`, pageWidth / 2, 22, { align: 'center' })
+
+            // ========== SUMMARY BOX ==========
+            doc.setDrawColor(200)
+            doc.setFillColor(248, 250, 252)
+            doc.roundedRect(margin, 28, pageWidth - 2 * margin, 20, 3, 3, 'F')
+
+            doc.setFontSize(9)
+            doc.setTextColor(60)
+            const summaryY = 38
+            doc.text(`Total Transaksi: ${monthlySales.length}`, margin + 5, summaryY)
+            doc.text(`Total Qty: ${totalQty} unit`, margin + 60, summaryY)
+            doc.text(`Total Penjualan: ${formatRp(totalPenjualan)}`, margin + 110, summaryY)
+            doc.text(`Total Modal: ${formatRp(totalModal)}`, margin + 175, summaryY)
+            doc.setTextColor(22, 163, 74)
+            doc.text(`Laba: ${formatRp(totalLaba)}`, margin + 235, summaryY)
+
+            // ========== TABLE (same columns as Excel) ==========
+            const headers = [
+                'NO', 'TANGGAL', 'NAMA PELANGGAN', 'QTY',
+                'HARGA BELI', 'HARGA JUAL', 'MARGIN SATUAN', 'TOTAL BELI', 'TOTAL JUAL',
+                'MARGIN KOTOR', 'PENGELUARAN', 'LABA BERSIH', 'TIPE'
+            ]
+
+            const tableData: (string | number)[][] = []
+            let rowNo = 1
+
+            monthlySales.forEach(sale => {
+                const costPrice = getCostPrice(sale.lpg_type)
+                const hargaJual = Number(sale.price_per_unit)
+                const marginSatuan = hargaJual - costPrice
+                const totalBeli = sale.qty * costPrice
+                const totalJual = Number(sale.total_amount)
+                const marginKotor = totalJual - totalBeli
+                const pengeluaran = 0
+                const labaBersih = marginKotor - pengeluaran
+
+                tableData.push([
+                    rowNo++,
+                    formatDatePremium(sale.sale_date),
+                    sale.consumer_name || sale.consumers?.name || 'Walk-in',
+                    sale.qty,
+                    formatRp(costPrice),
+                    formatRp(hargaJual),
+                    formatRp(marginSatuan),
+                    formatRp(totalBeli),
+                    formatRp(totalJual),
+                    formatRp(marginKotor),
+                    formatRp(pengeluaran),
+                    formatRp(labaBersih),
+                    sale.lpg_type.toUpperCase()
+                ])
+            })
+
+            autoTable(doc, {
+                startY: 52,
+                head: [headers],
+                body: tableData,
+                theme: 'grid',
+                margin: { left: 5, right: 5 },
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 1,
+                    lineColor: [200, 200, 200],
+                    lineWidth: 0.1,
+                    overflow: 'linebreak',
+                },
+                headStyles: {
+                    fillColor: [30, 64, 175],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    fontSize: 8,
+                    halign: 'center',
+                    cellPadding: 4,
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 14 },  // NO
+                    1: { cellWidth: 24 },                    // TANGGAL
+                    2: { cellWidth: 'auto' },                // NAMA PELANGGAN (flexible)
+                    3: { halign: 'center', cellWidth: 14 },  // QTY
+                    4: { halign: 'right', cellWidth: 20 },   // HARGA BELI
+                    5: { halign: 'right', cellWidth: 20 },   // HARGA JUAL
+                    6: { halign: 'right', cellWidth: 20 },   // MARGIN SATUAN
+                    7: { halign: 'right', cellWidth: 26 },   // TOTAL BELI
+                    8: { halign: 'right', cellWidth: 26 },   // TOTAL JUAL
+                    9: { halign: 'right', cellWidth: 24 },   // MARGIN KOTOR
+                    10: { halign: 'right', cellWidth: 24 },  // PENGELUARAN
+                    11: { halign: 'right', cellWidth: 24 },  // LABA BERSIH
+                    12: { halign: 'center', cellWidth: 14 }, // TIPE
+                },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                didParseCell: (data) => {
+                    // Highlight positive LABA BERSIH in green (column index 11)
+                    if (data.column.index === 11 && data.section === 'body') {
+                        const rawValue = String(data.cell.raw).replace(/[^\d]/g, '')
+                        if (parseInt(rawValue) > 0) {
+                            data.cell.styles.textColor = [22, 163, 74]
+                            data.cell.styles.fontStyle = 'bold'
+                        }
+                    }
+                }
+            })
+
+            // Footer
+            const pageCount = doc.getNumberOfPages()
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i)
+                doc.setFontSize(8)
+                doc.setTextColor(150)
+                doc.text(
+                    `Halaman ${i} dari ${pageCount} | Dicetak: ${new Date().toLocaleString('id-ID')}`,
+                    pageWidth / 2,
+                    doc.internal.pageSize.getHeight() - 10,
+                    { align: 'center' }
+                )
+            }
+
+            doc.save(`Laporan_${pangkalanName.replace(/\s/g, '_')}_${monthName.replace(/\s/g, '_')}.pdf`)
+            toast.success('PDF berhasil di-download!', { id: 'pdf-export' })
+        } catch (error) {
+            console.error('PDF export error:', error)
+            toast.error('Gagal export PDF', { id: 'pdf-export' })
+        }
+    }, [allSales, prices, profile])
 
     if (isLoading) {
         return (
@@ -277,10 +720,29 @@ export default function LaporanPangkalanPage() {
                             Perhitungan: Qty × (Harga Jual - Modal)
                         </p>
                     </div>
-                    <Button variant="outline" size="default" className="rounded-xl shadow-sm hover:shadow-md transition-all">
-                        <SafeIcon name="Download" className="h-4 w-4 mr-2" />
-                        Export
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="default"
+                                className="rounded-xl shadow-sm hover:shadow-md transition-all"
+                            >
+                                <SafeIcon name="Download" className="h-4 w-4 mr-2" />
+                                Export
+                                <SafeIcon name="ChevronDown" className="h-3 w-3 ml-1" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-600" />
+                                Export Excel
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-600" />
+                                Export PDF
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
                 {/* Date Filter Buttons */}
@@ -288,6 +750,7 @@ export default function LaporanPangkalanPage() {
                     <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
                         {[
                             { value: 'hariini', label: 'Hari Ini', icon: 'Calendar' },
+                            { value: '7hari', label: '7 Hari', icon: 'CalendarClock' },
                             { value: 'mingguini', label: 'Minggu Ini', icon: 'CalendarDays' },
                             { value: 'bulanini', label: 'Bulan Ini', icon: 'CalendarRange' },
                         ].map((period) => (
@@ -347,38 +810,19 @@ export default function LaporanPangkalanPage() {
                 </div>
             </div>
 
-            {/* Price Info Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-50 via-white to-green-50 rounded-2xl border border-slate-200 p-5 shadow-sm">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/50 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="relative flex flex-wrap items-center gap-6 lg:gap-10">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                            <SafeIcon name="Package" className="h-5 w-5 text-slate-600" />
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide">Harga Beli</p>
-                            <p className="text-lg font-bold text-slate-900">Rp 16.000<span className="text-sm font-normal text-slate-500">/tabung</span></p>
-                        </div>
+            {/* Calculation Info Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl border border-slate-200 p-4 shadow-sm">
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2 text-slate-600">
+                        <SafeIcon name="Calculator" className="h-4 w-4" />
+                        <span className="font-medium">Perhitungan:</span>
                     </div>
-                    <div className="w-px h-10 bg-slate-200 hidden lg:block" />
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                            <SafeIcon name="Tag" className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide">Harga Jual</p>
-                            <p className="text-lg font-bold text-blue-600">Rp 18.000<span className="text-sm font-normal text-slate-500">/tabung</span></p>
-                        </div>
-                    </div>
-                    <div className="w-px h-10 bg-slate-200 hidden lg:block" />
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                            <SafeIcon name="TrendingUp" className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide">Margin/Unit</p>
-                            <p className="text-lg font-bold text-green-600">Rp 2.000<span className="text-sm font-normal text-slate-500">/tabung</span></p>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-white">Modal = Qty × Harga Beli</Badge>
+                        <span className="text-slate-400">→</span>
+                        <Badge variant="outline" className="bg-white">Penjualan = Qty × Harga Jual</Badge>
+                        <span className="text-slate-400">→</span>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Laba = Penjualan - Modal</Badge>
                     </div>
                 </div>
             </div>
@@ -599,25 +1043,33 @@ export default function LaporanPangkalanPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {chartData.map((day, index) => {
-                                    const qty = Math.round(day.penjualan / HARGA_JUAL)
-                                    const margin = day.penjualan - day.modal
-                                    return (
-                                        <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                                            <td className="py-4 px-6 text-slate-900 font-medium">{formatDate(day.date)}</td>
-                                            <td className="text-right py-4 px-6 text-slate-700">{qty}</td>
-                                            <td className="text-right py-4 px-6 text-slate-700">{formatCurrency(day.modal)}</td>
-                                            <td className="text-right py-4 px-6 text-slate-900 font-medium">{formatCurrency(day.penjualan)}</td>
-                                            <td className="text-right py-4 px-6 text-cyan-600 font-medium">{formatCurrency(margin)}</td>
-                                            <td className="text-right py-4 px-6 text-orange-600">{formatCurrency(day.pengeluaran)}</td>
-                                            <td className="text-right py-4 px-6">
-                                                <span className={`font-bold ${day.laba >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                    {formatCurrency(day.laba)}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
+                                {dailySummaryArray.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="text-center py-12">
+                                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                            <p className="text-slate-400">Belum ada data untuk periode ini</p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    dailySummaryArray.map((day, index) => {
+                                        const margin = day.penjualan - day.modal
+                                        return (
+                                            <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                                <td className="py-4 px-6 text-slate-900 font-medium">{formatDate(day.date)}</td>
+                                                <td className="text-right py-4 px-6 text-slate-700">{day.qty}</td>
+                                                <td className="text-right py-4 px-6 text-slate-700">{formatCurrency(day.modal)}</td>
+                                                <td className="text-right py-4 px-6 text-slate-900 font-medium">{formatCurrency(day.penjualan)}</td>
+                                                <td className="text-right py-4 px-6 text-cyan-600 font-medium">{formatCurrency(margin)}</td>
+                                                <td className="text-right py-4 px-6 text-orange-600">{formatCurrency(day.pengeluaran)}</td>
+                                                <td className="text-right py-4 px-6">
+                                                    <span className={`font-bold ${day.laba >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {formatCurrency(day.laba)}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
+                                )}
                             </tbody>
                             <tfoot>
                                 <tr className="bg-gradient-to-r from-slate-100 to-slate-50 font-semibold">
@@ -658,41 +1110,59 @@ export default function LaporanPangkalanPage() {
                         <table className="w-full text-sm">
                             <thead className="sticky top-0 bg-white shadow-sm z-10">
                                 <tr className="bg-slate-50 border-b border-slate-200">
-                                    <th className="text-left py-4 px-6 font-semibold text-slate-700">Tanggal</th>
-                                    <th className="text-left py-4 px-6 font-semibold text-slate-700">Pelanggan</th>
-                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Qty</th>
-                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Modal (×Rp 16.000)</th>
-                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Total</th>
-                                    <th className="text-right py-4 px-6 font-semibold text-green-600">Margin (×Rp 2.000)</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Tanggal</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Pelanggan</th>
+                                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Qty</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Harga Beli</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Harga Jual</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-blue-600">Margin/Unit</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Total Beli</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Total Jual</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-green-600">Laba</th>
+                                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Tipe</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {recentSales.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-12">
+                                        <td colSpan={10} className="text-center py-12">
                                             <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
                                             <p className="text-slate-400">Belum ada transaksi</p>
                                         </td>
                                     </tr>
                                 ) : (
                                     recentSales.map((sale, index) => {
-                                        const modalAmount = sale.qty * HARGA_MODAL
-                                        const marginAmount = sale.qty * MARGIN_PER_UNIT
+                                        const costPrice = getCostPrice(sale.lpg_type)
+                                        const hargaJual = Number(sale.price_per_unit)
+                                        const marginPerUnit = hargaJual - costPrice
+                                        const totalBeli = sale.qty * costPrice
+                                        const totalJual = Number(sale.total_amount)
+                                        const laba = totalJual - totalBeli
                                         return (
                                             <tr key={sale.id} className={`border-b border-slate-100 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                                                <td className="py-4 px-6 text-slate-600">
+                                                <td className="py-3 px-4 text-slate-600">
                                                     {new Date(sale.sale_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                 </td>
-                                                <td className="py-4 px-6">
-                                                    <span className="font-semibold text-slate-900 uppercase">
+                                                <td className="py-3 px-4">
+                                                    <span className="font-medium text-slate-900 uppercase text-xs">
                                                         {sale.consumers?.name || sale.consumer_name || 'Walk-in'}
                                                     </span>
                                                 </td>
-                                                <td className="text-right py-4 px-6 text-slate-700 font-medium">{sale.qty}</td>
-                                                <td className="text-right py-4 px-6 text-slate-600">{formatCurrency(modalAmount)}</td>
-                                                <td className="text-right py-4 px-6 text-slate-900 font-medium">{formatCurrency(sale.total_amount)}</td>
-                                                <td className="text-right py-4 px-6">
-                                                    <span className="font-bold text-green-600">{formatCurrency(marginAmount)}</span>
+                                                <td className="text-center py-3 px-4 text-slate-700 font-medium">{sale.qty}</td>
+                                                <td className="text-right py-3 px-4 text-slate-600">{formatCurrency(costPrice)}</td>
+                                                <td className="text-right py-3 px-4 text-slate-700">{formatCurrency(hargaJual)}</td>
+                                                <td className="text-right py-3 px-4">
+                                                    <span className="font-medium text-blue-600">{formatCurrency(marginPerUnit)}</span>
+                                                </td>
+                                                <td className="text-right py-3 px-4 text-slate-600">{formatCurrency(totalBeli)}</td>
+                                                <td className="text-right py-3 px-4 text-slate-900 font-medium">{formatCurrency(totalJual)}</td>
+                                                <td className="text-right py-3 px-4">
+                                                    <span className="font-bold text-green-600">{formatCurrency(laba)}</span>
+                                                </td>
+                                                <td className="text-center py-3 px-4">
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                                        {sale.lpg_type.toUpperCase()}
+                                                    </span>
                                                 </td>
                                             </tr>
                                         )
