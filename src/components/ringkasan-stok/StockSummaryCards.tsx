@@ -30,11 +30,11 @@ const getStatusFromStock = (current: number, minStock: number): 'normal' | 'warn
 const getStatusBadge = (status: 'normal' | 'warning' | 'critical') => {
   switch (status) {
     case 'critical':
-      return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">Kritis</Badge>
+      return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/20">Kritis</Badge>
     case 'warning':
-      return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Perhatian</Badge>
+      return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400">Perhatian</Badge>
     default:
-      return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">Aman</Badge>
+      return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 dark:bg-primary/20">Aman</Badge>
   }
 }
 
@@ -88,16 +88,16 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="border-2 shadow-soft animate-pulse">
+          <Card key={i} className="glass-card animate-pulse">
             <CardHeader className="pb-3">
-              <div className="h-6 bg-gray-200 rounded w-1/2" />
-              <div className="h-4 bg-gray-100 rounded w-1/3 mt-2" />
+              <div className="h-6 bg-muted rounded w-1/2" />
+              <div className="h-4 bg-muted/50 rounded w-1/3 mt-2" />
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="h-16 bg-gray-200 rounded w-1/2" />
+              <div className="h-16 bg-muted rounded w-1/2" />
               <div className="grid grid-cols-2 gap-3">
-                <div className="h-12 bg-gray-100 rounded" />
-                <div className="h-12 bg-gray-100 rounded" />
+                <div className="h-12 bg-muted/50 rounded" />
+                <div className="h-12 bg-muted/50 rounded" />
               </div>
             </CardContent>
           </Card>
@@ -142,11 +142,11 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
       {/* Total Stock Summary Section - Only show if showSummary is true */}
       {showSummary && (
         <div className="glass-card rounded-2xl overflow-hidden animate-fadeInUp">
-          <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 p-6">
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               {/* Total Keseluruhan */}
               <div className="flex items-center gap-4">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600" style={{ boxShadow: '0 4px 20px -4px rgba(34,197,94,0.5)' }}>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg">
                   <SafeIcon name="Package" className="h-8 w-8 text-white" />
                 </div>
                 <div>
@@ -157,19 +157,19 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
 
               {/* Breakdown by Category */}
               <div className="grid grid-cols-3 gap-3 md:gap-4">
-                <div className="text-center p-4 rounded-xl bg-green-500/10 min-w-[100px]">
+                <div className="text-center p-4 rounded-xl bg-primary/10 dark:bg-primary/20 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Subsidi</p>
-                  <p className="text-2xl font-bold text-green-600"><AnimatedNumber value={totalSubsidi} delay={200} /></p>
+                  <p className="text-2xl font-bold text-primary"><AnimatedNumber value={totalSubsidi} delay={200} /></p>
                   <p className="text-xs text-muted-foreground">unit</p>
                 </div>
-                <div className="text-center p-4 rounded-xl bg-blue-500/10 min-w-[100px]">
+                <div className="text-center p-4 rounded-xl bg-accent/10 dark:bg-accent/20 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Non-Subsidi</p>
-                  <p className="text-2xl font-bold text-blue-600"><AnimatedNumber value={totalNonSubsidi} delay={300} /></p>
+                  <p className="text-2xl font-bold text-accent"><AnimatedNumber value={totalNonSubsidi} delay={300} /></p>
                   <p className="text-xs text-muted-foreground">unit</p>
                 </div>
-                <div className="text-center p-4 rounded-xl bg-purple-500/10 min-w-[100px]">
+                <div className="text-center p-4 rounded-xl bg-muted/50 dark:bg-muted/30 min-w-[100px]">
                   <p className="text-xs font-medium text-muted-foreground mb-1">Jenis Produk</p>
-                  <p className="text-2xl font-bold text-purple-600"><AnimatedNumber value={products.length} delay={400} /></p>
+                  <p className="text-2xl font-bold text-foreground"><AnimatedNumber value={products.length} delay={400} /></p>
                   <p className="text-xs text-muted-foreground">produk aktif</p>
                 </div>
               </div>
@@ -241,8 +241,8 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                     <Badge
                       variant="outline"
                       className={`px-3 py-1 font-medium ${product.category === 'SUBSIDI'
-                        ? 'bg-green-500/10 text-green-700 border-green-300'
-                        : 'bg-blue-500/10 text-blue-700 border-blue-300'
+                        ? 'bg-primary/10 text-primary border-primary/30 dark:bg-primary/20'
+                        : 'bg-accent/10 text-accent border-accent/30 dark:bg-accent/20'
                         }`}
                     >
                       {getCategoryLabel(product.category)}

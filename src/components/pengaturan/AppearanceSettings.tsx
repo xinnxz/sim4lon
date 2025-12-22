@@ -58,16 +58,15 @@ export default function AppearanceSettings() {
         }
         if (savedAccent) {
             setSettings(prev => ({ ...prev, accentColor: savedAccent }))
+            // Apply saved accent color immediately
             document.documentElement.setAttribute('data-accent', savedAccent)
         }
     }, [])
 
     const handleThemeChange = (theme: Theme) => {
         setSettings(prev => ({ ...prev, theme }))
-
-        // Apply theme immediately
+        // Preview theme immediately (but don't save yet)
         const root = document.documentElement
-
         if (theme === 'system') {
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
             root.classList.remove('light', 'dark')
@@ -76,20 +75,14 @@ export default function AppearanceSettings() {
             root.classList.remove('light', 'dark')
             root.classList.add(theme)
         }
-
-        localStorage.setItem('theme', theme)
-        toast.success(`Tema diubah ke ${themeOptions.find(t => t.value === theme)?.label}`)
+        // Note: Don't save to localStorage here - only on Save button click
     }
 
     const handleChange = (field: keyof AppearanceState, value: string) => {
         setSettings(prev => ({ ...prev, [field]: value }))
-
-        // Apply accent color immediately
+        // Preview accent color immediately (but don't save yet)
         if (field === 'accentColor') {
             document.documentElement.setAttribute('data-accent', value)
-            localStorage.setItem('accentColor', value)
-            const colorLabel = accentColors.find(c => c.value === value)?.label
-            toast.success(`Warna aksen diubah ke ${colorLabel}`)
         }
     }
 
@@ -97,6 +90,11 @@ export default function AppearanceSettings() {
         setIsSaving(true)
         try {
             await new Promise(resolve => setTimeout(resolve, 500))
+            // Save theme to localStorage
+            localStorage.setItem('theme', settings.theme)
+            // Save accent color to localStorage
+            localStorage.setItem('accentColor', settings.accentColor)
+            // Save all settings
             localStorage.setItem('appearance_settings', JSON.stringify(settings))
             toast.success('Pengaturan tampilan berhasil disimpan')
         } catch (error) {

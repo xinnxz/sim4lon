@@ -11,11 +11,11 @@ export declare class AuthService {
         message: string;
         user: {
             id: string;
-            created_at: Date;
             code: string;
             email: string;
             name: string;
             role: import("@prisma/client").$Enums.user_role;
+            created_at: Date;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -36,7 +36,6 @@ export declare class AuthService {
     }>;
     getProfile(userId: string): Promise<{
         id: string;
-        created_at: Date;
         code: string;
         email: string;
         name: string;
@@ -45,6 +44,7 @@ export declare class AuthService {
         role: import("@prisma/client").$Enums.user_role;
         pangkalan_id: string | null;
         is_active: boolean;
+        created_at: Date;
         updated_at: Date;
         pangkalans: {
             id: string;
@@ -58,7 +58,6 @@ export declare class AuthService {
         message: string;
         user: {
             id: string;
-            created_at: Date;
             code: string;
             email: string;
             name: string;
@@ -66,6 +65,7 @@ export declare class AuthService {
             avatar_url: string | null;
             role: import("@prisma/client").$Enums.user_role;
             is_active: boolean;
+            created_at: Date;
             updated_at: Date;
         };
     }>;

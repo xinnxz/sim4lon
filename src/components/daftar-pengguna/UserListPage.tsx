@@ -55,9 +55,9 @@ const roleLabels: Record<UserRole, string> = {
 }
 
 const roleBadgeColors: Record<UserRole, string> = {
-  ADMIN: 'bg-purple-500/20 text-purple-600',
-  OPERATOR: 'bg-blue-500/20 text-blue-600',
-  PANGKALAN: 'bg-green-500/20 text-green-600'
+  ADMIN: 'bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+  OPERATOR: 'bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+  PANGKALAN: 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
 }
 
 export default function UserListPage() {
@@ -128,17 +128,17 @@ export default function UserListPage() {
   // Sortable Header Component
   const SortableHeader = ({ field, children, className = '', align = 'left' }: { field: SortField; children: React.ReactNode; className?: string; align?: 'left' | 'center' }) => (
     <TableHead
-      className={`font-semibold text-slate-700 cursor-pointer hover:bg-slate-200/50 transition-colors select-none ${className}`}
+      className={`font-semibold text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none ${className}`}
       onClick={() => handleSort(field)}
     >
       <div className={`flex items-center gap-1.5 ${align === 'center' ? 'justify-center' : 'justify-start'}`}>
         {children}
         {sortField === field ? (
           sortDirection === 'asc'
-            ? <SafeIcon name="ChevronUp" className="w-4 h-4 text-green-500" />
-            : <SafeIcon name="ChevronDown" className="w-4 h-4 text-green-500" />
+            ? <SafeIcon name="ChevronUp" className="w-4 h-4 text-primary" />
+            : <SafeIcon name="ChevronDown" className="w-4 h-4 text-primary" />
         ) : (
-          <SafeIcon name="ChevronsUpDown" className="w-4 h-4 text-slate-400 opacity-50" />
+          <SafeIcon name="ChevronsUpDown" className="w-4 h-4 text-muted-foreground/50" />
         )}
       </div>
     </TableHead>
@@ -302,10 +302,10 @@ export default function UserListPage() {
                 <Card className="border-0 glass-card h-full">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-slate-200 w-10 h-10 animate-shimmer" />
+                      <div className="p-2.5 rounded-xl bg-muted w-10 h-10 animate-shimmer" />
                       <div className="space-y-2 flex-1">
-                        <div className="h-3 w-16 bg-slate-200 rounded animate-shimmer" />
-                        <div className="h-7 w-12 bg-slate-200 rounded animate-shimmer" />
+                        <div className="h-3 w-16 bg-muted rounded animate-shimmer" />
+                        <div className="h-7 w-12 bg-muted rounded animate-shimmer" />
                       </div>
                     </div>
                   </CardContent>
@@ -336,12 +336,12 @@ export default function UserListPage() {
               <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-purple-500/10">
-                      <SafeIcon name="Shield" className="w-5 h-5 text-purple-500" />
+                    <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/15">
+                      <SafeIcon name="Shield" className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Administrator</p>
-                      <p className="text-2xl font-bold text-purple-600"><AnimatedNumber value={adminCount} delay={200} /></p>
+                      <p className="text-2xl font-bold text-purple-600 dark:text-purple-400"><AnimatedNumber value={adminCount} delay={200} /></p>
                     </div>
                   </div>
                 </CardContent>
@@ -352,12 +352,12 @@ export default function UserListPage() {
               <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-blue-500/10">
-                      <SafeIcon name="UserCog" className="w-5 h-5 text-blue-500" />
+                    <div className="p-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15">
+                      <SafeIcon name="UserCog" className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Operator</p>
-                      <p className="text-2xl font-bold text-blue-600"><AnimatedNumber value={operatorCount} delay={300} /></p>
+                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400"><AnimatedNumber value={operatorCount} delay={300} /></p>
                     </div>
                   </div>
                 </CardContent>
@@ -378,7 +378,7 @@ export default function UserListPage() {
                 placeholder="Cari nama, email, atau telepon..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/50 border-white/20 focus:border-green-400 focus:ring-green-400/20"
+                className="pl-10 bg-transparent border-border focus:border-primary focus:ring-primary/20"
               />
             </div>
 
@@ -388,8 +388,8 @@ export default function UserListPage() {
                 size="sm"
                 onClick={() => setRoleFilter('all')}
                 className={roleFilter === 'all'
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
-                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
+                  ? 'bg-gradient-to-r from-primary to-primary/80 text-white shadow-md'
+                  : 'bg-transparent hover:bg-muted/50 text-muted-foreground'}
               >
                 <SafeIcon name="Users" className="w-4 h-4 mr-1.5" />
                 Semua
@@ -398,8 +398,8 @@ export default function UserListPage() {
                 size="sm"
                 onClick={() => setRoleFilter('ADMIN')}
                 className={roleFilter === 'ADMIN'
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
+                  ? 'bg-gradient-to-r from-purple-600/90 to-purple-500/90 text-white shadow-md'
+                  : 'bg-transparent hover:bg-muted/50 text-muted-foreground'}
               >
                 <SafeIcon name="Shield" className="w-4 h-4 mr-1.5" />
                 Admin
@@ -408,8 +408,8 @@ export default function UserListPage() {
                 size="sm"
                 onClick={() => setRoleFilter('OPERATOR')}
                 className={roleFilter === 'OPERATOR'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
-                  : 'bg-transparent hover:bg-white/50 text-muted-foreground'}
+                  ? 'bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white shadow-md'
+                  : 'bg-transparent hover:bg-muted/50 text-muted-foreground'}
               >
                 <SafeIcon name="UserCog" className="w-4 h-4 mr-1.5" />
                 Operator
@@ -447,7 +447,7 @@ export default function UserListPage() {
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-slate-50 to-slate-100/50">
+                  <TableRow className="bg-transparent border-border focus:border-primary">
                     <SortableHeader field="code" className="w-24">Kode</SortableHeader>
                     <SortableHeader field="name">Nama</SortableHeader>
                     <SortableHeader field="email">Email</SortableHeader>
@@ -464,7 +464,7 @@ export default function UserListPage() {
                       return (
                         <TableRow
                           key={user.id}
-                          className={`hover:bg-blue-50/50 transition-colors ${isCurrentUser ? 'bg-purple-50/50 border-l-2 border-l-purple-500' : ''}`}
+                          className={`hover:bg-muted/50 transition-colors ${isCurrentUser ? 'bg-purple-500/5 border-l-2 border-l-purple-500' : ''}`}
                         >
                           <TableCell className="font-mono text-sm text-primary">
                             {(user as any).code || '-'}
@@ -490,8 +490,8 @@ export default function UserListPage() {
                             <Badge
                               className={
                                 user.is_active
-                                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm'
-                                  : 'bg-gradient-to-r from-slate-400 to-slate-500 text-white shadow-sm'
+                                  ? 'bg-gradient-to-r from-primary-600/90 to-primary-500/90 text-white shadow-sm'
+                                  : 'bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/50 text-white shadow-sm'
                               }
                             >
                               {user.is_active ? '✓ Aktif' : 'Nonaktif'}

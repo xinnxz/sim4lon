@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon'
 import { notificationApi, type NotificationItem } from '@/lib/api'
@@ -48,109 +47,154 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
     }
   };
 
-  const getPriorityStyle = (priority: NotificationItem['priority']) => {
+  const getPriorityConfig = (priority: NotificationItem['priority']) => {
     switch (priority) {
       case 'critical':
-        return 'bg-red-100 text-red-600 border-red-300'
+        return {
+          badge: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+          icon: 'bg-rose-500/10 dark:bg-rose-500/15',
+          iconColor: 'text-rose-600 dark:text-rose-400',
+          label: 'Kritis!',
+          dot: 'bg-rose-500'
+        }
       case 'high':
-        return 'bg-orange-100 text-orange-600 border-orange-300'
-      default:
-        return 'bg-accent/10 text-accent-foreground border-accent/30'
-    }
-  }
-
-  const getIconStyle = (priority: NotificationItem['priority']) => {
-    switch (priority) {
-      case 'critical':
-        return 'bg-red-50 group-hover:bg-red-100'
-      case 'high':
-        return 'bg-orange-50 group-hover:bg-orange-100'
+        return {
+          badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+          icon: 'bg-amber-500/10 dark:bg-amber-500/15',
+          iconColor: 'text-amber-600 dark:text-amber-400',
+          label: 'Penting',
+          dot: 'bg-amber-500'
+        }
       case 'medium':
-        return 'bg-primary/15 group-hover:bg-primary/20'
+        return {
+          badge: 'bg-primary/10 text-primary border-primary/20',
+          icon: 'bg-primary/10 dark:bg-primary/15',
+          iconColor: 'text-primary',
+          label: 'Info',
+          dot: 'bg-primary'
+        }
       default:
-        return 'bg-secondary group-hover:bg-secondary/70'
-    }
-  }
-
-  const getIconColor = (priority: NotificationItem['priority']) => {
-    switch (priority) {
-      case 'critical':
-        return 'text-red-600'
-      case 'high':
-        return 'text-orange-600'
-      case 'medium':
-        return 'text-primary'
-      default:
-        return 'text-foreground'
+        return {
+          badge: 'bg-muted text-muted-foreground border-border',
+          icon: 'bg-muted',
+          iconColor: 'text-muted-foreground',
+          label: '',
+          dot: 'bg-muted-foreground'
+        }
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Notifikasi</DialogTitle>
-          <DialogDescription>
-            {isLoading ? 'Memuat notifikasi...' : `Anda memiliki ${notifications.length} notifikasi`}
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="h-[500px] pr-4">
-          <div className="space-y-2">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+        {/* Enhanced Header */}
+        <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 px-6 py-5 border-b border-border/50">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+                <SafeIcon name="Bell" className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold">Notifikasi</DialogTitle>
+                <DialogDescription className="text-sm">
+                  {isLoading ? 'Memuat...' : notifications.length > 0 ? `${notifications.length} notifikasi aktif` : 'Tidak ada notifikasi'}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
+
+        {/* Notification List */}
+        <ScrollArea className="h-[400px]">
+          <div className="px-4 py-3 space-y-1">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <SafeIcon name="Loader2" className="h-6 w-6 animate-spin text-muted-foreground" />
+              // Loading skeleton
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-3 p-3 animate-pulse">
+                    <div className="h-10 w-10 rounded-xl bg-muted" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                      <div className="h-3 bg-muted rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : notifications.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <SafeIcon name="Bell" className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>Tidak ada notifikasi</p>
+              // Empty state
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                  <SafeIcon name="BellOff" className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <p className="font-medium text-foreground">Tidak ada notifikasi</p>
+                <p className="text-sm text-muted-foreground mt-1">Semua sudah dibaca!</p>
               </div>
             ) : (
-              notifications.map((notification, index) => (
-                <div key={notification.id}>
+              // Notification items
+              notifications.map((notification, index) => {
+                const config = getPriorityConfig(notification.priority)
+                return (
                   <div
+                    key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className="flex gap-3 p-3 rounded-lg cursor-pointer hover:bg-primary/5 active:bg-primary/10 transition-colors duration-200 group"
+                    className="flex gap-3 p-3 rounded-xl cursor-pointer hover:bg-muted/50 active:bg-muted transition-all duration-200 group"
                   >
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getIconStyle(notification.priority)} transition-colors duration-200`}>
-                      <SafeIcon
-                        name={notification.icon}
-                        className={`h-5 w-5 ${getIconColor(notification.priority)}`}
-                      />
+                    {/* Icon with priority indicator */}
+                    <div className="relative flex-shrink-0">
+                      <div className={`h-10 w-10 rounded-xl ${config.icon} flex items-center justify-center transition-colors`}>
+                        <SafeIcon name={notification.icon} className={`h-5 w-5 ${config.iconColor}`} />
+                      </div>
+                      {(notification.priority === 'critical' || notification.priority === 'high') && (
+                        <div className={`absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ${config.dot} ring-2 ring-background`} />
+                      )}
                     </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-semibold leading-none text-foreground">
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                           {notification.title}
                         </p>
                         {(notification.priority === 'critical' || notification.priority === 'high') && (
-                          <Badge variant="outline" className={`shrink-0 text-xs ${getPriorityStyle(notification.priority)}`}>
-                            {notification.priority === 'critical' ? 'Kritis!' : 'Penting'}
+                          <Badge variant="outline" className={`shrink-0 text-[10px] px-1.5 py-0 ${config.badge}`}>
+                            {config.label}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground leading-snug">
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-muted-foreground/70">
+                      <p className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+                        <SafeIcon name="Clock" className="h-3 w-3" />
                         {notification.time}
                       </p>
                     </div>
+
+                    {/* Arrow indicator */}
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <SafeIcon name="ChevronRight" className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
-                  {index < notifications.length - 1 && (
-                    <Separator className="my-2" />
-                  )}
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </ScrollArea>
-        <Button variant="outline" className="w-full mt-4 text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all duration-300 ease-out" asChild>
-          <a href="/riwayat-aktivitas">
-            Lihat Semua Aktivitas
-            <SafeIcon name="ArrowRight" className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </a>
-        </Button>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-border/50 bg-muted/30">
+          <Button
+            variant="outline"
+            className="w-full gap-2 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+            asChild
+          >
+            <a href="/riwayat-aktivitas">
+              <SafeIcon name="History" className="h-4 w-4" />
+              Lihat Semua Aktivitas
+              <SafeIcon name="ArrowRight" className="h-4 w-4 ml-auto" />
+            </a>
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

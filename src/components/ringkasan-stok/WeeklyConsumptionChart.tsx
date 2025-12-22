@@ -39,10 +39,10 @@ interface ChartResponse {
 
 // Fungsi untuk menentukan level pemakaian (sama dengan dashboard)
 const getUsageLevel = (qty: number) => {
-  if (qty <= 0) return { text: 'TIDAK ADA', color: 'text-gray-500 bg-gray-100' }
-  if (qty >= 50) return { text: 'TINGGI', color: 'text-green-600 bg-green-100' }
-  if (qty >= 20) return { text: 'SEDANG', color: 'text-blue-600 bg-blue-100' }
-  return { text: 'RENDAH', color: 'text-yellow-600 bg-yellow-100' }
+  if (qty <= 0) return { text: 'TIDAK ADA', color: 'text-muted-foreground bg-muted/50' }
+  if (qty >= 50) return { text: 'TINGGI', color: 'text-primary bg-primary/10 dark:bg-primary/20' }
+  if (qty >= 20) return { text: 'SEDANG', color: 'text-accent bg-accent/10 dark:bg-accent/20' }
+  return { text: 'RENDAH', color: 'text-amber-600 bg-amber-500/10 dark:text-amber-400 dark:bg-amber-500/20' }
 }
 
 // Premium Custom Tooltip (enhanced from dashboard version)
@@ -52,18 +52,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const totalQty = payload.reduce((sum: number, p: any) => sum + (p.value || 0), 0)
 
   return (
-    <div
-      className="rounded-xl border shadow-2xl p-4 min-w-[240px]"
-      style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95))',
-        backdropFilter: 'blur(12px)',
-        borderColor: 'rgba(0,0,0,0.08)',
-      }}
-    >
+    <div className="rounded-xl border shadow-2xl p-4 min-w-[240px] bg-card/95 backdrop-blur-md border-border">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-        <span className="text-sm font-bold text-gray-800">📦 Pemakaian - {label}</span>
-        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary font-bold">
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-border">
+        <span className="text-sm font-bold text-foreground">📦 Pemakaian - {label}</span>
+        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary font-bold dark:bg-primary/20">
           {totalQty} Unit
         </Badge>
       </div>
@@ -79,7 +72,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                   className="w-3 h-3 rounded-full shadow-sm"
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-sm text-gray-700 font-medium truncate max-w-[100px]">
+                <span className="text-sm text-foreground font-medium truncate max-w-[100px]">
                   {entry.name}
                 </span>
               </div>
@@ -107,14 +100,14 @@ const CustomLegend = ({ payload }: any) => {
       {payload.map((entry: any, index: number) => (
         <div
           key={index}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-white/50 shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-card/50 dark:bg-card/30 shadow-sm hover:shadow-md transition-shadow"
           style={{ borderColor: `${entry.color}40` }}
         >
           <div
             className="w-2.5 h-2.5 rounded-full"
             style={{ backgroundColor: entry.color, boxShadow: `0 0 6px ${entry.color}60` }}
           />
-          <span className="text-xs font-medium text-gray-600">{entry.value}</span>
+          <span className="text-xs font-medium text-muted-foreground">{entry.value}</span>
         </div>
       ))}
     </div>
@@ -149,14 +142,14 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
   // Loading state with premium skeleton
   if (isLoading) {
     return (
-      <Card className="overflow-hidden border-0 shadow-lg">
-        <div className="h-1 bg-gradient-to-r from-primary/80 via-emerald-400 to-primary/80 animate-pulse" />
+      <Card className="overflow-hidden glass-card">
+        <div className="h-1 bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
         <CardHeader className="pb-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-200 animate-pulse" />
+            <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
             <div className="space-y-2 flex-1">
-              <div className="h-5 w-48 bg-gray-200 rounded animate-pulse" />
-              <div className="h-3 w-64 bg-gray-100 rounded animate-pulse" />
+              <div className="h-5 w-48 bg-muted rounded animate-pulse" />
+              <div className="h-3 w-64 bg-muted/50 rounded animate-pulse" />
             </div>
           </div>
         </CardHeader>
@@ -208,17 +201,14 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
   }
 
   return (
-    <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="overflow-hidden glass-card hover:shadow-xl transition-shadow duration-300">
       {/* Premium top border gradient */}
-      <div className="h-1 bg-gradient-to-r from-primary/80 via-emerald-400 to-teal-500" />
+      <div className="h-1 bg-gradient-to-r from-primary via-accent to-primary" />
 
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-emerald-600"
-              style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.4)' }}
-            >
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg">
               <SafeIcon name="TrendingUp" className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -228,7 +218,7 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="text-xs bg-green-500/10 text-green-700 border-green-200">
+          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30 dark:bg-primary/20">
             <SafeIcon name="Activity" className="h-3 w-3 mr-1" />
             Live
           </Badge>

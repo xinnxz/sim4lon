@@ -26,6 +26,12 @@ import LoginForm from '@/components/login/LoginForm'
   </div>
 </BaseLayout>
 
+<script>
+  // Force light mode and green accent on login page
+  document.documentElement.classList.remove('dark');
+  document.documentElement.removeAttribute('data-accent');  // Remove any accent = default green
+</script>
+
 <style>
   :global(body) {
     overflow-x: hidden;

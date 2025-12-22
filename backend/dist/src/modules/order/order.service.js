@@ -112,13 +112,11 @@ let OrderService = class OrderService {
             };
             const result = mapping[normalized];
             if (result) {
-                console.log(`[mapStringToLpgType] Direct match: ${strType} → ${result}`);
                 return result;
             }
             const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
             if (numberMatch) {
                 const size = parseFloat(numberMatch[1]);
-                console.log(`[mapStringToLpgType] Fallback numeric: ${strType} → size=${size}`);
                 if (size < 1)
                     return 'gr220';
                 if (size <= 4)
@@ -129,7 +127,6 @@ let OrderService = class OrderService {
                     return 'kg12';
                 return 'kg50';
             }
-            console.warn(`[mapStringToLpgType] Unable to map: ${strType}, defaulting to kg3`);
             return 'kg3';
         };
         const orderCount = await this.prisma.orders.count();
@@ -346,44 +343,40 @@ let OrderService = class OrderService {
         }
         if (dto.status === 'SELESAI') {
             const totalQtyForPenyaluran = updated.order_items.reduce((sum, item) => sum + (item.lpg_type === 'kg3' ? item.qty : 0), 0);
-            for (const item of updated.order_items) {
-                await this.prisma.pangkalan_stocks.upsert({
-                    where: {
-                        pangkalan_id_lpg_type: {
-                            pangkalan_id: updated.pangkalan_id,
-                            lpg_type: item.lpg_type,
-                        }
-                    },
-                    create: {
+            const stockUpserts = updated.order_items.map(item => this.prisma.pangkalan_stocks.upsert({
+                where: {
+                    pangkalan_id_lpg_type: {
                         pangkalan_id: updated.pangkalan_id,
                         lpg_type: item.lpg_type,
-                        qty: item.qty,
-                    },
-                    update: {
-                        qty: { increment: item.qty },
-                        updated_at: new Date(),
-                    },
-                });
-                await this.prisma.pangkalan_stock_movements.create({
-                    data: {
-                        pangkalan_id: updated.pangkalan_id,
-                        lpg_type: item.lpg_type,
-                        movement_type: 'IN',
-                        qty: item.qty,
-                        source: 'ORDER',
-                        reference_id: updated.id,
-                        note: `Stok masuk dari Order ${updated.code} - ${item.label || item.lpg_type}`,
-                    },
-                });
-            }
+                    }
+                },
+                create: {
+                    pangkalan_id: updated.pangkalan_id,
+                    lpg_type: item.lpg_type,
+                    qty: item.qty,
+                },
+                update: {
+                    qty: { increment: item.qty },
+                    updated_at: new Date(),
+                },
+            }));
+            const stockMovements = updated.order_items.map(item => this.prisma.pangkalan_stock_movements.create({
+                data: {
+                    pangkalan_id: updated.pangkalan_id,
+                    lpg_type: item.lpg_type,
+                    movement_type: 'IN',
+                    qty: item.qty,
+                    source: 'ORDER',
+                    reference_id: updated.id,
+                    note: `Stok masuk dari Order ${updated.code} - ${item.label || item.lpg_type}`,
+                },
+            }));
+            await Promise.all([...stockUpserts, ...stockMovements]);
             const now = new Date();
             const wibOffset = 7 * 60;
             const wibTime = new Date(now.getTime() + (wibOffset * 60 * 1000));
             const wibDateOnly = new Date(Date.UTC(wibTime.getUTCFullYear(), wibTime.getUTCMonth(), wibTime.getUTCDate(), 0, 0, 0, 0));
-            console.log('[PENYALURAN SYNC] Order SELESAI triggered. Items:', updated.order_items.length);
-            console.log('[PENYALURAN SYNC] WIB date:', wibDateOnly.toISOString());
             for (const item of updated.order_items) {
-                console.log(`[PENYALURAN SYNC] Upserting item: lpg_type=${item.lpg_type}, qty=${item.qty}`);
                 try {
                     const existing = await this.prisma.penyaluran_harian.findFirst({
                         where: {
@@ -392,9 +385,8 @@ let OrderService = class OrderService {
                             lpg_type: item.lpg_type,
                         }
                     });
-                    let result;
                     if (existing) {
-                        result = await this.prisma.penyaluran_harian.update({
+                        await this.prisma.penyaluran_harian.update({
                             where: { id: existing.id },
                             data: {
                                 jumlah_normal: existing.jumlah_normal + item.qty,
@@ -403,7 +395,7 @@ let OrderService = class OrderService {
                         });
                     }
                     else {
-                        result = await this.prisma.penyaluran_harian.create({
+                        await this.prisma.penyaluran_harian.create({
                             data: {
                                 pangkalan_id: updated.pangkalan_id,
                                 tanggal: wibDateOnly,
@@ -414,10 +406,8 @@ let OrderService = class OrderService {
                             },
                         });
                     }
-                    console.log(`[PENYALURAN SYNC] Upsert SUCCESS: id=${result.id}, jumlah_normal=${result.jumlah_normal}`);
                 }
                 catch (err) {
-                    console.error(`[PENYALURAN SYNC] Upsert FAILED for ${item.lpg_type}:`, err);
                 }
             }
         }

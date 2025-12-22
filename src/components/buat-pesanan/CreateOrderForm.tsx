@@ -35,6 +35,7 @@ import {
   type OrderStatus
 } from '@/lib/api'
 import { formatCurrency } from '@/lib/currency'
+import { useAppSettings } from '@/hooks/useAppSettings'
 
 interface OrderItem {
   id: string
@@ -93,6 +94,9 @@ const sizeKgToLpgType = (sizeKg: number | string): string => {
 }
 
 export default function CreateOrderForm() {
+  // App settings (PPN rate, etc.)
+  const { settings: appSettings } = useAppSettings()
+
   // Data state
   const [pangkalanList, setPangkalanList] = useState<Pangkalan[]>([])
   const [lpgProducts, setLpgProducts] = useState<LpgProductWithStock[]>([])
@@ -427,13 +431,14 @@ export default function CreateOrderForm() {
   }
 
   /**
-   * Calculate PPN 12% for non-subsidi items
+   * Calculate PPN for non-subsidi items
+   * Uses dynamic rate from app settings
    */
   const calculateTax = () => {
-    const PPN_RATE = 0.12
+    const ppnDecimal = appSettings.ppnRate / 100 // Convert 12 to 0.12
     return formData.items.reduce((sum, item) => {
       if (item.isTaxable) {
-        return sum + Math.round(item.price * item.quantity * PPN_RATE)
+        return sum + Math.round(item.price * item.quantity * ppnDecimal)
       }
       return sum
     }, 0)
@@ -935,7 +940,7 @@ export default function CreateOrderForm() {
 
             {/* Status Info */}
             {!isEditMode && (
-              <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-lg border border-blue-200">
+              <div className="p-3  from-blue-50 to-blue-100/50 rounded-lg border border-blue-200">
                 <div className="flex gap-2">
                   <SafeIcon name="Info" className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
                   <p className="text-xs text-blue-700">

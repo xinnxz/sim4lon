@@ -20,9 +20,10 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import SafeIcon from '@/components/common/SafeIcon'
-import { ordersApi, paymentApi, type Order, type OrderPaymentDetail } from '@/lib/api'
+import { ordersApi, paymentApi, companyProfileApi, type Order, type OrderPaymentDetail, type CompanyProfile } from '@/lib/api'
 import { formatCurrency } from '@/lib/currency'
 import { toast } from 'sonner'
+import { useAppSettings } from '@/hooks/useAppSettings'
 
 type DocumentType = 'invoice' | 'nota'
 
@@ -66,6 +67,10 @@ export default function NotaPembayaranPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPrinting, setIsPrinting] = useState(false)
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null)
+
+  // Get app settings (PPN rate, etc.)
+  const { settings: appSettings } = useAppSettings()
 
   // Get params from URL
   useEffect(() => {
@@ -92,11 +97,17 @@ export default function NotaPembayaranPage() {
     try {
       setIsLoading(true)
 
-      // Fetch order and payment data
-      const [order, payment] = await Promise.all([
+      // Fetch order, payment data, and company profile
+      const [order, payment, profile] = await Promise.all([
         ordersApi.getById(orderId),
-        paymentApi.getOrderPayment(orderId).catch((): null => null)
+        paymentApi.getOrderPayment(orderId).catch((): null => null),
+        companyProfileApi.get().catch((): null => null)
       ])
+
+      // Store company profile for header
+      if (profile) {
+        setCompanyProfile(profile)
+      }
 
       // Map to DocumentData
       const pangkalan = order.pangkalans
@@ -137,7 +148,7 @@ export default function NotaPembayaranPage() {
         contactPerson: (pangkalan as any)?.pic_name || '',
         items,
         subtotal,
-        taxRate: 12,
+        taxRate: appSettings.ppnRate,
         taxAmount,
         total: order.total_amount,
         isPaid: isPaid,
@@ -343,9 +354,30 @@ _SIM4LON - Sistem Manajemen LPG_`
           <CardContent className="p-8 print:p-6 relative">
             {/* Header */}
             <div className="flex justify-between items-start mb-8">
-              <div>
-                <h1 className="text-2xl font-bold text-primary">SIM4LON</h1>
-                <p className="text-sm text-muted-foreground">Sistem Manajemen LPG</p>
+              <div className="flex items-center gap-4">
+                {/* Company Logo */}
+                {companyProfile?.logo_url ? (
+                  <img
+                    src={companyProfile.logo_url}
+                    alt="Company Logo"
+                    className="w-16 h-16 object-contain rounded-lg border"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <SafeIcon name="Building2" className="h-8 w-8 text-primary" />
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-xl font-bold text-primary">
+                    {companyProfile?.company_name || 'SIM4LON'}
+                  </h1>
+                  <p className="text-xs text-muted-foreground">
+                    {companyProfile?.address || 'Sistem Manajemen LPG'}
+                  </p>
+                  {companyProfile?.phone && (
+                    <p className="text-xs text-muted-foreground">Tel: {companyProfile.phone}</p>
+                  )}
+                </div>
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">

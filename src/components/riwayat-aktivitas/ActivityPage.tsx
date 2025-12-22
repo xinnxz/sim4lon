@@ -82,11 +82,11 @@ const getActivityConfig = (type: string, iconOverride?: string | null) => {
     },
     'ORDER_COMPLETED': {
       icon: 'CheckCircle2',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+      borderColor: 'border-emerald-500/20',
       label: 'Selesai',
-      gradient: 'from-green-500 to-green-600'
+      gradient: 'from-emerald-600/90 to-emerald-500/90'
     },
     'ORDER_DELIVERED': {
       icon: 'Truck',
@@ -123,20 +123,20 @@ const getActivityConfig = (type: string, iconOverride?: string | null) => {
     },
     // System activities
     'USER_LOGIN': {
-      icon: 'LogIn',
-      color: 'text-slate-600',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
+      icon: 'User',
+      color: 'text-muted-foreground',
+      bgColor: 'bg-muted/50',
+      borderColor: 'border-border',
       label: 'Login',
-      gradient: 'from-slate-500 to-slate-600'
+      gradient: 'from-muted-foreground/60 to-muted-foreground/50'
     },
     'SYSTEM_CREATE': {
       icon: 'Plus',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+      borderColor: 'border-emerald-500/20',
       label: 'Data Dibuat',
-      gradient: 'from-green-500 to-green-600'
+      gradient: 'from-emerald-600/90 to-emerald-500/90'
     },
     'SYSTEM_UPDATE': {
       icon: 'Edit',
@@ -307,7 +307,7 @@ export default function ActivityPage() {
       {/* Header - with Vertical Gradient Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-purple-500 via-purple-400 to-pink-400" />
+          <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-primary/40" />
           <div>
             <h1 className="text-3xl font-bold text-gradient-primary">
               Riwayat Aktivitas
@@ -317,7 +317,7 @@ export default function ActivityPage() {
             </p>
           </div>
         </div>
-        <Badge variant="outline" className="px-4 py-2 text-sm font-medium bg-white/50 backdrop-blur-sm w-fit">
+        <Badge variant="outline" className="px-4 py-2 text-sm font-medium bg-card/50 backdrop-blur-sm w-fit">
           <SafeIcon name="Database" className="h-4 w-4 mr-2" />
           {isLoading ? '... ' : <AnimatedNumber value={stats.total} delay={0} />} Total
         </Badge>
@@ -388,7 +388,7 @@ export default function ActivityPage() {
               </div>
               <h3 className="font-semibold text-xl mb-2">Terjadi Kesalahan</h3>
               <p className="text-muted-foreground mb-6 max-w-md">{error}</p>
-              <Button onClick={handleRetry} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+              <Button onClick={handleRetry} className="bg-gradient-to-r from-primary to-primary/80 text-white">
                 <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
                 Coba Lagi
               </Button>
@@ -396,8 +396,8 @@ export default function ActivityPage() {
           ) : activities.length === 0 ? (
             // Empty State
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
-                <SafeIcon name="Inbox" className="h-12 w-12 text-purple-400" />
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center mb-4">
+                <SafeIcon name="Inbox" className="h-12 w-12 text-primary/60" />
               </div>
               <h3 className="font-semibold text-xl mb-2">Belum Ada Aktivitas</h3>
               <p className="text-muted-foreground max-w-md">
@@ -408,7 +408,7 @@ export default function ActivityPage() {
             // Timeline View
             <div className="relative">
               {/* Timeline Line */}
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-500 via-purple-300 to-transparent hidden sm:block" />
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-transparent hidden sm:block" />
 
               <div className="space-y-4">
                 {activities.map((activity, index) => {
@@ -428,7 +428,7 @@ export default function ActivityPage() {
                       </div>
 
                       {/* Content Card */}
-                      <div className={`flex-1 p-5 rounded-xl border ${config.borderColor} bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group-hover:translate-x-1`}>
+                      <div className={`flex-1 p-5 rounded-xl border ${config.borderColor} bg-card/80 dark:bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group-hover:translate-x-1`}>
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-3">
                           <div className="flex items-center gap-2">
                             {/* Mobile Icon */}
@@ -447,12 +447,12 @@ export default function ActivityPage() {
                         </p>
 
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1.5 bg-slate-100 rounded-full px-3 py-1">
+                          <span className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1">
                             <SafeIcon name="Clock" className="h-3.5 w-3.5" />
                             {formatRelativeTime(activity.timestamp)}
                           </span>
                           {activity.users && (
-                            <span className="flex items-center gap-1.5 bg-slate-100 rounded-full px-3 py-1">
+                            <span className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1">
                               <SafeIcon name="User" className="h-3.5 w-3.5" />
                               {activity.users.name}
                             </span>

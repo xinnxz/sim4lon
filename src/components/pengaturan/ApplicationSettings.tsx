@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,6 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
+import { companyProfileApi } from '@/lib/api'
+import { clearAppSettingsCache } from '@/hooks/useAppSettings'
 
 /**
  * ApplicationSettings - Tab Aplikasi
@@ -46,6 +48,29 @@ const initialSettings: ApplicationState = {
 export default function ApplicationSettings() {
     const [settings, setSettings] = useState<ApplicationState>(initialSettings)
     const [isSaving, setIsSaving] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+
+    // Load settings from API on mount
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const profile = await companyProfileApi.get()
+                setSettings(prev => ({
+                    ...prev,
+                    ppnPercentage: Number(profile.ppn_rate) || 12,
+                    criticalStockLimit: profile.critical_stock_limit || 10,
+                    invoicePrefix: profile.invoice_prefix || 'INV-',
+                    orderCodePrefix: profile.order_code_prefix || 'ORD-',
+                }))
+            } catch (error) {
+                console.error('Failed to load settings:', error)
+                // Use defaults on error
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadSettings()
+    }, [])
 
     const handleChange = (field: keyof ApplicationState, value: string | number | boolean) => {
         setSettings(prev => ({ ...prev, [field]: value }))
@@ -54,11 +79,18 @@ export default function ApplicationSettings() {
     const handleSave = async () => {
         setIsSaving(true)
         try {
-            // TODO: API call to save application settings
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            localStorage.setItem('app_settings', JSON.stringify(settings))
+            // Save to backend via company profile API
+            await companyProfileApi.update({
+                ppn_rate: settings.ppnPercentage,
+                critical_stock_limit: settings.criticalStockLimit,
+                invoice_prefix: settings.invoicePrefix,
+                order_code_prefix: settings.orderCodePrefix,
+            })
+            // Clear cache so other components get fresh data
+            clearAppSettingsCache()
             toast.success('Pengaturan aplikasi berhasil disimpan')
         } catch (error) {
+            console.error('Failed to save settings:', error)
             toast.error('Gagal menyimpan pengaturan')
         } finally {
             setIsSaving(false)

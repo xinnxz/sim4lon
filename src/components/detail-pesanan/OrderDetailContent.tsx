@@ -349,12 +349,12 @@ export default function OrderDetailContent() {
         </div>
         <Badge
           variant="status"
-          className={`text-base px-4 py-2 ${order.status === 'pending_payment' ? 'bg-amber-100 text-amber-800' :
-            order.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800' :
-              order.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-800' :
-                order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                  order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
+          className={`text-base px-4 py-2 ${order.status === 'pending_payment' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' :
+            order.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' :
+              order.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300' :
+                order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
+                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300' :
+                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
             }`}
         >
           {order.statusLabel}

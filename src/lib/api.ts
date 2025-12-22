@@ -231,6 +231,9 @@ export const notificationApi = {
     async getNotifications(limit = 10): Promise<NotificationResponse> {
         return apiRequest<NotificationResponse>(`/notifications?limit=${limit}`);
     },
+    async markAllAsRead(): Promise<void> {
+        return apiRequest('/notifications/mark-all-read', { method: 'POST' });
+    },
 };
 
 // ============================================================
@@ -298,6 +301,48 @@ export const activityApi = {
      */
     async getByType(type: string, limit = 20): Promise<ActivityLog[]> {
         return apiRequest<ActivityLog[]>(`/activities/by-type?type=${type}&limit=${limit}`);
+    },
+};
+
+// ============================================================
+// COMPANY PROFILE & SETTINGS API
+// ============================================================
+
+export interface CompanyProfile {
+    id: string;
+    company_name: string;
+    address: string;
+    phone?: string;
+    email?: string;
+    pic_name?: string;
+    sppbe_number?: string;
+    region?: string;
+    logo_url?: string;
+    // App Settings
+    ppn_rate: number;
+    critical_stock_limit: number;
+    invoice_prefix: string;
+    order_code_prefix: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export const companyProfileApi = {
+    /**
+     * Get company profile (singleton)
+     */
+    async get(): Promise<CompanyProfile> {
+        return apiRequest<CompanyProfile>('/company-profile');
+    },
+
+    /**
+     * Update company profile
+     */
+    async update(data: Partial<CompanyProfile>): Promise<CompanyProfile> {
+        return apiRequest<CompanyProfile>('/company-profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
     },
 };
 
@@ -2231,53 +2276,5 @@ export const penerimaanApi = {
 
     async getInOutAgen(bulan: string): Promise<InOutAgenResponse> {
         return apiRequest(`/penerimaan/in-out-agen?bulan=${bulan}`);
-    },
-};
-
-// ============================================================
-// COMPANY PROFILE API
-// ============================================================
-
-export interface CompanyProfile {
-    id: string;
-    company_name: string;
-    address: string;
-    phone: string | null;
-    email: string | null;
-    pic_name: string | null;
-    sppbe_number: string | null;
-    region: string | null;
-    logo_url: string | null;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface UpdateCompanyProfilePayload {
-    company_name: string;
-    address: string;
-    phone?: string;
-    email?: string;
-    pic_name?: string;
-    sppbe_number?: string;
-    region?: string;
-    logo_url?: string;
-}
-
-export const companyProfileApi = {
-    /**
-     * Get company profile (singleton - creates default if not exists)
-     */
-    async get(): Promise<CompanyProfile> {
-        return apiRequest('/company-profile');
-    },
-
-    /**
-     * Update company profile
-     */
-    async update(data: UpdateCompanyProfilePayload): Promise<CompanyProfile> {
-        return apiRequest('/company-profile', {
-            method: 'PUT',
-            body: JSON.stringify(data),
-        });
     },
 };

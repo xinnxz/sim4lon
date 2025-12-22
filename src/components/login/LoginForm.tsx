@@ -94,7 +94,7 @@ export default function LoginForm() {
   }
 
   return (
-    <Card className="border-0 shadow-lg animate-scaleIn">
+    <Card className="border-0 shadow-xl animate-scaleIn bg-slate-50/100 backdrop-blur-sm">
       <CardHeader className="space-y-2 text-center">
         <div className="flex justify-center mb-4 mt-8">
           <img
@@ -121,13 +121,13 @@ export default function LoginForm() {
 
           {/* Email Field */}
           <div className="space-y-2 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-            <Label htmlFor="email" className="text-sm font-medium transition-colors" style={{ color: focusedField === 'email' ? 'hsl(var(--primary))' : undefined }}>
+            <Label htmlFor="email" className="text-sm font-medium transition-colors" style={{ color: focusedField === 'email' ? 'hsl(152, 100%, 30%)' : undefined }}>
               Email
             </Label>
             <div className="relative group">
               <SafeIcon
                 name="Mail"
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-emerald-600"
               />
               <Input
                 id="email"
@@ -138,7 +138,7 @@ export default function LoginForm() {
                 onFocus={() => setFocusedField('email')}
                 onBlur={() => setFocusedField(null)}
                 disabled={isLoading}
-                className="pl-10 h-10 transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className="pl-10 h-10 transition-all duration-200 focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600"
                 autoComplete="email"
               />
             </div>
@@ -146,13 +146,13 @@ export default function LoginForm() {
 
           {/* Password Field */}
           <div className="space-y-2 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-            <Label htmlFor="password" className="text-sm font-medium transition-colors" style={{ color: focusedField === 'password' ? 'hsl(var(--primary))' : undefined }}>
+            <Label htmlFor="password" className="text-sm font-medium transition-colors" style={{ color: focusedField === 'password' ? 'hsl(152, 100%, 30%)' : undefined }}>
               Password
             </Label>
             <div className="relative group">
               <SafeIcon
                 name="Lock"
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-emerald-600"
               />
               <Input
                 id="password"
@@ -163,7 +163,7 @@ export default function LoginForm() {
                 onFocus={() => setFocusedField('password')}
                 onBlur={() => setFocusedField(null)}
                 disabled={isLoading}
-                className="pl-10 pr-10 h-10 transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className="pl-10 pr-10 h-10 transition-all duration-200 focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600"
                 autoComplete="current-password"
               />
               <button
@@ -181,12 +181,16 @@ export default function LoginForm() {
             </div>
           </div>
 
-          {/* Login Button */}
+          {/* Login Button - Hardcoded green for login page (HSL 152 100% 30% from --primary) */}
           <div className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-medium button-interactive transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-70"
+              className="w-full h-10 text-white font-medium button-interactive transition-all duration-300 hover:shadow-lg disabled:opacity-70"
+              style={{
+                background: 'linear-gradient(to right, hsl(152, 100%, 40%), hsl(152, 100%, 35%))',
+                boxShadow: isLoading ? undefined : '0 4px 14px 0 hsla(152, 100%, 30%, 0.25)'
+              }}
             >
               {isLoading ? (
                 <>
@@ -209,6 +213,9 @@ export default function LoginForm() {
             </p>
             <p className="text-xs text-muted-foreground text-center">
               <span className="font-medium">Demo:</span> pangkalan@test.com / password123
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              <span className="font-medium">Demo:</span> operator2@sim4lon.com / Operator123
             </p>
           </div>
         </form>
