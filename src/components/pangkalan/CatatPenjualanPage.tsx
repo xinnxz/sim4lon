@@ -41,6 +41,7 @@ export default function CatatPenjualanPage() {
     const [showSuccess, setShowSuccess] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [lpgPrices, setLpgPrices] = useState<PangkalanLpgPrice[]>([])
+    const [manualPrice, setManualPrice] = useState<number | null>(null) // null = use default from API
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -89,8 +90,14 @@ export default function CatatPenjualanPage() {
     }, [lpgPrices])
 
     const selectedLpg = LPG_DISPLAY.find(l => l.value === lpgType)!
-    const currentPrice = getPrice(lpgType)
+    const defaultPrice = getPrice(lpgType)
+    const currentPrice = manualPrice !== null ? manualPrice : defaultPrice
     const total = qty * currentPrice
+
+    // Reset manual price when LPG type changes
+    useEffect(() => {
+        setManualPrice(null)
+    }, [lpgType])
 
     const formatCurrency = (v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(v)
 
@@ -266,6 +273,50 @@ export default function CatatPenjualanPage() {
                                         onTouchEnd={stopHold}
                                     >+</Button>
                                 </div>
+                            </div>
+
+                            {/* Manual Price Input */}
+                            <div>
+                                <Label className="text-sm font-semibold text-slate-700 mb-3 flex items-center justify-between">
+                                    <span>Harga Jual</span>
+                                    {manualPrice! == null && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setManualPrice(null)}
+                                            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                        >
+                                            Reset ke default
+                                        </button>
+                                    )}
+                                </Label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">Rp</span>
+                                    <Input
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={manualPrice === null ? defaultPrice.toLocaleString('id-ID') : (manualPrice === 0 ? '' : manualPrice.toLocaleString('id-ID'))}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '')
+                                            setManualPrice(val === '' ? 0 : parseInt(val))
+                                        }}
+                                        onBlur={() => {
+                                            // Reset to default if left empty (0)
+                                            if (manualPrice === 0) {
+                                                setManualPrice(null)
+                                            }
+                                        }}
+                                        placeholder={defaultPrice.toLocaleString('id-ID')}
+                                        className="h-12 pl-10 text-lg font-bold rounded-xl placeholder:text-slate-300 placeholder:font-normal"
+                                    />
+                                    {manualPrice !== null && manualPrice !== 0 && manualPrice !== defaultPrice && (
+                                        <Badge className="absolute right-3 top-1/2 -translate-y-1/2 bg-orange-100 text-orange-700">
+                                            Custom
+                                        </Badge>
+                                    )}
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Default: {formatCurrency(defaultPrice)}
+                                </p>
                             </div>
 
                             {/* Consumer Search */}

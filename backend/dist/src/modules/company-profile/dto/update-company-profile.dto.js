@@ -20,6 +20,10 @@ class UpdateCompanyProfileDto {
     sppbe_number;
     region;
     logo_url;
+    ppn_rate;
+    critical_stock_limit;
+    invoice_prefix;
+    order_code_prefix;
 }
 exports.UpdateCompanyProfileDto = UpdateCompanyProfileDto;
 __decorate([
@@ -66,4 +70,30 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateCompanyProfileDto.prototype, "logo_url", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(100),
+    __metadata("design:type", Number)
+], UpdateCompanyProfileDto.prototype, "ppn_rate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(1000),
+    __metadata("design:type", Number)
+], UpdateCompanyProfileDto.prototype, "critical_stock_limit", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], UpdateCompanyProfileDto.prototype, "invoice_prefix", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], UpdateCompanyProfileDto.prototype, "order_code_prefix", void 0);
 //# sourceMappingURL=update-company-profile.dto.js.map

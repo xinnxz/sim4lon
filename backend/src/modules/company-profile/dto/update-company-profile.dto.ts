@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsEmail, MaxLength, IsNumber, Min, Max } from 'class-validator';
 
 export class UpdateCompanyProfileDto {
     @IsString()
@@ -36,4 +36,27 @@ export class UpdateCompanyProfileDto {
     @IsOptional()
     @IsString()
     logo_url?: string;
+
+    // === APP SETTINGS ===
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    @Max(100)
+    ppn_rate?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    @Max(1000)
+    critical_stock_limit?: number;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(20)
+    invoice_prefix?: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(20)
+    order_code_prefix?: string;
 }

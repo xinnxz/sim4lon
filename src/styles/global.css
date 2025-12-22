@@ -356,14 +356,20 @@
      Professional dark mode uses solid colors, not gradients
      ============================================ */
   
-  /* Dashboard background - pure solid dark */
+  /* Dashboard background - subtle primary hint for dark mode */
   .dark .dashboard-gradient-bg {
-    background: hsl(var(--background)) !important;
+    background: 
+      radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.02) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(var(--primary) / 0.015) 0%, transparent 50%),
+      hsl(var(--background)) !important;
   }
   
-  /* Mesh gradient for dark mode */
+  /* Mesh gradient for dark mode - subtle primary hint */
   .dark .mesh-gradient-bg {
-    background: hsl(var(--background)) !important;
+    background: 
+      radial-gradient(at 40% 20%, hsl(var(--primary) / 0.03) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(var(--primary) / 0.02) 0px, transparent 40%),
+      hsl(var(--background)) !important;
   }
   
   /* Card premium styling for dark mode - FLAT SOLID COLOR */
@@ -751,12 +757,12 @@
     transform: translateX(100%);
   }
 
-  /* Dashboard Gradient Background */
+  /* Dashboard Gradient Background - Subtle Primary Theme */
   .dashboard-gradient-bg {
     background: 
-      radial-gradient(ellipse at 20% 0%, hsl(152 100% 95% / 0.5) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 100%, hsl(48 100% 95% / 0.3) 0%, transparent 50%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(220 13% 98%) 100%);
+      radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(var(--primary) / 0.025) 0%, transparent 50%),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.15) 100%);
   }
 
   /* Glowing Status Indicator */
@@ -1351,12 +1357,15 @@
   .particle {
     position: absolute;
     border-radius: 50%;
-    background: linear-gradient(135deg, hsl(152 100% 50% / 0.5), hsl(48 100% 65% / 0.4));
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.4), hsl(var(--primary) / 0.2));
     box-shadow: 
-      0 0 20px hsl(152 100% 50% / 0.3),
-      0 0 40px hsl(152 100% 50% / 0.15);
+      0 0 20px hsl(var(--primary) / 0.2),
+      0 0 40px hsl(var(--primary) / 0.1);
     animation: floatParticle 15s ease-in-out infinite;
     filter: blur(0.5px);
+    /* GPU acceleration for better performance */
+    will-change: transform, opacity;
+    transform: translateZ(0);
   }
 
   @keyframes floatParticle {
@@ -1389,7 +1398,7 @@
     width: 24px; height: 24px;
     animation-delay: 2s; 
     animation-duration: 18s;
-    background: linear-gradient(135deg, hsl(48 100% 60% / 0.5), hsl(152 100% 50% / 0.3));
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.35), hsl(var(--primary) / 0.2));
   }
   .particle:nth-child(3) { 
     top: 35%; left: 75%; 
@@ -1402,7 +1411,7 @@
     width: 18px; height: 18px;
     animation-delay: 1s; 
     animation-duration: 16s;
-    background: linear-gradient(135deg, hsl(220 80% 60% / 0.4), hsl(152 100% 50% / 0.3));
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.15));
   }
   .particle:nth-child(5) { 
     top: 8%; left: 55%; 
@@ -1415,7 +1424,7 @@
     width: 10px; height: 10px;
     animation-delay: 5s; 
     animation-duration: 13s;
-    background: linear-gradient(135deg, hsl(152 100% 60% / 0.6), hsl(48 100% 55% / 0.4));
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.45), hsl(var(--primary) / 0.25));
   }
   .particle:nth-child(7) { 
     top: 25%; left: 30%; 
@@ -1431,15 +1440,15 @@
     background: linear-gradient(135deg, hsl(48 100% 65% / 0.5), hsl(152 80% 55% / 0.4));
   }
 
-  /* 12. Mesh Gradient Background */
+  /* 12. Mesh Gradient Background - Theme-aware */
   .mesh-gradient-bg {
     background: 
-      radial-gradient(at 40% 20%, hsl(152 100% 95% / 0.6) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsl(48 100% 95% / 0.4) 0px, transparent 40%),
-      radial-gradient(at 0% 50%, hsl(152 80% 90% / 0.3) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsl(220 20% 98% / 0.5) 0px, transparent 40%),
-      radial-gradient(at 0% 100%, hsl(48 100% 95% / 0.3) 0px, transparent 40%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(220 13% 98%) 100%);
+      radial-gradient(at 40% 20%, hsl(var(--primary) / 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(var(--primary) / 0.04) 0px, transparent 40%),
+      radial-gradient(at 0% 50%, hsl(var(--primary) / 0.03) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(var(--muted) / 0.3) 0px, transparent 40%),
+      radial-gradient(at 0% 100%, hsl(var(--primary) / 0.03) 0px, transparent 40%),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.2) 100%);
   }
 
   /* 13. Premium KPI Card Styles */
@@ -1701,3 +1710,49 @@
   }
 }
 
+/* ============================================
+   THIN AUTO-HIDE SCROLLBAR
+   Scrollbar tipis yang tersembunyi, muncul saat hover
+   ============================================ */
+.scrollbar-thin-auto {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.scrollbar-thin-auto:hover {
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.scrollbar-thin-auto::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.scrollbar-thin-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin-auto::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.scrollbar-thin-auto:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+.scrollbar-thin-auto:hover::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Dark mode scrollbar */
+.dark .scrollbar-thin-auto:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.dark .scrollbar-thin-auto:hover::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.6);
+}

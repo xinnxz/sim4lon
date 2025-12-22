@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import SafeIcon from '@/components/common/SafeIcon'
+import { companyProfileApi } from '@/lib/api'
 
 // Cache key for profile
 const PROFILE_CACHE_KEY = 'sim4lon_user_profile'
@@ -69,6 +70,7 @@ const menuGroups: MenuGroup[] = [
     label: 'Sistem',
     adminOnly: true,  // Entire group is admin-only
     items: [
+      { name: 'Log Riwayat', href: '/riwayat-aktivitas', icon: 'History' },
       { name: 'Pengaturan', href: './pengaturan.html', icon: 'Settings' },
     ]
   }
@@ -116,6 +118,7 @@ export default function AdminSidebar() {
   // Then update to actual role after client hydration
   const [userRole, setUserRole] = useState<UserRole>('ADMIN')
   const [isHydrated, setIsHydrated] = useState(false)
+  const [companyName, setCompanyName] = useState<string>('')
 
   const normalizeForComparison = (path: string): string => {
     return path
@@ -158,6 +161,11 @@ export default function AdminSidebar() {
       const role = getUserRole()
       setUserRole(role)
       setIsHydrated(true)
+
+      // Fetch company name from settings
+      companyProfileApi.get()
+        .then(profile => setCompanyName(profile.company_name || ''))
+        .catch(() => setCompanyName(''))
     }
   }, [])
 
@@ -175,8 +183,27 @@ export default function AdminSidebar() {
           background: 'linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(var(--sidebar-background)/0.97) 50%, hsl(var(--sidebar-accent)/0.3) 100%)',
         }}
       >
+        {/* Company Header - Elegant */}
+        <div className="">
+          <div className="flex items-center gap-2 justify-center">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-500/20 to-transparent" />
+          </div>
+          <div className="py-2 flex justify-center">
+            {companyName ? (
+              <p className="text-[11px] font-bold text-center tracking-wide text-gray-500/70">
+                {companyName}
+              </p>
+            ) : (
+              <div className="h-3 w-32 bg-muted rounded animate-pulse" />
+            )}
+          </div>
+          <div className="flex items-center gap-2 justify-center">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+          </div>
+        </div>
+
         {visibleGroups.map((group, groupIndex) => (
-          <SidebarGroup key={group.label} className="py-0.5">
+          <SidebarGroup key={group.label} className="py-0">
             <SidebarGroupLabel
               className="text-[9px] font-bold uppercase tracking-[0.12em] text-sidebar-foreground/50 px-3 mb-1 flex items-center gap-2"
             >
@@ -185,7 +212,7 @@ export default function AdminSidebar() {
               <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent" />
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5 px-1">
+              <SidebarMenu className="gap-0.4 px-1">
                 {group.items.map((item, itemIndex) => {
                   const normalizedItemHref = normalizeForComparison(item.href)
                   const isActive = normalizedItemHref === activePage
@@ -200,13 +227,10 @@ export default function AdminSidebar() {
                         className={`
                           relative overflow-hidden rounded-xl transition-all duration-300 ease-out
                           ${isActive
-                            ? 'bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-white shadow-lg'
-                            : 'hover:bg-sidebar-accent/50 hover:translate-x-1'
+                            ? 'bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-white shadow-lg shadow-primary/30'
+                            : 'hover:bg-sidebar-accent/50 hover:translate-x-1 active:bg-primary/20'
                           }
                         `}
-                        style={isActive ? {
-                          boxShadow: '0 4px 15px -3px rgba(22, 163, 74, 0.4), 0 0 20px -5px rgba(22, 163, 74, 0.2)'
-                        } : {}}
                       >
                         <a href={item.href} className="flex items-center gap-2 w-full px-3 py-2 group">
                           <div className={`

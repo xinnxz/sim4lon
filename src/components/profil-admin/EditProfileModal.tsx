@@ -53,7 +53,7 @@ export default function EditProfileModal({ open, onOpenChange }: EditProfileModa
   const [isCropModalOpen, setIsCropModalOpen] = useState(false)
   const [selectedImageForCrop, setSelectedImageForCrop] = useState<string>('')
 
-const validateForm = (): boolean => {
+  const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {}
 
     if (!formData.name.trim()) {
@@ -76,12 +76,12 @@ const validateForm = (): boolean => {
     return Object.keys(newErrors).length === 0
   }
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target
-    
+
     if (name === 'photo' && files && files[0]) {
       const file = files[0]
-      
+
       // Create preview for crop modal
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -105,7 +105,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   const handleCropComplete = (croppedImage: string) => {
     setPhotoPreview(croppedImage)
-    
+
     // Convert blob URL to file
     fetch(croppedImage)
       .then(res => res.blob())
@@ -137,8 +137,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       toast.success('Profil berhasil diperbarui')
-      
-// Reset and close modal
+
+      // Reset and close modal
       setTimeout(() => {
         onOpenChange(false)
         setFormData({
@@ -159,7 +159,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     }
   }
 
-const handleCancel = () => {
+  const handleCancel = () => {
     onOpenChange(false)
     setFormData({
       name: mockAdminProfile.name,
@@ -186,34 +186,34 @@ const handleCancel = () => {
           </DialogDescription>
         </DialogHeader>
 
-<form onSubmit={handleSubmit} className="space-y-4 max-h-[60vh] overflow-y-auto pr-4">
-           {/* Photo Upload Field */}
-           <div className="space-y-2">
-             <Label htmlFor="edit-photo" className="text-sm font-medium">
-               Foto Profil
-             </Label>
-             <div className="flex flex-col gap-3">
-               <div className="flex justify-center">
-                 <img 
-                   src={photoPreview} 
-                   alt="Preview" 
-                   className="h-24 w-24 rounded-full object-cover border-2 border-primary/30"
-                 />
-               </div>
-               <Input
-                 id="edit-photo"
-                 name="photo"
-                 type="file"
-                 accept="image/*"
-                 onChange={handleChange}
-                 disabled={isLoading}
-                 className="cursor-pointer"
-               />
-             </div>
-           </div>
+        <form onSubmit={handleSubmit} className="space-y-4 max-h-[60vh] overflow-y-auto pr-4">
+          {/* Photo Upload Field */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-photo" className="text-sm font-medium">
+              Foto Profil
+            </Label>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-center">
+                <img
+                  src={photoPreview}
+                  alt="Preview"
+                  className="h-24 w-24 rounded-full object-cover border-2 border-primary/30"
+                />
+              </div>
+              <Input
+                id="edit-photo"
+                name="photo"
+                type="file"
+                accept="image/*"
+                onChange={handleChange}
+                disabled={isLoading}
+                className="cursor-pointer"
+              />
+            </div>
+          </div>
 
-           {/* Name Field */}
-           <div className="space-y-2">
+          {/* Name Field */}
+          <div className="space-y-2">
             <Label htmlFor="edit-name" className="text-sm font-medium">
               Nama Lengkap <span className="text-destructive">*</span>
             </Label>
@@ -258,28 +258,28 @@ const handleCancel = () => {
             )}
           </div>
 
-{/* Phone Field */}
-           <div className="space-y-2">
-             <Label htmlFor="edit-phone" className="text-sm font-medium">
-               Nomor Telepon <span className="text-destructive">*</span>
-             </Label>
-             <Input
-               id="edit-phone"
-               name="phone"
-               type="tel"
-               placeholder="Contoh: +62812345678"
-               value={formData.phone}
-               onChange={handleChange}
-               disabled={isLoading}
-               className={errors.phone ? 'border-destructive' : ''}
-             />
-             {errors.phone && (
-               <p className="text-xs text-destructive flex items-center gap-1">
-                 <SafeIcon name="AlertCircle" className="h-3 w-3" />
-                 {errors.phone}
-               </p>
-             )}
-           </div>
+          {/* Phone Field */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-phone" className="text-sm font-medium">
+              Nomor Telepon <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="edit-phone"
+              name="phone"
+              type="tel"
+              placeholder="Contoh: +62812345678"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={isLoading}
+              className={errors.phone ? 'border-destructive' : ''}
+            />
+            {errors.phone && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <SafeIcon name="AlertCircle" className="h-3 w-3" />
+                {errors.phone}
+              </p>
+            )}
+          </div>
 
           {/* Info Box */}
           <Alert className="bg-primary/5 border-primary/20 mt-4">
@@ -290,8 +290,8 @@ const handleCancel = () => {
           </Alert>
 
           {/* Crop Modal */}
-          <CropImageModal 
-            open={isCropModalOpen} 
+          <CropImageModal
+            open={isCropModalOpen}
             onOpenChange={setIsCropModalOpen}
             imageSrc={selectedImageForCrop}
             onCropComplete={handleCropComplete}

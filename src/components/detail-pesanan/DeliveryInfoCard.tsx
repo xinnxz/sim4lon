@@ -26,10 +26,13 @@ export default function DeliveryInfoCard({ delivery }: DeliveryInfoCardProps) {
           <p className="text-sm text-muted-foreground">Status Pengiriman</p>
           <Badge
             variant="status"
-            className={`mt-1 ${delivery.status === 'not_scheduled' || delivery.status === 'ready_to_ship' ? 'bg-gray-100 text-gray-700' :
-              delivery.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
-                delivery.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-700' :
-                  'bg-green-100 text-green-700'
+            className={`mt-1 ${delivery.status === 'not_scheduled' || delivery.status === 'ready_to_ship'
+              ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' :
+              delivery.status === 'scheduled'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                delivery.status === 'in_delivery' || delivery.status === 'assigned'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' :
+                  'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
               }`}
           >
             {delivery.statusLabel}

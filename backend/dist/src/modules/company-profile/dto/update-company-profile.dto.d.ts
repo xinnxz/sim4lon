@@ -7,4 +7,8 @@ export declare class UpdateCompanyProfileDto {
     sppbe_number?: string;
     region?: string;
     logo_url?: string;
+    ppn_rate?: number;
+    critical_stock_limit?: number;
+    invoice_prefix?: string;
+    order_code_prefix?: string;
 }

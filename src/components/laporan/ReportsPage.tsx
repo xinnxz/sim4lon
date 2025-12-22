@@ -231,13 +231,19 @@ export default function ReportsPage() {
                 ? { start: new Date(customStart).toISOString(), end: new Date(customEnd).toISOString() }
                 : getDateRange(datePreset)
 
-            const [sales, stock] = await Promise.all([
+            // Fetch all reports including pangkalan for badge count
+            const [sales, stock, pangkalan] = await Promise.all([
                 reportsApi.getSalesReport(range.start, range.end),
                 reportsApi.getStockMovementReport(range.start, range.end),
+                reportsApi.getPangkalanReport(range.start, range.end),
             ])
 
             setSalesData(sales)
             setStockData(stock)
+            // Set pangkalan count for tab badge
+            if (pangkalan?.summary?.total_pangkalan) {
+                setTotalPangkalan(pangkalan.summary.total_pangkalan)
+            }
         } catch (error: any) {
             toast.error(error.message || 'Gagal memuat laporan')
         } finally {
@@ -270,12 +276,12 @@ export default function ReportsPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'SELESAI': return 'bg-green-100 text-green-800'
-            case 'DIKIRIM': return 'bg-blue-100 text-blue-800'
-            case 'DIPROSES': return 'bg-yellow-100 text-yellow-800'
-            case 'MENUNGGU_PEMBAYARAN': return 'bg-orange-100 text-orange-800'
-            case 'DIBATALKAN': return 'bg-red-100 text-red-800'
-            default: return 'bg-gray-100 text-gray-800'
+            case 'SELESAI': return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
+            case 'DIKIRIM': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'
+            case 'DIPROSES': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
+            case 'MENUNGGU_PEMBAYARAN': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300'
+            case 'DIBATALKAN': return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+            default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
         }
     }
 
@@ -648,42 +654,39 @@ export default function ReportsPage() {
 
             {/* Tabs with Glass Effect */}
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-                <TabsList className="inline-flex h-auto gap-1.5 rounded-2xl glass-card p-2 shadow-lg" style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.1)' }}>
+                <TabsList className="inline-flex h-auto gap-1.5 rounded-2xl glass-card p-2 shadow-lg">
                     <TabsTrigger
                         value="sales"
-                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-slate-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-green-50 hover:text-green-700"
-                        style={{ boxShadow: activeTab === 'sales' ? '0 4px 15px -3px rgba(34,197,94,0.4)' : 'none' }}
+                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20"
                     >
                         <SafeIcon name="ShoppingCart" className="h-4 w-4" />
                         <span>Penjualan</span>
                         {salesData && salesData.summary.total_orders > 0 && (
-                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'sales' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-800'}`}>
+                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'sales' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary dark:bg-primary/20'}`}>
                                 {salesData.summary.total_orders}
                             </Badge>
                         )}
                     </TabsTrigger>
                     <TabsTrigger
                         value="pangkalan"
-                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-slate-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-blue-50 hover:text-blue-700"
-                        style={{ boxShadow: activeTab === 'pangkalan' ? '0 4px 15px -3px rgba(59,130,246,0.4)' : 'none' }}
+                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-accent/80 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-accent/10 hover:text-accent dark:hover:bg-accent/20"
                     >
                         <SafeIcon name="Store" className="h-4 w-4" />
                         <span>Pangkalan</span>
                         {totalPangkalan > 0 && (
-                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'pangkalan' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'pangkalan' ? 'bg-white/20 text-white' : 'bg-accent/10 text-accent dark:bg-accent/20'}`}>
                                 {totalPangkalan}
                             </Badge>
                         )}
                     </TabsTrigger>
                     <TabsTrigger
                         value="stock"
-                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-slate-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-orange-50 hover:text-orange-700"
-                        style={{ boxShadow: activeTab === 'stock' ? '0 4px 15px -3px rgba(249,115,22,0.4)' : 'none' }}
+                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-amber-500/10 hover:text-amber-600 dark:hover:bg-amber-500/20 dark:hover:text-amber-400"
                     >
                         <SafeIcon name="Package" className="h-4 w-4" />
                         <span>Stok</span>
                         {stockData && stockData.summary.current_balance !== undefined && (
-                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'stock' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-800'}`}>
+                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'stock' ? 'bg-white/20 text-white' : 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'}`}>
                                 {stockData.summary.current_balance}
                             </Badge>
                         )}
@@ -704,11 +707,11 @@ export default function ReportsPage() {
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Pesanan dalam periode</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
-                                        <SafeIcon name="ShoppingCart" className="h-5 w-5 text-blue-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-emerald-200/50 dark:from-primary/30 dark:to-emerald-800/30 shadow-lg">
+                                        <SafeIcon name="ShoppingCart" className="h-5 w-5 text-primary" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                             </div>
                         </Tilt3DCard>
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
@@ -716,16 +719,16 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
-                                        <p className="text-3xl font-bold text-primary mt-2">
+                                        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={salesData?.summary.total_revenue || 0} delay={200} isCurrency />}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Revenue keseluruhan</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
-                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-green-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30 shadow-lg">
+                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-300" />
                             </div>
                         </Tilt3DCard>
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
@@ -733,16 +736,16 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rata-rata Pesanan</p>
-                                        <p className="text-3xl font-bold text-primary mt-2">
+                                        <p className="text-3xl font-bold text-teal-600 dark:text-teal-400 mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={salesData?.summary.average_order || 0} delay={300} isCurrency />}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Per transaksi</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200" style={{ boxShadow: '0 4px 12px -2px rgba(139,92,246,0.3)' }}>
-                                        <SafeIcon name="Calculator" className="h-5 w-5 text-purple-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30 shadow-lg">
+                                        <SafeIcon name="Calculator" className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
                             </div>
                         </Tilt3DCard>
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
@@ -750,13 +753,13 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pertumbuhan</p>
-                                        <p className={`text-3xl font-bold mt-2 ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <p className={`text-3xl font-bold mt-2 ${growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                             {isLoading ? '...' : `${growthPercentage >= 0 ? '+' : ''}${growthPercentage.toFixed(1)}%`}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Vs target harian</p>
                                     </div>
-                                    <div className={`p-3 rounded-xl bg-gradient-to-br ${growthPercentage >= 0 ? 'from-green-100 to-green-200' : 'from-red-100 to-red-200'}`} style={{ boxShadow: growthPercentage >= 0 ? '0 4px 12px -2px rgba(34,197,94,0.3)' : '0 4px 12px -2px rgba(239,68,68,0.3)' }}>
-                                        <SafeIcon name={growthPercentage >= 0 ? "TrendingUp" : "TrendingDown"} className={`h-5 w-5 ${growthPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                                    <div className={`p-3 rounded-xl shadow-lg bg-gradient-to-br ${growthPercentage >= 0 ? 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30' : 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30'}`}>
+                                        <SafeIcon name={growthPercentage >= 0 ? "TrendingUp" : "TrendingDown"} className={`h-5 w-5 ${growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} />
                                     </div>
                                 </div>
                                 <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${growthPercentage >= 0 ? 'from-green-300 via-green-500 to-green-300' : 'from-red-300 via-red-500 to-red-300'}`} />
@@ -1147,11 +1150,11 @@ export default function ReportsPage() {
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Stok saat ini</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200" style={{ boxShadow: '0 4px 12px -2px rgba(139,92,246,0.3)' }}>
-                                        <SafeIcon name="Package" className="h-5 w-5 text-purple-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-emerald-200/50 dark:from-primary/30 dark:to-emerald-800/30 shadow-lg">
+                                        <SafeIcon name="Package" className="h-5 w-5 text-primary" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                             </div>
                         </Tilt3DCard>
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
@@ -1159,16 +1162,16 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Masuk</p>
-                                        <p className="text-3xl font-bold text-green-600 mt-2">
+                                        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
                                             +{isLoading ? '...' : <AnimatedNumber value={stockData?.summary.total_in || 0} delay={200} />}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Stok masuk</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200" style={{ boxShadow: '0 4px 12px -2px rgba(34,197,94,0.3)' }}>
-                                        <SafeIcon name="ArrowDownCircle" className="h-5 w-5 text-green-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30 shadow-lg">
+                                        <SafeIcon name="ArrowDownCircle" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-300" />
                             </div>
                         </Tilt3DCard>
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
@@ -1176,13 +1179,13 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Keluar</p>
-                                        <p className="text-3xl font-bold text-red-600 mt-2">
+                                        <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">
                                             -{isLoading ? '...' : <AnimatedNumber value={stockData?.summary.total_out || 0} delay={300} />}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Stok keluar</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-red-100 to-red-200" style={{ boxShadow: '0 4px 12px -2px rgba(239,68,68,0.3)' }}>
-                                        <SafeIcon name="ArrowUpCircle" className="h-5 w-5 text-red-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 shadow-lg">
+                                        <SafeIcon name="ArrowUpCircle" className="h-5 w-5 text-red-600 dark:text-red-400" />
                                     </div>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-300 via-red-500 to-red-300" />
@@ -1193,16 +1196,16 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Perubahan Bersih</p>
-                                        <p className={`text-3xl font-bold mt-2 ${(stockData?.summary.net_change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <p className={`text-3xl font-bold mt-2 ${(stockData?.summary.net_change || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                             {isLoading ? '...' : <>{(stockData?.summary.net_change || 0) >= 0 ? '+' : ''}<AnimatedNumber value={stockData?.summary.net_change || 0} delay={400} /></>}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Selisih masuk/keluar</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200" style={{ boxShadow: '0 4px 12px -2px rgba(59,130,246,0.3)' }}>
-                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-blue-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30 shadow-lg">
+                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
                             </div>
                         </Tilt3DCard>
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-5 card-hover-glow">
@@ -1210,16 +1213,16 @@ export default function ReportsPage() {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Jumlah Transaksi</p>
-                                        <p className="text-3xl font-bold text-orange-600 mt-2">
+                                        <p className="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={stockData?.summary.movement_count || 0} delay={500} />}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">Pergerakan stok</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200" style={{ boxShadow: '0 4px 12px -2px rgba(249,115,22,0.3)' }}>
-                                        <SafeIcon name="Activity" className="h-5 w-5 text-orange-600" />
+                                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-900/30 dark:to-orange-800/30 shadow-lg">
+                                        <SafeIcon name="Activity" className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
                             </div>
                         </Tilt3DCard>
                     </div>

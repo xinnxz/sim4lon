@@ -623,7 +623,7 @@ export default function PenyaluranPage() {
                         <CardContent className="p-0">
                             <div
                                 ref={tableScrollRef}
-                                className="overflow-x-auto scrollbar-thin"
+                                className="overflow-x-auto scrollbar-thin-auto"
                                 style={{ scrollBehavior: 'auto' }}
                             >
                                 <table className="w-full text-sm">

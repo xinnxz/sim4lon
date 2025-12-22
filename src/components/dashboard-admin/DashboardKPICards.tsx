@@ -99,12 +99,12 @@ function AnimatedNumber({
 }
 
 /**
- * Floating Decorative Orb - Warna lebih jelas
+ * Floating Decorative Orb - Theme-aware dengan visibility lebih jelas
  */
 function FloatingOrb({ className = '', delay = 0 }: { className?: string; delay?: number }) {
   return (
     <div
-      className={`absolute rounded-full bg-white/30 animate-floatOrb ${className}`}
+      className={`absolute rounded-full bg-white/40 dark:bg-white/20 animate-floatOrb ${className}`}
       style={{ animationDelay: `${delay}s` }}
     />
   )
@@ -118,7 +118,7 @@ const KPICardSkeleton = ({ index }: { index: number }) => (
     className={`animate-slideInBlur stagger-${index + 1}`}
     style={{ opacity: 0 }}
   >
-    <div className="h-32 bg-gradient-to-br from-slate-200 to-slate-100 rounded-2xl relative overflow-hidden">
+    <div className="h-32 bg-gradient-to-br from-muted to-muted/50 dark:from-muted/80 dark:to-muted/30 rounded-2xl relative overflow-hidden">
       <div className="absolute inset-0 shine-effect" />
     </div>
   </div>
@@ -240,25 +240,25 @@ export default function DashboardKPICards() {
         style={{ animationDelay: '400ms', opacity: 0 }}
       >
         <Card
-          className="group relative overflow-hidden h-[140px] bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0"
+          className="group relative overflow-hidden h-[140px] bg-card dark:bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0"
         >
-          {/* Floating Orbs Decoration - Warna lebih jelas */}
-          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-200 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 bg-purple-100 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed opacity-80" />
+          {/* Floating Orbs Decoration - Theme-aware dengan visibility lebih jelas */}
+          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 dark:bg-primary/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+          <div className="absolute bottom-0 left-0 w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed opacity-80" />
 
           <CardHeader className="pb-2 relative z-10">
-            <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors duration-300">
-                <SafeIcon name="Package" className="h-4 w-4 text-purple-600 icon-bounce-target icon-rotate-hover" />
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors duration-300">
+                <SafeIcon name="Package" className="h-4 w-4 text-primary icon-bounce-target icon-rotate-hover" />
               </div>
               Total Stok LPG
             </CardTitle>
           </CardHeader>
           <CardContent className="relative z-10">
-            <p className="text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
+            <p className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
               <AnimatedNumber value={totalStock} delay={600} />
             </p>
-            <p className="text-slate-500 text-sm mt-2 flex items-center gap-1">
+            <p className="text-muted-foreground text-sm mt-2 flex items-center gap-1">
               <SafeIcon name="Layers" className="h-3.5 w-3.5" />
               {productCount > 0 ? `${productCount} jenis produk` : 'Belum ada produk'}
             </p>
