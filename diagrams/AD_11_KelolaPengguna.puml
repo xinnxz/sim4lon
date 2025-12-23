@@ -1,0 +1,77 @@
+@startuml AD_11_KelolaPengguna
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-11: Kelola Pengguna**\nSistem SIM4LON
+
+|Admin|
+start
+:Buka halaman Master Pengguna;
+
+|Sistem|
+:Load daftar pengguna\n(Admin, Operator);
+:Tampilkan dengan pagination;
+
+|Admin|
+:Pilih aksi;
+
+switch (Aksi?)
+case (Tambah Baru)
+    :Klik "Tambah Pengguna";
+    
+    |Sistem|
+    :Tampilkan form registrasi;
+    
+    |Admin|
+    :Isi nama, email, password;
+    :Pilih role (Admin/Operator);
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Validasi email unik;
+    :Hash password;
+    :Generate kode user (USR-XXX);
+    :Simpan user baru;
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Edit)
+    :Klik "Edit" pada user;
+    
+    |Sistem|
+    :Load data user;
+    :Tampilkan form edit;
+    
+    |Admin|
+    :Ubah data (nama, phone, role);
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Update data user;
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Nonaktifkan)
+    :Klik toggle status;
+    
+    |Sistem|
+    :Update is_active = false;
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+endswitch
+
+:Refresh daftar;
+stop
+
+@enduml

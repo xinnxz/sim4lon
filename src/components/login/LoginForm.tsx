@@ -138,7 +138,7 @@ export default function LoginForm() {
                 onFocus={() => setFocusedField('email')}
                 onBlur={() => setFocusedField(null)}
                 disabled={isLoading}
-                className="pl-10 h-10 transition-all duration-200 focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600"
+                className="pl-10 h-11 sm:h-10 text-base sm:text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600"
                 autoComplete="email"
               />
             </div>
@@ -163,14 +163,14 @@ export default function LoginForm() {
                 onFocus={() => setFocusedField('password')}
                 onBlur={() => setFocusedField(null)}
                 disabled={isLoading}
-                className="pl-10 pr-10 h-10 transition-all duration-200 focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600"
+                className="pl-10 pr-12 h-11 sm:h-10 text-base sm:text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600"
                 autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-all duration-200 disabled:opacity-50 hover:scale-110"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-all duration-200 disabled:opacity-50 hover:scale-110 touch-manipulation"
                 aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
               >
                 <SafeIcon
@@ -186,7 +186,7 @@ export default function LoginForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 text-white font-medium button-interactive transition-all duration-300 hover:shadow-lg disabled:opacity-70"
+              className="w-full h-12 sm:h-10 text-base sm:text-sm text-white font-medium button-interactive transition-all duration-300 hover:shadow-lg disabled:opacity-70 touch-manipulation"
               style={{
                 background: 'linear-gradient(to right, hsl(152, 100%, 40%), hsl(152, 100%, 35%))',
                 boxShadow: isLoading ? undefined : '0 4px 14px 0 hsla(152, 100%, 30%, 0.25)'
@@ -207,7 +207,7 @@ export default function LoginForm() {
           </div>
 
           {/* Demo Credentials Info */}
-          <div className="mt-6 p-3 bg-secondary/50 rounded-lg border border-border animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+          <div className="mt-6 p-3 sm:p-3 bg-secondary/50 rounded-lg border border-border animate-fadeInUp space-y-1" style={{ animationDelay: '0.5s' }}>
             <p className="text-xs text-muted-foreground text-center">
               <span className="font-medium">Demo:</span> admin@demo.com / admin123
             </p>

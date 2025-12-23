@@ -1,0 +1,104 @@
+@startuml SIM4LON_UseCase
+!theme plain
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor #87CEEB
+skinparam usecaseFontSize 11
+skinparam actorFontSize 12
+skinparam packageFontSize 14
+skinparam ArrowColor #333333
+skinparam UseCaseBorderColor #1e3a5f
+skinparam UseCaseBackgroundColor #e3f2fd
+skinparam PackageBorderColor #1e3a5f
+skinparam PackageBackgroundColor #b0d4f1
+skinparam ActorBorderColor #1e3a5f
+
+title **SISTEM SIM4LON - DISTRIBUSI GAS LPG**\nUse Case Diagram
+
+' ==================== ACTORS ====================
+actor "Admin" as Admin
+actor "Operator" as Operator
+actor "Pangkalan" as Pangkalan
+
+' ==================== SYSTEM BOUNDARY ====================
+rectangle "Sistem SIM4LON" {
+    
+    ' ========== AUTHENTICATION ==========
+    usecase "Login" as UC_Login
+    usecase "Kelola Profil" as UC_Profil
+    
+    ' ========== MASTER DATA ==========
+    usecase "Kelola Pengguna" as UC_Pengguna
+    usecase "Kelola Pangkalan" as UC_KelolaPangkalan
+    usecase "Kelola Supir" as UC_Supir
+    usecase "Kelola Produk LPG" as UC_ProdukLPG
+    
+    ' ========== OPERASIONAL ==========
+    usecase "Kelola Dashboard" as UC_Dashboard
+    usecase "Kelola Pesanan" as UC_Pesanan
+    usecase "Update Status" as UC_UpdateStatus
+    usecase "Assign Driver" as UC_AssignDriver
+    usecase "Kelola Pembayaran" as UC_Pembayaran
+    usecase "Cetak Nota" as UC_CetakNota
+    
+    ' ========== STOK ==========
+    usecase "Kelola Stok" as UC_Stok
+    usecase "Catat Penerimaan" as UC_Penerimaan
+    usecase "Catat Penyaluran" as UC_Penyaluran
+    usecase "Kelola Perencanaan" as UC_Perencanaan
+    
+    ' ========== LAPORAN ==========
+    usecase "Kelola Laporan" as UC_Laporan
+    
+    ' ========== MONITORING ==========
+    usecase "Lihat Log Aktivitas" as UC_Log
+    
+    ' ========== PANGKALAN ==========
+    usecase "Dashboard Pangkalan" as UC_DashPangkalan
+    usecase "Kelola Konsumen" as UC_Konsumen
+    usecase "Catat Penjualan" as UC_CatatPenjualan
+    usecase "Kelola Stok Pangkalan" as UC_StokPangkalan
+    usecase "Buat Order ke Agen" as UC_OrderAgen
+}
+
+' ==================== ADMIN ASSOCIATIONS ====================
+Admin --> UC_Login
+Admin --> UC_Profil
+Admin --> UC_Pengguna
+Admin --> UC_KelolaPangkalan
+Admin --> UC_Supir
+Admin --> UC_ProdukLPG
+Admin --> UC_Dashboard
+Admin --> UC_Pesanan
+Admin --> UC_Pembayaran
+Admin --> UC_Stok
+Admin --> UC_Perencanaan
+Admin --> UC_Laporan
+Admin --> UC_Log
+
+' ==================== OPERATOR ASSOCIATIONS ====================
+Operator --> UC_Login
+Operator --> UC_Profil
+Operator --> UC_Dashboard
+Operator --> UC_Pesanan
+Operator --> UC_Pembayaran
+Operator --> UC_Stok
+
+' ==================== PANGKALAN ASSOCIATIONS ====================
+Pangkalan --> UC_Login
+Pangkalan --> UC_Profil
+Pangkalan --> UC_DashPangkalan
+Pangkalan --> UC_Konsumen
+Pangkalan --> UC_CatatPenjualan
+Pangkalan --> UC_StokPangkalan
+Pangkalan --> UC_OrderAgen
+
+' ==================== INCLUDE RELATIONSHIPS ====================
+UC_Stok ..> UC_Penerimaan : <<include>>
+UC_Stok ..> UC_Penyaluran : <<include>>
+
+' ==================== EXTEND RELATIONSHIPS ====================
+UC_AssignDriver ..> UC_UpdateStatus : <<extend>>
+UC_CetakNota ..> UC_Pembayaran : <<extend>>
+
+@enduml

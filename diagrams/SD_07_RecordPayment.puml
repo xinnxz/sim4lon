@@ -1,0 +1,96 @@
+@startuml SD_07_RecordPayment
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-07: RECORD PAYMENT\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "PaymentPage" as PP
+control "PaymentService" as PS
+database "order_payment_details" as PaymentDB
+database "payment_records" as RecordsDB
+database "orders" as OrdersDB
+database "timeline_tracks" as TimelineDB
+
+== Menampilkan Form Pembayaran ==
+
+Admin -> PP : 1: Buka form pembayaran
+activate PP
+
+PP -> PS : 1.1: getOrderPaymentStatus(orderId)
+activate PS
+PS -> PaymentDB : 1.1.1: SELECT * FROM order_payment_details\nWHERE order_id = ?
+activate PaymentDB
+PaymentDB --> PS : 1.1.1.1: paymentData
+deactivate PaymentDB
+PS --> PP : 1.1.2: {totalAmount, amountPaid, remaining}
+deactivate PS
+
+PP --> Admin : 1.2: Tampilkan form\ndengan sisa tagihan
+
+== Input Pembayaran ==
+
+Admin -> PP : 2: Pilih metode (TUNAI/TRANSFER)
+Admin -> PP : 3: Input jumlah bayar
+Admin -> PP : 4: Upload bukti (jika transfer)
+Admin -> PP : 5: Klik "Simpan"
+
+PP -> PS : 5.1: recordPayment(paymentDto)
+activate PS
+
+PS -> PS : 5.1.1: validateInput(paymentDto)
+
+PS -> PaymentDB : 5.1.2: SELECT amount_paid FROM\norder_payment_details
+activate PaymentDB
+PaymentDB --> PS : 5.1.2.1: currentPaid
+deactivate PaymentDB
+
+PS -> PS : 5.1.3: calculateRemaining()
+PS -> PS : 5.1.4: checkPaymentStatus()
+
+alt Jumlah >= Sisa Tagihan
+    PS -> PS : 5.1.5: setStatus(PAID, is_paid=true)
+else Jumlah < Sisa Tagihan
+    PS -> PS : 5.1.5: setStatus(PARTIAL, is_dp=true)
+end
+
+PS -> PaymentDB : 5.1.6: UPSERT order_payment_details\n{is_paid, is_dp, amount_paid, method}
+activate PaymentDB
+PaymentDB --> PS : 5.1.6.1: updated
+deactivate PaymentDB
+
+PS -> RecordsDB : 5.1.7: INSERT INTO payment_records\n{order_id, method, amount, recorded_by}
+activate RecordsDB
+RecordsDB --> PS : 5.1.7.1: created
+deactivate RecordsDB
+
+opt Pembayaran Lunas AND Status = MENUNGGU_PEMBAYARAN
+    PS -> OrdersDB : 5.1.8: UPDATE orders\nSET current_status = 'DIPROSES'
+    activate OrdersDB
+    OrdersDB --> PS : 5.1.8.1: updated
+    deactivate OrdersDB
+    
+    PS -> TimelineDB : 5.1.9: INSERT INTO timeline_tracks\n{status='DIPROSES', desc='Pembayaran diterima'}
+    activate TimelineDB
+    TimelineDB --> PS : 5.1.9.1: created
+    deactivate TimelineDB
+    
+    note right of PS
+      <b>Auto-update status</b>
+      jika pembayaran lunas
+    end note
+end
+
+PS --> PP : 5.2: {paymentResult}
+deactivate PS
+
+PP --> Admin : 5.3: Tampilkan pesan sukses
+PP --> Admin : 5.4: Refresh halaman
+
+deactivate PP
+
+@enduml

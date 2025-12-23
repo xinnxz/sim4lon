@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import CreateOrderForm from '@/components/buat-pesanan/CreateOrderForm.tsx'
@@ -9,7 +8,6 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 
 <BaseLayout title="Buat Pesanan - SIM4LON">
   <ProtectedDashboard client:load>
-    <AdminHeader client:load />
     <AppSidebarLayout client:load headerHeight="64px">
       <main class="flex-1 flex flex-col" id="i5rzb7">
         <div class="flex-1 overflow-auto flex flex-col" id="ixt0d1">

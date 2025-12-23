@@ -1,0 +1,77 @@
+@startuml SD_09_ReceiveStock
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-09: RECEIVE STOCK (PENERIMAAN STOK)\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "PenerimaanPage" as PP
+control "PenerimaanService" as PS
+database "penerimaan_stok" as PenerimaanDB
+database "stock_histories" as HistoryDB
+
+== Menampilkan Daftar Penerimaan ==
+
+Admin -> PP : 1: Buka halaman Penerimaan Stok
+activate PP
+
+PP -> PS : 1.1: getPenerimaanList(bulan)
+activate PS
+PS -> PenerimaanDB : 1.1.1: SELECT * FROM penerimaan_stok\nWHERE tanggal BETWEEN ? AND ?
+activate PenerimaanDB
+PenerimaanDB --> PS : 1.1.1.1: penerimaanList
+deactivate PenerimaanDB
+PS --> PP : 1.1.2: penerimaanList
+deactivate PS
+
+PP --> Admin : 1.2: Tampilkan daftar penerimaan
+
+== Tambah Penerimaan Baru ==
+
+Admin -> PP : 2: Klik "Tambah Penerimaan"
+PP --> Admin : 2.1: Tampilkan form
+
+Admin -> PP : 3: Input No. SO
+Admin -> PP : 4: Input No. LO
+Admin -> PP : 5: Input nama material
+Admin -> PP : 6: Input qty_pcs & qty_kg
+Admin -> PP : 7: Pilih tanggal
+Admin -> PP : 8: Input sumber
+Admin -> PP : 9: Klik "Simpan"
+
+PP -> PS : 9.1: createPenerimaan(penerimaanDto)
+activate PS
+
+PS -> PS : 9.1.1: validateInput(penerimaanDto)
+
+PS -> PenerimaanDB : 9.1.2: INSERT INTO penerimaan_stok\n{no_so, no_lo, nama_material, qty_pcs, qty_kg, tanggal, sumber}
+activate PenerimaanDB
+PenerimaanDB --> PS : 9.1.2.1: penerimaanId
+deactivate PenerimaanDB
+
+PS -> PS : 9.1.3: mapMaterialToLpgType(nama_material)
+
+PS -> HistoryDB : 9.1.4: INSERT INTO stock_histories\n{lpg_type, movement_type='MASUK', qty}
+activate HistoryDB
+HistoryDB --> PS : 9.1.4.1: created
+deactivate HistoryDB
+
+PS --> PP : 9.2: {penerimaan, stockHistory}
+deactivate PS
+
+PP --> Admin : 9.3: Tampilkan pesan sukses
+PP --> Admin : 9.4: Refresh daftar
+
+deactivate PP
+
+note right of PS
+  <b>stock_histories</b>
+  mencatat pergerakan
+  stok AGEN (bukan pangkalan)
+end note
+
+@enduml

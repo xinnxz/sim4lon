@@ -1,0 +1,59 @@
+@startuml AD_01_Login
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-01: Login**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman Login;
+:Masukkan Email & Password;
+
+|Sistem|
+:Validasi format input;
+
+if (Format Valid?) then (ya)
+    :Cari user berdasarkan email;
+    
+    if (User ditemukan?) then (ya)
+        :Cek status akun;
+        
+        if (Akun aktif?) then (ya)
+            :Validasi password;
+            
+            if (Password benar?) then (ya)
+                :Generate session_id baru;
+                :Simpan session_id ke database;
+                note right: Invalidasi session lama\n(single-session login)
+                :Generate JWT token;
+                :Log aktivitas login;
+                
+                |User|
+                :Redirect ke Dashboard\nsesuai role;
+                stop
+            else (tidak)
+                |User|
+                :Tampilkan error\n"Email atau password salah";
+                stop
+            endif
+        else (tidak)
+            |User|
+            :Tampilkan error\n"Akun tidak aktif";
+            stop
+        endif
+    else (tidak)
+        |User|
+        :Tampilkan error\n"Email atau password salah";
+        stop
+    endif
+else (tidak)
+    |User|
+    :Tampilkan error format;
+    stop
+endif
+
+@enduml

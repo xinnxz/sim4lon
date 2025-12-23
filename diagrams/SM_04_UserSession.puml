@@ -1,0 +1,76 @@
+@startuml SM_04_UserSession
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam state {
+    BackgroundColor #F3E5F5
+    BorderColor #7B1FA2
+    FontSize 12
+    ArrowColor #7B1FA2
+}
+
+skinparam state {
+    BackgroundColor<<logged_out>> #9E9E9E
+    FontColor<<logged_out>> white
+    BackgroundColor<<logged_in>> #4CAF50
+    FontColor<<logged_in>> white
+    BackgroundColor<<expired>> #FF9800
+    FontColor<<expired>> white
+}
+
+title <size:18>**STATE MACHINE DIAGRAM**</size>\n<size:14>SM-04: User Session State</size>\n<size:10>Sistem SIM4LON - Single Session Login</size>
+
+[*] --> LOGGED_OUT
+
+state LOGGED_OUT <<logged_out>> {
+    LOGGED_OUT : session_id = null
+    LOGGED_OUT : JWT token = null
+    LOGGED_OUT : --
+    LOGGED_OUT : User belum login
+}
+
+state LOGGED_IN <<logged_in>> {
+    LOGGED_IN : session_id = UUID
+    LOGGED_IN : JWT token = valid
+    LOGGED_IN : --
+    LOGGED_IN : Do: Monitor token expiry
+    LOGGED_IN : Do: Validate session_id tiap request
+}
+
+state SESSION_EXPIRED <<expired>> {
+    SESSION_EXPIRED : JWT expired / invalid
+    SESSION_EXPIRED : --
+    SESSION_EXPIRED : Token tidak valid lagi
+}
+
+state KICKED_OUT <<expired>> {
+    KICKED_OUT : session_id mismatch
+    KICKED_OUT : --
+    KICKED_OUT : Login dari device lain
+    KICKED_OUT : (Single Session)
+}
+
+LOGGED_OUT --> LOGGED_IN : Login success\n[generate new session_id]
+
+LOGGED_IN --> LOGGED_OUT : Logout\n[clear session_id]
+
+LOGGED_IN --> SESSION_EXPIRED : Token expired\n[JWT validation failed]
+
+LOGGED_IN --> KICKED_OUT : Login dari device lain\n[session_id changed]
+
+SESSION_EXPIRED --> LOGGED_OUT : Redirect ke login
+
+KICKED_OUT --> LOGGED_OUT : Redirect ke login\n[show message]
+
+note right of LOGGED_IN
+  <b>Active State</b>
+  User sedang aktif
+  dalam sistem
+end note
+
+note bottom of KICKED_OUT
+  <b>Single Session Feature</b>
+  Saat user login dari device baru,
+  session lama otomatis invalid
+end note
+
+@enduml

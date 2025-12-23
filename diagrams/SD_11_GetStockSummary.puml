@@ -1,0 +1,60 @@
+@startuml SD_11_GetStockSummary
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-11: GET STOCK SUMMARY\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "StockPage" as SP
+control "StockService" as SS
+database "stock_histories" as HistoryDB
+database "lpg_products" as ProductsDB
+database "penerimaan_stok" as PenerimaanDB
+database "penyaluran_harian" as PenyaluranDB
+
+== Load Stock Summary ==
+
+Admin -> SP : 1: Buka halaman Stok
+activate SP
+
+SP -> SS : 1.1: getStockSummary()
+activate SS
+
+SS -> ProductsDB : 1.1.1: SELECT * FROM lpg_products\nWHERE is_active = true
+activate ProductsDB
+ProductsDB --> SS : 1.1.1.1: productList
+deactivate ProductsDB
+
+loop untuk setiap product
+    SS -> HistoryDB : 1.1.2: SELECT SUM(qty) FROM stock_histories\nWHERE lpg_type = ? AND movement_type = 'MASUK'
+    activate HistoryDB
+    HistoryDB --> SS : 1.1.2.1: totalIn
+    deactivate HistoryDB
+    
+    SS -> HistoryDB : 1.1.3: SELECT SUM(qty) FROM stock_histories\nWHERE lpg_type = ? AND movement_type = 'KELUAR'
+    activate HistoryDB
+    HistoryDB --> SS : 1.1.3.1: totalOut
+    deactivate HistoryDB
+    
+    SS -> SS : 1.1.4: calculateBalance()\n→ totalIn - totalOut
+end
+
+SS -> SS : 1.1.5: buildSummary(products, balances)
+
+SS --> SP : 1.2: {summary: [{lpg_type, totalIn, totalOut, balance}]}
+deactivate SS
+
+SP --> Admin : 1.3: Tampilkan ringkasan stok\nper jenis LPG
+
+deactivate SP
+
+note right of SS
+  Stok dihitung dari:
+  Total MASUK - Total KELUAR
+end note
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml AD_16_GenerateInvoice
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-16: Generate Invoice**\nSistem SIM4LON
+
+|User|
+start
+:Buka detail pesanan;
+:Klik "Generate Invoice";
+
+|Sistem|
+:Cek apakah invoice\nsudah ada;
+
+if (Invoice sudah ada?) then (ya)
+    |User|
+    :Tampilkan invoice\nyang sudah ada;
+    stop
+else (tidak)
+    :Generate nomor invoice\n(INV-YYYY-XXXX);
+    :Hitung subtotal dari items;
+    :Hitung PPN (12% non-subsidi);
+    :Hitung grand total;
+    :Set due_date\n(+7 hari dari sekarang);
+    :Simpan data invoice;
+    
+    |User|
+    :Tampilkan invoice baru;
+    :Opsi: Cetak / Download;
+    stop
+endif
+
+@enduml

@@ -1,0 +1,121 @@
+@startuml SD_17_CRUDGeneric
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-17: CRUD GENERIC\n<size:10>Sistem SIM4LON - Template CRUD</size>
+
+actor "Admin" as Admin
+boundary "ListPage" as LP
+boundary "FormPage" as FP
+control "EntityService" as ES
+database "entity_table" as EntityDB
+
+== READ (List) ==
+
+Admin -> LP : 1: Buka halaman list
+activate LP
+LP -> ES : 1.1: findAll(page, limit, filters)
+activate ES
+ES -> EntityDB : 1.1.1: SELECT * FROM entity_table\nWHERE filters LIMIT ? OFFSET ?
+activate EntityDB
+EntityDB --> ES : 1.1.1.1: dataList
+deactivate EntityDB
+ES --> LP : 1.1.2: {data, total, page}
+deactivate ES
+LP --> Admin : 1.2: Tampilkan daftar dengan pagination
+deactivate LP
+
+== CREATE ==
+
+Admin -> LP : 2: Klik "Tambah"
+activate LP
+LP -> FP : 2.1: navigate(form/new)
+deactivate LP
+activate FP
+FP --> Admin : 2.2: Tampilkan form kosong
+
+Admin -> FP : 3: Isi data
+Admin -> FP : 4: Klik "Simpan"
+
+FP -> ES : 4.1: create(entityDto)
+activate ES
+ES -> ES : 4.1.1: validateInput(entityDto)
+ES -> ES : 4.1.2: generateCode()
+ES -> EntityDB : 4.1.3: INSERT INTO entity_table
+activate EntityDB
+EntityDB --> ES : 4.1.3.1: entityId
+deactivate EntityDB
+ES --> FP : 4.2: EntityModel
+deactivate ES
+FP --> Admin : 4.3: Tampilkan sukses
+FP -> LP : 4.4: navigate(list)
+deactivate FP
+
+== UPDATE ==
+
+Admin -> LP : 5: Klik "Edit" pada row
+activate LP
+LP -> FP : 5.1: navigate(form/:id)
+deactivate LP
+activate FP
+
+FP -> ES : 5.2: findOne(id)
+activate ES
+ES -> EntityDB : 5.2.1: SELECT * FROM entity_table WHERE id = ?
+activate EntityDB
+EntityDB --> ES : 5.2.1.1: entityData
+deactivate EntityDB
+ES --> FP : 5.2.2: EntityModel
+deactivate ES
+
+FP --> Admin : 5.3: Tampilkan form dengan data
+
+Admin -> FP : 6: Ubah data
+Admin -> FP : 7: Klik "Simpan"
+
+FP -> ES : 7.1: update(id, entityDto)
+activate ES
+ES -> EntityDB : 7.1.1: UPDATE entity_table SET ... WHERE id = ?
+activate EntityDB
+EntityDB --> ES : 7.1.1.1: updated
+deactivate EntityDB
+ES --> FP : 7.2: EntityModel
+deactivate ES
+FP --> Admin : 7.3: Tampilkan sukses
+FP -> LP : 7.4: navigate(list)
+deactivate FP
+
+== DELETE ==
+
+Admin -> LP : 8: Klik "Hapus" pada row
+activate LP
+LP --> Admin : 8.1: Tampilkan konfirmasi
+
+Admin -> LP : 9: Konfirmasi hapus
+
+LP -> ES : 9.1: remove(id)
+activate ES
+ES -> EntityDB : 9.1.1: UPDATE entity_table\nSET deleted_at = NOW() WHERE id = ?
+activate EntityDB
+EntityDB --> ES : 9.1.1.1: deleted (soft)
+deactivate EntityDB
+ES --> LP : 9.2: success
+deactivate ES
+LP --> Admin : 9.3: Tampilkan sukses
+LP --> Admin : 9.4: Refresh list
+deactivate LP
+
+note right of ES
+  Template ini berlaku untuk:
+  - Kelola Pengguna
+  - Kelola Supir
+  - Kelola Produk LPG
+  - Kelola Konsumen
+  - dll
+end note
+
+@enduml
