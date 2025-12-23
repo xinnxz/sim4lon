@@ -125,9 +125,6 @@ async function main() {
     console.log(`📦 Pangkalan: ${pangkalan.name} (${pangkalan.code})\n`);
     console.log('🗑️  Cleaning existing data...');
     await prisma.consumer_orders.deleteMany({ where: { pangkalan_id: pangkalan.id } });
-    await prisma.consumer_pricing.deleteMany({
-        where: { consumers: { pangkalan_id: pangkalan.id } }
-    });
     await prisma.consumers.deleteMany({ where: { pangkalan_id: pangkalan.id } });
     console.log('✅ Data cleaned\n');
     console.log('👥 Creating consumers with pricing...');
@@ -148,14 +145,6 @@ async function main() {
             for (const [lpgType, price] of Object.entries(c.customPricing)) {
                 if (price) {
                     prices[lpgType] = price;
-                    await prisma.consumer_pricing.create({
-                        data: {
-                            pangkalan_id: pangkalan.id,
-                            consumer_id: consumer.id,
-                            lpg_type: lpgType,
-                            price: price,
-                        },
-                    });
                 }
             }
         }

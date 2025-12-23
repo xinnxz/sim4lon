@@ -209,7 +209,7 @@ export default function LoginForm() {
           {/* Demo Credentials Info */}
           <div className="mt-6 p-3 sm:p-3 bg-secondary/50 rounded-lg border border-border animate-fadeInUp space-y-1" style={{ animationDelay: '0.5s' }}>
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium">Demo:</span> admin@demo.com / admin123
+              <span className="font-medium">Demo:</span> admin@agen.com / admin123
             </p>
             <p className="text-xs text-muted-foreground text-center">
               <span className="font-medium">Demo:</span> operator@demo.com / operator123

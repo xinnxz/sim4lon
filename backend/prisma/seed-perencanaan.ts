@@ -7,7 +7,7 @@
 // 3. Total per day across all pangkalans = 600-800 units
 // 4. Saturdays have less (50%)
 
-import { PrismaClient, kondisi_type } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

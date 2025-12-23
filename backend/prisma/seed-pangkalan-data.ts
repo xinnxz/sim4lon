@@ -172,9 +172,7 @@ async function main() {
     // 2. Clean existing data
     console.log('🗑️  Cleaning existing data...');
     await prisma.consumer_orders.deleteMany({ where: { pangkalan_id: pangkalan.id } });
-    await prisma.consumer_pricing.deleteMany({
-        where: { consumers: { pangkalan_id: pangkalan.id } }
-    });
+    // Note: consumer_pricing table removed from schema
     await prisma.consumers.deleteMany({ where: { pangkalan_id: pangkalan.id } });
     console.log('✅ Data cleaned\n');
 
@@ -198,19 +196,14 @@ async function main() {
         const defaultPrices = DEFAULT_PRICES[c.type];
         const prices: Record<string, number> = { ...defaultPrices };
 
-        // Create custom pricing if any
+        // Create custom pricing if any (Note: consumer_pricing table removed from schema)
+        // Custom pricing is now just stored in-memory for order calculation
         if (c.customPricing) {
             for (const [lpgType, price] of Object.entries(c.customPricing)) {
                 if (price) {
                     prices[lpgType] = price;
-                    await prisma.consumer_pricing.create({
-                        data: {
-                            pangkalan_id: pangkalan.id,
-                            consumer_id: consumer.id,
-                            lpg_type: lpgType as any,
-                            price: price,
-                        },
-                    });
+                    // consumer_pricing table no longer exists
+                    // Prices are applied directly when creating orders
                 }
             }
         }

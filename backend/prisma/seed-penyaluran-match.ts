@@ -2,7 +2,7 @@
 // Run with: npx ts-node prisma/seed-penyaluran-match.ts
 // RULES: Copy exactly from perencanaan, skip Sundays, only up to today
 
-import { PrismaClient, kondisi_type } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
