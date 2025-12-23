@@ -1,7 +1,8 @@
 /**
- * PangkalanHeaderSimple - Header sederhana untuk Dashboard Pangkalan
+ * PangkalanHeaderSimple - Header untuk Dashboard Pangkalan dengan hamburger menu
  * 
- * Versi simple tanpa SidebarTrigger untuk menghindari context issues.
+ * PENTING: Header ini HARUS di-render di dalam SidebarProvider agar
+ * hamburger menu button bisa mengakses context sidebar.
  */
 
 'use client'
@@ -20,6 +21,51 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import SafeIcon from '@/components/common/SafeIcon'
 import { authApi, type UserProfile } from '@/lib/api'
 import { clearCachedProfile } from '@/components/auth/AuthGuard'
+import { useSidebar } from '@/components/ui/sidebar'
+
+/**
+ * Premium Mobile Menu Button with animated hamburger icon
+ * Shows only on mobile (md:hidden)
+ * Transforms to X when sidebar is open
+ */
+function MobileMenuButton() {
+    try {
+        const { toggleSidebar, openMobile } = useSidebar()
+
+        return (
+            <button
+                onClick={toggleSidebar}
+                className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl 
+                           bg-gradient-to-br from-blue-500/10 to-blue-500/5 
+                           hover:from-blue-500/20 hover:to-blue-500/10 
+                           active:scale-95 transition-all duration-300 
+                           border border-blue-500/20 shadow-sm"
+                aria-label="Toggle menu"
+            >
+                <div className="w-5 h-4 flex flex-col justify-between">
+                    {/* Top line */}
+                    <span
+                        className={`block h-0.5 bg-blue-600 rounded-full transform transition-all duration-300 origin-left
+                                   ${openMobile ? 'rotate-45 translate-x-0.5 w-[22px]' : 'w-5'}`}
+                    />
+                    {/* Middle line */}
+                    <span
+                        className={`block h-0.5 bg-blue-600 rounded-full transition-all duration-300
+                                   ${openMobile ? 'opacity-0 translate-x-3' : 'w-4 opacity-100'}`}
+                    />
+                    {/* Bottom line */}
+                    <span
+                        className={`block h-0.5 bg-blue-600 rounded-full transform transition-all duration-300 origin-left
+                                   ${openMobile ? '-rotate-45 translate-x-0.5 w-[22px]' : 'w-5'}`}
+                    />
+                </div>
+            </button>
+        )
+    } catch {
+        // useSidebar will throw if not within SidebarProvider - silently return null
+        return null
+    }
+}
 
 export default function PangkalanHeaderSimple() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -53,6 +99,9 @@ export default function PangkalanHeaderSimple() {
     return (
         <header className="sticky top-0 z-50 w-full h-14 sm:h-16 border-b bg-white dark:bg-slate-950 shadow-sm backdrop-blur-lg">
             <div className="flex h-full items-center px-3 sm:px-4 gap-2 sm:gap-4">
+                {/* Mobile Hamburger Menu - Premium animated button */}
+                <MobileMenuButton />
+
                 {/* Logo & Title - Responsive */}
                 <div className="flex items-center gap-2 sm:gap-3">
                     <img
@@ -60,7 +109,7 @@ export default function PangkalanHeaderSimple() {
                         alt="Pertamina"
                         className="h-8 sm:h-10 object-contain transition-all duration-300"
                     />
-                    <div>
+                    <div className="hidden xs:block">
                         <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">SIM4LON</h1>
                         <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate max-w-[100px] sm:max-w-[200px]">
                             {profile?.pangkalans?.name || 'Dashboard Pangkalan'}

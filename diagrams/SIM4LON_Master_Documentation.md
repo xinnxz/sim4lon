@@ -1,92 +1,176 @@
-# DOKUMEN ANALISIS SISTEM LENGKAP
-# Sistem Informasi Manajemen LPG (SIM4LON)
+# DOKUMENTASI TEKNIS SISTEM
+# SIM4LON - Sistem Informasi Manajemen LPG 4 Jalur Online
 
 ---
 
-> **Dokumen**: System Analysis & Design Documentation  
-> **Versi**: 1.0  
-> **Tanggal**: 23 Desember 2024  
-> **Sistem**: SIM4LON (Sistem Informasi Manajemen LPG 4 Jalur Online)  
-> **Dibuat oleh**: System Analyst Team
+**Document Version:** 1.0  
+**Date:** 23 Desember 2024  
+**Author:** System Analyst  
+**Status:** Final
 
 ---
 
 ## DAFTAR ISI
 
 1. [Executive Summary](#1-executive-summary)
-2. [Gambaran Umum Sistem](#2-gambaran-umum-sistem)
-3. [Full Stack Technology](#3-full-stack-technology)
+2. [System Overview](#2-system-overview)
+3. [Technology Stack](#3-technology-stack)
 4. [Use Case Diagram](#4-use-case-diagram)
-5. [Class Diagram](#5-class-diagram)
-6. [Entity Relationship Diagram (ERD)](#6-entity-relationship-diagram-erd)
-7. [Activity Diagram](#7-activity-diagram)
-8. [Sequence Diagram](#8-sequence-diagram)
-9. [State Machine Diagram](#9-state-machine-diagram)
-10. [Deployment Diagram](#10-deployment-diagram)
-11. [Lampiran](#11-lampiran)
+5. [Class Diagram & ERD](#5-class-diagram--erd)
+6. [Activity Diagrams](#6-activity-diagrams)
+7. [Sequence Diagrams](#7-sequence-diagrams)
+8. [State Machine Diagrams](#8-state-machine-diagrams)
+9. [Deployment Architecture](#9-deployment-architecture)
+10. [Security & Authentication](#10-security--authentication)
+11. [Appendix](#11-appendix)
 
 ---
 
 # 1. EXECUTIVE SUMMARY
 
-## 1.1 Tujuan Dokumen
+## 1.1 Tentang SIM4LON
 
-Dokumen ini merupakan **dokumentasi teknis lengkap** untuk sistem SIM4LON yang mencakup seluruh diagram UML dan analisis sistem.
+**SIM4LON (Sistem Informasi Manajemen LPG 4 Jalur Online)** adalah aplikasi web yang dirancang untuk mengelola distribusi gas LPG dari **Agen** ke **Pangkalan** hingga ke **Konsumen akhir**.
 
-## 1.2 Ringkasan Sistem
+## 1.2 Tujuan Sistem
 
-**SIM4LON** adalah Sistem Informasi Manajemen LPG 4 Jalur Online yang mengelola distribusi gas LPG dari Agen ke Pangkalan hingga ke Konsumen akhir.
+| Tujuan | Deskripsi |
+|--------|-----------|
+| **Efisiensi Operasional** | Digitalisasi proses pencatatan pesanan, stok, dan pembayaran |
+| **Transparansi** | Tracking real-time status pesanan dan stok |
+| **Multi-Tenant** | Setiap pangkalan hanya akses data miliknya |
+| **Reporting** | Laporan komprehensif untuk analisis bisnis |
 
-## 1.3 Statistik UML
+## 1.3 Scope Sistem
 
-| Diagram Type | Jumlah | Status |
-|--------------|--------|--------|
-| Use Case Diagram | 1 | ✅ |
-| Class Diagram | 1 | ✅ |
-| ERD | 1 | ✅ |
-| Activity Diagram | 25 | ✅ |
-| Sequence Diagram | 18 | ✅ |
-| State Machine Diagram | 4 | ✅ |
-| Deployment Diagram | 1 | ✅ |
-| **TOTAL** | **51** | ✅ |
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         AGEN LPG                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  Penerimaan  │→ │   Stok       │→ │  Penyaluran  │          │
+│  │  dari SPBE   │  │   Agen       │  │  ke Pangkalan│          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      PANGKALAN LPG                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  Terima dari │→ │   Stok       │→ │  Penjualan   │          │
+│  │    Agen      │  │  Pangkalan   │  │ ke Konsumen  │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    KONSUMEN AKHIR                               │
+│         Rumah Tangga  |  Warung  |  UMKM                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## 1.4 Statistik Dokumentasi
+
+| Diagram Type | Jumlah | File Type |
+|--------------|--------|-----------|
+| Use Case | 1 | PlantUML |
+| Class Diagram | 1 | PlantUML |
+| ERD | 1 | PlantUML |
+| Activity Diagram | 25 | PlantUML |
+| Sequence Diagram | 18 | PlantUML |
+| State Machine | 4 | PlantUML |
+| Deployment | 1 | PlantUML |
+| **TOTAL** | **51** | |
 
 ---
 
-# 2. GAMBARAN UMUM SISTEM
+# 2. SYSTEM OVERVIEW
 
-## 2.1 Alur Bisnis
+## 2.1 Arsitektur High-Level
 
 ```
-SPBE/SUPPLIER → AGEN → PANGKALAN → KONSUMEN
+┌────────────────────────────────────────────────────────────────────┐
+│                           PRESENTATION LAYER                       │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │                     React 18 + Vite 5                        │ │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌──────────────────┐   │ │
+│  │  │ Admin   │ │Operator │ │Pangkalan│ │ Shadcn/UI        │   │ │
+│  │  │Dashboard│ │ Views   │ │ Portal  │ │ Components       │   │ │
+│  │  └─────────┘ └─────────┘ └─────────┘ └──────────────────┘   │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────┘
+                              ↓ HTTPS:443
+┌────────────────────────────────────────────────────────────────────┐
+│                         BUSINESS LOGIC LAYER                       │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │                     NestJS 10 + Prisma 5                     │ │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐            │ │
+│  │  │  Auth   │ │  Order  │ │  Stock  │ │ Payment │            │ │
+│  │  │ Module  │ │ Service │ │ Service │ │ Service │            │ │
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘            │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────┘
+                              ↓ TCP:5432
+┌────────────────────────────────────────────────────────────────────┐
+│                          DATA ACCESS LAYER                         │
+│  ┌────────────────────────┐    ┌────────────────────────┐         │
+│  │   PostgreSQL 15        │    │   Supabase Storage     │         │
+│  │   21 Tables            │    │   S3-compatible        │         │
+│  │   7 Enums              │    │   File uploads         │         │
+│  └────────────────────────┘    └────────────────────────┘         │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 2.2 Aktor Sistem
 
-| Aktor | Deskripsi | Hak Akses |
-|-------|-----------|-----------|
-| **Admin** | Administrator sistem | Full access |
-| **Operator** | Staff operasional agen | Operasional |
-| **Pangkalan** | Pemilik pangkalan | Data sendiri |
+| Aktor | Role | Akses |
+|-------|------|-------|
+| **Admin** | Administrator | Full access semua fitur + master data |
+| **Operator** | Staff Operasional | Pesanan, stok, pembayaran |
+| **Pangkalan** | Pemilik Pangkalan | Data milik sendiri saja (multi-tenant) |
 
 ---
 
-# 3. FULL STACK TECHNOLOGY
+# 3. TECHNOLOGY STACK
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        SIM4LON FULL STACK                       │
-├─────────────────────────────────────────────────────────────────┤
-│  FRONTEND          │  BACKEND           │  DATABASE/STORAGE     │
-│  React 18          │  NestJS 10         │  PostgreSQL 15        │
-│  Vite 5            │  Prisma 5          │  Supabase Storage     │
-│  TanStack Query v5 │  JWT + Passport    │                       │
-│  React Router v6   │  Multer            │                       │
-│  Tailwind CSS      │  class-validator   │                       │
-│  Shadcn/UI         │                    │                       │
-├─────────────────────────────────────────────────────────────────┤
-│  Vercel            │  Railway           │  Railway + Supabase   │
-└─────────────────────────────────────────────────────────────────┘
-```
+## 3.1 Frontend
+
+| Technology | Version | Fungsi |
+|------------|---------|--------|
+| **React** | 18 | UI Library |
+| **Vite** | 5 | Build Tool & Dev Server |
+| **TypeScript** | 5 | Type Safety |
+| **TanStack Query** | v5 | Data Fetching & Caching |
+| **React Router** | v6 | Client-side Routing |
+| **Tailwind CSS** | 3 | Utility-first CSS |
+| **Shadcn/UI** | Latest | Pre-built Components |
+| **Lucide Icons** | Latest | Icon Library |
+| **Recharts** | Latest | Charts & Graphs |
+
+## 3.2 Backend
+
+| Technology | Version | Fungsi |
+|------------|---------|--------|
+| **NestJS** | 10 | Backend Framework |
+| **Prisma** | 5 | ORM & Database Client |
+| **Passport** | Latest | Authentication Framework |
+| **JWT** | Latest | Token-based Auth |
+| **Multer** | Latest | File Upload Handler |
+| **class-validator** | Latest | DTO Validation |
+| **bcrypt** | Latest | Password Hashing |
+
+## 3.3 Database & Storage
+
+| Technology | Fungsi |
+|------------|--------|
+| **PostgreSQL 15** | Relational Database |
+| **Supabase Storage** | S3-compatible File Storage |
+
+## 3.4 Hosting
+
+| Layer | Provider |
+|-------|----------|
+| Frontend | Vercel |
+| Backend | Railway |
+| Database | Railway PostgreSQL |
+| Storage | Supabase |
 
 ---
 
@@ -94,139 +178,127 @@ SPBE/SUPPLIER → AGEN → PANGKALAN → KONSUMEN
 
 ## 4.1 Diagram
 
-```plantuml
-@startuml SIM4LON_UseCase
-!theme plain
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-skinparam backgroundColor #87CEEB
-skinparam usecaseFontSize 11
-skinparam ActorBorderColor #1e3a5f
+File: `SIM4LON_UseCase.puml`
 
-title **SISTEM SIM4LON - DISTRIBUSI GAS LPG**\nUse Case Diagram
+## 4.2 Daftar Use Case
 
-actor "Admin" as Admin
-actor "Operator" as Operator
-actor "Pangkalan" as Pangkalan
+### Use Case SEMUA AKTOR
 
-rectangle "Sistem SIM4LON" {
-    usecase "Login" as UC_Login
-    usecase "Kelola Profil" as UC_Profil
-    usecase "Kelola Pengguna" as UC_Pengguna
-    usecase "Kelola Pangkalan" as UC_KelolaPangkalan
-    usecase "Kelola Supir" as UC_Supir
-    usecase "Kelola Dashboard" as UC_Dashboard
-    usecase "Kelola Pesanan" as UC_Pesanan
-    usecase "Update Status" as UC_UpdateStatus
-    usecase "Assign Driver" as UC_AssignDriver
-    usecase "Kelola Pembayaran" as UC_Pembayaran
-    usecase "Cetak Nota" as UC_CetakNota
-    usecase "Kelola Stok" as UC_Stok
-    usecase "Catat Penerimaan" as UC_Penerimaan
-    usecase "Catat Penyaluran" as UC_Penyaluran
-    usecase "Kelola Laporan" as UC_Laporan
-    usecase "Dashboard Pangkalan" as UC_DashPangkalan
-    usecase "Kelola Konsumen" as UC_Konsumen
-    usecase "Catat Penjualan" as UC_CatatPenjualan
-    usecase "Buat Order ke Agen" as UC_OrderAgen
-}
+| Use Case | Deskripsi |
+|----------|-----------|
+| Login | Masuk dengan email + password (single-session) |
+| Kelola Profil | View & update profil pengguna |
 
-Admin --> UC_Login
-Admin --> UC_Pengguna
-Admin --> UC_KelolaPangkalan
-Admin --> UC_Supir
-Admin --> UC_Dashboard
-Admin --> UC_Pesanan
-Admin --> UC_Pembayaran
-Admin --> UC_Stok
-Admin --> UC_Laporan
+### Use Case ADMIN Only
 
-Operator --> UC_Login
-Operator --> UC_Dashboard
-Operator --> UC_Pesanan
-Operator --> UC_Pembayaran
-Operator --> UC_Stok
+| Use Case | Deskripsi |
+|----------|-----------|
+| Kelola Pengguna | CRUD data Admin/Operator |
+| Kelola Pangkalan | CRUD pangkalan + auto-create user |
+| Kelola Supir | CRUD data driver |
+| Lihat Log Aktivitas | Audit trail sistem |
+| Kelola Perencanaan | Perencanaan alokasi bulanan |
 
-Pangkalan --> UC_Login
-Pangkalan --> UC_DashPangkalan
-Pangkalan --> UC_Konsumen
-Pangkalan --> UC_CatatPenjualan
-Pangkalan --> UC_OrderAgen
+### Use Case ADMIN + OPERATOR
 
-UC_Stok ..> UC_Penerimaan : <<include>>
-UC_Stok ..> UC_Penyaluran : <<include>>
-UC_AssignDriver ..> UC_UpdateStatus : <<extend>>
-UC_CetakNota ..> UC_Pembayaran : <<extend>>
+| Use Case | Deskripsi |
+|----------|-----------|
+| Kelola Dashboard | Ringkasan KPI |
+| Kelola Pesanan | CRUD pesanan + update status |
+| Kelola Pembayaran | Catat pembayaran tunai/transfer |
+| Kelola Stok | Penerimaan + penyaluran |
+| Kelola Laporan | Generate & export laporan |
 
-@enduml
-```
+### Use Case PANGKALAN Only
 
-## 4.2 Matriks Akses
+| Use Case | Deskripsi |
+|----------|-----------|
+| Kelola Penjualan | Catat penjualan ke konsumen |
+| Kelola Konsumen | CRUD data konsumen |
+| Buat Order ke Agen | Order stok ke agen |
+
+## 4.3 Access Matrix
 
 | Use Case | Admin | Operator | Pangkalan |
 |----------|:-----:|:--------:|:---------:|
 | Login | ✅ | ✅ | ✅ |
-| Kelola Profil | ✅ | ✅ | ✅ |
 | Kelola Pengguna | ✅ | ❌ | ❌ |
 | Kelola Pangkalan | ✅ | ❌ | ❌ |
-| Kelola Supir | ✅ | ❌ | ❌ |
-| Kelola Dashboard | ✅ | ✅ | ❌ |
 | Kelola Pesanan | ✅ | ✅ | ❌ |
-| Kelola Pembayaran | ✅ | ✅ | ❌ |
 | Kelola Stok | ✅ | ✅ | ❌ |
 | Kelola Penjualan | ❌ | ❌ | ✅ |
 | Kelola Konsumen | ❌ | ❌ | ✅ |
 
 ---
 
-# 5. CLASS DIAGRAM
+# 5. CLASS DIAGRAM & ERD
 
-## 5.1 Daftar Class (21 Entitas)
+## 5.1 Overview
 
-### Master Data
-| Class | Deskripsi |
-|-------|-----------|
-| `users` | Akun pengguna |
-| `agen` | Distributor LPG |
-| `pangkalans` | Pangkalan/outlet |
-| `drivers` | Supir pengiriman |
-| `lpg_products` | Katalog produk LPG |
+File Diagram:
+- Class Diagram: `SIM4LON_ClassDiagram.puml`
+- ERD: `SIM4LON_ERD.puml`
 
-### Order Management
-| Class | Deskripsi |
-|-------|-----------|
-| `orders` | Pesanan utama |
-| `order_items` | Detail item pesanan |
-| `timeline_tracks` | Riwayat status |
-| `invoices` | Faktur/invoice |
-| `order_payment_details` | Summary pembayaran |
-| `payment_records` | Catatan transaksi |
+## 5.2 Database Statistics
 
-### Stock Management
-| Class | Deskripsi |
-|-------|-----------|
-| `stock_histories` | Riwayat stok agen |
-| `penerimaan_stok` | Penerimaan dari SPBE |
-| `penyaluran_harian` | Penyaluran ke pangkalan |
-| `perencanaan_harian` | Perencanaan alokasi |
+| Metric | Value |
+|--------|-------|
+| Total Tables | 21 |
+| Total Enums | 7 |
+| Primary Key Type | UUID |
+| Extensions | pgcrypto, uuid-ossp |
 
-### Pangkalan Module
-| Class | Deskripsi |
-|-------|-----------|
-| `consumers` | Konsumen pangkalan |
-| `consumer_orders` | Penjualan ke konsumen |
-| `pangkalan_stocks` | Stok per pangkalan |
-| `pangkalan_stock_movements` | Riwayat pergerakan |
-| `lpg_prices` | Harga jual per pangkalan |
-| `expenses` | Pengeluaran operasional |
-| `agen_orders` | Order ke agen |
+## 5.3 Daftar Entitas
 
-### Audit
-| Class | Deskripsi |
-|-------|-----------|
-| `activity_logs` | Log aktivitas sistem |
+### Master Data (5 Tables)
 
-## 5.2 Enumerasi
+| No | Table | Deskripsi |
+|----|-------|-----------|
+| 1 | `users` | Akun pengguna sistem |
+| 2 | `agen` | Distributor LPG |
+| 3 | `pangkalans` | Pangkalan LPG |
+| 4 | `drivers` | Supir pengiriman |
+| 5 | `lpg_products` | Katalog produk LPG |
+
+### Order Management (6 Tables)
+
+| No | Table | Deskripsi |
+|----|-------|-----------|
+| 6 | `orders` | Pesanan utama |
+| 7 | `order_items` | Item dalam pesanan |
+| 8 | `timeline_tracks` | Riwayat status pesanan |
+| 9 | `invoices` | Faktur/invoice |
+| 10 | `order_payment_details` | Summary pembayaran (1:1) |
+| 11 | `payment_records` | Catatan transaksi payment |
+
+### Pangkalan Operations (7 Tables)
+
+| No | Table | Deskripsi |
+|----|-------|-----------|
+| 12 | `consumers` | Konsumen pangkalan |
+| 13 | `consumer_orders` | Penjualan ke konsumen |
+| 14 | `lpg_prices` | Harga jual per pangkalan |
+| 15 | `pangkalan_stocks` | Stok pangkalan |
+| 16 | `pangkalan_stock_movements` | Riwayat stok pangkalan |
+| 17 | `expenses` | Pengeluaran operasional |
+| 18 | `agen_orders` | Order pangkalan ke agen |
+
+### Stock & Distribution (3 Tables)
+
+| No | Table | Deskripsi |
+|----|-------|-----------|
+| 19 | `penerimaan_stok` | Penerimaan dari SPBE |
+| 20 | `penyaluran_harian` | Penyaluran ke pangkalan |
+| 21 | `perencanaan_harian` | Perencanaan alokasi |
+
+### Audit (2 Tables)
+
+| No | Table | Deskripsi |
+|----|-------|-----------|
+| 22 | `stock_histories` | Riwayat stok agen |
+| 23 | `activity_logs` | Log aktivitas sistem |
+
+## 5.4 Enumerasi
 
 | Enum | Values |
 |------|--------|
@@ -238,30 +310,34 @@ UC_CetakNota ..> UC_Pembayaran : <<extend>>
 | `stock_movement_type` | MASUK, KELUAR |
 | `consumer_type` | RUMAH_TANGGA, WARUNG |
 
----
+## 5.5 Key Relationships
 
-# 6. ENTITY RELATIONSHIP DIAGRAM
-
-## 6.1 Relasi Utama
-
-| Parent | Child | Cardinality |
-|--------|-------|-------------|
-| agen | pangkalans | 1:N |
-| pangkalans | users | 1:N |
-| pangkalans | orders | 1:N |
-| orders | order_items | 1:N |
-| orders | timeline_tracks | 1:N |
-| orders | order_payment_details | 1:1 |
-| pangkalans | consumers | 1:N |
-| consumers | consumer_orders | 1:N |
+| From | To | Type | Cardinality |
+|------|----|------|-------------|
+| agen | pangkalans | 1:N | Agen memasok banyak pangkalan |
+| pangkalans | orders | 1:N | Pangkalan membuat pesanan |
+| orders | order_items | 1:N | Pesanan berisi items |
+| orders | order_payment_details | 1:1 | Pesanan punya 1 payment summary |
+| pangkalans | consumers | 1:N | Pangkalan punya konsumen |
+| consumers | consumer_orders | 1:N | Konsumen membeli LPG |
 
 ---
 
-# 7. ACTIVITY DIAGRAM
+# 6. ACTIVITY DIAGRAMS
 
-## 7.1 Daftar Activity Diagram (25 Total)
+## 6.1 Overview
+
+Total: **25 Activity Diagrams**
+
+| Fase | Jumlah | Fokus |
+|------|--------|-------|
+| Fase 1 | 9 | Core Business Processes |
+| Fase 2 | 16 | Supporting Processes |
+
+## 6.2 Daftar Activity Diagrams
 
 ### Fase 1: Core Processes
+
 | ID | Nama | File |
 |----|------|------|
 | AD-01 | Login | `AD_01_Login.puml` |
@@ -275,6 +351,7 @@ UC_CetakNota ..> UC_Pembayaran : <<extend>>
 | AD-09 | Kelola Pangkalan | `AD_09_KelolaPangkalan.puml` |
 
 ### Fase 2: Supporting Processes
+
 | ID | Nama | File |
 |----|------|------|
 | AD-10 | Ubah Password | `AD_10_UbahPassword.puml` |
@@ -294,259 +371,136 @@ UC_CetakNota ..> UC_Pembayaran : <<extend>>
 | AD-24 | Generate Laporan | `AD_24_GenerateLaporan.puml` |
 | AD-25 | Export Laporan | `AD_25_ExportLaporan.puml` |
 
----
+## 6.3 Struktur Activity Diagram
 
-# 8. SEQUENCE DIAGRAM
-
-## 8.1 Daftar Sequence Diagram (18 Total)
-
-### Fase 1: Core Interactions
-| ID | Nama | File |
-|----|------|------|
-| SD-01 | Login | `SD_01_Login.puml` |
-| SD-03 | Create Order | `SD_03_CreateOrder.puml` |
-| SD-04 | Update Status | `SD_04_UpdateStatus.puml` |
-| SD-07 | Record Payment | `SD_07_RecordPayment.puml` |
-| SD-09 | Receive Stock | `SD_09_ReceiveStock.puml` |
-| SD-10 | Record Distribution | `SD_10_RecordDistribution.puml` |
-| SD-12 | Record Sale | `SD_12_RecordSale.puml` |
-| SD-16 | Create Pangkalan | `SD_16_CreatePangkalan.puml` |
-
-### Fase 2: Supporting Interactions
-| ID | Nama | File |
-|----|------|------|
-| SD-02 | Logout | `SD_02_Logout.puml` |
-| SD-05 | Assign Driver | `SD_05_AssignDriver.puml` |
-| SD-06 | Get Order Detail | `SD_06_GetOrderDetail.puml` |
-| SD-08 | Generate Invoice | `SD_08_GenerateInvoice.puml` |
-| SD-11 | Get Stock Summary | `SD_11_GetStockSummary.puml` |
-| SD-13 | Create Order to Agen | `SD_13_CreateOrderToAgen.puml` |
-| SD-14 | Confirm Receipt | `SD_14_ConfirmReceipt.puml` |
-| SD-15 | Dashboard Pangkalan | `SD_15_DashboardPangkalan.puml` |
-| SD-17 | CRUD Generic | `SD_17_CRUDGeneric.puml` |
-| SD-18 | Generate Export Report | `SD_18_GenerateExportReport.puml` |
+Semua Activity Diagram menggunakan 2 swimlanes:
+- **User/Admin/Pangkalan**: Aksi yang dilakukan pengguna
+- **Sistem**: Response dan proses backend
 
 ---
 
-# 9. STATE MACHINE DIAGRAM
+# 7. SEQUENCE DIAGRAMS
 
-## 9.1 SM-01: Order Status
+## 7.1 Overview
 
-```plantuml
-@startuml SM_01_OrderStatus
-!theme plain
-skinparam backgroundColor #FEFEFE
+Total: **18 Sequence Diagrams**
 
-title SM-01: Status Pesanan (Order Status)
+| Fase | Jumlah | Fokus |
+|------|--------|-------|
+| Fase 1 | 8 | Core Processes |
+| Fase 2 | 10 | Supporting Processes |
 
-[*] --> DRAFT : Pesanan dibuat
+## 7.2 Participant Types
 
-state DRAFT {
-    DRAFT : Entry: Generate kode ORD-XXXX
-    DRAFT : Entry: Hitung subtotal, tax, total
-}
+| Stereotype | Simbol | Fungsi |
+|------------|--------|--------|
+| actor | 🧑 | Pengguna sistem |
+| boundary | ▢ | UI/Interface |
+| control | ◎ | Business Logic |
+| database | ⬡ | Table Database |
 
-state MENUNGGU_PEMBAYARAN #FF9800 {
-    MENUNGGU_PEMBAYARAN : Do: Tunggu pembayaran
-}
+## 7.3 Daftar Sequence Diagrams
 
-state DIPROSES #4CAF50 {
-    DIPROSES : Do: Siapkan barang
-}
+### Fase 1: Core Processes
 
-state SIAP_KIRIM {
-    SIAP_KIRIM : Entry: Assign driver
-}
+| ID | Nama | Tables |
+|----|------|--------|
+| SD-01 | Login | users, activity_logs |
+| SD-03 | Create Order | pangkalans, orders, order_items, timeline_tracks |
+| SD-04 | Update Status | orders, order_items, timeline_tracks, pangkalan_stocks |
+| SD-07 | Record Payment | order_payment_details, payment_records, orders |
+| SD-09 | Receive Stock | penerimaan_stok, stock_histories |
+| SD-10 | Record Distribution | pangkalans, penyaluran_harian, stock_histories |
+| SD-12 | Record Sale | consumers, pangkalan_stocks, consumer_orders |
+| SD-16 | Create Pangkalan | pangkalans, users, activity_logs |
 
-state DIKIRIM #4CAF50 {
-    DIKIRIM : Do: Dalam perjalanan
-}
+### Fase 2: Supporting Processes
 
-state SELESAI #2196F3 {
-    SELESAI : Entry: Auto-sync stok pangkalan
-}
-
-state BATAL #F44336 {
-    BATAL : Entry: Log alasan pembatalan
-}
-
-DRAFT --> MENUNGGU_PEMBAYARAN : Submit pesanan
-MENUNGGU_PEMBAYARAN --> DIPROSES : Pembayaran diterima
-DIPROSES --> SIAP_KIRIM : Barang siap
-SIAP_KIRIM --> DIKIRIM : Driver berangkat
-DIKIRIM --> SELESAI : Barang diterima
-
-DRAFT --> BATAL : Cancel
-MENUNGGU_PEMBAYARAN --> BATAL : Cancel
-DIPROSES --> BATAL : Cancel
-SIAP_KIRIM --> BATAL : Cancel
-DIKIRIM --> BATAL : Gagal kirim
-
-SELESAI --> [*]
-BATAL --> [*]
-
-@enduml
-```
-
-## 9.2 SM-02: Payment Status
-
-```plantuml
-@startuml SM_02_PaymentStatus
-!theme plain
-
-title SM-02: Status Pembayaran
-
-[*] --> UNPAID : Pesanan dibuat
-
-state UNPAID #F44336 {
-    UNPAID : is_paid = false
-    UNPAID : is_dp = false
-}
-
-state PARTIAL #FF9800 {
-    PARTIAL : is_paid = false
-    PARTIAL : is_dp = true
-}
-
-state PAID #4CAF50 {
-    PAID : is_paid = true
-}
-
-UNPAID --> PARTIAL : Bayar DP
-UNPAID --> PAID : Bayar Lunas
-PARTIAL --> PAID : Bayar Sisa
-
-PAID --> [*]
-
-@enduml
-```
-
-## 9.3 SM-03: Agen Order Status
-
-```plantuml
-@startuml SM_03_AgenOrderStatus
-!theme plain
-
-title SM-03: Status Order ke Agen
-
-[*] --> PENDING : Pangkalan submit order
-
-state PENDING #FFC107 {
-    PENDING : Menunggu konfirmasi Agen
-}
-
-state DIKIRIM #2196F3 {
-    DIKIRIM : Agen sudah mengirim LPG
-}
-
-state DITERIMA #4CAF50 {
-    DITERIMA : Entry: Update pangkalan_stocks
-}
-
-state DITOLAK #F44336 {
-    DITOLAK : Order tidak dapat dipenuhi
-}
-
-PENDING --> DIKIRIM : Agen konfirmasi kirim
-PENDING --> DITOLAK : Agen menolak
-DIKIRIM --> DITERIMA : Pangkalan konfirmasi terima
-DIKIRIM --> DITOLAK : Gagal diterima
-
-DITERIMA --> [*]
-DITOLAK --> [*]
-
-@enduml
-```
-
-## 9.4 SM-04: User Session
-
-```plantuml
-@startuml SM_04_UserSession
-!theme plain
-
-title SM-04: User Session (Single Session Login)
-
-[*] --> LOGGED_OUT
-
-state LOGGED_OUT #9E9E9E {
-    LOGGED_OUT : session_id = null
-}
-
-state LOGGED_IN #4CAF50 {
-    LOGGED_IN : session_id = UUID
-    LOGGED_IN : JWT token = valid
-}
-
-state SESSION_EXPIRED #FF9800 {
-    SESSION_EXPIRED : Token expired
-}
-
-state KICKED_OUT #FF9800 {
-    KICKED_OUT : Login dari device lain
-}
-
-LOGGED_OUT --> LOGGED_IN : Login success
-LOGGED_IN --> LOGGED_OUT : Logout
-LOGGED_IN --> SESSION_EXPIRED : Token expired
-LOGGED_IN --> KICKED_OUT : Login dari device lain
-
-SESSION_EXPIRED --> LOGGED_OUT : Redirect
-KICKED_OUT --> LOGGED_OUT : Redirect
-
-@enduml
-```
+| ID | Nama | Tables |
+|----|------|--------|
+| SD-02 | Logout | users |
+| SD-05 | Assign Driver | drivers, orders, timeline_tracks |
+| SD-06 | Get Order Detail | orders, order_items, timeline_tracks, order_payment_details |
+| SD-08 | Generate Invoice | invoices, orders, order_items |
+| SD-11 | Get Stock Summary | stock_histories, lpg_products |
+| SD-13 | Create Order to Agen | agen_orders, pangkalans |
+| SD-14 | Confirm Receipt | agen_orders, pangkalan_stocks |
+| SD-15 | Dashboard Pangkalan | consumer_orders, pangkalan_stocks, expenses |
+| SD-17 | CRUD Generic | (template) |
+| SD-18 | Generate & Export Report | orders, payment_records, stock_histories |
 
 ---
 
-# 10. DEPLOYMENT DIAGRAM
+# 8. STATE MACHINE DIAGRAMS
 
-## 10.1 Diagram
+## 8.1 Overview
 
-```plantuml
-@startuml SIM4LON_Deployment
-!theme plain
-skinparam backgroundColor #FFFFFF
+Total: **4 State Machine Diagrams**
 
-title SIM4LON Deployment Diagram
+## 8.2 Daftar State Machines
 
-node "<<device>>\nClient Layer" as client {
-    artifact "SIM4LON Web App" as webapp
-}
+### SM-01: Order Status (status_pesanan)
 
-node "<<platform>>\nVercel" as vercel {
-    artifact "React 18" as react
-    artifact "Vite 5" as vite
-    artifact "Tailwind CSS" as tailwind
-}
+| State | Deskripsi |
+|-------|-----------|
+| DRAFT | Pesanan baru dibuat |
+| MENUNGGU_PEMBAYARAN | Menunggu pembayaran |
+| DIPROSES | Sedang diproses |
+| SIAP_KIRIM | Siap untuk dikirim |
+| DIKIRIM | Dalam pengiriman |
+| SELESAI | Pesanan selesai → auto-sync stok |
+| BATAL | Dibatalkan |
 
-node "<<platform>>\nRailway" as railway {
-    artifact "NestJS 10" as nestjs
-    artifact "Prisma 5" as prisma
-    component "Auth Module" as auth
-    component "Order Service" as orderService
-    component "Stock Service" as stockService
-    component "Payment Service" as paymentService
-}
-
-node "<<service>>\nPostgreSQL" as postgres {
-    artifact "21 Tables" as tables
-    artifact "7 Enums" as enums
-}
-
-node "<<service>>\nSupabase Storage" as supabase {
-    artifact "/profile-pictures/" as pics
-    artifact "/payment-proofs/" as proofs
-}
-
-client --> vercel : "HTTPS:443"
-vercel --> railway : "HTTPS:443\nAPI Request"
-railway --> postgres : "TCP:5432"
-railway --> supabase : "HTTPS:443"
-
-@enduml
+**Transition Flow:**
+```
+DRAFT → MENUNGGU_PEMBAYARAN → DIPROSES → SIAP_KIRIM → DIKIRIM → SELESAI
+                              (Cancel dari state manapun) → BATAL
 ```
 
-## 10.2 Protokol
+### SM-02: Payment Status
+
+| State | Field Values |
+|-------|--------------|
+| UNPAID | is_paid=false, is_dp=false |
+| PARTIAL | is_paid=false, is_dp=true |
+| PAID | is_paid=true |
+
+### SM-03: Agen Order Status
+
+| State | Deskripsi |
+|-------|-----------|
+| PENDING | Menunggu konfirmasi agen |
+| DIKIRIM | Agen sudah kirim |
+| DITERIMA | Pangkalan sudah terima → update stok |
+| DITOLAK | Order ditolak |
+
+### SM-04: User Session
+
+| State | Deskripsi |
+|-------|-----------|
+| LOGGED_OUT | Belum login |
+| LOGGED_IN | Aktif dengan token valid |
+| SESSION_EXPIRED | Token expired |
+| KICKED_OUT | Login dari device lain (single session) |
+
+---
+
+# 9. DEPLOYMENT ARCHITECTURE
+
+## 9.1 Diagram
+
+File: `SIM4LON_Deployment.puml`
+
+## 9.2 Infrastructure Components
+
+| Component | Provider | Technology |
+|-----------|----------|------------|
+| **Frontend** | Vercel | React 18, Vite 5, Tailwind CSS |
+| **Backend** | Railway | NestJS 10, Prisma 5 |
+| **Database** | Railway | PostgreSQL 15 |
+| **Storage** | Supabase | S3-compatible |
+
+## 9.3 Communication Protocols
 
 | From | To | Protocol | Port |
 |------|----|----------|------|
@@ -555,42 +509,130 @@ railway --> supabase : "HTTPS:443"
 | Railway | PostgreSQL | TCP | 5432 |
 | Railway | Supabase | HTTPS | 443 |
 
+## 9.4 Environment Variables
+
+### Frontend
+```env
+VITE_API_URL=https://sim4lon-api.up.railway.app
+VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
+```
+
+### Backend
+```env
+DATABASE_URL=postgresql://user:pass@host:5432/db
+JWT_SECRET=your-super-secret-key
+PORT=3000
+CORS_ORIGIN=https://sim4lon.vercel.app
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=eyJ...
+```
+
 ---
 
-# 11. LAMPIRAN
+# 10. SECURITY & AUTHENTICATION
 
-## 11.1 Daftar File Diagram (51 files)
+## 10.1 Authentication Flow
+
+1. User submit email + password
+2. Backend validate credentials
+3. Backend generate new `session_id`
+4. Backend sign JWT with `session_id`
+5. Token returned to frontend
+6. Frontend store in localStorage
+7. Every request validates token + session_id
+
+## 10.2 Single Session Login
+
+- Setiap login generate `session_id` baru
+- JWT berisi `session_id`
+- Validation check: token.session_id === users.session_id
+- Mismatch = auto logout (kicked out)
+
+## 10.3 Role-Based Access Control
+
+| Role | Access |
+|------|--------|
+| ADMIN | Full access + master data |
+| OPERATOR | Operasional (orders, stock, payment) |
+| PANGKALAN | Own data only (multi-tenant) |
+
+## 10.4 Security Measures
+
+| Layer | Measure |
+|-------|---------|
+| Transport | HTTPS/TLS 1.3 |
+| Password | bcrypt (10 rounds) |
+| Token | JWT with expiry |
+| Database | SSL connection |
+| Storage | RLS + signed URLs |
+| Secrets | Environment variables |
+
+---
+
+# 11. APPENDIX
+
+## 11.1 File Structure
 
 ```
 diagrams/
-├── SIM4LON_UseCase.puml
-├── SIM4LON_ClassDiagram.puml
-├── SIM4LON_ERD.puml
-├── SIM4LON_Deployment.puml
-├── AD_01_Login.puml ... AD_25_ExportLaporan.puml (25 files)
-├── SD_01_Login.puml ... SD_18_GenerateExportReport.puml (18 files)
-└── SM_01_OrderStatus.puml ... SM_04_UserSession.puml (4 files)
+├── Activity Diagrams (25 files)
+│   ├── AD_01_Login.puml
+│   ├── AD_02_BuatPesanan.puml
+│   └── ... (AD_03 - AD_25)
+│
+├── Sequence Diagrams (18 files)
+│   ├── SD_01_Login.puml
+│   ├── SD_02_Logout.puml
+│   └── ... (SD_03 - SD_18)
+│
+├── State Machine Diagrams (4 files)
+│   ├── SM_01_OrderStatus.puml
+│   ├── SM_02_PaymentStatus.puml
+│   ├── SM_03_AgenOrderStatus.puml
+│   └── SM_04_UserSession.puml
+│
+├── Other Diagrams
+│   ├── SIM4LON_UseCase.puml
+│   ├── SIM4LON_ClassDiagram.puml
+│   ├── SIM4LON_ERD.puml
+│   └── SIM4LON_Deployment.puml
+│
+└── Documentation (6 files)
+    ├── SIM4LON_UseCase_Documentation.md
+    ├── SIM4LON_ClassDiagram_Documentation.md
+    ├── SIM4LON_ERD_Documentation.md
+    ├── SIM4LON_ActivityDiagram_Documentation.md
+    ├── SIM4LON_SequenceDiagram_Documentation.md
+    ├── SIM4LON_StateMachine_Documentation.md
+    └── SIM4LON_Deployment_Documentation.md
 ```
 
-## 11.2 Business Rules
+## 11.2 Total Artifacts
 
-| Rule | Description |
-|------|-------------|
-| Single-Session | 1 user = 1 device aktif |
-| Auto-Sync Stock | Stok pangkalan update saat order SELESAI |
-| Auto-Create User | Buat pangkalan bisa auto-generate akun |
-| PPN 12% | Diterapkan untuk LPG NON_SUBSIDI |
-| Soft Delete | Master data menggunakan deleted_at |
-| Multi-Tenant | Pangkalan hanya lihat data sendiri |
+| Category | Count |
+|----------|-------|
+| PlantUML Diagrams | 51 |
+| Documentation Files | 8 |
+| PDF Exports | 8+ |
+| **TOTAL** | **67+ files** |
 
-## 11.3 Tools
+## 11.3 Rendering Tools
 
-| Tool | Purpose |
-|------|---------|
-| PlantUML Online | Render diagrams |
-| VS Code + PlantUML Extension | Local preview |
-| Markdown PDF Extension | Export to PDF |
+Diagram dapat di-render menggunakan:
+- [PlantUML Online](https://www.plantuml.com/plantuml/uml/)
+- VS Code Extension: "PlantUML"
+- IntelliJ IDEA PlantUML Plugin
+- Visual Paradigm (import PlantUML)
+
+## 11.4 Document History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| 1.0 | 23 Des 2024 | Initial comprehensive documentation |
 
 ---
 
-*© 2024 SIM4LON - Sistem Informasi Manajemen LPG 4 Jalur Online*
+*Dokumen ini adalah dokumentasi teknis lengkap SIM4LON*  
+*Sistem Informasi Manajemen LPG 4 Jalur Online*  
+*© 2024 SIM4LON Development Team*

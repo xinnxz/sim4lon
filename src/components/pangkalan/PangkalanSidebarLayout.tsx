@@ -1,14 +1,16 @@
 /**
  * PangkalanSidebarLayout - Layout wrapper untuk dashboard pangkalan
  * 
- * STRUKTUR LAYOUT:
+ * BEST PRACTICE STRUCTURE:
  * ┌─────────────────────────────────────┐
- * │           HEADER (fixed)            │
+ * │      HEADER (full width, sticky)    │  ← Spans entire width
  * ├──────────┬──────────────────────────┤
- * │ SIDEBAR  │       CONTENT            │
- * │          │     (with padding)       │
+ * │ SIDEBAR  │       CONTENT            │  ← Sidebar + Content in row
  * │          │                          │
  * └──────────┴──────────────────────────┘
+ * 
+ * Header is inside SidebarProvider (for hamburger menu access)
+ * but wrapped in a flex-col container to place it ABOVE the sidebar+content row.
  */
 
 'use client'
@@ -42,25 +44,26 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
     }, [])
 
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
-            {/* Fixed Header */}
-            <PangkalanHeaderSimple />
+        <SidebarProvider
+            style={{ '--header-height': '64px' } as React.CSSProperties}
+        >
+            {/* Flex column: header on top, sidebar+content row below */}
+            <div className="flex flex-col min-h-screen w-full bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
+                {/* HEADER - Full width at top */}
+                <PangkalanHeaderSimple />
 
-            {/* Sidebar + Content */}
-            <SidebarProvider
-                style={{ '--header-height': '64px' } as React.CSSProperties}
-            >
-                <PangkalanSidebar />
-                <SidebarInset className="flex-1">
-                    {/* Content wrapper with proper padding */}
-                    <main className="p-2 lg:p-8">
-                        <div className="max-w-7x1 mx-auto">
-                            {children}
-                        </div>
-                    </main>
-                </SidebarInset>
-            </SidebarProvider>
-        </div>
+                {/* SIDEBAR + CONTENT row */}
+                <div className="flex flex-1 w-full">
+                    <PangkalanSidebar />
+                    <SidebarInset className="flex flex-col flex-1">
+                        <main className="flex-1 p-2 lg:p-8">
+                            <div className="max-w-7xl mx-auto">
+                                {children}
+                            </div>
+                        </main>
+                    </SidebarInset>
+                </div>
+            </div>
+        </SidebarProvider>
     )
 }
-

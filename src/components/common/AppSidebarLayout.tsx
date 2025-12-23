@@ -6,22 +6,25 @@ import AdminHeader from '@/components/common/AdminHeader'
 interface AppSidebarLayoutProps {
   children: React.ReactNode
   headerHeight?: string
-  /**
-   * If true, hides the header (for pages that need custom header behavior)
-   */
-  hideHeader?: boolean
 }
 
 /**
  * AppSidebarLayout - Main layout wrapper for admin pages
  * 
- * IMPORTANT: AdminHeader is rendered INSIDE SidebarProvider to ensure
- * the hamburger menu button has access to the sidebar context for mobile.
+ * BEST PRACTICE STRUCTURE:
+ * ┌─────────────────────────────────────┐
+ * │      HEADER (full width, sticky)    │  ← Spans entire width
+ * ├──────────┬──────────────────────────┤
+ * │ SIDEBAR  │       CONTENT            │  ← Sidebar + Content in row
+ * │          │                          │
+ * └──────────┴──────────────────────────┘
+ * 
+ * Header is inside SidebarProvider (for hamburger menu access)
+ * but wrapped in a flex-col container to place it ABOVE the sidebar+content row.
  */
 export default function AppSidebarLayout({
   children,
-  headerHeight = '64px',
-  hideHeader = false
+  headerHeight = '64px'
 }: AppSidebarLayoutProps) {
   return (
     <SidebarProvider
@@ -29,12 +32,23 @@ export default function AppSidebarLayout({
         '--header-height': headerHeight
       } as React.CSSProperties}
     >
-      {/* Header rendered INSIDE SidebarProvider so hamburger menu has access to context */}
-      {!hideHeader && <AdminHeader />}
-      <AdminSidebar />
-      <SidebarInset className="flex flex-col min-h-[calc(100vh-var(--header-height))]">
-        {children}
-      </SidebarInset>
+      {/* 
+        Flex column container wraps everything:
+        - Row 1: Header (full width)
+        - Row 2: Sidebar + Content (flex row)
+      */}
+      <div className="flex flex-col min-h-screen w-full">
+        {/* HEADER - Full width sticky at top */}
+        <AdminHeader />
+
+        {/* SIDEBAR + CONTENT row */}
+        <div className="flex flex-1 w-full">
+          <AdminSidebar />
+          <SidebarInset className="flex flex-col flex-1">
+            {children}
+          </SidebarInset>
+        </div>
+      </div>
     </SidebarProvider>
   )
 }
