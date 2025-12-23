@@ -20,12 +20,12 @@ export declare class ConsumerOrderController {
             note: string | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
             qty: number;
-            consumer_id: string | null;
             consumer_name: string | null;
             price_per_unit: import("@prisma/client/runtime/library").Decimal;
             total_amount: import("@prisma/client/runtime/library").Decimal;
             payment_status: import("@prisma/client").$Enums.consumer_payment_status;
             sale_date: Date;
+            consumer_id: string | null;
         })[];
         meta: {
             total: number;
@@ -58,12 +58,12 @@ export declare class ConsumerOrderController {
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
-        consumer_id: string | null;
         consumer_name: string | null;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
+        consumer_id: string | null;
     })[]>;
     getChartData(req: any): Promise<{
         day: string;
@@ -98,12 +98,12 @@ export declare class ConsumerOrderController {
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
-        consumer_id: string | null;
         consumer_name: string | null;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
+        consumer_id: string | null;
     }>;
     create(dto: CreateConsumerOrderDto, req: any): Promise<{
         consumers: {
@@ -121,12 +121,12 @@ export declare class ConsumerOrderController {
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
-        consumer_id: string | null;
         consumer_name: string | null;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
+        consumer_id: string | null;
     }>;
     update(id: string, dto: UpdateConsumerOrderDto, req: any): Promise<{
         consumers: {
@@ -144,12 +144,12 @@ export declare class ConsumerOrderController {
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
-        consumer_id: string | null;
         consumer_name: string | null;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
+        consumer_id: string | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;

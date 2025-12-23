@@ -139,22 +139,6 @@ model expenses {
   @@index([category], map: "idx_expenses_category")
 }
 
-/// Consumer-specific pricing for pangkalan
-model consumer_pricing {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id String    @db.Uuid
-  consumer_id  String    @db.Uuid
-  lpg_type     lpg_type
-  price        Decimal   @db.Decimal(15, 2)
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
-  consumers    consumers @relation(fields: [consumer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumer_pricing_consumer")
-
-  @@unique([consumer_id, lpg_type], map: "idx_consumer_pricing_unique")
-  @@index([pangkalan_id], map: "idx_consumer_pricing_pangkalan")
-  @@index([consumer_id], map: "idx_consumer_pricing_consumer")
-}
-
 /// Pangkalan stock levels per LPG type
 model pangkalan_stocks {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -436,7 +420,6 @@ model consumers {
   /// Consumer type: RUMAH_TANGGA or WARUNG
   consumer_type    consumer_type      @default(RUMAH_TANGGA)
   consumer_orders  consumer_orders[]
-  consumer_pricing consumer_pricing[]
   pangkalans       pangkalans         @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumers_pangkalan")
 
   @@index([pangkalan_id], map: "idx_consumers_pangkalan")
@@ -615,14 +598,6 @@ enum stock_movement_type {
 enum consumer_payment_status {
   /// Paid in full
   LUNAS
-}
-
-/// Kondisi/condition type for perencanaan/penyaluran
-enum kondisi_type {
-  /// Normal allocation
-  NORMAL
-  /// Extra/fakultatif allocation
-  FAKULTATIF
 }
 
 /// Company profile for reports and invoices (singleton - only one record)

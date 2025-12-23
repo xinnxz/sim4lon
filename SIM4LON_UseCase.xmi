@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <xmi:Documentation exporter="SIM4LON UML Generator" exporterVersion="1.0"/>
+  
+  <uml:Model xmi:type="uml:Model" xmi:id="model_sim4lon" name="SIM4LON - Sistem Distribusi Gas LPG">
+    
+    <!-- ==================== ACTORS ==================== -->
+    
+    <packagedElement xmi:type="uml:Actor" xmi:id="actor_admin" name="Admin"/>
+    <packagedElement xmi:type="uml:Actor" xmi:id="actor_operator" name="Operator"/>
+    <packagedElement xmi:type="uml:Actor" xmi:id="actor_pangkalan" name="Pangkalan"/>
+    
+    <!-- ==================== USE CASES: AUTHENTICATION ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_auth" name="Authentication">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_login" name="Login"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_register" name="Register User"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_profil" name="Kelola Profil"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_ubah_password" name="Ubah Password"/>
+    </packagedElement>
+    
+    <!-- ==================== USE CASES: MASTER DATA ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_master" name="Master Data">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_pengguna" name="Kelola Pengguna"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_pangkalan" name="Kelola Pangkalan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_supir" name="Kelola Supir"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_produk_lpg" name="Kelola Produk LPG"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_agen" name="Kelola Agen"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_profil_perusahaan" name="Kelola Profil Perusahaan"/>
+    </packagedElement>
+    
+    <!-- ==================== USE CASES: OPERASIONAL AGEN ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_operasional" name="Operasional Agen">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_dashboard" name="Kelola Dashboard"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_pesanan" name="Kelola Pesanan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_buat_pesanan" name="Buat Pesanan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lihat_pesanan" name="Lihat Pesanan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_update_status" name="Update Status Pesanan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_assign_driver" name="Assign Driver"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_pembayaran" name="Kelola Pembayaran"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_cetak_nota" name="Cetak Nota"/>
+    </packagedElement>
+    
+    <!-- ==================== USE CASES: STOK AGEN ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_stok" name="Stok Agen">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_stok" name="Kelola Stok"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_catat_penerimaan" name="Catat Penerimaan Stok"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_catat_penyaluran" name="Catat Penyaluran"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_perencanaan" name="Kelola Perencanaan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lihat_inout_agen" name="Lihat In-Out Agen"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_ringkasan_stok" name="Ringkasan Stok"/>
+    </packagedElement>
+    
+    <!-- ==================== USE CASES: LAPORAN ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_laporan" name="Laporan">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_laporan" name="Kelola Laporan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_laporan_penjualan" name="Laporan Penjualan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_laporan_pembayaran" name="Laporan Pembayaran"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_laporan_stok" name="Laporan Stok"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_export_laporan" name="Export Laporan"/>
+    </packagedElement>
+    
+    <!-- ==================== USE CASES: MONITORING ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_monitoring" name="Monitoring">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lihat_log_aktivitas" name="Lihat Log Aktivitas"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_lihat_notifikasi" name="Lihat Notifikasi"/>
+    </packagedElement>
+    
+    <!-- ==================== USE CASES: PANGKALAN ==================== -->
+    
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_pangkalan" name="Pangkalan Dashboard">
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_dashboard_pangkalan" name="Dashboard Pangkalan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_konsumen" name="Kelola Konsumen"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_catat_penjualan" name="Catat Penjualan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_stok_pangkalan" name="Kelola Stok Pangkalan"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_kelola_pengeluaran" name="Kelola Pengeluaran"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_atur_harga_jual" name="Atur Harga Jual"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_order_ke_agen" name="Buat Order ke Agen"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_laporan_pangkalan" name="Laporan Pangkalan"/>
+    </packagedElement>
+    
+    <!-- ==================== ASSOCIATIONS: ADMIN ==================== -->
+    
+    <!-- Auth -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_login" name="">
+      <memberEnd xmi:idref="assoc_admin_login_end1"/>
+      <memberEnd xmi:idref="assoc_admin_login_end2"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_login_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_login_end2" type="uc_login"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_register">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_register_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_register_end2" type="uc_register"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_profil">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_profil_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_profil_end2" type="uc_kelola_profil"/>
+    </packagedElement>
+    
+    <!-- Master Data - Admin Only -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_kelola_pengguna">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_pengguna_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_pengguna_end2" type="uc_kelola_pengguna"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_kelola_pangkalan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_pangkalan_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_pangkalan_end2" type="uc_kelola_pangkalan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_kelola_supir">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_supir_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_supir_end2" type="uc_kelola_supir"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_kelola_produk_lpg">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_produk_lpg_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_produk_lpg_end2" type="uc_kelola_produk_lpg"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_kelola_agen">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_agen_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_agen_end2" type="uc_kelola_agen"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_kelola_profil_perusahaan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_profil_perusahaan_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_kelola_profil_perusahaan_end2" type="uc_kelola_profil_perusahaan"/>
+    </packagedElement>
+    
+    <!-- Operasional - Admin -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_dashboard">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_dashboard_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_dashboard_end2" type="uc_kelola_dashboard"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_pesanan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_pesanan_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_pesanan_end2" type="uc_kelola_pesanan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_pembayaran">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_pembayaran_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_pembayaran_end2" type="uc_kelola_pembayaran"/>
+    </packagedElement>
+    
+    <!-- Stok - Admin -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_stok">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_stok_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_stok_end2" type="uc_kelola_stok"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_penerimaan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_penerimaan_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_penerimaan_end2" type="uc_catat_penerimaan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_penyaluran">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_penyaluran_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_penyaluran_end2" type="uc_catat_penyaluran"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_perencanaan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_perencanaan_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_perencanaan_end2" type="uc_kelola_perencanaan"/>
+    </packagedElement>
+    
+    <!-- Laporan - Admin -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_laporan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_laporan_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_laporan_end2" type="uc_kelola_laporan"/>
+    </packagedElement>
+    
+    <!-- Monitoring - Admin Only -->
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_log">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_log_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_log_end2" type="uc_lihat_log_aktivitas"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_admin_notif">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_notif_end1" type="actor_admin"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_admin_notif_end2" type="uc_lihat_notifikasi"/>
+    </packagedElement>
+    
+    <!-- ==================== ASSOCIATIONS: OPERATOR ==================== -->
+    
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_login">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_login_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_login_end2" type="uc_login"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_profil">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_profil_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_profil_end2" type="uc_kelola_profil"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_dashboard">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_dashboard_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_dashboard_end2" type="uc_kelola_dashboard"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_pesanan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_pesanan_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_pesanan_end2" type="uc_kelola_pesanan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_pembayaran">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_pembayaran_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_pembayaran_end2" type="uc_kelola_pembayaran"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_stok">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_stok_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_stok_end2" type="uc_kelola_stok"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_penyaluran">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_penyaluran_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_penyaluran_end2" type="uc_catat_penyaluran"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_operator_laporan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_laporan_end1" type="actor_operator"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_operator_laporan_end2" type="uc_kelola_laporan"/>
+    </packagedElement>
+    
+    <!-- ==================== ASSOCIATIONS: PANGKALAN ==================== -->
+    
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_login">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_login_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_login_end2" type="uc_login"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_profil">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_profil_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_profil_end2" type="uc_kelola_profil"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_dashboard">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_dashboard_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_dashboard_end2" type="uc_dashboard_pangkalan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_konsumen">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_konsumen_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_konsumen_end2" type="uc_kelola_konsumen"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_penjualan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_penjualan_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_penjualan_end2" type="uc_catat_penjualan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_stok">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_stok_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_stok_end2" type="uc_kelola_stok_pangkalan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_pengeluaran">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_pengeluaran_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_pengeluaran_end2" type="uc_kelola_pengeluaran"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_harga">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_harga_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_harga_end2" type="uc_atur_harga_jual"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_order">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_order_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_order_end2" type="uc_order_ke_agen"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="assoc_pangkalan_laporan">
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_laporan_end1" type="actor_pangkalan"/>
+      <ownedEnd xmi:type="uml:Property" xmi:id="assoc_pangkalan_laporan_end2" type="uc_laporan_pangkalan"/>
+    </packagedElement>
+    
+    <!-- ==================== INCLUDE RELATIONSHIPS ==================== -->
+    
+    <packagedElement xmi:type="uml:Include" xmi:id="include_pesanan_buat">
+      <includingCase xmi:idref="uc_kelola_pesanan"/>
+      <addition xmi:idref="uc_buat_pesanan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_pesanan_lihat">
+      <includingCase xmi:idref="uc_kelola_pesanan"/>
+      <addition xmi:idref="uc_lihat_pesanan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_laporan_penjualan">
+      <includingCase xmi:idref="uc_kelola_laporan"/>
+      <addition xmi:idref="uc_laporan_penjualan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_laporan_pembayaran">
+      <includingCase xmi:idref="uc_kelola_laporan"/>
+      <addition xmi:idref="uc_laporan_pembayaran"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_laporan_stok">
+      <includingCase xmi:idref="uc_kelola_laporan"/>
+      <addition xmi:idref="uc_laporan_stok"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_stok_penerimaan">
+      <includingCase xmi:idref="uc_kelola_stok"/>
+      <addition xmi:idref="uc_catat_penerimaan"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_stok_penyaluran">
+      <includingCase xmi:idref="uc_kelola_stok"/>
+      <addition xmi:idref="uc_catat_penyaluran"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Include" xmi:id="include_stok_ringkasan">
+      <includingCase xmi:idref="uc_kelola_stok"/>
+      <addition xmi:idref="uc_ringkasan_stok"/>
+    </packagedElement>
+    
+    <!-- ==================== EXTEND RELATIONSHIPS ==================== -->
+    
+    <packagedElement xmi:type="uml:Extend" xmi:id="extend_status_driver">
+      <extendedCase xmi:idref="uc_update_status"/>
+      <extension xmi:idref="uc_assign_driver"/>
+      <extensionLocation xmi:idref="ext_point_assign_driver"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Extend" xmi:id="extend_pembayaran_nota">
+      <extendedCase xmi:idref="uc_kelola_pembayaran"/>
+      <extension xmi:idref="uc_cetak_nota"/>
+      <extensionLocation xmi:idref="ext_point_cetak_nota"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Extend" xmi:id="extend_laporan_export">
+      <extendedCase xmi:idref="uc_kelola_laporan"/>
+      <extension xmi:idref="uc_export_laporan"/>
+    </packagedElement>
+    
+    <!-- Extension Points -->
+    <packagedElement xmi:type="uml:ExtensionPoint" xmi:id="ext_point_assign_driver" name="Assign Driver"/>
+    <packagedElement xmi:type="uml:ExtensionPoint" xmi:id="ext_point_cetak_nota" name="Cetak Nota"/>
+    
+  </uml:Model>
+  
+</xmi:XMI>

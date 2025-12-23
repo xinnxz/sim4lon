@@ -22,9 +22,6 @@ let PerencanaanService = class PerencanaanService {
         if (query.pangkalan_id) {
             where.pangkalan_id = query.pangkalan_id;
         }
-        if (query.kondisi) {
-            where.kondisi = query.kondisi;
-        }
         if (query.bulan) {
             const [year, month] = query.bulan.split('-').map(Number);
             const startDate = new Date(year, month - 1, 1);
@@ -79,9 +76,6 @@ let PerencanaanService = class PerencanaanService {
         const where = {
             tanggal: { gte: startDate, lte: actualEndDate },
         };
-        if (kondisi) {
-            where.kondisi = kondisi;
-        }
         if (lpgType) {
             where.lpg_type = lpgType;
         }
