@@ -49,6 +49,7 @@ const initialProfile: ProfileFormData = {
 
 export default function CompanyProfileSettings() {
     const [profile, setProfile] = useState<ProfileFormData>(initialProfile)
+    const [agenId, setAgenId] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
@@ -73,6 +74,7 @@ export default function CompanyProfileSettings() {
                 region: data.region || '',
                 logo: data.logo_url || null
             })
+            setAgenId(data.id || null) // id is now the 6-digit agen code
             if (data.logo_url) {
                 setLogoPreview(data.logo_url)
             }
@@ -160,6 +162,33 @@ export default function CompanyProfileSettings() {
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-5">
+                    {/* ID Agen Display - for pangkalan connection */}
+                    {agenId && (
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white">
+                                    <SafeIcon name="Key" className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-blue-600 font-medium">ID Agen (Kode Koneksi)</p>
+                                    <p className="text-2xl font-bold text-blue-800 tracking-wider">{agenId}</p>
+                                </div>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-blue-300 text-blue-600 hover:bg-blue-100"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(agenId)
+                                    toast.success('ID Agen disalin!')
+                                }}
+                            >
+                                <SafeIcon name="Copy" className="h-4 w-4 mr-1" />
+                                Salin
+                            </Button>
+                        </div>
+                    )}
+
                     {/* Logo Upload */}
                     <div className="flex items-start gap-6 p-4 rounded-xl bg-muted/30 border border-dashed">
                         <div className="flex-shrink-0">

@@ -625,7 +625,8 @@ enum kondisi_type {
 
 /// Company profile for reports and invoices (singleton - only one record)
 model company_profile {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// 6-digit kode agen (primary key, auto-generated)
+  id                   String   @id @db.VarChar(6)
   /// Nama agen/distributor
   company_name         String   @db.VarChar(255)
   /// Alamat lengkap

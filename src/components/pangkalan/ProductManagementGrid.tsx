@@ -71,15 +71,6 @@ export const ProductManagementGrid: React.FC<ProductManagementGridProps> = ({
             {/* Active Products Section */}
             {activeProducts.length > 0 && (
                 <section className="space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-                            <SafeIcon name="CheckCircle2" className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-slate-900">Produk Aktif</h3>
-                            <p className="text-xs text-slate-500">{activeProducts.length} produk yang dijual</p>
-                        </div>
-                    </div>
 
                     <div className="grid gap-4 lg:grid-cols-2">
                         {activeProducts.map((product) => {

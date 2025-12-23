@@ -18,7 +18,7 @@ const CRITICAL_STOCK_THRESHOLD = 100;  // Critical jika stok < 100
 
 export interface Notification {
     id: string;
-    type: 'order_new' | 'stock_low' | 'stock_critical' | 'stock_out';
+    type: 'order_new' | 'agen_order' | 'stock_low' | 'stock_critical' | 'stock_out';
     title: string;
     message: string;
     icon: string;
@@ -26,6 +26,7 @@ export interface Notification {
     link?: string;
     time: string;
     created_at: Date;
+    orderId?: string; // For agen_order type - reference to agen_orders.id
 }
 
 @Injectable()
@@ -63,7 +64,34 @@ export class NotificationService {
             });
         }
 
-        // 2. Calculate stock alerts
+        // 2. Get pending orders from pangkalan (LANGSUNG dari agen_orders)
+        const pendingAgenOrders = await this.prisma.agen_orders.findMany({
+            where: {
+                status: 'PENDING',
+            },
+            take: limit,
+            orderBy: { order_date: 'desc' },
+            include: {
+                pangkalans: { select: { code: true, name: true } },
+            },
+        });
+
+        for (const order of pendingAgenOrders) {
+            notifications.push({
+                id: `agen-order-${order.id}`,
+                type: 'agen_order',
+                title: `Pesanan Baru dari ${order.pangkalans?.name || 'Pangkalan'}`,
+                message: `${order.pangkalans?.code || 'PKL'} memesan ${order.qty_ordered} tabung LPG`,
+                icon: 'ShoppingCart',
+                priority: 'high',
+                link: '/pesanan-pangkalan',
+                time: this.formatTimeAgo(order.order_date),
+                created_at: order.order_date,
+                orderId: order.id, // Include order ID for actions
+            });
+        }
+
+        // 3. Calculate stock alerts
         const stockAlerts = await this.calculateStockAlerts();
         notifications.push(...stockAlerts);
 

@@ -1,4 +1,4 @@
-export type LpgType = 'kg3' | 'kg5' | 'kg12' | 'kg50';
+export type LpgType = 'gr220' | 'kg3' | 'kg5' | 'kg12' | 'kg50';
 export type MovementType = 'MASUK' | 'KELUAR' | 'OPNAME';
 export declare const LPG_TYPES: LpgType[];
 export declare const LPG_TYPES_FRONTEND: string[];
