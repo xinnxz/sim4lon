@@ -1,0 +1,48 @@
+@startuml AD_18_KelolaPerencanaan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-18: Kelola Perencanaan**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman Perencanaan;
+:Pilih bulan & tipe LPG;
+
+|Sistem|
+:Load data perencanaan\nbulan tersebut;
+:Load daftar pangkalan aktif;
+:Tampilkan grid\n(pangkalan x tanggal);
+
+|User|
+if (Data sudah ada?) then (ya)
+    :Klik cell untuk edit;
+    :Ubah jumlah normal/fakultatif;
+else (tidak)
+    :Klik "Auto Generate";
+    
+    |Sistem|
+    :Buat perencanaan\nuntuk semua pangkalan;
+    :Set alokasi berdasarkan\nalokasi_bulanan pangkalan;
+    
+    |User|
+    :Edit manual jika perlu;
+endif
+
+:Klik "Simpan";
+
+|Sistem|
+:Validasi input;
+:Simpan/Update perencanaan_harian;
+:Log aktivitas;
+
+|User|
+:Tampilkan pesan sukses;
+:Refresh grid;
+stop
+
+@enduml

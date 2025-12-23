@@ -1,0 +1,85 @@
+@startuml SM_03_AgenOrderStatus
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam state {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+    FontSize 12
+    ArrowColor #2E7D32
+}
+
+skinparam state {
+    BackgroundColor<<pending>> #FFC107
+    FontColor<<pending>> black
+    BackgroundColor<<dikirim>> #2196F3
+    FontColor<<dikirim>> white
+    BackgroundColor<<diterima>> #4CAF50
+    FontColor<<diterima>> white
+    BackgroundColor<<ditolak>> #F44336
+    FontColor<<ditolak>> white
+}
+
+title <size:18>**STATE MACHINE DIAGRAM**</size>\n<size:14>SM-03: Status Order ke Agen (Agen Order Status)</size>\n<size:10>Sistem SIM4LON</size>
+
+[*] --> PENDING : Pangkalan submit order
+
+state PENDING <<pending>> {
+    PENDING : order_date = now
+    PENDING : qty_ordered = X
+    PENDING : qty_received = null
+    PENDING : received_date = null
+    PENDING : --
+    PENDING : Menunggu konfirmasi Agen
+}
+
+state DIKIRIM <<dikirim>> {
+    DIKIRIM : status = "DIKIRIM"
+    DIKIRIM : --
+    DIKIRIM : Agen sudah mengirim LPG
+    DIKIRIM : Dalam perjalanan ke Pangkalan
+}
+
+state DITERIMA <<diterima>> {
+    DITERIMA : qty_received = Y
+    DITERIMA : received_date = now
+    DITERIMA : --
+    DITERIMA : Entry: Update pangkalan_stocks
+    DITERIMA : Entry: Create stock_movement
+}
+
+state DITOLAK <<ditolak>> {
+    DITOLAK : note = alasan_tolak
+    DITOLAK : --
+    DITOLAK : Order tidak dapat dipenuhi
+}
+
+PENDING --> DIKIRIM : Agen konfirmasi kirim
+
+PENDING --> DITOLAK : Agen menolak\n[stok tidak ada]
+
+DIKIRIM --> DITERIMA : Pangkalan konfirmasi terima\n[qty_received > 0]
+
+DIKIRIM --> DITOLAK : Gagal diterima\n[rusak/hilang]
+
+DITERIMA --> [*]
+DITOLAK --> [*]
+
+note right of PENDING
+  <b>Initial State</b>
+  Pangkalan membuat order
+  ke Agen untuk mengisi stok
+end note
+
+note right of DITERIMA
+  <b>Final State (Success)</b>
+  Stok pangkalan bertambah
+  sesuai qty_received
+end note
+
+note bottom of DITERIMA
+  <b>qty_received</b> bisa berbeda
+  dengan <b>qty_ordered</b>
+  (partial delivery)
+end note
+
+@enduml

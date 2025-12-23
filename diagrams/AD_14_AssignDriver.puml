@@ -1,0 +1,35 @@
+@startuml AD_14_AssignDriver
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-14: Assign Driver**\nSistem SIM4LON
+
+|User|
+start
+:Buka detail pesanan;
+:Klik "Assign Driver";
+
+|Sistem|
+:Load daftar driver aktif;
+:Tampilkan modal pilih driver;
+
+|User|
+:Pilih driver dari daftar;
+:Klik "Simpan";
+
+|Sistem|
+:Validasi driver tersedia;
+:Update driver_id pada pesanan;
+:Buat timeline track\n"Driver ditugaskan";
+:Log aktivitas;
+
+|User|
+:Tampilkan pesan sukses;
+:Refresh halaman detail;
+stop
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml AD_17_CetakNota
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-17: Cetak Nota**\nSistem SIM4LON
+
+|User|
+start
+:Buka detail pesanan/invoice;
+:Klik "Cetak Nota";
+
+|Sistem|
+:Load data invoice;
+:Load data pangkalan;
+:Load order items;
+:Load company profile\n(untuk header nota);
+:Generate template nota\ndengan data;
+:Buka print preview;
+
+|User|
+if (Konfirmasi cetak?) then (ya)
+    :Klik "Print";
+    
+    |Sistem|
+    :Kirim ke printer;
+    
+    |User|
+    :Nota tercetak;
+    stop
+else (tidak)
+    :Klik "Download PDF";
+    
+    |Sistem|
+    :Generate PDF;
+    :Download file;
+    
+    |User|
+    :File tersimpan;
+    stop
+endif
+
+@enduml

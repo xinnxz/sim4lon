@@ -1,0 +1,44 @@
+@startuml SD_02_Logout
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-02: LOGOUT\n<size:10>Sistem SIM4LON</size>
+
+actor "User" as User
+boundary "Header" as H
+control "AuthService" as AS
+database "users" as UsersDB
+
+== Proses Logout ==
+
+User -> H : 1: Klik menu "Logout"
+activate H
+
+H -> H : 1.1: Hapus token dari localStorage
+H -> H : 1.2: Clear user state
+
+H -> AS : 1.3: logout(userId)
+activate AS
+
+AS -> UsersDB : 1.3.1: UPDATE users\nSET session_id = NULL\nWHERE id = ?
+activate UsersDB
+UsersDB --> AS : 1.3.1.1: updated
+deactivate UsersDB
+
+AS --> H : 1.3.2: success
+deactivate AS
+
+H --> User : 1.4: Redirect ke halaman Login
+
+deactivate H
+
+note right of AS
+  Menghapus session_id
+  untuk invalidasi token JWT
+end note
+
+@enduml

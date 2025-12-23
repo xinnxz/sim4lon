@@ -1,0 +1,96 @@
+@startuml SM_01_OrderStatus
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam state {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    FontSize 12
+    ArrowColor #1565C0
+}
+
+skinparam state {
+    BackgroundColor<<active>> #4CAF50
+    FontColor<<active>> white
+    BackgroundColor<<warning>> #FF9800
+    FontColor<<warning>> white
+    BackgroundColor<<danger>> #F44336
+    FontColor<<danger>> white
+    BackgroundColor<<success>> #2196F3
+    FontColor<<success>> white
+}
+
+title <size:18>**STATE MACHINE DIAGRAM**</size>\n<size:14>SM-01: Status Pesanan (Order Status)</size>\n<size:10>Sistem SIM4LON</size>
+
+[*] --> DRAFT : Pesanan dibuat
+
+state DRAFT {
+    DRAFT : Entry: Generate kode ORD-XXXX
+    DRAFT : Entry: Hitung subtotal, tax, total
+    DRAFT : Entry: Buat timeline track
+}
+
+state MENUNGGU_PEMBAYARAN <<warning>> {
+    MENUNGGU_PEMBAYARAN : Entry: Notifikasi ke Pangkalan
+    MENUNGGU_PEMBAYARAN : Do: Tunggu pembayaran
+}
+
+state DIPROSES <<active>> {
+    DIPROSES : Entry: Verifikasi pembayaran
+    DIPROSES : Do: Siapkan barang
+}
+
+state SIAP_KIRIM {
+    SIAP_KIRIM : Entry: Assign driver (opsional)
+    SIAP_KIRIM : Do: Tunggu jadwal kirim
+}
+
+state DIKIRIM <<active>> {
+    DIKIRIM : Entry: Driver berangkat
+    DIKIRIM : Do: Dalam perjalanan
+}
+
+state SELESAI <<success>> {
+    SELESAI : Entry: Auto-sync stok pangkalan
+    SELESAI : Entry: Update pangkalan_stocks
+    SELESAI : Exit: Generate invoice (opsional)
+}
+
+state BATAL <<danger>> {
+    BATAL : Entry: Log alasan pembatalan
+    BATAL : Entry: Rollback stok (jika ada)
+}
+
+DRAFT --> MENUNGGU_PEMBAYARAN : Submit pesanan
+MENUNGGU_PEMBAYARAN --> DIPROSES : Pembayaran diterima\n[is_paid = true]
+MENUNGGU_PEMBAYARAN --> DIPROSES : DP diterima\n[is_dp = true]
+DIPROSES --> SIAP_KIRIM : Barang siap
+SIAP_KIRIM --> DIKIRIM : Driver berangkat\n[driver_id != null]
+DIKIRIM --> SELESAI : Barang diterima\npangkalan konfirmasi
+
+DRAFT --> BATAL : Cancel
+MENUNGGU_PEMBAYARAN --> BATAL : Cancel / Timeout
+DIPROSES --> BATAL : Cancel
+SIAP_KIRIM --> BATAL : Cancel
+DIKIRIM --> BATAL : Gagal kirim
+
+SELESAI --> [*]
+BATAL --> [*]
+
+note right of DRAFT
+  <b>Initial State</b>
+  Pesanan baru dibuat
+  dengan status DRAFT
+end note
+
+note right of SELESAI
+  <b>Final State (Success)</b>
+  Stok pangkalan otomatis
+  bertambah saat SELESAI
+end note
+
+note bottom of BATAL
+  Pembatalan bisa dari
+  state manapun kecuali SELESAI
+end note
+
+@enduml

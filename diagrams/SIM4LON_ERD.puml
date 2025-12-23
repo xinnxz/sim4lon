@@ -1,0 +1,437 @@
+@startuml SIM4LON_ERD
+!define primary_key(x) <b><color:#b8860b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+!define column(x) <color:#efefef><&media-record></color> x
+!define table(x) entity x << (E,#FFAA00) >>
+
+skinparam backgroundColor #FFFFFF
+skinparam roundcorner 5
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FFFACD
+    BorderColor #D2691E
+    ArrowColor #8B4513
+    HeaderBackgroundColor #FF8C00
+    HeaderFontColor #FFFFFF
+    FontSize 11
+}
+
+title <size:20>**ENTITY RELATIONSHIP DIAGRAM**</size>\n<size:14>Sistem Informasi Manajemen LPG (SIM4LON)</size>\n<size:10>Database: PostgreSQL | ORM: Prisma</size>
+
+' ===================================================
+' MASTER DATA ENTITIES
+' ===================================================
+
+table(users) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    column(email) : varchar(255) <<UK>>
+    column(password) : varchar(255)
+    column(name) : varchar(255)
+    column(phone) : varchar(20)
+    column(avatar_url) : text
+    column(role) : user_role
+    foreign_key(pangkalan_id) : UUID
+    column(session_id) : varchar(100)
+    column(is_active) : boolean
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+table(agen) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    column(name) : varchar(255)
+    column(address) : text
+    column(pic_name) : varchar(255)
+    column(phone) : varchar(20)
+    column(email) : varchar(255)
+    column(note) : text
+    column(is_active) : boolean
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+table(pangkalans) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    column(name) : varchar(255)
+    column(address) : text
+    column(region) : varchar(100)
+    column(pic_name) : varchar(255)
+    column(phone) : varchar(20)
+    column(email) : varchar(255)
+    column(capacity) : int
+    column(note) : text
+    column(is_active) : boolean
+    foreign_key(agen_id) : UUID
+    column(alokasi_bulanan) : int
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+table(drivers) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    column(name) : varchar(255)
+    column(phone) : varchar(20)
+    column(vehicle_id) : varchar(20)
+    column(note) : text
+    column(is_active) : boolean
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+table(lpg_products) {
+    primary_key(id) : UUID
+    --
+    column(name) : varchar(100)
+    column(size_kg) : decimal(5,2)
+    column(category) : lpg_category
+    column(color) : varchar(50)
+    column(description) : text
+    column(selling_price) : decimal(15,2)
+    column(cost_price) : decimal(15,2)
+    column(brand) : varchar(50)
+    column(is_active) : boolean
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+' ===================================================
+' ORDER ENTITIES
+' ===================================================
+
+table(orders) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    foreign_key(pangkalan_id) : UUID
+    foreign_key(driver_id) : UUID
+    column(order_date) : date
+    column(current_status) : status_pesanan
+    column(subtotal) : decimal(15,2)
+    column(tax_amount) : decimal(15,2)
+    column(total_amount) : decimal(15,2)
+    column(note) : text
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+table(order_items) {
+    primary_key(id) : UUID
+    --
+    foreign_key(order_id) : UUID
+    column(lpg_type) : lpg_type
+    column(label) : varchar(50)
+    column(price_per_unit) : decimal(15,2)
+    column(qty) : int
+    column(sub_total) : decimal(15,2)
+    column(is_taxable) : boolean
+    column(tax_amount) : decimal(15,2)
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(timeline_tracks) {
+    primary_key(id) : UUID
+    --
+    foreign_key(order_id) : UUID
+    column(status) : status_pesanan
+    column(description) : text
+    column(note) : text
+    column(created_at) : timestamptz
+}
+
+table(invoices) {
+    primary_key(id) : UUID
+    --
+    foreign_key(order_id) : UUID
+    column(invoice_number) : varchar(50) <<UK>>
+    column(invoice_date) : date
+    column(due_date) : date
+    column(billing_address) : text
+    column(billed_to_name) : varchar(255)
+    column(sub_total) : decimal(15,2)
+    column(tax_rate) : decimal(5,2)
+    column(tax_amount) : decimal(15,2)
+    column(grand_total) : decimal(15,2)
+    column(payment_status) : varchar(50)
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+    column(deleted_at) : timestamptz
+}
+
+table(order_payment_details) {
+    primary_key(id) : UUID
+    --
+    foreign_key(order_id) : UUID <<UK>>
+    column(is_paid) : boolean
+    column(is_dp) : boolean
+    column(payment_method) : payment_method
+    column(amount_paid) : decimal(15,2)
+    column(payment_date) : timestamptz
+    column(proof_url) : text
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(payment_records) {
+    primary_key(id) : UUID
+    --
+    foreign_key(order_id) : UUID
+    foreign_key(invoice_id) : UUID
+    column(method) : payment_method
+    column(amount) : decimal(15,2)
+    column(payment_time) : timestamptz
+    column(proof_url) : text
+    foreign_key(recorded_by_user_id) : UUID
+    column(note) : text
+    column(created_at) : timestamptz
+}
+
+' ===================================================
+' PANGKALAN OPERATIONS ENTITIES
+' ===================================================
+
+table(consumers) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(name) : varchar(255)
+    column(nik) : varchar(16)
+    column(kk) : varchar(16)
+    column(phone) : varchar(20)
+    column(address) : text
+    column(note) : text
+    column(consumer_type) : consumer_type
+    column(is_active) : boolean
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(consumer_orders) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    foreign_key(pangkalan_id) : UUID
+    foreign_key(consumer_id) : UUID
+    column(consumer_name) : varchar(255)
+    column(lpg_type) : lpg_type
+    column(qty) : int
+    column(price_per_unit) : decimal(15,2)
+    column(cost_price) : decimal(15,2)
+    column(total_amount) : decimal(15,2)
+    column(payment_status) : consumer_payment_status
+    column(note) : text
+    column(sale_date) : timestamptz
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(lpg_prices) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(lpg_type) : lpg_type
+    column(cost_price) : decimal(15,2)
+    column(selling_price) : decimal(15,2)
+    column(is_active) : boolean
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(pangkalan_stocks) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(lpg_type) : lpg_type
+    column(qty) : int
+    column(warning_level) : int
+    column(critical_level) : int
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(pangkalan_stock_movements) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(lpg_type) : lpg_type
+    column(movement_type) : varchar(20)
+    column(qty) : int
+    column(source) : varchar(50)
+    column(reference_id) : UUID
+    column(note) : text
+    column(movement_date) : timestamptz
+    column(created_at) : timestamptz
+}
+
+table(expenses) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(category) : varchar(50)
+    column(amount) : decimal(15,2)
+    column(description) : text
+    column(expense_date) : timestamptz
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(agen_orders) {
+    primary_key(id) : UUID
+    --
+    column(code) : varchar(20) <<UK>>
+    foreign_key(pangkalan_id) : UUID
+    foreign_key(agen_id) : UUID
+    column(lpg_type) : lpg_type
+    column(qty_ordered) : int
+    column(qty_received) : int
+    column(status) : varchar(20)
+    column(order_date) : timestamptz
+    column(received_date) : timestamptz
+    column(note) : text
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+' ===================================================
+' STOCK & DISTRIBUTION ENTITIES
+' ===================================================
+
+table(penerimaan_stok) {
+    primary_key(id) : UUID
+    --
+    column(no_so) : varchar(50)
+    column(no_lo) : varchar(50)
+    column(nama_material) : varchar(255)
+    column(qty_pcs) : int
+    column(qty_kg) : decimal(10,2)
+    column(tanggal) : date
+    column(sumber) : varchar(255)
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(penyaluran_harian) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(tanggal) : date
+    column(lpg_type) : lpg_type
+    column(jumlah_normal) : int
+    column(jumlah_fakultatif) : int
+    column(tipe_pembayaran) : varchar(20)
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(perencanaan_harian) {
+    primary_key(id) : UUID
+    --
+    foreign_key(pangkalan_id) : UUID
+    column(tanggal) : date
+    column(lpg_type) : lpg_type
+    column(jumlah_normal) : int
+    column(jumlah_fakultatif) : int
+    column(alokasi_bulan) : int
+    column(created_at) : timestamptz
+    column(updated_at) : timestamptz
+}
+
+table(stock_histories) {
+    primary_key(id) : UUID
+    --
+    foreign_key(lpg_product_id) : UUID
+    column(lpg_type) : lpg_type
+    column(movement_type) : stock_movement_type
+    column(qty) : int
+    column(note) : text
+    foreign_key(recorded_by_user_id) : UUID
+    column(timestamp) : timestamptz
+    column(created_at) : timestamptz
+}
+
+table(activity_logs) {
+    primary_key(id) : UUID
+    --
+    foreign_key(user_id) : UUID
+    foreign_key(order_id) : UUID
+    column(type) : varchar(50)
+    column(title) : varchar(255)
+    column(description) : text
+    column(pangkalan_name) : varchar(255)
+    column(detail_numeric) : decimal(15,2)
+    column(icon_name) : varchar(50)
+    column(order_status) : status_pesanan
+    column(timestamp) : timestamptz
+    column(created_at) : timestamptz
+}
+
+' ===================================================
+' RELATIONSHIPS
+' ===================================================
+
+agen "1" -- "0..*" pangkalans : has
+pangkalans "1" -- "0..*" users : has
+pangkalans "1" -- "0..*" orders : places
+drivers "1" -- "0..*" orders : delivers
+orders "1" -- "1..*" order_items : contains
+orders "1" -- "0..*" timeline_tracks : tracks
+orders "1" -- "0..*" invoices : generates
+orders "1" -- "0..1" order_payment_details : has
+orders "1" -- "0..*" payment_records : receives
+invoices "1" -- "0..*" payment_records : receives
+users "1" -- "0..*" payment_records : records
+users "1" -- "0..*" stock_histories : records
+users "1" -- "0..*" activity_logs : generates
+orders "1" -- "0..*" activity_logs : generates
+lpg_products "1" -- "0..*" stock_histories : tracks
+pangkalans "1" -- "0..*" consumers : serves
+consumers "1" -- "0..*" consumer_orders : places
+pangkalans "1" -- "0..*" consumer_orders : sells
+pangkalans "1" -- "0..*" lpg_prices : sets
+pangkalans "1" -- "0..*" pangkalan_stocks : manages
+pangkalans "1" -- "0..*" pangkalan_stock_movements : tracks
+pangkalans "1" -- "0..*" expenses : incurs
+pangkalans "1" -- "0..*" penyaluran_harian : distributes
+pangkalans "1" -- "0..*" perencanaan_harian : plans
+agen "1" -- "0..*" agen_orders : receives
+pangkalans "1" -- "0..*" agen_orders : places
+
+' ===================================================
+' LEGEND
+' ===================================================
+
+legend right
+  <b>LEGEND</b>
+  |= Simbol |= Keterangan |
+  | <color:#b8860b><&key></color> | Primary Key |
+  | <color:#aaaaaa><&key></color> | Foreign Key |
+  | <<UK>> | Unique Key |
+  --
+  <b>CARDINALITY</b>
+  | 1 -- 0..* | One to Many |
+  | 1 -- 0..1 | One to One (optional) |
+  | 1 -- 1..* | One to Many (required) |
+  --
+  <b>ENUMS</b>
+  | user_role | ADMIN, OPERATOR, PANGKALAN |
+  | lpg_type | kg3, kg5_5, kg12, kg50 |
+  | status_pesanan | DRAFT → SELESAI |
+  | payment_method | TUNAI, TRANSFER |
+endlegend
+
+@enduml

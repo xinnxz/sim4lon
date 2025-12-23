@@ -1,7 +1,6 @@
 
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import ExportLaporanForm from '@/components/export-laporan/ExportLaporanForm.tsx'
@@ -10,7 +9,6 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 
 <BaseLayout title="Ekspor Laporan - SIM4LON">
   <ProtectedDashboard client:load>
-    <AdminHeader client:load />
     <AppSidebarLayout client:load headerHeight="64px">
       <main className="flex-1 flex flex-col">
         <div className="flex-1 overflow-auto">

@@ -1,0 +1,83 @@
+@startuml SD_06_GetOrderDetail
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-06: GET ORDER DETAIL\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "OrderListPage" as OLP
+boundary "OrderDetailPage" as ODP
+control "OrderService" as OS
+database "orders" as OrdersDB
+database "order_items" as ItemsDB
+database "timeline_tracks" as TimelineDB
+database "order_payment_details" as PaymentDB
+database "pangkalans" as PangkalanDB
+database "drivers" as DriversDB
+
+== Navigasi ke Detail ==
+
+Admin -> OLP : 1: Klik baris pesanan
+activate OLP
+OLP -> ODP : 1.1: navigate(/orders/:id)
+deactivate OLP
+
+activate ODP
+
+== Load Order Data ==
+
+ODP -> OS : 2: getOrderDetail(orderId)
+activate OS
+
+OS -> OrdersDB : 2.1: SELECT * FROM orders\nWHERE id = ?
+activate OrdersDB
+OrdersDB --> OS : 2.1.1: orderData
+deactivate OrdersDB
+
+OS -> ItemsDB : 2.2: SELECT * FROM order_items\nWHERE order_id = ?
+activate ItemsDB
+ItemsDB --> OS : 2.2.1: items[]
+deactivate ItemsDB
+
+OS -> TimelineDB : 2.3: SELECT * FROM timeline_tracks\nWHERE order_id = ?\nORDER BY created_at
+activate TimelineDB
+TimelineDB --> OS : 2.3.1: timeline[]
+deactivate TimelineDB
+
+OS -> PaymentDB : 2.4: SELECT * FROM order_payment_details\nWHERE order_id = ?
+activate PaymentDB
+PaymentDB --> OS : 2.4.1: paymentDetails
+deactivate PaymentDB
+
+OS -> PangkalanDB : 2.5: SELECT * FROM pangkalans\nWHERE id = order.pangkalan_id
+activate PangkalanDB
+PangkalanDB --> OS : 2.5.1: pangkalanData
+deactivate PangkalanDB
+
+opt order.driver_id exists
+    OS -> DriversDB : 2.6: SELECT * FROM drivers\nWHERE id = order.driver_id
+    activate DriversDB
+    DriversDB --> OS : 2.6.1: driverData
+    deactivate DriversDB
+end
+
+OS -> OS : 2.7: combineData()
+
+OS --> ODP : 2.8: {order, items, timeline, payment, pangkalan, driver}
+deactivate OS
+
+== Render Page ==
+
+ODP --> Admin : 3: Tampilkan detail pesanan
+ODP --> Admin : 3.1: Tampilkan info pangkalan
+ODP --> Admin : 3.2: Tampilkan daftar items
+ODP --> Admin : 3.3: Tampilkan timeline
+ODP --> Admin : 3.4: Tampilkan status pembayaran
+
+deactivate ODP
+
+@enduml

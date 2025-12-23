@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import InOutAgenPage from '@/components/in-out-agen/InOutAgenPage.tsx'
@@ -9,7 +8,6 @@ import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 
 <BaseLayout title="In / Out Agen - SIM4LON">
   <ProtectedDashboard client:load allowedRoles={['ADMIN']}>
-    <AdminHeader client:load />
     <AppSidebarLayout client:load headerHeight="64px">
       <main class="flex-1 flex flex-col dashboard-gradient-bg min-w-0">
         <div class="flex-1 overflow-y-auto overflow-x-hidden">

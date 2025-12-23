@@ -1,0 +1,77 @@
+@startuml SD_13_CreateOrderToAgen
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-13: CREATE ORDER TO AGEN (PANGKALAN)\n<size:10>Sistem SIM4LON</size>
+
+actor "Pangkalan" as User
+boundary "OrderAgenPage" as OAP
+control "AgenOrderService" as AOS
+database "agen_orders" as OrderDB
+database "pangkalans" as PangkalanDB
+database "agen" as AgenDB
+
+== Menampilkan Form Order ==
+
+User -> OAP : 1: Buka menu "Order ke Agen"
+activate OAP
+
+OAP -> AOS : 1.1: getAgenData(pangkalanId)
+activate AOS
+AOS -> PangkalanDB : 1.1.1: SELECT agen_id FROM pangkalans\nWHERE id = ?
+activate PangkalanDB
+PangkalanDB --> AOS : 1.1.1.1: agen_id
+deactivate PangkalanDB
+
+AOS -> AgenDB : 1.1.2: SELECT * FROM agen\nWHERE id = ?
+activate AgenDB
+AgenDB --> AOS : 1.1.2.1: agenData
+deactivate AgenDB
+
+AOS --> OAP : 1.1.3: {agen, currentStock}
+deactivate AOS
+
+OAP --> User : 1.2: Tampilkan form order\ndengan info agen
+
+== Submit Order ==
+
+User -> OAP : 2: Pilih jenis LPG
+User -> OAP : 3: Input qty order
+User -> OAP : 4: Tambah catatan (opsional)
+User -> OAP : 5: Klik "Kirim Order"
+
+OAP -> AOS : 5.1: createOrder(orderDto)
+activate AOS
+
+AOS -> AOS : 5.1.1: validateInput(orderDto)
+
+AOS -> OrderDB : 5.1.2: SELECT MAX(code) FROM agen_orders
+activate OrderDB
+OrderDB --> AOS : 5.1.2.1: lastCode
+deactivate OrderDB
+
+AOS -> AOS : 5.1.3: generateCode()\n→ "AGN-0001"
+
+AOS -> OrderDB : 5.1.4: INSERT INTO agen_orders\n{code, pangkalan_id, agen_id, lpg_type,\nqty_ordered, status='PENDING', order_date}
+activate OrderDB
+OrderDB --> AOS : 5.1.4.1: orderId
+deactivate OrderDB
+
+AOS --> OAP : 5.2: AgenOrderModel
+deactivate AOS
+
+OAP --> User : 5.3: Tampilkan pesan sukses\n"Order dikirim ke Agen"
+OAP --> User : 5.4: Tampilkan daftar order
+
+deactivate OAP
+
+note right of AOS
+  Status flow:
+  PENDING → DIKIRIM → DITERIMA
+end note
+
+@enduml

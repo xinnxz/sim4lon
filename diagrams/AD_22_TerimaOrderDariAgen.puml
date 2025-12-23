@@ -1,0 +1,36 @@
+@startuml AD_22_TerimaOrderDariAgen
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-22: Terima Order dari Agen**\nSistem SIM4LON
+
+|Pangkalan|
+start
+:Buka halaman Order ke Agen;
+:Lihat daftar order\ndengan status DIKIRIM;
+:Klik order yang akan\ndikonfirmasi;
+
+|Sistem|
+:Load detail agen_order;
+:Tampilkan info:\n- Jenis LPG\n- Qty dipesan\n- Tanggal order;
+
+|Pangkalan|
+:Masukkan qty yang diterima\n(bisa berbeda dari qty order);
+:Tambah catatan (opsional);
+:Klik "Konfirmasi Terima";
+
+|Sistem|
+:Update agen_order:\n- status = DITERIMA\n- qty_received = input\n- received_date = now;
+:Tambah pangkalan_stocks\nsesuai qty diterima;
+:Buat pangkalan_stock_movement\n(MASUK, source: AGEN);
+
+|Pangkalan|
+:Tampilkan pesan sukses\n"Stok berhasil ditambahkan";
+:Refresh halaman;
+stop
+
+@enduml
