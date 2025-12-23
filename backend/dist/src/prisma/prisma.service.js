@@ -44,7 +44,6 @@ let PrismaService = class PrismaService {
     get lpg_products() { return this._client.lpg_products; }
     get consumers() { return this._client.consumers; }
     get consumer_orders() { return this._client.consumer_orders; }
-    get consumer_pricing() { return this._client.consumer_pricing; }
     get expenses() { return this._client.expenses; }
     get pangkalan_stocks() { return this._client.pangkalan_stocks; }
     get pangkalan_stock_movements() { return this._client.pangkalan_stock_movements; }

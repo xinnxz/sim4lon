@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma';
 import { CreatePerencanaanDto, UpdatePerencanaanDto, BulkUpdatePerencanaanDto, GetPerencanaanQueryDto } from './dto';
-import { kondisi_type } from '@prisma/client';
 
 @Injectable()
 export class PerencanaanService {
@@ -15,10 +14,6 @@ export class PerencanaanService {
 
         if (query.pangkalan_id) {
             where.pangkalan_id = query.pangkalan_id;
-        }
-
-        if (query.kondisi) {
-            where.kondisi = query.kondisi as kondisi_type;
         }
 
         // Filter by month (YYYY-MM)
@@ -91,9 +86,6 @@ export class PerencanaanService {
         const where: any = {
             tanggal: { gte: startDate, lte: actualEndDate },
         };
-        if (kondisi) {
-            where.kondisi = kondisi as kondisi_type;
-        }
         if (lpgType) {
             where.lpg_type = lpgType;
         }
