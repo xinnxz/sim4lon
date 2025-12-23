@@ -98,7 +98,7 @@ export default function LoginForm() {
       <CardHeader className="space-y-2 text-center">
         <div className="flex justify-center mb-4 mt-8">
           <img
-            src="/src/assets/logo-pertamina-2.png"
+            src="/logo-pertamina-2.png"
             alt="Pertamina"
             className="h-16 object-contain"
           />
@@ -212,7 +212,7 @@ export default function LoginForm() {
               <span className="font-medium">Demo:</span> admin@agen.com / admin123
             </p>
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium">Demo:</span> pangkalan@test.com / password123
+              <span className="font-medium">Demo:</span> pangkalanreon@test.com / pangkalan123
             </p>
             <p className="text-xs text-muted-foreground text-center">
               <span className="font-medium">Demo:</span> operator2@sim4lon.com / Operator123

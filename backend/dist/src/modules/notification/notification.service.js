@@ -46,6 +46,30 @@ let NotificationService = class NotificationService {
                 created_at: activity.created_at,
             });
         }
+        const pendingAgenOrders = await this.prisma.agen_orders.findMany({
+            where: {
+                status: 'PENDING',
+            },
+            take: limit,
+            orderBy: { order_date: 'desc' },
+            include: {
+                pangkalans: { select: { code: true, name: true } },
+            },
+        });
+        for (const order of pendingAgenOrders) {
+            notifications.push({
+                id: `agen-order-${order.id}`,
+                type: 'agen_order',
+                title: `Pesanan Baru dari ${order.pangkalans?.name || 'Pangkalan'}`,
+                message: `${order.pangkalans?.code || 'PKL'} memesan ${order.qty_ordered} tabung LPG`,
+                icon: 'ShoppingCart',
+                priority: 'high',
+                link: '/pesanan-pangkalan',
+                time: this.formatTimeAgo(order.order_date),
+                created_at: order.order_date,
+                orderId: order.id,
+            });
+        }
         const stockAlerts = await this.calculateStockAlerts();
         notifications.push(...stockAlerts);
         notifications.sort((a, b) => {

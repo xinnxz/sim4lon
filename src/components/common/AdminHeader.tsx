@@ -166,13 +166,13 @@ export default function AdminHeader({
           <div className="flex items-center gap-3">
             {/* Light mode logo */}
             <img
-              src="/src/assets/logo-pertamina.png"
+              src="/logo-pertamina.png"
               alt="Pertamina"
               className="h-10 object-contain dark:hidden"
             />
             {/* Dark mode logo */}
             <img
-              src="/src/assets/logo-pertamina - darkmode.png"
+              src="/logo-pertamina-darkmode.png"
               alt="Pertamina"
               className="h-10 object-contain hidden dark:block"
             />

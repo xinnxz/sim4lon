@@ -14,12 +14,13 @@ exports.toBackendFormat = toBackendFormat;
 exports.toFrontendFormat = toFrontendFormat;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
-exports.LPG_TYPES = ['kg3', 'kg5', 'kg12', 'kg50'];
-exports.LPG_TYPES_FRONTEND = ['3kg', '5kg', '12kg', '50kg'];
+exports.LPG_TYPES = ['gr220', 'kg3', 'kg5', 'kg12', 'kg50'];
+exports.LPG_TYPES_FRONTEND = ['220gr', '3kg', '5kg', '12kg', '50kg'];
 exports.ALL_LPG_TYPES = [...exports.LPG_TYPES, ...exports.LPG_TYPES_FRONTEND];
 exports.MOVEMENT_TYPES = ['MASUK', 'KELUAR', 'OPNAME'];
 function toBackendFormat(type) {
     const mapping = {
+        '220gr': 'gr220', 'gr220': 'gr220',
         '3kg': 'kg3', '5kg': 'kg5', '12kg': 'kg12', '50kg': 'kg50',
         'kg3': 'kg3', 'kg5': 'kg5', 'kg12': 'kg12', 'kg50': 'kg50',
     };
@@ -27,10 +28,11 @@ function toBackendFormat(type) {
 }
 function toFrontendFormat(type) {
     const mapping = {
+        'gr220': 'gr220', '220gr': 'gr220',
         'kg3': '3kg', 'kg5': '5kg', 'kg12': '12kg', 'kg50': '50kg',
         '3kg': '3kg', '5kg': '5kg', '12kg': '12kg', '50kg': '50kg',
     };
-    return mapping[type] || '3kg';
+    return mapping[type] || type;
 }
 class ReceiveStockDto {
     lpg_type;

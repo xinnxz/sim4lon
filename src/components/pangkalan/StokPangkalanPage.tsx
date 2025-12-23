@@ -11,7 +11,6 @@
  */
 
 'use client'
-
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -34,7 +33,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
-import { authApi, pangkalanStockApi, lpgPricesApi, lpgProductsApi, agenApi, agenOrdersApi, type UserProfile, type StockLevel, type LpgType, type PangkalanStockMovement, type PangkalanLpgPrice, type Agen, type LpgProductWithStock, type AgenOrder, type AgenOrderStatus } from '@/lib/api'
+import { authApi, pangkalanStockApi, lpgPricesApi, lpgProductsApi, agenOrdersApi, companyProfileApi, type UserProfile, type StockLevel, type LpgType, type PangkalanStockMovement, type PangkalanLpgPrice, type LpgProductWithStock, type AgenOrder, type AgenOrderStatus, type CompanyProfile } from '@/lib/api'
 import { toast } from 'sonner'
 import { ProductManagementGrid } from './ProductManagementGrid'
 import * as XLSX from 'xlsx'
@@ -50,8 +49,7 @@ import {
 // LPG type config (supports both '3kg' and 'kg3' formats)
 const LPG_CONFIG: Record<string, { name: string; color: string; gradient: string }> = {
     // 220gram / Bright Gas Can
-    '022': { name: 'Bright Gas 220gr', color: '#FFA500', gradient: 'from-orange-400 to-amber-500' },
-    'kg022': { name: 'Bright Gas 220gr', color: '#FFA500', gradient: 'from-orange-400 to-amber-500' },
+    'gr220': { name: 'Bright Gas 220gr', color: '#FFA500', gradient: 'from-orange-400 to-amber-500' },
     // 3kg
     '3kg': { name: 'LPG 3 kg', color: '#22C55E', gradient: 'from-green-500 to-emerald-600' },
     'kg3': { name: 'LPG 3 kg', color: '#22C55E', gradient: 'from-green-500 to-emerald-600' },
@@ -66,8 +64,17 @@ const LPG_CONFIG: Record<string, { name: string; color: string; gradient: string
     'kg50': { name: 'LPG 50 kg', color: '#8B5CF6', gradient: 'from-violet-500 to-purple-600' },
 }
 
-// Tab type
-type TabType = 'stock' | 'history' | 'products' | 'orders';
+// Normalize lpg_type format: kg3 <-> 3kg for proper matching
+const normalizeType = (type: string) => {
+    if (type.startsWith('kg')) return type; // already kg3 format
+    const match = type.match(/^(\d+\.?\d*)kg$/);
+    if (match) return `kg${match[1]}`;
+    if (type.match(/g?r?220g?r?/i)) return 'gr220';
+    return type;
+}
+
+// Tab type - simplified (removed orders tab)
+type TabType = 'stock' | 'history' | 'products';
 
 export default function StokPangkalanPage() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -82,7 +89,7 @@ export default function StokPangkalanPage() {
     const [receiveData, setReceiveData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '', movementType: 'IN' as 'IN' | 'OUT' })
     const [orderData, setOrderData] = useState({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [agen, setAgen] = useState<Agen | null>(null)
+    const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null)
 
     // History pagination & filter
     const [currentPage, setCurrentPage] = useState(1)
@@ -171,6 +178,7 @@ export default function StokPangkalanPage() {
 
     useEffect(() => {
         fetchData()
+        fetchPrices() // Also fetch prices on initial load for stock filtering
     }, [])
 
     useEffect(() => {
@@ -206,24 +214,22 @@ export default function StokPangkalanPage() {
         }
     }
 
-    // Fetch orders when tab changes or filter changes
+    // Fetch orders on component mount (for pending orders in header)
     useEffect(() => {
-        if (activeTab === 'orders') {
-            fetchAgenOrders()
-        }
-    }, [activeTab, orderStatusFilter])
+        fetchAgenOrders()
+    }, [])
 
-    // Fetch agen data for WhatsApp order
+    // Fetch company profile for agen info
     useEffect(() => {
-        const fetchAgen = async () => {
+        const fetchCompanyProfile = async () => {
             try {
-                const agenData = await agenApi.getMyAgen()
-                setAgen(agenData)
+                const profileData = await companyProfileApi.get()
+                setCompanyProfile(profileData)
             } catch (error) {
-                console.error('Failed to fetch agen:', error)
+                console.error('Failed to fetch company profile:', error)
             }
         }
-        fetchAgen()
+        fetchCompanyProfile()
     }, [])
 
     // Price management functions
@@ -278,7 +284,7 @@ export default function StokPangkalanPage() {
             'kg55': 5.5,   // Alternative format
             'kg12': 12,
             'kg50': 50,
-            'kg022': 0.22, // 220gram
+            'gr220': 0.22, // 220gram Bright Gas
             'kg220': 0.22, // Alternative for 220gram
         }
         return mapping[lpgType] ?? parseFloat(lpgType.replace('kg', ''))
@@ -287,7 +293,7 @@ export default function StokPangkalanPage() {
     // Mapping: size_kg to lpg_type format
     const sizeKgToLpgType = (sizeKg: number): string => {
         const mapping: Record<number, string> = {
-            0.22: 'kg022',
+            0.22: 'gr220',
             3: 'kg3',
             5.5: 'kg5',
             12: 'kg12',
@@ -367,7 +373,7 @@ export default function StokPangkalanPage() {
     const getAllDisplayProducts = () => {
         // Define fixed 5 product types
         const FIXED_PRODUCTS = [
-            { lpgType: 'kg022', name: 'Bright Gas Can', size_kg: 0.22, color: '#FFA500' },
+            { lpgType: 'gr220', name: 'Bright Gas Can', size_kg: 0.22, color: '#FFA500' },
             { lpgType: 'kg3', name: 'LPG 3 kg', size_kg: 3, color: '#22C55E' },
             { lpgType: 'kg5', name: 'LPG 5.5 kg', size_kg: 5.5, color: '#ff82c5' },
             { lpgType: 'kg12', name: 'LPG 12 kg', size_kg: 12, color: '#3B82F6' },
@@ -396,15 +402,16 @@ export default function StokPangkalanPage() {
     // Get active LPG types for dropdowns
     const getActiveLpgTypes = () => {
         const allTypes = [
+            { value: 'gr220', label: 'Bright Gas 220gr' },
             { value: 'kg3', label: 'LPG 3 kg' },
             { value: 'kg5', label: 'LPG 5.5 kg' },
             { value: 'kg12', label: 'LPG 12 kg' },
             { value: 'kg50', label: 'LPG 50 kg' },
         ]
         if (prices.length === 0) return allTypes // Return all if no prices loaded
-        // Only include types that are explicitly active in prices
+        // Only include types that are explicitly active in prices (use normalizeType for matching)
         return allTypes.filter(type => {
-            const priceData = prices.find(p => p.lpg_type === type.value)
+            const priceData = prices.find(p => normalizeType(p.lpg_type) === normalizeType(type.value))
             return priceData?.is_active === true // Must exist AND be active
         })
     }
@@ -475,13 +482,13 @@ export default function StokPangkalanPage() {
             return
         }
 
-        if (!agen?.phone) {
-            toast.error('Nomor telepon Agen belum terdaftar. Hubungi admin untuk menambahkan data agen.')
+        if (!companyProfile?.phone) {
+            toast.error('Nomor telepon Agen belum terdaftar. Hubungi admin untuk menambahkan data.')
             return
         }
 
         // Format phone number for WhatsApp (remove leading 0, add 62)
-        let phoneNumber = agen.phone.replace(/\D/g, '')
+        let phoneNumber = companyProfile.phone.replace(/\D/g, '')
         if (phoneNumber.startsWith('0')) {
             phoneNumber = '62' + phoneNumber.substring(1)
         } else if (!phoneNumber.startsWith('62')) {
@@ -504,7 +511,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
         const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
         window.open(waUrl, '_blank')
 
-        toast.success(`Membuka WhatsApp untuk menghubungi ${agen.name}`)
+        toast.success(`Membuka WhatsApp untuk menghubungi ${companyProfile.company_name}`)
         setIsOrderOpen(false)
         setOrderData({ lpgType: '3kg', qty: 0, note: '' })
     }
@@ -823,15 +830,21 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Pesan ke Agen Button */}
+                    {/* Pesan ke Agen Button with Pending Badge */}
                     <Dialog open={isOrderOpen} onOpenChange={setIsOrderOpen}>
                         <DialogTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                                className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 relative"
                             >
                                 <SafeIcon name="Truck" className="h-4 w-4 mr-2" />
                                 Pesan ke Agen
+                                {/* Pending Orders Badge */}
+                                {agenOrders.filter(o => o.status === 'PENDING' || o.status === 'DIKIRIM').length > 0 && (
+                                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                                        {agenOrders.filter(o => o.status === 'PENDING' || o.status === 'DIKIRIM').length}
+                                    </span>
+                                )}
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-md">
@@ -843,9 +856,22 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                     Pesan ke Agen
                                 </DialogTitle>
                                 <DialogDescription>
-                                    Kirim pesanan LPG ke agen distributor
+                                    Buat pesanan LPG baru dan kirim notifikasi ke agen
                                 </DialogDescription>
                             </DialogHeader>
+
+                            {/* Pending Orders Alert */}
+                            {agenOrders.filter(o => o.status === 'PENDING').length > 0 && (
+                                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                    <div className="flex items-center gap-2">
+                                        <SafeIcon name="Clock" className="h-4 w-4 text-orange-600" />
+                                        <p className="text-sm text-orange-700">
+                                            <span className="font-medium">{agenOrders.filter(o => o.status === 'PENDING').length} pesanan</span> menunggu konfirmasi
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Tipe LPG</label>
@@ -877,14 +903,14 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         onChange={(e) => setOrderData({ ...orderData, note: e.target.value })}
                                     />
                                 </div>
-                                {/* Agen Info Banner */}
-                                {agen ? (
+                                {/* Agen Info Banner - from Company Profile */}
+                                {companyProfile ? (
                                     <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                                         <div className="flex items-start gap-2">
                                             <SafeIcon name="Building2" className="h-4 w-4 text-green-600 mt-0.5" />
                                             <div>
-                                                <p className="text-sm font-medium text-green-800">{agen.name}</p>
-                                                <p className="text-xs text-green-600">{agen.phone}</p>
+                                                <p className="text-sm font-medium text-green-800">{companyProfile.company_name}</p>
+                                                <p className="text-xs text-green-600">{companyProfile.phone || 'No telepon belum diatur'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -893,21 +919,47 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         <div className="flex items-start gap-2">
                                             <SafeIcon name="AlertCircle" className="h-4 w-4 text-amber-600 mt-0.5" />
                                             <p className="text-sm text-amber-700">
-                                                Agen belum terdaftar. Hubungi admin untuk menambahkan data agen.
+                                                Profil perusahaan belum diatur. Hubungi admin.
                                             </p>
                                         </div>
                                     </div>
                                 )}
                             </div>
-                            <DialogFooter>
+                            <DialogFooter className="flex-col sm:flex-row gap-2">
                                 <Button variant="outline" onClick={() => setIsOrderOpen(false)}>Batal</Button>
                                 <Button
-                                    onClick={handleOrderToAgen}
-                                    disabled={!agen?.phone}
-                                    className="bg-green-600 hover:bg-green-700"
+                                    onClick={async () => {
+                                        // Save order to database
+                                        try {
+                                            setIsSubmitting(true)
+                                            await agenOrdersApi.createOrder({
+                                                lpg_type: orderData.lpgType,
+                                                qty: orderData.qty,
+                                                note: orderData.note || undefined
+                                            })
+                                            toast.success('Pesanan berhasil dibuat!')
+                                            await fetchAgenOrders()
+
+                                            // Also send WhatsApp if phone exists
+                                            if (companyProfile?.phone) {
+                                                handleOrderToAgen()
+                                            }
+                                            setIsOrderOpen(false)
+                                        } catch (error: any) {
+                                            toast.error(error.message || 'Gagal membuat pesanan')
+                                        } finally {
+                                            setIsSubmitting(false)
+                                        }
+                                    }}
+                                    disabled={isSubmitting || orderData.qty <= 0}
+                                    className="bg-blue-600 hover:bg-blue-700"
                                 >
-                                    <SafeIcon name="MessageCircle" className="h-4 w-4 mr-2" />
-                                    Kirim via WhatsApp
+                                    {isSubmitting ? (
+                                        <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <SafeIcon name="Send" className="h-4 w-4 mr-2" />
+                                    )}
+                                    {isSubmitting ? 'Menyimpan...' : 'Buat Pesanan'}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
@@ -916,10 +968,10 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                     {/* Terima Stok Button */}
                     <Dialog open={isReceiveOpen} onOpenChange={setIsReceiveOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg shadow-green-500/25">
+                            {/* <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg shadow-green-500/25">
                                 <SafeIcon name="PackagePlus" className="h-4 w-4 mr-2" />
                                 Koreksi Stok
-                            </Button>
+                            </Button> */}
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-md">
                             <DialogHeader>
@@ -1021,10 +1073,10 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 Total Stok Tersedia
                             </p>
                             <p className="text-5xl font-bold tracking-tight">
-                                {stocks.filter(s => prices.find(p => p.lpg_type === s.lpg_type)?.is_active === true).reduce((sum, s) => sum + s.qty, 0)}
+                                {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).reduce((sum, s) => sum + s.qty, 0)}
                             </p>
                             <p className="text-blue-100 text-sm mt-2">
-                                tabung dari {stocks.filter(s => prices.find(p => p.lpg_type === s.lpg_type)?.is_active === true).length} tipe LPG aktif
+                                tabung dari {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).length} tipe LPG aktif
                             </p>
                         </div>
                         <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -1066,16 +1118,6 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                     <SafeIcon name="Package" className="h-4 w-4" />
                     Kelola Produk
                 </button>
-                <button
-                    onClick={() => setActiveTab('orders')}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'orders'
-                        ? 'bg-white shadow-sm text-blue-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                >
-                    <SafeIcon name="ShoppingCart" className="h-4 w-4" />
-                    Pesanan Agen
-                </button>
             </div>
 
             {/* Tab Content */}
@@ -1085,8 +1127,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                     <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
                         {stocks
                             .filter(stock => {
-                                // Only show stocks where the product is active
-                                const priceData = prices.find(p => p.lpg_type === stock.lpg_type)
+                                // Only show stocks where the product is active (normalize formats)
+                                const priceData = prices.find(p => normalizeType(p.lpg_type) === normalizeType(stock.lpg_type))
                                 return priceData?.is_active === true
                             })
                             .map((stock) => {
@@ -1158,7 +1200,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         <p className="font-semibold text-slate-900">Pesan ke Agen</p>
                                         <p className="text-sm text-slate-500">Kirim pesanan LPG</p>
                                     </div>
-                                    <Badge className="ml-auto bg-amber-100 text-amber-700 hover:bg-amber-200">Soon</Badge>
+                                    {/* <Badge className="ml-auto bg-amber-100 text-amber-700 hover:bg-amber-200">Soon</Badge> */}
                                 </button>
 
                                 {/* Terima Stok */}
@@ -1177,7 +1219,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
 
                                 {/* Stock Opname */}
                                 <button
-                                    onClick={() => toast.info('Kaleum euy fitur na can beres')}
+                                    onClick={() => toast.info('santai brader 😭')}
                                     className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-100 hover:border-slate-300 transition-all group"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1290,7 +1332,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                             <tbody className="divide-y divide-slate-100">
                                                 {paginatedMovements.map((mv, idx) => {
                                                     const config = LPG_CONFIG[mv.lpg_type] || { name: mv.lpg_type, color: '#666' }
-                                                    const isIn = mv.movement_type === 'IN'
+                                                    // Database uses 'MASUK'/'KELUAR', not 'IN'/'OUT'
+                                                    const isIn = mv.movement_type === 'MASUK' || mv.movement_type === 'IN'
 
                                                     return (
                                                         <tr key={mv.id} className={`hover:bg-slate-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
@@ -1414,224 +1457,6 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                             onUpdatePrice={updatePrice}
                         />
                     )}
-                </div>
-            ) : activeTab === 'orders' ? (
-                <div className="space-y-6">
-                    {/* Header with filter and create button */}
-                    <div className="flex flex-col sm:flex-row justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
-                                <SelectTrigger className="w-[160px]">
-                                    <SelectValue placeholder="Filter Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Status</SelectItem>
-                                    <SelectItem value="PENDING">Menunggu</SelectItem>
-                                    <SelectItem value="DIKIRIM">Dikirim</SelectItem>
-                                    <SelectItem value="DITERIMA">Diterima</SelectItem>
-                                    <SelectItem value="BATAL">Dibatalkan</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Create Order Dialog */}
-                        <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                                    <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
-                                    Buat Pesanan
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle className="flex items-center gap-2">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                                            <SafeIcon name="ShoppingCart" className="h-5 w-5 text-blue-600" />
-                                        </div>
-                                        Buat Pesanan ke Agen
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        Catat pesanan LPG ke agen distributor
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Tipe LPG</label>
-                                        <Select value={createOrderData.lpgType} onValueChange={(v) => setCreateOrderData({ ...createOrderData, lpgType: v as LpgType })}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {activeLpgTypes.map(type => (
-                                                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Jumlah (tabung)</label>
-                                        <Input
-                                            type="number"
-                                            placeholder="Masukkan jumlah"
-                                            value={createOrderData.qty || ''}
-                                            onChange={(e) => setCreateOrderData({ ...createOrderData, qty: parseInt(e.target.value) || 0 })}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Catatan (opsional)</label>
-                                        <Input
-                                            placeholder="Catatan tambahan"
-                                            value={createOrderData.note}
-                                            onChange={(e) => setCreateOrderData({ ...createOrderData, note: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button variant="outline" onClick={() => setIsCreateOrderOpen(false)}>Batal</Button>
-                                    <Button onClick={handleCreateOrder} disabled={isSubmitting}>
-                                        {isSubmitting ? 'Menyimpan...' : 'Buat Pesanan'}
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-
-                    {/* Orders List */}
-                    {
-                        isLoadingOrders ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                            </div>
-                        ) : agenOrders.length === 0 ? (
-                            <Card className="bg-white">
-                                <CardContent className="flex flex-col items-center justify-center py-12">
-                                    <SafeIcon name="ShoppingCart" className="h-12 w-12 text-slate-300 mb-4" />
-                                    <p className="text-slate-500 text-center">Belum ada pesanan ke agen</p>
-                                    <p className="text-slate-400 text-sm text-center">Klik "Buat Pesanan" untuk membuat pesanan baru</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <Card className="bg-white overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-slate-50 border-b">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">KODE</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">TANGGAL</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">TIPE LPG</th>
-                                                <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600">DIPESAN</th>
-                                                <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600">DITERIMA</th>
-                                                <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600">STATUS</th>
-                                                <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600">AKSI</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y">
-                                            {agenOrders.map(order => (
-                                                <tr key={order.id} className="hover:bg-slate-50">
-                                                    <td className="px-4 py-3 text-sm font-medium text-blue-600">{order.code}</td>
-                                                    <td className="px-4 py-3 text-sm text-slate-600">
-                                                        {new Date(order.order_date).toLocaleDateString('id-ID')}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-slate-900">
-                                                        {LPG_CONFIG[order.lpg_type]?.name || order.lpg_type.toUpperCase()}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-center font-semibold">{order.qty_ordered}</td>
-                                                    <td className="px-4 py-3 text-sm text-center">
-                                                        {order.qty_received > 0 ? (
-                                                            <span className="font-semibold text-green-600">{order.qty_received}</span>
-                                                        ) : '-'}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-center">{getStatusBadge(order.status)}</td>
-                                                    <td className="px-4 py-3 text-center">
-                                                        {order.status === 'PENDING' && (
-                                                            <div className="flex justify-center gap-2">
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    className="text-green-600 border-green-200 hover:bg-green-50"
-                                                                    onClick={() => {
-                                                                        setSelectedOrder(order)
-                                                                        setReceiveQty(order.qty_ordered)
-                                                                        setIsReceiveOrderOpen(true)
-                                                                    }}
-                                                                >
-                                                                    <SafeIcon name="Check" className="h-3 w-3 mr-1" />
-                                                                    Terima
-                                                                </Button>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    className="text-red-600 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => handleCancelOrder(order)}
-                                                                >
-                                                                    <SafeIcon name="X" className="h-3 w-3" />
-                                                                </Button>
-                                                            </div>
-                                                        )}
-                                                        {order.status === 'DITERIMA' && (
-                                                            <span className="text-xs text-slate-400">
-                                                                {order.received_date && new Date(order.received_date).toLocaleDateString('id-ID')}
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </Card>
-                        )
-                    }
-
-                    {/* Receive Order Dialog */}
-                    <Dialog open={isReceiveOrderOpen} onOpenChange={setIsReceiveOrderOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                                        <SafeIcon name="PackageCheck" className="h-5 w-5 text-green-600" />
-                                    </div>
-                                    Terima Pesanan
-                                </DialogTitle>
-                                <DialogDescription>
-                                    {selectedOrder && `Konfirmasi penerimaan pesanan ${selectedOrder.code}`}
-                                </DialogDescription>
-                            </DialogHeader>
-                            {selectedOrder && (
-                                <div className="space-y-4 py-4">
-                                    <div className="p-4 bg-slate-50 rounded-xl">
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <p className="text-slate-500">Tipe LPG</p>
-                                                <p className="font-semibold">{LPG_CONFIG[selectedOrder.lpg_type]?.name || selectedOrder.lpg_type}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-slate-500">Jumlah Dipesan</p>
-                                                <p className="font-semibold">{selectedOrder.qty_ordered} tabung</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Jumlah Diterima (tabung)</label>
-                                        <Input
-                                            type="number"
-                                            value={receiveQty || ''}
-                                            onChange={(e) => setReceiveQty(parseInt(e.target.value) || 0)}
-                                        />
-                                        <p className="text-xs text-slate-500">
-                                            Stok akan otomatis bertambah setelah konfirmasi
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsReceiveOrderOpen(false)}>Batal</Button>
-                                <Button onClick={handleReceiveOrder} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
-                                    {isSubmitting ? 'Menyimpan...' : 'Konfirmasi Terima'}
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
                 </div>
             ) : null}
         </div>

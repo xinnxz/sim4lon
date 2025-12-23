@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const agen_orders_controller_1 = require("./agen-orders.controller");
 const agen_orders_service_1 = require("./agen-orders.service");
 const prisma_module_1 = require("../../prisma/prisma.module");
+const activity_module_1 = require("../activity/activity.module");
 let AgenOrdersModule = class AgenOrdersModule {
 };
 exports.AgenOrdersModule = AgenOrdersModule;
 exports.AgenOrdersModule = AgenOrdersModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_module_1.PrismaModule, activity_module_1.ActivityModule],
         controllers: [agen_orders_controller_1.AgenOrdersController],
         providers: [agen_orders_service_1.AgenOrdersService],
         exports: [agen_orders_service_1.AgenOrdersService],

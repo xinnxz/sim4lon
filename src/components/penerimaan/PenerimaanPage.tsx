@@ -265,10 +265,15 @@ export default function PenerimaanPage() {
                 const qtyPcs = parseInt(item.qty_pcs)
                 const qtyKg = product ? qtyPcs * Number(product.size_kg) : 0
 
+                // Format nama_material: REFILL/ISI LPG @XKG (NET)
+                const sizeKg = product ? Number(product.size_kg) : 3
+                const sizeLabel = sizeKg < 1 ? `${Math.round(sizeKg * 1000)}GR` : `${sizeKg}KG`
+                const namaMaterial = `REFILL/ISI LPG @${sizeLabel} (NET)`
+
                 await penerimaanApi.create({
                     no_so: headerData.no_so,
                     no_lo: headerData.no_lo,
-                    nama_material: product?.name || 'LPG',
+                    nama_material: namaMaterial,
                     qty_pcs: qtyPcs,
                     qty_kg: qtyKg,
                     tanggal: headerData.tanggal,

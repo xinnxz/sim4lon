@@ -19,12 +19,16 @@ let CompanyProfileService = CompanyProfileService_1 = class CompanyProfileServic
     constructor(prisma) {
         this.prisma = prisma;
     }
+    generate6DigitId() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
     async getProfile() {
         let profile = await this.prisma.company_profile.findFirst();
         if (!profile) {
             this.logger.log('No company profile found, creating default...');
             profile = await this.prisma.company_profile.create({
                 data: {
+                    id: this.generate6DigitId(),
                     company_name: 'PT. MITRA SURYA NATASYA',
                     address: 'CHOBA RT.002 RW.006 DESA MAYAK',
                     phone: '',
@@ -51,7 +55,10 @@ let CompanyProfileService = CompanyProfileService_1 = class CompanyProfileServic
         }
         else {
             return this.prisma.company_profile.create({
-                data: dto,
+                data: {
+                    id: this.generate6DigitId(),
+                    ...dto,
+                },
             });
         }
     }

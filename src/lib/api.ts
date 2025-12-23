@@ -213,13 +213,15 @@ export const uploadApi = {
 
 export interface NotificationItem {
     id: string;
-    type: 'order_new' | 'stock_low' | 'stock_critical' | 'stock_out';
+    type: 'order_new' | 'agen_order' | 'stock_low' | 'stock_critical' | 'stock_out';
     title: string;
     message: string;
     icon: string;
     priority: 'low' | 'medium' | 'high' | 'critical';
     link?: string;
     time: string;
+    // For agen_order type - order reference
+    orderId?: string;
 }
 
 export interface NotificationResponse {
@@ -233,6 +235,68 @@ export const notificationApi = {
     },
     async markAllAsRead(): Promise<void> {
         return apiRequest('/notifications/mark-all-read', { method: 'POST' });
+    },
+};
+
+// ============================================================
+// AGEN ORDERS API (For Admin/Operator to manage pangkalan orders)
+// ============================================================
+
+export interface AgenOrderFromPangkalan {
+    id: string;
+    code: string;
+    lpg_type: string;
+    qty_ordered: number;
+    qty_received: number | null;
+    status: 'PENDING' | 'DIKIRIM' | 'DITERIMA' | 'BATAL';
+    order_date: string;
+    received_date: string | null;
+    note: string | null;
+    pangkalans: {
+        code: string;
+        name: string;
+        phone: string | null;
+    };
+}
+
+export const agenPangkalanOrdersApi = {
+    /**
+     * Get all orders from all pangkalan (agen view)
+     */
+    async getAll(status?: string): Promise<AgenOrderFromPangkalan[]> {
+        const params = status && status !== 'all' ? `?status=${status}` : '';
+        return apiRequest(`/agen-orders/agen/all${params}`);
+    },
+
+    /**
+     * Get stats for agen
+     */
+    async getStats(): Promise<{ pending: number; dikirim: number; diterima: number; batal: number; total: number }> {
+        return apiRequest('/agen-orders/agen/stats');
+    },
+
+    /**
+     * Confirm order (PENDING -> DIKIRIM)
+     */
+    async confirm(id: string): Promise<AgenOrderFromPangkalan> {
+        return apiRequest(`/agen-orders/agen/${id}/confirm`, { method: 'PATCH' });
+    },
+
+    /**
+     * Complete order (DIKIRIM -> DITERIMA)
+     */
+    async complete(id: string, qtyReceived: number): Promise<AgenOrderFromPangkalan> {
+        return apiRequest(`/agen-orders/agen/${id}/complete`, {
+            method: 'PATCH',
+            body: JSON.stringify({ qty_received: qtyReceived }),
+        });
+    },
+
+    /**
+     * Cancel order from agen
+     */
+    async cancel(id: string): Promise<AgenOrderFromPangkalan> {
+        return apiRequest(`/agen-orders/agen/${id}/cancel`, { method: 'PATCH' });
     },
 };
 
@@ -309,7 +373,7 @@ export const activityApi = {
 // ============================================================
 
 export interface CompanyProfile {
-    id: string;
+    id: string; // 6-digit agen code
     company_name: string;
     address: string;
     phone?: string;
@@ -1729,7 +1793,7 @@ export interface PangkalanStockMovement {
     id: string;
     pangkalan_id: string;
     lpg_type: string;
-    movement_type: 'IN' | 'OUT';
+    movement_type: 'MASUK' | 'KELUAR' | 'IN' | 'OUT'; // Support both formats
     qty: number;
     source: string | null;
     reference_id: string | null;
@@ -2029,7 +2093,7 @@ export interface Agen {
 }
 
 /**
- * Agen API - Get agen data for current pangkalan
+ * Agen API - Manage agen (distributor) data
  */
 export const agenApi = {
     /**
@@ -2037,6 +2101,68 @@ export const agenApi = {
      */
     async getMyAgen(): Promise<Agen | null> {
         return apiRequest('/agen/my-agen');
+    },
+
+    /**
+     * Get all agen (for admin or selection dropdown)
+     */
+    async getAll(): Promise<Agen[]> {
+        return apiRequest('/agen');
+    },
+
+    /**
+     * Get all active agen for selection
+     */
+    async getAllActive(): Promise<Agen[]> {
+        const all = await apiRequest<Agen[]>('/agen');
+        return all.filter(a => a.is_active);
+    },
+
+    /**
+     * Create new agen
+     */
+    async create(data: {
+        code: string;
+        name: string;
+        phone?: string;
+        address?: string;
+        pic_name?: string;
+        email?: string;
+        note?: string;
+    }): Promise<Agen> {
+        return apiRequest('/agen', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    /**
+     * Update agen
+     */
+    async update(id: string, data: Partial<Agen>): Promise<Agen> {
+        return apiRequest(`/agen/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    },
+
+    /**
+     * Delete agen
+     */
+    async delete(id: string): Promise<void> {
+        return apiRequest(`/agen/${id}`, {
+            method: 'DELETE',
+        });
+    },
+
+    /**
+     * Link current pangkalan to an agen
+     */
+    async linkToAgen(agenId: string): Promise<{ message: string }> {
+        return apiRequest('/agen/link', {
+            method: 'POST',
+            body: JSON.stringify({ agen_id: agenId }),
+        });
     },
 };
 

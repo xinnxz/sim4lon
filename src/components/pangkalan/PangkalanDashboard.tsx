@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
-import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory } from '@/lib/api'
+import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, lpgPricesApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory, type PangkalanLpgPrice } from '@/lib/api'
 import {
     AreaChart,
     Area,
@@ -34,6 +34,10 @@ import {
 
 // LPG type config - support both formats (3kg from new standard, kg3 from legacy)
 const lpgTypeConfig: Record<string, { name: string; color: string }> = {
+    // Bright Gas 220gr
+    'gr220': { name: 'Bright Gas 220gr', color: '#FFA500' },
+    '220gr': { name: 'Bright Gas 220gr', color: '#FFA500' },
+    // Standard formats
     '3kg': { name: '3 kg', color: '#22C55E' },
     '5kg': { name: '5.5 kg', color: '#ff82c5ff' },
     '12kg': { name: '12 kg', color: '#3B82F6' },
@@ -155,12 +159,13 @@ export default function PangkalanDashboard() {
                 const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
                 const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
 
-                const [statsData, recentData, chartDataFromApi, stockResponse, expenseData] = await Promise.all([
+                const [statsData, recentData, chartDataFromApi, stockResponse, expenseData, pricesData] = await Promise.all([
                     consumerOrdersApi.getStats(true),
                     consumerOrdersApi.getRecent(5),
                     consumerOrdersApi.getChartData(),
                     pangkalanStockApi.getStockLevels(),
                     expensesApi.getAll(startDate, endDate),
+                    lpgPricesApi.getAll(), // Fetch prices to filter by active
                 ])
 
                 setStats(statsData)
@@ -169,10 +174,32 @@ export default function PangkalanDashboard() {
                     setChartData(chartDataFromApi)
                 }
 
-                // Convert stock API response to pie chart format
+                // Convert stock API response to pie chart format - filter by active prices only
                 if (stockResponse && stockResponse.stocks) {
-                    const total = stockResponse.summary.total
-                    const pieData = stockResponse.stocks.map(stock => ({
+                    // Normalize lpg_type format: kg3 <-> 3kg
+                    const normalizeType = (type: string) => {
+                        // Convert both kg3->3kg and 3kg->kg3 to a common format (kg3)
+                        if (type.startsWith('kg')) return type; // already kg3 format
+                        // Convert 3kg -> kg3, 12kg -> kg12, etc.
+                        const match = type.match(/^(\d+\.?\d*)kg$/);
+                        if (match) return `kg${match[1]}`;
+                        // Handle gram formats like 220gr, gr220
+                        if (type.match(/g?r?220g?r?/i)) return 'gr220';
+                        return type;
+                    };
+
+                    // Get active lpg_types from prices (normalized)
+                    const activeLpgTypes = pricesData
+                        .filter((p: PangkalanLpgPrice) => p.is_active)
+                        .map((p: PangkalanLpgPrice) => normalizeType(p.lpg_type))
+
+                    // Filter stocks to only include active products (comparing normalized types)
+                    const activeStocks = stockResponse.stocks.filter(stock =>
+                        activeLpgTypes.includes(normalizeType(stock.lpg_type))
+                    )
+
+                    const total = activeStocks.reduce((sum, s) => sum + s.qty, 0)
+                    const pieData = activeStocks.map(stock => ({
                         name: lpgTypeConfig[stock.lpg_type]?.name || stock.lpg_type,
                         value: stock.qty,
                         color: lpgTypeConfig[stock.lpg_type]?.color || '#94A3B8',

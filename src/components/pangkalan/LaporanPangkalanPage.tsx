@@ -262,7 +262,7 @@ export default function LaporanPangkalanPage() {
         if (priceData) return Number(priceData.cost_price)
         // Fallback defaults if not found
         const fallbacks: Record<string, number> = {
-            'kg022': 17000, 'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
+            'gr220': 17000, 'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
         }
         return fallbacks[lpgType] || 16000
     }

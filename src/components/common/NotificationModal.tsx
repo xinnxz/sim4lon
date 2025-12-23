@@ -11,7 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import SafeIcon from '@/components/common/SafeIcon'
-import { notificationApi, type NotificationItem } from '@/lib/api'
+import { notificationApi, agenPangkalanOrdersApi, type NotificationItem } from '@/lib/api'
+import { toast } from 'sonner'
 
 interface NotificationModalProps {
   open: boolean
@@ -21,6 +22,7 @@ interface NotificationModalProps {
 export default function NotificationModal({ open, onOpenChange }: NotificationModalProps) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [processingId, setProcessingId] = useState<string | null>(null)
 
   // Fetch notifications when modal opens
   useEffect(() => {
@@ -46,6 +48,42 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
       window.location.href = notification.link
     }
   };
+
+  // Handle accept order from agen side
+  const handleAcceptOrder = async (e: React.MouseEvent, notification: NotificationItem) => {
+    e.stopPropagation()
+    if (!notification.orderId) return
+
+    try {
+      setProcessingId(notification.id)
+      await agenPangkalanOrdersApi.confirm(notification.orderId)
+      toast.success('Pesanan berhasil dikonfirmasi!')
+      // Remove from list
+      setNotifications(prev => prev.filter(n => n.id !== notification.id))
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mengkonfirmasi pesanan')
+    } finally {
+      setProcessingId(null)
+    }
+  }
+
+  // Handle reject order from agen side
+  const handleRejectOrder = async (e: React.MouseEvent, notification: NotificationItem) => {
+    e.stopPropagation()
+    if (!notification.orderId) return
+
+    try {
+      setProcessingId(notification.id)
+      await agenPangkalanOrdersApi.cancel(notification.orderId)
+      toast.success('Pesanan ditolak')
+      // Remove from list
+      setNotifications(prev => prev.filter(n => n.id !== notification.id))
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menolak pesanan')
+    } finally {
+      setProcessingId(null)
+    }
+  }
 
   const getPriorityConfig = (priority: NotificationItem['priority']) => {
     switch (priority) {
@@ -133,11 +171,14 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
               // Notification items
               notifications.map((notification, index) => {
                 const config = getPriorityConfig(notification.priority)
+                const isAgenOrder = notification.type === 'agen_order'
+                const isProcessing = processingId === notification.id
+
                 return (
                   <div
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className="flex gap-3 p-3 rounded-xl cursor-pointer hover:bg-muted/50 active:bg-muted transition-all duration-200 group"
+                    onClick={() => !isAgenOrder && handleNotificationClick(notification)}
+                    className={`flex gap-3 p-3 rounded-xl ${isAgenOrder ? '' : 'cursor-pointer hover:bg-muted/50 active:bg-muted'} transition-all duration-200 group`}
                   >
                     {/* Icon with priority indicator */}
                     <div className="relative flex-shrink-0">
@@ -168,12 +209,44 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
                         <SafeIcon name="Clock" className="h-3 w-3" />
                         {notification.time}
                       </p>
+
+                      {/* Action buttons for agen_order */}
+                      {isAgenOrder && notification.orderId && (
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-7 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
+                            onClick={(e) => handleAcceptOrder(e, notification)}
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? (
+                              <SafeIcon name="Loader2" className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <SafeIcon name="Check" className="h-3 w-3" />
+                            )}
+                            Terima
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs gap-1 text-rose-600 border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                            onClick={(e) => handleRejectOrder(e, notification)}
+                            disabled={isProcessing}
+                          >
+                            <SafeIcon name="X" className="h-3 w-3" />
+                            Tolak
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Arrow indicator */}
-                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <SafeIcon name="ChevronRight" className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    {/* Arrow indicator (only for non-agen orders) */}
+                    {!isAgenOrder && (
+                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <SafeIcon name="ChevronRight" className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
                 )
               })
@@ -199,3 +272,4 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
     </Dialog>
   )
 }
+

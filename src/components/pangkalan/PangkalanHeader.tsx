@@ -61,7 +61,7 @@ export default function PangkalanHeader() {
                 {/* Logo & Title */}
                 <div className="flex items-center gap-3">
                     <img
-                        src="/src/assets/logo-pertamina-2.png"
+                        src="/logo-pertamina-2.png"
                         alt="Pertamina"
                         className="h-9 object-contain"
                     />

@@ -9,17 +9,25 @@ export class CompanyProfileService {
     constructor(private prisma: PrismaService) { }
 
     /**
+     * Generate unique 6-digit ID
+     */
+    private generate6DigitId(): string {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    /**
      * Get company profile (singleton - first record or create default)
      */
     async getProfile() {
         // Try to get existing profile
         let profile = await this.prisma.company_profile.findFirst();
 
-        // If no profile exists, create default
+        // If no profile exists, create default with 6-digit ID
         if (!profile) {
             this.logger.log('No company profile found, creating default...');
             profile = await this.prisma.company_profile.create({
                 data: {
+                    id: this.generate6DigitId(),
                     company_name: 'PT. MITRA SURYA NATASYA',
                     address: 'CHOBA RT.002 RW.006 DESA MAYAK',
                     phone: '',
@@ -52,9 +60,12 @@ export class CompanyProfileService {
                 },
             });
         } else {
-            // Create new
+            // Create new with generated 6-digit ID
             return this.prisma.company_profile.create({
-                data: dto,
+                data: {
+                    id: this.generate6DigitId(),
+                    ...dto,
+                },
             });
         }
     }
