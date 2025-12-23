@@ -94,22 +94,22 @@ export default function LoginForm() {
   }
 
   return (
-    <Card className="border-0 shadow-xl animate-scaleIn bg-slate-50/100 backdrop-blur-sm">
-      <CardHeader className="space-y-2 text-center">
-        <div className="flex justify-center mb-4 mt-8">
+    <Card className="border-0 shadow-xl animate-scaleIn bg-slate-50/100 backdrop-blur-sm mx-4 sm:mx-0 w-full max-w-md">
+      <CardHeader className="space-y-2 text-center px-4 sm:px-6">
+        <div className="flex justify-center mb-2 sm:mb-4 mt-4 sm:mt-8">
           <img
             src="/logo-pertamina-2.png"
             alt="Pertamina"
-            className="h-16 object-contain"
+            className="h-12 sm:h-16 object-contain transition-all duration-300"
           />
         </div>
-        <CardTitle className="text-2xl font-bold">SIM4LON</CardTitle>
-        <CardDescription className="text-base">
+        <CardTitle className="text-xl sm:text-2xl font-bold">SIM4LON</CardTitle>
+        <CardDescription className="text-sm sm:text-base">
           Sistem Informasi Distribusi LPG
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-4 sm:px-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Error Alert */}
           {error && (
@@ -209,13 +209,13 @@ export default function LoginForm() {
           {/* Demo Credentials Info */}
           <div className="mt-6 p-3 bg-secondary/50 rounded-lg border border-border animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium">Demo:</span> admin@agen.com / admin123
+              <span className="font-medium">Demo:</span> admin@demo.com / admin123
             </p>
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium">Demo:</span> pangkalanreon@test.com / pangkalan123
+              <span className="font-medium">Demo:</span> operator@demo.com / operator123
             </p>
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium">Demo:</span> operator2@sim4lon.com / Operator123
+              <span className="font-medium">Demo:</span> pkl001@demo.com / pangkalan123
             </p>
           </div>
         </form>

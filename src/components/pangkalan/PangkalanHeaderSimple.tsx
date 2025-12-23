@@ -51,18 +51,18 @@ export default function PangkalanHeaderSimple() {
     }
 
     return (
-        <header className="sticky top-0 z-50 w-full h-16 border-b bg-white dark:bg-slate-950 shadow-sm">
-            <div className="flex h-full items-center px-4 gap-4">
-                {/* Logo & Title */}
-                <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-50 w-full h-14 sm:h-16 border-b bg-white dark:bg-slate-950 shadow-sm backdrop-blur-lg">
+            <div className="flex h-full items-center px-3 sm:px-4 gap-2 sm:gap-4">
+                {/* Logo & Title - Responsive */}
+                <div className="flex items-center gap-2 sm:gap-3">
                     <img
                         src="/logo-pertamina-2.png"
                         alt="Pertamina"
-                        className="h-10 object-contain"
+                        className="h-8 sm:h-10 object-contain transition-all duration-300"
                     />
                     <div>
-                        <h1 className="text-lg font-bold text-slate-900 dark:text-white">SIM4LON</h1>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">SIM4LON</h1>
+                        <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate max-w-[100px] sm:max-w-[200px]">
                             {profile?.pangkalans?.name || 'Dashboard Pangkalan'}
                         </p>
                     </div>

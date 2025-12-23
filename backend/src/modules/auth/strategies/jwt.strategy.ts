@@ -8,6 +8,8 @@ export interface JwtPayload {
     sub: string;
     email: string;
     role: string;
+    pangkalan_id?: string;
+    session_id?: string;  // For single-session validation
 }
 
 @Injectable()
@@ -33,12 +35,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
                 name: true,
                 role: true,
                 is_active: true,
-                pangkalan_id: true, // For PANGKALAN role multi-tenant access
+                pangkalan_id: true,
+                session_id: true,  // Get current session_id from DB
             },
         });
 
         if (!user || !user.is_active) {
             throw new UnauthorizedException('User tidak ditemukan atau tidak aktif');
+        }
+
+        // Single-session validation: check if JWT session_id matches DB session_id
+        if (payload.session_id && user.session_id && payload.session_id !== user.session_id) {
+            throw new UnauthorizedException('Sesi tidak valid. Anda mungkin sudah login di perangkat lain.');
         }
 
         return user;

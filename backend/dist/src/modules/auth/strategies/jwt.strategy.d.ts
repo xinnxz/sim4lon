@@ -5,6 +5,8 @@ export interface JwtPayload {
     sub: string;
     email: string;
     role: string;
+    pangkalan_id?: string;
+    session_id?: string;
 }
 declare const JwtStrategy_base: new (...args: [opt: import("passport-jwt").StrategyOptionsWithRequest] | [opt: StrategyOptionsWithoutRequest]) => Strategy & {
     validate(...args: any[]): unknown;
@@ -18,6 +20,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
         name: string;
         role: import("@prisma/client").$Enums.user_role;
         pangkalan_id: string | null;
+        session_id: string | null;
         is_active: boolean;
     }>;
 }

@@ -53,21 +53,21 @@ export default function PangkalanHeader() {
     }
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-16 items-center px-4 gap-4">
-                {/* Sidebar Toggle */}
-                <SidebarTrigger className="-ml-2" />
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 shadow-sm">
+            <div className="flex h-14 sm:h-16 items-center px-3 sm:px-4 gap-2 sm:gap-4">
+                {/* Sidebar Toggle - Premium styled */}
+                <SidebarTrigger className="-ml-1 sm:-ml-2 h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/5 hover:bg-primary/10 transition-all duration-300" />
 
-                {/* Logo & Title */}
-                <div className="flex items-center gap-3">
+                {/* Logo & Title - Responsive */}
+                <div className="flex items-center gap-2 sm:gap-3">
                     <img
                         src="/logo-pertamina-2.png"
                         alt="Pertamina"
-                        className="h-9 object-contain"
+                        className="h-7 sm:h-9 object-contain transition-all duration-300"
                     />
-                    <div>
-                        <h1 className="text-base font-bold leading-none">SIM4LON</h1>
-                        <p className="text-xs text-muted-foreground">
+                    <div className="hidden xs:block">
+                        <h1 className="text-sm sm:text-base font-bold leading-none">SIM4LON</h1>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-none">
                             {profile?.pangkalans?.name || 'Pangkalan'}
                         </p>
                     </div>

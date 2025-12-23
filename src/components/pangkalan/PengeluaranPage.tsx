@@ -191,14 +191,17 @@ export default function PengeluaranPage() {
 
     return (
         <div className="space-y-8 pb-8">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Pengeluaran</h1>
-                    <p className="text-slate-500 mt-1 flex items-center gap-2">
-                        <SafeIcon name="Wallet" className="h-4 w-4" />
-                        Catat biaya operasional pangkalan
-                    </p>
+            {/* Header - Animated */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
+                <div className="flex items-center gap-3">
+                    <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-red-500 via-red-400 to-orange-500 animate-lineGrow" />
+                    <div>
+                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Pengeluaran</h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                            <SafeIcon name="Wallet" className="h-4 w-4 animate-pulse" />
+                            Catat biaya operasional pangkalan
+                        </p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-3">
                     {/* Month Filter */}
@@ -214,9 +217,9 @@ export default function PengeluaranPage() {
                         <DialogTrigger asChild>
                             <Button
                                 onClick={() => handleOpenDialog()}
-                                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg shadow-red-500/25"
+                                className="group bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg shadow-red-500/25 active:scale-95"
                             >
-                                <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
+                                <SafeIcon name="Plus" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
                                 Tambah Pengeluaran
                             </Button>
                         </DialogTrigger>
@@ -244,8 +247,8 @@ export default function PengeluaranPage() {
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, category: cat.value })}
                                                     className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${formData.category === cat.value
-                                                            ? 'border-red-500 bg-red-50'
-                                                            : 'border-slate-200 hover:border-slate-300'
+                                                        ? 'border-red-500 bg-red-50'
+                                                        : 'border-slate-200 hover:border-slate-300'
                                                         }`}
                                                 >
                                                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center`}>
@@ -316,40 +319,47 @@ export default function PengeluaranPage() {
                 </div>
             </div>
 
-            {/* Summary Cards */}
+            {/* Summary Cards - Staggered Entry */}
             <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
                 {/* Total Pengeluaran */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="TrendingDown" className="h-4 w-4" />
-                            Total Pengeluaran
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totalExpenses)}</p>
-                        <p className="text-red-100 text-sm mt-2">{expenses.length} transaksi bulan ini</p>
-                    </CardContent>
-                </Card>
-
-                {/* Top 3 Categories */}
-                {expensesByCategory.slice(0, 3).map(cat => (
-                    <Card key={cat.value} className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="animate-slideInBlur stagger-1" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
                         <CardHeader className="pb-2 relative">
-                            <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                                <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${cat.gradient} flex items-center justify-center`}>
-                                    <SafeIcon name={cat.icon} className="h-4 w-4 text-white" />
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="TrendingDown" className="h-4 w-4" />
                                 </div>
-                                {cat.label}
+                                Total Pengeluaran
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="relative">
-                            <p className="text-2xl font-bold text-slate-900">{formatCurrency(cat.total)}</p>
-                            <p className="text-slate-500 text-sm mt-2">{cat.count} transaksi</p>
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totalExpenses)}</p>
+                            <p className="text-red-100 text-sm mt-2">{expenses.length} transaksi bulan ini</p>
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Top 3 Categories */}
+                {expensesByCategory.slice(0, 3).map((cat, index) => (
+                    <div key={cat.value} className={`animate-slideInBlur stagger-${index + 2}`} style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.gradient} flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12`}>
+                                        <SafeIcon name={cat.icon} className="h-4 w-4 text-white" />
+                                    </div>
+                                    {cat.label}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(cat.total)}</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{cat.count} transaksi</p>
+                            </CardContent>
+                        </Card>
+                    </div>
                 ))}
             </div>
 

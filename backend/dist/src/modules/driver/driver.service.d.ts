@@ -17,8 +17,8 @@ export declare class DriverService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            vehicle_id: string | null;
             note: string | null;
+            vehicle_id: string | null;
         })[];
         meta: {
             total: number;
@@ -43,8 +43,8 @@ export declare class DriverService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        vehicle_id: string | null;
         note: string | null;
+        vehicle_id: string | null;
     }>;
     create(dto: CreateDriverDto): Promise<{
         id: string;
@@ -55,8 +55,8 @@ export declare class DriverService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        vehicle_id: string | null;
         note: string | null;
+        vehicle_id: string | null;
     }>;
     update(id: string, dto: UpdateDriverDto): Promise<{
         id: string;
@@ -67,8 +67,8 @@ export declare class DriverService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        vehicle_id: string | null;
         note: string | null;
+        vehicle_id: string | null;
     }>;
     remove(id: string): Promise<{
         message: string;

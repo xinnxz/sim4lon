@@ -16,8 +16,8 @@ export declare class ConsumerController {
             is_active: boolean;
             created_at: Date;
             updated_at: Date;
-            note: string | null;
             address: string | null;
+            note: string | null;
             nik: string | null;
             kk: string | null;
             consumer_type: import("@prisma/client").$Enums.consumer_type;
@@ -49,8 +49,8 @@ export declare class ConsumerController {
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
-        note: string | null;
         address: string | null;
+        note: string | null;
         nik: string | null;
         kk: string | null;
         consumer_type: import("@prisma/client").$Enums.consumer_type;
@@ -63,8 +63,8 @@ export declare class ConsumerController {
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
-        note: string | null;
         address: string | null;
+        note: string | null;
         nik: string | null;
         kk: string | null;
         consumer_type: import("@prisma/client").$Enums.consumer_type;
@@ -77,8 +77,8 @@ export declare class ConsumerController {
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
-        note: string | null;
         address: string | null;
+        note: string | null;
         nik: string | null;
         kk: string | null;
         consumer_type: import("@prisma/client").$Enums.consumer_type;

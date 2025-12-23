@@ -12,8 +12,8 @@ export declare class AgenController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        note: string | null;
         address: string | null;
         pic_name: string | null;
+        note: string | null;
     } | null>;
 }

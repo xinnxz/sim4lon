@@ -25,12 +25,12 @@ export declare class PaymentService {
             created_at: Date;
             order_id: string | null;
             note: string | null;
+            recorded_by_user_id: string;
             invoice_id: string | null;
             method: import("@prisma/client").$Enums.payment_method;
             amount: import("@prisma/client/runtime/library").Decimal;
             payment_time: Date;
             proof_url: string | null;
-            recorded_by_user_id: string;
         })[];
         meta: {
             total: number;
@@ -56,10 +56,10 @@ export declare class PaymentService {
                 created_at: Date;
                 updated_at: Date;
                 deleted_at: Date | null;
-                note: string | null;
                 address: string;
-                region: string | null;
                 pic_name: string | null;
+                note: string | null;
+                region: string | null;
                 capacity: number | null;
                 agen_id: string | null;
                 alokasi_bulanan: number;
@@ -85,12 +85,12 @@ export declare class PaymentService {
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
-            total_amount: import("@prisma/client/runtime/library").Decimal;
-            driver_id: string | null;
             order_date: Date;
+            total_amount: import("@prisma/client/runtime/library").Decimal;
             current_status: import("@prisma/client").$Enums.status_pesanan;
             subtotal: import("@prisma/client/runtime/library").Decimal;
             tax_amount: import("@prisma/client/runtime/library").Decimal;
+            driver_id: string | null;
         }) | null;
         invoices: {
             id: string;
@@ -114,12 +114,12 @@ export declare class PaymentService {
         created_at: Date;
         order_id: string | null;
         note: string | null;
+        recorded_by_user_id: string;
         invoice_id: string | null;
         method: import("@prisma/client").$Enums.payment_method;
         amount: import("@prisma/client/runtime/library").Decimal;
         payment_time: Date;
         proof_url: string | null;
-        recorded_by_user_id: string;
     }>;
     createRecord(dto: CreatePaymentRecordDto, userId: string): Promise<{
         users: {
@@ -134,12 +134,12 @@ export declare class PaymentService {
             updated_at: Date;
             deleted_at: Date | null;
             note: string | null;
-            total_amount: import("@prisma/client/runtime/library").Decimal;
-            driver_id: string | null;
             order_date: Date;
+            total_amount: import("@prisma/client/runtime/library").Decimal;
             current_status: import("@prisma/client").$Enums.status_pesanan;
             subtotal: import("@prisma/client/runtime/library").Decimal;
             tax_amount: import("@prisma/client/runtime/library").Decimal;
+            driver_id: string | null;
         } | null;
         invoices: {
             id: string;
@@ -163,12 +163,12 @@ export declare class PaymentService {
         created_at: Date;
         order_id: string | null;
         note: string | null;
+        recorded_by_user_id: string;
         invoice_id: string | null;
         method: import("@prisma/client").$Enums.payment_method;
         amount: import("@prisma/client/runtime/library").Decimal;
         payment_time: Date;
         proof_url: string | null;
-        recorded_by_user_id: string;
     }>;
     updateOrderPayment(orderId: string, dto: UpdateOrderPaymentDto): Promise<{
         id: string;

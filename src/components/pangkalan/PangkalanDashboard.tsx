@@ -297,92 +297,115 @@ export default function PangkalanDashboard() {
 
     return (
         <div className="space-y-8 pb-8">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-                    <p className="text-slate-500 mt-1 flex items-center gap-2">
-                        <SafeIcon name="Sparkles" className="h-4 w-4 text-amber-500" />
-                        Selamat datang, {profile?.name?.split(' ')[0] || 'Pak'}
-                    </p>
+            {/* Header - Animated */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
+                <div className="flex items-center gap-3">
+                    <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-blue-400 to-emerald-500 animate-lineGrow" />
+                    <div>
+                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                            <SafeIcon name="Sparkles" className="h-4 w-4 text-amber-500 animate-pulse" />
+                            Selamat datang, {profile?.name?.split(' ')[0] || 'Pak'}
+                        </p>
+                    </div>
                 </div>
                 <Button
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                    className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all active:scale-95"
                     onClick={() => window.location.href = '/pangkalan/penjualan/catat'}
                 >
-                    <SafeIcon name="Plus" className="h-4 w-4 mr-2" />
+                    <SafeIcon name="Plus" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
                     Catat Penjualan
                 </Button>
             </div>
 
-            {/* Stats Cards */}
+            {/* Stats Cards - Staggered Entry */}
             <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
                 {/* Penjualan Hari Ini */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="Banknote" className="h-4 w-4" />
-                            Penjualan Hari Ini
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(stats?.total_revenue || 0)}</p>
-                        <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
-                            <SafeIcon name="Flame" className="h-3.5 w-3.5" />
-                            {stats?.total_qty || 0} tabung terjual
-                        </p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-1" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group">
+                        {/* Floating Orbs */}
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="Banknote" className="h-4 w-4" />
+                                </div>
+                                Penjualan Hari Ini
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(stats?.total_revenue || 0)}</p>
+                            <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
+                                <SafeIcon name="Flame" className="h-3.5 w-3.5" />
+                                {stats?.total_qty || 0} tabung terjual
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Laba Bersih */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
-                            Laba Bersih (Profit)
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(stats?.laba_bersih || 0)}</p>
-                        <p className="text-green-100 text-sm mt-2">Hari ini</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-2" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group">
+                        {/* Floating Orbs */}
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
+                                </div>
+                                Laba Bersih (Profit)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(stats?.laba_bersih || 0)}</p>
+                            <p className="text-green-100 text-sm mt-2">Hari ini</p>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Total Transaksi */}
-                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
-                                <SafeIcon name="Receipt" className="h-4 w-4 text-purple-600" />
-                            </div>
-                            Total Transaksi
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold text-slate-900">{stats?.total_orders || 0}</p>
-                        <p className="text-slate-500 text-sm mt-2">Transaksi hari ini</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-3" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group">
+                        {/* Floating Orbs */}
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="Receipt" className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                Total Transaksi
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">{stats?.total_orders || 0}</p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Transaksi hari ini</p>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Total Stok */}
-                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-                                <SafeIcon name="Package" className="h-4 w-4 text-amber-600" />
-                            </div>
-                            Total Stok
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-2xl lg:text-3xl font-bold text-slate-900">{totalStock} <span className="text-lg font-normal text-slate-500">tabung</span></p>
-                        <p className="text-slate-500 text-sm mt-2">{stockData.length} tipe LPG</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-4" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-white dark:bg-slate-900 shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group">
+                        {/* Floating Orbs */}
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="Package" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                </div>
+                                Total Stok
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">{totalStock} <span className="text-lg font-normal text-slate-500 dark:text-slate-400">tabung</span></p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{stockData.length} tipe LPG</p>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             {/* Charts Row */}
@@ -632,7 +655,7 @@ export default function PangkalanDashboard() {
                                 </div>
                                 <span className="font-medium text-green-700">Laba Bersih</span>
                             </div>
-                            <span className="text-xl font-bold text-green-600">{formatCurrency((stats?.laba_bersih || 0) - expenseSummary.total)}</span>
+                            <span className="text-xl font-bold text-green-600">{formatCurrency(stats?.laba_bersih || 0)}</span>
                         </div>
                     </CardContent>
                 </Card>
