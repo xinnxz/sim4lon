@@ -94,12 +94,23 @@ export class AuthService {
             throw new UnauthorizedException('Email atau password salah');
         }
 
-        // Generate JWT token with pangkalan_id for SAAS multi-tenant
+        // Generate unique session ID for single-session login
+        // This invalidates any previous sessions
+        const sessionId = `${user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+
+        // Save session_id to database (invalidates old sessions)
+        await this.prisma.users.update({
+            where: { id: user.id },
+            data: { session_id: sessionId },
+        });
+
+        // Generate JWT token with session_id for validation
         const payload = {
             sub: user.id,
             email: user.email,
             role: user.role,
-            pangkalan_id: user.pangkalan_id,  // Include for PANGKALAN role
+            pangkalan_id: user.pangkalan_id,
+            session_id: sessionId,  // Include session_id for single-session validation
         };
 
         const accessToken = this.jwtService.sign(payload);
@@ -119,7 +130,7 @@ export class AuthService {
                 name: user.name,
                 role: user.role,
                 pangkalan_id: user.pangkalan_id,
-                pangkalan: user.pangkalans,  // Include pangkalan info for dashboard
+                pangkalan: user.pangkalans,
             },
         };
     }

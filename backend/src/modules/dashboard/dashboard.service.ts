@@ -343,19 +343,30 @@ export class DashboardService {
             where: { is_active: true, deleted_at: null }
         });
 
-        // Map lpg_type enum to cost_price
+        // Map lpg_type to cost_price - support BOTH formats (kg3 and 3kg)
         const costPriceMap: Record<string, number> = {};
         products.forEach(p => {
-            // Map size_kg to lpg_type enum format (3kg, 5.5kg, 12kg, 50kg)
             const sizeKg = Number(p.size_kg);
-            let lpgTypeKey = '';
-            if (sizeKg === 3) lpgTypeKey = 'kg3';
-            else if (sizeKg === 5.5) lpgTypeKey = 'kg5';
-            else if (sizeKg === 12) lpgTypeKey = 'kg12';
-            else if (sizeKg === 50) lpgTypeKey = 'kg50';
+            const cost = Number(p.cost_price) || 0;
 
-            if (lpgTypeKey) {
-                costPriceMap[lpgTypeKey] = Number(p.cost_price) || 0;
+            // Map size to both backend (kg3) and frontend (3kg) formats
+            if (sizeKg === 3) {
+                costPriceMap['kg3'] = cost;
+                costPriceMap['3kg'] = cost;
+            } else if (sizeKg === 5.5) {
+                costPriceMap['kg5'] = cost;
+                costPriceMap['5kg'] = cost;
+                costPriceMap['5.5kg'] = cost;
+            } else if (sizeKg === 12) {
+                costPriceMap['kg12'] = cost;
+                costPriceMap['12kg'] = cost;
+            } else if (sizeKg === 50) {
+                costPriceMap['kg50'] = cost;
+                costPriceMap['50kg'] = cost;
+            } else if (sizeKg <= 0.5) {
+                // Bright Gas 220gr (0.22kg)
+                costPriceMap['gr220'] = cost;
+                costPriceMap['220gr'] = cost;
             }
         });
 

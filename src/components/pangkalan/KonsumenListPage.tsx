@@ -203,14 +203,17 @@ export default function KonsumenListPage() {
 
     return (
         <div className="space-y-8 pb-8">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Konsumen</h1>
-                    <p className="text-slate-500 mt-1 flex items-center gap-2">
-                        <SafeIcon name="Users" className="h-4 w-4" />
-                        Kelola data pelanggan pangkalan Anda
-                    </p>
+            {/* Header - Animated */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
+                <div className="flex items-center gap-3">
+                    <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500 animate-lineGrow" />
+                    <div>
+                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Konsumen</h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                            <SafeIcon name="Users" className="h-4 w-4 animate-pulse" />
+                            Kelola data pelanggan pangkalan Anda
+                        </p>
+                    </div>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
@@ -372,70 +375,81 @@ export default function KonsumenListPage() {
             {/* Stats Cards */}
             <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
                 {/* Total Konsumen */}
-                <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                            <SafeIcon name="Users" className="h-4 w-4" />
-                            Total Konsumen
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-3xl font-bold tracking-tight">{total}</p>
-                        <p className="text-blue-100 text-sm mt-2">Pelanggan terdaftar</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-1" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="Users" className="h-4 w-4" />
+                                </div>
+                                Total Konsumen
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-3xl font-bold tracking-tight">{total}</p>
+                            <p className="text-blue-100 text-sm mt-2">Pelanggan terdaftar</p>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Rumah Tangga */}
-                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
-                                <SafeIcon name="User" className="h-4 w-4 text-green-600" />
-                            </div>
-                            Rumah Tangga
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-3xl font-bold text-slate-900">{stats.rumahTangga}</p>
-                        <p className="text-slate-500 text-sm mt-2">Konsumen RT</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-2" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-white dark:bg-slate-800 shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="User" className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                </div>
+                                Rumah Tangga
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.rumahTangga}</p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Konsumen RT</p>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Warung */}
-                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
-                                <SafeIcon name="Store" className="h-4 w-4 text-amber-600" />
-                            </div>
-                            Warung
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-3xl font-bold text-slate-900">{stats.warung}</p>
-                        <p className="text-slate-500 text-sm mt-2">Usaha mikro</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-3" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-white dark:bg-slate-800 shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100 dark:bg-amber-900/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="Store" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                </div>
+                                Warung
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.warung}</p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Usaha mikro</p>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* With NIK */}
-                <Card className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <CardHeader className="pb-2 relative">
-                        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
-                                <SafeIcon name="CreditCard" className="h-4 w-4 text-purple-600" />
-                            </div>
-                            Terverifikasi NIK
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                        <p className="text-3xl font-bold text-slate-900">{stats.withNik}</p>
-                        <p className="text-slate-500 text-sm mt-2">Sudah input NIK</p>
-                    </CardContent>
-                </Card>
+                <div className="animate-slideInBlur stagger-4" style={{ opacity: 0 }}>
+                    <Card className="relative overflow-hidden bg-white dark:bg-slate-800 shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                        <CardHeader className="pb-2 relative">
+                            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                    <SafeIcon name="CreditCard" className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                Terverifikasi NIK
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative">
+                            <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.withNik}</p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Sudah input NIK</p>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             {/* Search & Filter */}

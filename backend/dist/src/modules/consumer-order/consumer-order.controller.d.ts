@@ -19,9 +19,9 @@ export declare class ConsumerOrderController {
             cost_price: import("@prisma/client/runtime/library").Decimal;
             note: string | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
+            qty: number;
             consumer_id: string | null;
             consumer_name: string | null;
-            qty: number;
             price_per_unit: import("@prisma/client/runtime/library").Decimal;
             total_amount: import("@prisma/client/runtime/library").Decimal;
             payment_status: import("@prisma/client").$Enums.consumer_payment_status;
@@ -57,9 +57,9 @@ export declare class ConsumerOrderController {
         cost_price: import("@prisma/client/runtime/library").Decimal;
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         consumer_id: string | null;
         consumer_name: string | null;
-        qty: number;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
@@ -82,8 +82,8 @@ export declare class ConsumerOrderController {
             is_active: boolean;
             created_at: Date;
             updated_at: Date;
-            note: string | null;
             address: string | null;
+            note: string | null;
             nik: string | null;
             kk: string | null;
             consumer_type: import("@prisma/client").$Enums.consumer_type;
@@ -97,9 +97,9 @@ export declare class ConsumerOrderController {
         cost_price: import("@prisma/client/runtime/library").Decimal;
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         consumer_id: string | null;
         consumer_name: string | null;
-        qty: number;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
@@ -120,9 +120,9 @@ export declare class ConsumerOrderController {
         cost_price: import("@prisma/client/runtime/library").Decimal;
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         consumer_id: string | null;
         consumer_name: string | null;
-        qty: number;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
@@ -143,9 +143,9 @@ export declare class ConsumerOrderController {
         cost_price: import("@prisma/client/runtime/library").Decimal;
         note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         consumer_id: string | null;
         consumer_name: string | null;
-        qty: number;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;

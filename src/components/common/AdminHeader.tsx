@@ -16,6 +16,7 @@ import NotificationModal from '@/components/common/NotificationModal'
 import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { removeToken, authApi } from '@/lib/api'
 import { clearCachedProfile } from '@/components/auth/AuthGuard'
+import { useSidebar } from '@/components/ui/sidebar'
 
 const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000'
 
@@ -35,6 +36,50 @@ interface AdminHeaderProps {
 // localStorage keys for caching
 const PROFILE_CACHE_KEY = 'sim4lon_profile_cache'
 const NOTIF_READ_KEY = 'sim4lon_last_notif_read'
+
+/**
+ * Premium Mobile Menu Button with animated hamburger icon
+ * Shows only on mobile (md:hidden)
+ * Transforms to X when sidebar is open
+ */
+function MobileMenuButton() {
+  try {
+    const { toggleSidebar, openMobile } = useSidebar()
+
+    return (
+      <button
+        onClick={toggleSidebar}
+        className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl 
+                   bg-gradient-to-br from-primary/10 to-primary/5 
+                   hover:from-primary/20 hover:to-primary/10 
+                   active:scale-95 transition-all duration-300 
+                   border border-primary/20 shadow-sm"
+        aria-label="Toggle menu"
+      >
+        <div className="w-5 h-4 flex flex-col justify-between">
+          {/* Top line */}
+          <span
+            className={`block h-0.5 bg-primary rounded-full transform transition-all duration-300 origin-left
+                       ${openMobile ? 'rotate-45 translate-x-0.5 w-[22px]' : 'w-5'}`}
+          />
+          {/* Middle line */}
+          <span
+            className={`block h-0.5 bg-primary rounded-full transition-all duration-300
+                       ${openMobile ? 'opacity-0 translate-x-3' : 'w-4 opacity-100'}`}
+          />
+          {/* Bottom line */}
+          <span
+            className={`block h-0.5 bg-primary rounded-full transform transition-all duration-300 origin-left
+                       ${openMobile ? '-rotate-45 translate-x-0.5 w-[22px]' : 'w-5'}`}
+          />
+        </div>
+      </button>
+    )
+  } catch {
+    // useSidebar will throw if not within SidebarProvider - silently return null
+    return null
+  }
+}
 
 export default function AdminHeader({
   userName: initialUserName = '',
@@ -162,19 +207,21 @@ export default function AdminHeader({
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-gradient-to-r from-background to-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300" id="ijli">
         <div className="w-full flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo & App Name */}
-          <div className="flex items-center gap-3">
-            {/* Light mode logo */}
+          {/* Left Section: Mobile Menu + Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Mobile Hamburger Menu - Premium animated button */}
+            <MobileMenuButton />
+            {/* Light mode logo - smaller on mobile */}
             <img
               src="/logo-pertamina.png"
               alt="Pertamina"
-              className="h-10 object-contain dark:hidden"
+              className="h-8 sm:h-10 object-contain dark:hidden transition-all duration-300"
             />
             {/* Dark mode logo */}
             <img
               src="/logo-pertamina-darkmode.png"
               alt="Pertamina"
-              className="h-10 object-contain hidden dark:block"
+              className="h-8 sm:h-10 object-contain hidden dark:block transition-all duration-300"
             />
           </div>
 

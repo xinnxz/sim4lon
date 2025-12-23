@@ -22,6 +22,8 @@ model users {
   role            user_role         @default(OPERATOR)
   /// Link to pangkalan for PANGKALAN role
   pangkalan_id    String?           @db.Uuid
+  /// Session ID for single-session login (only 1 device at a time)
+  session_id      String?           @db.VarChar(100)
   is_active       Boolean           @default(true)
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   updated_at      DateTime          @default(now()) @db.Timestamptz(6)

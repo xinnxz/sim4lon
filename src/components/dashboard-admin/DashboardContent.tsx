@@ -118,7 +118,7 @@ export default function DashboardContent() {
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                     <CardTitle className="text-lg font-semibold">Keuntungan</CardTitle>
                   </div>
-                  <CardDescription className="text-xs sm:text-sm">Profit harian (Penjualan - Modal)</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">Profit harian (Penjualan - Pembelian)</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-4">
                   <div className="w-full h-64 sm:h-72">

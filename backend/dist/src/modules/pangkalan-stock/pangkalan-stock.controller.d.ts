@@ -20,16 +20,16 @@ export declare class PangkalanStockController {
         };
     }>;
     getMovements(req: any, startDate?: string, endDate?: string, limit?: string): Promise<{
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        note: string | null;
-        movement_date: Date;
         id: string;
         pangkalan_id: string;
         created_at: Date;
+        note: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         movement_type: string;
         source: string | null;
         reference_id: string | null;
+        movement_date: Date;
     }[]>;
     receiveStock(req: any, dto: ReceiveStockDto): Promise<{
         message: string;
@@ -42,13 +42,13 @@ export declare class PangkalanStockController {
         difference: number;
     }>;
     updateLevels(req: any, dto: UpdateStockLevelsDto): Promise<{
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        warning_level: number;
-        critical_level: number;
         id: string;
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
+        warning_level: number;
+        critical_level: number;
     }>;
 }

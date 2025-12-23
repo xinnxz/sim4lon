@@ -225,17 +225,27 @@ let DashboardService = class DashboardService {
         const costPriceMap = {};
         products.forEach(p => {
             const sizeKg = Number(p.size_kg);
-            let lpgTypeKey = '';
-            if (sizeKg === 3)
-                lpgTypeKey = 'kg3';
-            else if (sizeKg === 5.5)
-                lpgTypeKey = 'kg5';
-            else if (sizeKg === 12)
-                lpgTypeKey = 'kg12';
-            else if (sizeKg === 50)
-                lpgTypeKey = 'kg50';
-            if (lpgTypeKey) {
-                costPriceMap[lpgTypeKey] = Number(p.cost_price) || 0;
+            const cost = Number(p.cost_price) || 0;
+            if (sizeKg === 3) {
+                costPriceMap['kg3'] = cost;
+                costPriceMap['3kg'] = cost;
+            }
+            else if (sizeKg === 5.5) {
+                costPriceMap['kg5'] = cost;
+                costPriceMap['5kg'] = cost;
+                costPriceMap['5.5kg'] = cost;
+            }
+            else if (sizeKg === 12) {
+                costPriceMap['kg12'] = cost;
+                costPriceMap['12kg'] = cost;
+            }
+            else if (sizeKg === 50) {
+                costPriceMap['kg50'] = cost;
+                costPriceMap['50kg'] = cost;
+            }
+            else if (sizeKg <= 0.5) {
+                costPriceMap['gr220'] = cost;
+                costPriceMap['220gr'] = cost;
             }
         });
         for (let i = 6; i >= 0; i--) {

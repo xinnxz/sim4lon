@@ -77,29 +77,40 @@ export default function HutangPage() {
 
     return (
         <div className="p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Hutang</h1>
-                <p className="text-slate-500">Daftar piutang yang belum lunas</p>
+            {/* Header - Animated */}
+            <div className="mb-6 flex items-center gap-3 animate-fadeInDown">
+                <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-orange-500 via-orange-400 to-amber-500 animate-lineGrow" />
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Hutang</h1>
+                    <p className="text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <SafeIcon name="Receipt" className="h-4 w-4 animate-pulse" />
+                        Daftar piutang yang belum lunas
+                    </p>
+                </div>
             </div>
 
-            {/* Total Card */}
-            <Card className="mb-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 shadow-lg">
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-orange-100 text-sm mb-1">Total Hutang</p>
-                            <p className="text-4xl font-bold">{formatCurrency(totalHutang)}</p>
-                            <p className="text-orange-100 text-sm mt-2">
-                                {orders.length} transaksi belum lunas
-                            </p>
+            {/* Total Card - Animated */}
+            <div className="animate-slideInBlur stagger-1 mb-6" style={{ opacity: 0 }}>
+                <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01] relative overflow-hidden group">
+                    {/* Floating Orbs */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                    <CardContent className="p-6 relative">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-orange-100 text-sm mb-1">Total Hutang</p>
+                                <p className="text-4xl font-bold">{formatCurrency(totalHutang)}</p>
+                                <p className="text-orange-100 text-sm mt-2">
+                                    {orders.length} transaksi belum lunas
+                                </p>
+                            </div>
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                <SafeIcon name="Receipt" className="h-8 w-8" />
+                            </div>
                         </div>
-                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                            <SafeIcon name="Receipt" className="h-8 w-8" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* List */}
             <Card className="shadow-lg">

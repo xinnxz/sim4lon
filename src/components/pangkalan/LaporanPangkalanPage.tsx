@@ -21,10 +21,12 @@ import {
     authApi,
     consumerOrdersApi,
     lpgPricesApi,
+    expensesApi,
     type UserProfile,
     type ConsumerOrder,
     type ChartDataPoint,
     type PangkalanLpgPrice,
+    type Expense,
 } from '@/lib/api'
 import {
     LineChart,
@@ -86,6 +88,8 @@ export default function LaporanPangkalanPage() {
     const [showCustom, setShowCustom] = useState(false)
     const [allSales, setAllSales] = useState<ConsumerOrder[]>([]) // Store all sales for filtering
     const [prices, setPrices] = useState<PangkalanLpgPrice[]>([]) // Dynamic prices from API
+    const [allExpenses, setAllExpenses] = useState<Expense[]>([]) // All expenses
+    const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]) // Filtered expenses by period
 
     // Calculate date range based on selected period
     const getDateRange = () => {
@@ -162,18 +166,25 @@ export default function LaporanPangkalanPage() {
                 setIsLoading(true)
                 setError(null)
 
-                const profileData = await authApi.getProfile()
-                setProfile(profileData)
+                const now = new Date()
+                const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
 
-                const [chartDataResult, allSalesResult, pricesData] = await Promise.all([
+                const [chartDataResult, allSalesResult, pricesData, expensesData] = await Promise.all([
                     consumerOrdersApi.getChartData(),
                     consumerOrdersApi.getRecent(200), // Get more sales for filtering
                     lpgPricesApi.getAll(), // Fetch dynamic prices
+                    expensesApi.getAll(monthStart, monthEnd), // Fetch expenses for current month
                 ])
 
                 setChartData(chartDataResult || [])
                 setAllSales(allSalesResult || [])
                 setPrices(pricesData || [])
+                setAllExpenses(expensesData || [])
+
+                // Also fetch profile
+                const profileData = await authApi.getProfile()
+                setProfile(profileData)
             } catch (err: any) {
                 console.error('❌ [Laporan] Error:', err)
                 setError(`Gagal memuat data: ${err?.message || 'Unknown error'}`)
@@ -229,8 +240,15 @@ export default function LaporanPangkalanPage() {
             return saleTime >= startTime && saleTime <= endTime
         })
 
+        // Also filter expenses by the same period
+        const filteredExp = allExpenses.filter(exp => {
+            const expTime = new Date(exp.expense_date).getTime()
+            return expTime >= startTime && expTime <= endTime
+        })
+
         setRecentSales(filtered)
-    }, [selectedPeriod, customStartDate, customEndDate, allSales])
+        setFilteredExpenses(filteredExp)
+    }, [selectedPeriod, customStartDate, customEndDate, allSales, allExpenses])
 
     // Handle custom date apply
     const handleApplyCustomDate = () => {
@@ -285,12 +303,13 @@ export default function LaporanPangkalanPage() {
         }, { qty: 0, penjualan: 0, modal: 0, marginKotor: 0, laba: 0 })
     }, [recentSales, prices])
 
-    // Calculate daily summary from recentSales (MEMOIZED)
+    // Calculate daily summary from recentSales + filteredExpenses (MEMOIZED)
     const dailySummaryArray = useMemo(() => {
+        // First, build sales summary by date
         const summary = recentSales.reduce((acc, sale) => {
             const dateKey = new Date(sale.sale_date).toISOString().split('T')[0]
             if (!acc[dateKey]) {
-                acc[dateKey] = { date: dateKey, qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, laba: 0 }
+                acc[dateKey] = { date: dateKey, qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, marginKotor: 0, laba: 0 }
             }
             const costPrice = getCostPrice(sale.lpg_type)
             const modal = sale.qty * costPrice
@@ -300,27 +319,47 @@ export default function LaporanPangkalanPage() {
             acc[dateKey].qty += sale.qty
             acc[dateKey].penjualan += penjualan
             acc[dateKey].modal += modal
-            acc[dateKey].laba += margin
+            acc[dateKey].marginKotor += margin
             return acc
-        }, {} as Record<string, { date: string; qty: number; penjualan: number; modal: number; pengeluaran: number; laba: number }>)
+        }, {} as Record<string, { date: string; qty: number; penjualan: number; modal: number; pengeluaran: number; marginKotor: number; laba: number }>)
+
+        // Then, add expenses to each date
+        filteredExpenses.forEach(exp => {
+            const dateKey = new Date(exp.expense_date).toISOString().split('T')[0]
+            if (!summary[dateKey]) {
+                // Create entry for expense-only day (no sales)
+                summary[dateKey] = { date: dateKey, qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, marginKotor: 0, laba: 0 }
+            }
+            summary[dateKey].pengeluaran += Number(exp.amount)
+        })
+
+        // Calculate laba for each day: marginKotor - pengeluaran
+        Object.values(summary).forEach(day => {
+            day.laba = day.marginKotor - day.pengeluaran
+        })
 
         // Sort by date (newest first)
         return Object.values(summary).sort((a, b) =>
             new Date(b.date).getTime() - new Date(a.date).getTime()
         )
-    }, [recentSales, prices])
+    }, [recentSales, prices, filteredExpenses])
+
+    // Calculate total pengeluaran from filtered expenses
+    const totalPengeluaran = useMemo(() => {
+        return filteredExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
+    }, [filteredExpenses])
 
     // For backward compatibility - use filtered totals for summary cards
     const totals = {
         qty: filteredTotals.qty,
         penjualan: filteredTotals.penjualan,
         modal: filteredTotals.modal,
-        pengeluaran: 0, // Pengeluaran not included in per-sale data
-        laba: filteredTotals.laba,
+        pengeluaran: totalPengeluaran, // Now using actual expense data!
+        laba: filteredTotals.laba - totalPengeluaran, // Laba = MarginKotor - Pengeluaran
     }
 
     const marginKotor = filteredTotals.marginKotor
-    const marginPercentage = totals.penjualan > 0 ? ((totals.laba / totals.penjualan) * 100).toFixed(1) : '0'
+    const marginPercentage = totals.penjualan > 0 ? ((marginKotor / totals.penjualan) * 100).toFixed(1) : '0'
 
     // Get period label for display
     const getPeriodLabel = () => {
@@ -710,15 +749,18 @@ export default function LaporanPangkalanPage() {
 
     return (
         <div className="space-y-8 pb-8">
-            {/* Header Section */}
+            {/* Header Section - Animated */}
             <div className="flex flex-col gap-4">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Laporan Penjualan</h1>
-                        <p className="text-slate-500 mt-1 flex items-center gap-2">
-                            <SafeIcon name="Calculator" className="h-4 w-4" />
-                            Perhitungan: Qty × (Harga Jual - Modal)
-                        </p>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
+                    <div className="flex items-center gap-3">
+                        <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500 animate-lineGrow" />
+                        <div>
+                            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Laporan Penjualan</h1>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                                <SafeIcon name="Calculator" className="h-4 w-4 animate-pulse" />
+                                Perhitungan: Qty × (Harga Jual - Modal)
+                            </p>
+                        </div>
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -841,86 +883,109 @@ export default function LaporanPangkalanPage() {
                 </div>
                 <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
                     {/* Total Penjualan */}
-                    <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <CardHeader className="pb-2 relative">
-                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                <SafeIcon name="Banknote" className="h-4 w-4" />
-                                Total Penjualan
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative">
-                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
-                            <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
-                                <SafeIcon name="Flame" className="h-3.5 w-3.5" />
-                                {totals.qty} tabung terjual
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <div className="animate-slideInBlur stagger-1" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="Banknote" className="h-4 w-4" />
+                                    </div>
+                                    Total Penjualan
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
+                                <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
+                                    <SafeIcon name="Flame" className="h-3.5 w-3.5" />
+                                    {totals.qty} tabung terjual
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
                     {/* Total Modal */}
-                    <Card className="relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <CardHeader className="pb-2 relative">
-                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                <SafeIcon name="Wallet" className="h-4 w-4" />
-                                Total Beli
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative">
-                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
-                            <p className="text-slate-300 text-sm mt-2">Biaya pembelian LPG</p>
-                        </CardContent>
-                    </Card>
+                    <div className="animate-slideInBlur stagger-2" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="Wallet" className="h-4 w-4" />
+                                    </div>
+                                    Total Beli
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
+                                <p className="text-slate-300 text-sm mt-2">Biaya pembelian LPG</p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
                     {/* Margin Kotor */}
-                    <Card className="relative overflow-hidden bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <CardHeader className="pb-2 relative">
-                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                <SafeIcon name="ArrowUpRight" className="h-4 w-4" />
-                                Margin Kotor
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative">
-                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
-                            <p className="text-cyan-100 text-sm mt-2">Sebelum pengeluaran</p>
-                        </CardContent>
-                    </Card>
+                    <div className="animate-slideInBlur stagger-3" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="ArrowUpRight" className="h-4 w-4" />
+                                    </div>
+                                    Margin Kotor
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
+                                <p className="text-cyan-100 text-sm mt-2">Sebelum pengeluaran</p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
                     {/* Pengeluaran */}
-                    <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <CardHeader className="pb-2 relative">
-                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                <SafeIcon name="MinusCircle" className="h-4 w-4" />
-                                Pengeluaran
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative">
-                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
-                            <p className="text-orange-100 text-sm mt-2">Biaya operasional</p>
-                        </CardContent>
-                    </Card>
+                    <div className="animate-slideInBlur stagger-4" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="MinusCircle" className="h-4 w-4" />
+                                    </div>
+                                    Pengeluaran
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
+                                <p className="text-orange-100 text-sm mt-2">Biaya operasional</p>
+                            </CardContent>
+                        </Card>
+                    </div>
 
                     {/* Laba Bersih */}
-                    <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                        <CardHeader className="pb-2 relative">
-                            <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
-                                Laba Bersih
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative">
-                            <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                                <Badge className="bg-white/20 text-white hover:bg-white/30 text-xs">
-                                    {marginPercentage}% margin
-                                </Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <div className="animate-slideInBlur stagger-5" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
+                                    </div>
+                                    Laba Bersih
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="bg-white/20 text-white hover:bg-white/30 text-xs">
+                                        {marginPercentage}% margin
+                                    </Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
 

@@ -117,11 +117,17 @@ let AuthService = class AuthService {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Email atau password salah');
         }
+        const sessionId = `${user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+        await this.prisma.users.update({
+            where: { id: user.id },
+            data: { session_id: sessionId },
+        });
         const payload = {
             sub: user.id,
             email: user.email,
             role: user.role,
             pangkalan_id: user.pangkalan_id,
+            session_id: sessionId,
         };
         const accessToken = this.jwtService.sign(payload);
         await this.activityService.logActivity('user_login', 'User Login', {
