@@ -90,6 +90,11 @@ export class OrderService {
 
     async create(dto: CreateOrderDto) {
 
+        // VALIDASI: Tidak boleh submit order tanpa items
+        if (!dto.items || dto.items.length === 0) {
+            throw new BadRequestException('Silakan tambahkan minimal satu item LPG');
+        }
+
         /**
          * PENJELASAN MAPPING lpg_type:
          * 
@@ -155,6 +160,36 @@ export class OrderService {
             // Default fallback (silent for performance)
             return 'kg3' as lpg_type;
         };
+
+        // VALIDASI STOK: Cek stok sebelum membuat order
+        // Best practice: Backend validation sebagai safety net, bahkan jika frontend sudah validasi
+        for (const item of dto.items) {
+            if (item.lpg_product_id) {
+                // Dynamic product - cek stok dari stock_histories (MASUK - KELUAR)
+                const product = await this.prisma.lpg_products.findUnique({
+                    where: { id: item.lpg_product_id },
+                    select: { name: true }
+                });
+
+                // itung stok sekarang dari history
+                const stockIn = await this.prisma.stock_histories.aggregate({
+                    where: { lpg_product_id: item.lpg_product_id, movement_type: 'MASUK' },
+                    _sum: { qty: true }
+                });
+                const stockOut = await this.prisma.stock_histories.aggregate({
+                    where: { lpg_product_id: item.lpg_product_id, movement_type: 'KELUAR' },
+                    _sum: { qty: true }
+                });
+
+                const currentStock = (stockIn._sum.qty || 0) - (stockOut._sum.qty || 0);
+
+                if (product && item.qty > currentStock) {
+                    throw new BadRequestException(
+                        `Stok ${product.name} tidak mencukupi! Tersedia: ${currentStock}, Diminta: ${item.qty}`
+                    );
+                }
+            }
+        }
 
         // Generate order code (ORD-0001, ORD-0002, etc.)
         const orderCount = await this.prisma.orders.count();

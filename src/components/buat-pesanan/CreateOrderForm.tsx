@@ -1,13 +1,13 @@
 /**
- * CreateOrderForm - Form untuk membuat pesanan baru
- * 
- * PENJELASAN:
- * Component ini menampilkan form untuk membuat pesanan LPG baru dengan:
- * - Fetch pangkalan dari API (real data)
- * - Fetch produk LPG dari API (dynamic products)
- * - Submit pesanan via ordersApi
- * - Support edit mode untuk update pesanan existing
- */
+* CreateOrderForm - Form untuk membuat pesanan baru
+* 
+* PENJELASAN:
+* Component ini menampilkan form untuk membuat pesanan LPG baru dengan:
+* - Fetch pangkalan dari API (real data)
+* - Fetch produk LPG dari API (dynamic products)
+* - Submit pesanan via ordersApi
+* - Support edit mode untuk update pesanan existing
+*/
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
@@ -319,6 +319,7 @@ export default function CreateOrderForm() {
 
   /**
    * Validate quantity on blur - ensure min 1 and cap to max stock
+   * PERBAIKAN: Validasi stok bahkan ketika maxStock = 0 (stok habis)
    */
   const handleQuantityBlur = (itemId: string) => {
     const item = formData.items.find(i => i.id === itemId)
@@ -326,17 +327,22 @@ export default function CreateOrderForm() {
 
     let newQuantity = item.quantity
     const product = lpgProducts.find(p => p.id === item.productId)
-    const maxStock = product?.stock?.current || 0
+    const maxStock = product?.stock?.current ?? 0
 
     // Ensure min 1 (orders must have at least 1)
     if (newQuantity < 1) {
       newQuantity = 1
     }
 
-    // Cap to max stock
-    if (maxStock > 0 && newQuantity > maxStock) {
-      toast.warning(`Maksimal stok ${product?.name}: ${maxStock} unit`)
-      newQuantity = maxStock
+    // Cap to max stock - SELALU validasi, termasuk saat stok = 0
+    if (newQuantity > maxStock) {
+      if (maxStock === 0) {
+        toast.error(`Stok ${product?.name} habis! Tidak dapat memesan.`)
+        newQuantity = 0  // Set to 0 to indicate invalid
+      } else {
+        toast.warning(`Jumlah melebihi stok! Maksimal ${product?.name}: ${maxStock} unit`)
+        newQuantity = maxStock
+      }
     }
 
     // Update if changed
@@ -453,6 +459,7 @@ export default function CreateOrderForm() {
 
   /**
    * Handle form submission
+   * PERBAIKAN: Tambah validasi stok sebelum submit
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -465,6 +472,22 @@ export default function CreateOrderForm() {
     if (formData.items.length === 0) {
       toast.error('Silakan tambahkan minimal satu item LPG')
       return
+    }
+
+    // VALIDASI STOK: Cek semua item tidak melebihi stok
+    for (const item of formData.items) {
+      const product = lpgProducts.find(p => p.id === item.productId)
+      const maxStock = product?.stock?.current ?? 0
+
+      if (item.quantity > maxStock) {
+        toast.error(`Jumlah ${product?.name || item.lpgType} (${item.quantity}) melebihi stok tersedia (${maxStock})!`)
+        return
+      }
+
+      if (item.quantity < 1) {
+        toast.error(`Jumlah ${product?.name || item.lpgType} harus minimal 1`)
+        return
+      }
     }
 
     setIsSubmitting(true)

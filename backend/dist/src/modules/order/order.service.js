@@ -85,6 +85,9 @@ let OrderService = class OrderService {
         return order;
     }
     async create(dto) {
+        if (!dto.items || dto.items.length === 0) {
+            throw new common_1.BadRequestException('Silakan tambahkan minimal satu item LPG');
+        }
         const mapStringToLpgType = (strType) => {
             const normalized = strType.toLowerCase().trim();
             const mapping = {
@@ -129,6 +132,26 @@ let OrderService = class OrderService {
             }
             return 'kg3';
         };
+        for (const item of dto.items) {
+            if (item.lpg_product_id) {
+                const product = await this.prisma.lpg_products.findUnique({
+                    where: { id: item.lpg_product_id },
+                    select: { name: true }
+                });
+                const stockIn = await this.prisma.stock_histories.aggregate({
+                    where: { lpg_product_id: item.lpg_product_id, movement_type: 'MASUK' },
+                    _sum: { qty: true }
+                });
+                const stockOut = await this.prisma.stock_histories.aggregate({
+                    where: { lpg_product_id: item.lpg_product_id, movement_type: 'KELUAR' },
+                    _sum: { qty: true }
+                });
+                const currentStock = (stockIn._sum.qty || 0) - (stockOut._sum.qty || 0);
+                if (product && item.qty > currentStock) {
+                    throw new common_1.BadRequestException(`Stok ${product.name} tidak mencukupi! Tersedia: ${currentStock}, Diminta: ${item.qty}`);
+                }
+            }
+        }
         const orderCount = await this.prisma.orders.count();
         const orderCode = `ORD-${String(orderCount + 1).padStart(4, '0')}`;
         const PPN_RATE = 0.12;

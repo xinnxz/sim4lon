@@ -102,17 +102,17 @@ export default function PangkalanHeaderSimple() {
                 {/* Mobile Hamburger Menu - Premium animated button */}
                 <MobileMenuButton />
 
-                {/* Logo & Title - Responsive */}
+                {/* Logo & Title - Always visible */}
                 <div className="flex items-center gap-2 sm:gap-3">
                     <img
                         src="/logo-pertamina-2.png"
                         alt="Pertamina"
                         className="h-8 sm:h-10 object-contain transition-all duration-300"
                     />
-                    <div className="hidden xs:block">
-                        <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">SIM4LON</h1>
-                        <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate max-w-[100px] sm:max-w-[200px]">
-                            {profile?.pangkalans?.name || 'Dashboard Pangkalan'}
+                    <div className="flex flex-col">
+                        <h1 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">SIM4LON</h1>
+                        <p className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium truncate max-w-[120px] sm:max-w-[200px]">
+                            {profile?.pangkalans?.name || 'Pangkalan'}
                         </p>
                     </div>
                 </div>

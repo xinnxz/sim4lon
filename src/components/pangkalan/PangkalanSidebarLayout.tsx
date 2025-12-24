@@ -48,7 +48,7 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
             style={{ '--header-height': '64px' } as React.CSSProperties}
         >
             {/* Flex column: header on top, sidebar+content row below */}
-            <div className="flex flex-col min-h-screen w-full bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
+            <div className="pangkalan-scale flex flex-col min-h-screen w-full bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
                 {/* HEADER - Full width at top */}
                 <PangkalanHeaderSimple />
 
