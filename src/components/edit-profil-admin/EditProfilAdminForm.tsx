@@ -100,9 +100,9 @@ export default function EditProfilAdminForm() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate file type
-    if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
-      toast.error('Hanya file gambar yang diperbolehkan (JPEG, PNG, GIF, WebP)')
+    // Validate file type - no GIF allowed
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+      toast.error('Gambar kudu wajib JPEG, PNG, WebP.')
       return
     }
 
@@ -262,7 +262,7 @@ export default function EditProfilAdminForm() {
         <CardHeader>
           <CardTitle>Foto Profil</CardTitle>
           <CardDescription>
-            Pilih dan crop foto profil Anda (maks. 5MB, format: JPEG, PNG, GIF, WebP)
+            Pilih dan crop foto profil Anda (maks. 5MB, format: JPEG, PNG, WebP)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -287,7 +287,7 @@ export default function EditProfilAdminForm() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileSelect}
                 className="hidden"
               />
