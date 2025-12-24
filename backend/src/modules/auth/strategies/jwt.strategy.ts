@@ -29,19 +29,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     async validate(payload: JwtPayload) {
         const user = await this.prisma.users.findUnique({
             where: { id: payload.sub },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                role: true,
-                is_active: true,
-                pangkalan_id: true,
-                session_id: true,  // Get current session_id from DB
+            include: {
+                pangkalans: {
+                    select: {
+                        is_active: true,
+                    },
+                },
             },
         });
 
         if (!user || !user.is_active) {
             throw new UnauthorizedException('User tidak ditemukan atau tidak aktif');
+        }
+
+        // Check if pangkalan is active (for PANGKALAN role users)
+        // Force logout if pangkalan is deactivated while user is logged in
+        if (user.role === 'PANGKALAN' && user.pangkalans && !user.pangkalans.is_active) {
+            throw new UnauthorizedException('Pangkalan Anda sudah dinonaktifkan. Silakan hubungi agen.');
         }
 
         // TEMPORARILY DISABLED FOR TESTING - Enable for production
