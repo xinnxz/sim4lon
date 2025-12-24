@@ -557,12 +557,13 @@ export default function PerencanaanPage() {
                 {/* Filter Bar */}
                 <Card className="glass-card mb-6">
                     <CardContent className="p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">Bulan:</span>
+                        <div className="flex flex-col gap-4">
+                            {/* Filters - Stack vertically on mobile */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="space-y-1.5">
+                                    <span className="text-xs font-medium text-muted-foreground">Bulan</span>
                                     <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                        <SelectTrigger className="w-44">
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -573,10 +574,10 @@ export default function PerencanaanPage() {
                                     </Select>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">Kondisi:</span>
+                                <div className="space-y-1.5">
+                                    <span className="text-xs font-medium text-muted-foreground">Kondisi</span>
                                     <Select value={kondisi} onValueChange={setKondisi}>
-                                        <SelectTrigger className="w-32">
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -587,10 +588,10 @@ export default function PerencanaanPage() {
                                     </Select>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">Tipe:</span>
+                                <div className="space-y-1.5">
+                                    <span className="text-xs font-medium text-muted-foreground">Tipe</span>
                                     <Select value={tipePembayaran} onValueChange={setTipePembayaran}>
-                                        <SelectTrigger className="w-28">
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -602,10 +603,12 @@ export default function PerencanaanPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 sm:ml-auto">
-                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading}>
+                            {/* Action Buttons - Responsive grid */}
+                            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2">
+                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading} className="w-full sm:w-auto">
                                     <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                                    Refresh
+                                    <span className="hidden sm:inline">Refresh</span>
+                                    <span className="sm:hidden">Muat Ulang</span>
                                 </Button>
 
                                 <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
@@ -614,13 +617,14 @@ export default function PerencanaanPage() {
                                             variant="default"
                                             size="sm"
                                             disabled={isGenerating}
-                                            className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                                            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                                         >
                                             <SafeIcon name="Wand2" className={`w-4 h-4 mr-1 ${isGenerating ? 'animate-spin' : ''}`} />
-                                            {isGenerating ? 'Generating...' : 'Generate Otomatis'}
+                                            <span className="hidden sm:inline">{isGenerating ? 'Generating...' : 'Generate Otomatis'}</span>
+                                            <span className="sm:hidden">{isGenerating ? '...' : 'Generate'}</span>
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent>
+                                    <AlertDialogContent className="mx-4 max-w-[calc(100vw-2rem)] sm:max-w-lg">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Generate Perencanaan Otomatis</AlertDialogTitle>
                                             <AlertDialogDescription className="space-y-3">
@@ -659,7 +663,7 @@ export default function PerencanaanPage() {
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm">
+                                        <Button variant="outline" size="sm" className="w-full sm:w-auto col-span-2 sm:col-span-1">
                                             <SafeIcon name="Download" className="w-4 h-4 mr-1" />
                                             Download
                                             <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />

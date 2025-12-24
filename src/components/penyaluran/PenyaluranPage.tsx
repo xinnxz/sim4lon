@@ -437,12 +437,13 @@ export default function PenyaluranPage() {
                 {/* Filter Bar */}
                 <Card className="glass-card mb-6">
                     <CardContent className="p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">Bulan:</span>
+                        <div className="flex flex-col gap-4">
+                            {/* Filters - Stack vertically on mobile */}
+                            <div className={`grid gap-3 ${selectedCategory === 'SUBSIDI' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1'}`}>
+                                <div className="space-y-1.5">
+                                    <span className="text-xs font-medium text-muted-foreground">Bulan</span>
                                     <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                        <SelectTrigger className="w-44">
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -456,10 +457,10 @@ export default function PenyaluranPage() {
                                 {/* Only show Kondisi and Tipe filters for Subsidi */}
                                 {selectedCategory === 'SUBSIDI' && (
                                     <>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">Kondisi:</span>
+                                        <div className="space-y-1.5">
+                                            <span className="text-xs font-medium text-muted-foreground">Kondisi</span>
                                             <Select value={kondisi} onValueChange={setKondisi}>
-                                                <SelectTrigger className="w-32">
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -470,10 +471,10 @@ export default function PenyaluranPage() {
                                             </Select>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">Tipe:</span>
+                                        <div className="space-y-1.5">
+                                            <span className="text-xs font-medium text-muted-foreground">Tipe</span>
                                             <Select value={tipePembayaran} onValueChange={setTipePembayaran}>
-                                                <SelectTrigger className="w-28">
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -486,25 +487,29 @@ export default function PenyaluranPage() {
                                     </>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2 sm:ml-auto">
+
+                            {/* Action Buttons - Responsive grid */}
+                            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2">
                                 <Button
                                     variant="default"
                                     size="sm"
                                     onClick={() => setShowFakultatifModal(true)}
-                                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                                    className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                                 >
                                     <SafeIcon name="Plus" className="w-4 h-4 mr-1" />
-                                    Tambah Fakultatif
+                                    <span className="hidden sm:inline">Tambah Fakultatif</span>
+                                    <span className="sm:hidden">Fakultatif</span>
                                 </Button>
 
-                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading}>
+                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading} className="w-full sm:w-auto">
                                     <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                                    Refresh
+                                    <span className="hidden sm:inline">Refresh</span>
+                                    <span className="sm:hidden">Muat Ulang</span>
                                 </Button>
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm">
+                                        <Button variant="outline" size="sm" className="w-full sm:w-auto col-span-2 sm:col-span-1">
                                             <SafeIcon name="Download" className="w-4 h-4 mr-1" />
                                             Download
                                             <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
