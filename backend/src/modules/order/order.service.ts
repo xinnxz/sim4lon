@@ -95,6 +95,89 @@ export class OrderService {
             throw new BadRequestException('Silakan tambahkan minimal satu item LPG');
         }
 
+        // VALIDASI ALOKASI BULANAN: Khusus LPG 3kg subsidi
+        // Calculate total 3kg being ordered
+        const total3kgOrdered = dto.items
+            .filter(item => {
+                const normalized = item.lpg_type.toLowerCase().trim();
+                return normalized === '3kg' || normalized === 'kg3' || normalized === '3';
+            })
+            .reduce((sum, item) => sum + item.qty, 0);
+
+        if (total3kgOrdered > 0) {
+            // Get pangkalan's monthly allocation
+            const pangkalan = await this.prisma.pangkalans.findUnique({
+                where: { id: dto.pangkalan_id },
+                select: {
+                    id: true,
+                    name: true,
+                    alokasi_bulanan: true,
+                    is_active: true,
+                },
+            });
+
+            if (!pangkalan) {
+                throw new BadRequestException('Pangkalan tidak ditemukan');
+            }
+
+            // Block orders if pangkalan is inactive
+            if (!pangkalan.is_active) {
+                throw new BadRequestException('Pangkalan tidak aktif. Tidak dapat membuat pesanan.');
+            }
+
+            // Calculate this month's start and end (WIB timezone)
+            const now = new Date();
+            const wibOffset = 7 * 60; // UTC+7
+            const wibTime = new Date(now.getTime() + (wibOffset * 60 * 1000));
+            const monthStart = new Date(Date.UTC(wibTime.getUTCFullYear(), wibTime.getUTCMonth(), 1, 0, 0, 0, 0));
+            const monthEnd = new Date(Date.UTC(wibTime.getUTCFullYear(), wibTime.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+
+            // Sum all 3kg orders for this pangkalan this month (excluding BATAL)
+            const ordersThisMonth = await this.prisma.order_items.aggregate({
+                where: {
+                    lpg_type: 'kg3',
+                    orders: {
+                        pangkalan_id: dto.pangkalan_id,
+                        created_at: { gte: monthStart, lte: monthEnd },
+                        current_status: { not: 'BATAL' },
+                        deleted_at: null,
+                    },
+                },
+                _sum: { qty: true },
+            });
+
+            // Sum all 3kg from penyaluran_harian this month
+            const penyaluranThisMonth = await this.prisma.penyaluran_harian.aggregate({
+                where: {
+                    pangkalan_id: dto.pangkalan_id,
+                    lpg_type: 'kg3',
+                    tanggal: { gte: monthStart, lte: monthEnd },
+                },
+                _sum: {
+                    jumlah_normal: true,
+                    jumlah_fakultatif: true,
+                },
+            });
+
+            const totalOrderedThisMonth = ordersThisMonth._sum.qty || 0;
+            const totalPenyaluran = (penyaluranThisMonth._sum.jumlah_normal || 0) +
+                (penyaluranThisMonth._sum.jumlah_fakultatif || 0);
+
+            // Use the higher of the two (to avoid double counting if order creates penyaluran)
+            const currentUsed = Math.max(totalOrderedThisMonth, totalPenyaluran);
+            const remainingAllocation = pangkalan.alokasi_bulanan - currentUsed;
+
+            if (total3kgOrdered > remainingAllocation) {
+                throw new BadRequestException(
+                    `Melebihi alokasi bulanan! ` +
+                    `Alokasi: ${pangkalan.alokasi_bulanan} tabung, ` +
+                    `Sudah terpakai: ${currentUsed} tabung, ` +
+                    `Sisa: ${remainingAllocation} tabung, ` +
+                    `Diminta: ${total3kgOrdered} tabung.`
+                );
+            }
+        }
+
         /**
          * PENJELASAN MAPPING lpg_type:
          * 
