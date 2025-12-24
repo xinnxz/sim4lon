@@ -73,6 +73,7 @@ export class AuthService {
                         id: true,
                         code: true,
                         name: true,
+                        is_active: true,  // For pangkalan status validation
                     },
                 },
             },
@@ -85,6 +86,14 @@ export class AuthService {
         // Check if user is active
         if (!user.is_active) {
             throw new UnauthorizedException('Akun tidak aktif');
+        }
+
+        // Check if pangkalan is active (for PANGKALAN role users)
+        // Best practice: Block login if the associated pangkalan is deactivated
+
+
+        if (user.role === 'PANGKALAN' && user.pangkalans && !user.pangkalans.is_active) {
+            throw new UnauthorizedException('Pangkalan Anda sudah dinonaktifkan. Hubungi agen untuk informasi lebih lanjut.');
         }
 
         // Validate password

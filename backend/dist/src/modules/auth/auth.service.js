@@ -103,6 +103,7 @@ let AuthService = class AuthService {
                         id: true,
                         code: true,
                         name: true,
+                        is_active: true,
                     },
                 },
             },
@@ -112,6 +113,9 @@ let AuthService = class AuthService {
         }
         if (!user.is_active) {
             throw new common_1.UnauthorizedException('Akun tidak aktif');
+        }
+        if (user.role === 'PANGKALAN' && user.pangkalans && !user.pangkalans.is_active) {
+            throw new common_1.UnauthorizedException('Pangkalan Anda sudah dinonaktifkan. Hubungi agen untuk informasi lebih lanjut.');
         }
         const isPasswordValid = await bcrypt.compare(dto.password, user.password);
         if (!isPasswordValid) {

@@ -29,18 +29,19 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
     async validate(payload) {
         const user = await this.prisma.users.findUnique({
             where: { id: payload.sub },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                role: true,
-                is_active: true,
-                pangkalan_id: true,
-                session_id: true,
+            include: {
+                pangkalans: {
+                    select: {
+                        is_active: true,
+                    },
+                },
             },
         });
         if (!user || !user.is_active) {
             throw new common_1.UnauthorizedException('User tidak ditemukan atau tidak aktif');
+        }
+        if (user.role === 'PANGKALAN' && user.pangkalans && !user.pangkalans.is_active) {
+            throw new common_1.UnauthorizedException('Pangkalan Anda sudah dinonaktifkan. Silakan hubungi agen.');
         }
         return user;
     }
