@@ -1,1 +1,0 @@
-import{j as jsxRuntimeExports}from"./jsx-runtime.mvtouYz0.js";import{c as cn}from"./SafeIcon.C08LGL0m.js";function Skeleton({className,...props}){return jsxRuntimeExports.jsx("div",{className:cn("animate-pulse rounded-md bg-primary/10",className),...props})}export{Skeleton as S};
