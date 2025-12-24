@@ -88,6 +88,23 @@ let OrderService = class OrderService {
         if (!dto.items || dto.items.length === 0) {
             throw new common_1.BadRequestException('Silakan tambahkan minimal satu item LPG');
         }
+        if (dto.driver_id) {
+            const driverBusyOrder = await this.prisma.orders.findFirst({
+                where: {
+                    driver_id: dto.driver_id,
+                    current_status: 'DIKIRIM',
+                    deleted_at: null,
+                },
+                select: {
+                    code: true,
+                    drivers: { select: { name: true } },
+                },
+            });
+            if (driverBusyOrder) {
+                throw new common_1.BadRequestException(`Supir ${driverBusyOrder.drivers?.name || 'tersebut'} sedang mengantar pesanan ${driverBusyOrder.code}. ` +
+                    `Pilih supir lain atau tunggu sampai pengiriman selesai.`);
+            }
+        }
         const total3kgOrdered = dto.items
             .filter(item => {
             const normalized = item.lpg_type.toLowerCase().trim();
@@ -294,6 +311,23 @@ let OrderService = class OrderService {
     async update(id, dto) {
         const existingOrder = await this.findOne(id);
         const { items, ...orderData } = dto;
+        if (orderData.driver_id && orderData.driver_id !== existingOrder.driver_id) {
+            const driverBusyOrder = await this.prisma.orders.findFirst({
+                where: {
+                    driver_id: orderData.driver_id,
+                    current_status: 'DIKIRIM',
+                    deleted_at: null,
+                },
+                select: {
+                    code: true,
+                    drivers: { select: { name: true } },
+                },
+            });
+            if (driverBusyOrder) {
+                throw new common_1.BadRequestException(`Supir ${driverBusyOrder.drivers?.name || 'tersebut'} sedang mengantar pesanan ${driverBusyOrder.code}. ` +
+                    `Pilih supir lain atau tunggu sampai pengiriman selesai.`);
+            }
+        }
         if (items && items.length > 0) {
             const PPN_RATE = 0.12;
             let subtotal = 0;

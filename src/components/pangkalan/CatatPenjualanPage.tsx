@@ -36,7 +36,6 @@ export default function CatatPenjualanPage() {
     const [consumerSearch, setConsumerSearch] = useState('')
     const [consumers, setConsumers] = useState<Consumer[]>([])
     const [showDropdown, setShowDropdown] = useState(false)
-    const [paymentStatus, setPaymentStatus] = useState<'LUNAS' | 'HUTANG'>('LUNAS')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -151,7 +150,7 @@ export default function CatatPenjualanPage() {
                 lpg_type: lpgType as any,
                 qty,
                 price_per_unit: currentPrice, // Use dynamic price from API
-                payment_status: paymentStatus,
+                // payment_status selalu LUNAS (fitur hutang tidak tersedia)
             })
             setShowSuccess(true)
             toast.success('Penjualan berhasil!')
@@ -376,33 +375,10 @@ export default function CatatPenjualanPage() {
                     {/* Right: Payment & Summary */}
                     <Card className="shadow-lg border-0 rounded-2xl">
                         <CardContent className="p-5 space-y-5">
-                            {/* Payment Status */}
-                            <div>
-                                <Label className="text-sm font-semibold text-slate-700 mb-3 block">Status Pembayaran</Label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentStatus('LUNAS')}
-                                        className={`p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${paymentStatus === 'LUNAS'
-                                            ? 'border-green-500 bg-green-50 shadow-md'
-                                            : 'border-slate-200 hover:border-slate-300'
-                                            }`}
-                                    >
-                                        <SafeIcon name="CheckCircle" className={`h-5 w-5 ${paymentStatus === 'LUNAS' ? 'text-green-600' : 'text-slate-400'}`} />
-                                        <span className={`font-semibold ${paymentStatus === 'LUNAS' ? 'text-green-700' : 'text-slate-600'}`}>Lunas</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentStatus('HUTANG')}
-                                        className={`p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${paymentStatus === 'HUTANG'
-                                            ? 'border-orange-500 bg-orange-50 shadow-md'
-                                            : 'border-slate-200 hover:border-slate-300'
-                                            }`}
-                                    >
-                                        <SafeIcon name="Clock" className={`h-5 w-5 ${paymentStatus === 'HUTANG' ? 'text-orange-600' : 'text-slate-400'}`} />
-                                        <span className={`font-semibold ${paymentStatus === 'HUTANG' ? 'text-orange-700' : 'text-slate-600'}`}>Hutang</span>
-                                    </button>
-                                </div>
+                            {/* Payment Status - Always LUNAS (no debt feature) */}
+                            <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 flex items-center justify-center gap-2">
+                                <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600" />
+                                <span className="font-semibold text-green-700">Pembayaran Lunas</span>
                             </div>
 
                             {/* Total */}

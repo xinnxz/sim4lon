@@ -407,25 +407,56 @@ export default function OrderDetailContent() {
             <DialogTitle>Pilih Driver</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 max-h-80 overflow-y-auto">
-            {drivers.map((driver) => (
-              <button
-                key={driver.id}
-                onClick={() => handleSelectDriver(driver.id)}
-                disabled={isUpdating}
-                className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left disabled:opacity-50"
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback>{driver.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{driver.name}</p>
-                  <p className="text-xs text-muted-foreground">{driver.phone || '-'}</p>
-                </div>
-                {selectedDriverId === driver.id && (
-                  <SafeIcon name="Check" className="h-5 w-5 text-primary" />
-                )}
-              </button>
-            ))}
+            {drivers.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                Tidak ada supir tersedia
+              </div>
+            ) : (
+              drivers.map((driver) => {
+                const isBusy = driver.is_busy || false;
+                return (
+                  <button
+                    key={driver.id}
+                    onClick={() => !isBusy && handleSelectDriver(driver.id)}
+                    disabled={isUpdating || isBusy}
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left
+                      ${isBusy
+                        ? 'opacity-60 cursor-not-allowed bg-muted/50 border-dashed'
+                        : 'hover:bg-accent disabled:opacity-50'
+                      }`}
+                    title={isBusy ? `Sedang mengantar ${driver.active_order?.code || 'pesanan'}` : 'Pilih supir ini'}
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className={isBusy ? 'bg-orange-100 text-orange-600' : ''}>
+                        {driver.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{driver.name}</p>
+                        {isBusy && (
+                          <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200">
+                            <SafeIcon name="Truck" className="h-3 w-3 mr-1" />
+                            Mengantar
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {isBusy
+                          ? `Sedang antar: ${driver.active_order?.code || 'pesanan'}`
+                          : driver.phone || 'Tersedia'}
+                      </p>
+                    </div>
+                    {selectedDriverId === driver.id && !isBusy && (
+                      <SafeIcon name="Check" className="h-5 w-5 text-primary" />
+                    )}
+                    {!isBusy && (
+                      <SafeIcon name="ChevronRight" className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                );
+              })
+            )}
           </div>
         </DialogContent>
       </Dialog>
