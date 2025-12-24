@@ -488,6 +488,12 @@ export default function CreateOrderForm() {
         toast.error(`Jumlah ${product?.name || item.lpgType} harus minimal 1`)
         return
       }
+
+      // VALIDASI HARGA: Cek harga tidak boleh 0
+      if (item.price <= 0) {
+        toast.error(`Harga ${product?.name || item.lpgType} tidak valid (Rp 0)`)
+        return
+      }
     }
 
     setIsSubmitting(true)

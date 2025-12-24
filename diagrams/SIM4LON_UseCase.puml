@@ -1,104 +1,95 @@
 @startuml SIM4LON_UseCase
 !theme plain
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
 skinparam backgroundColor #87CEEB
-skinparam usecaseFontSize 11
-skinparam actorFontSize 12
-skinparam packageFontSize 14
-skinparam ArrowColor #333333
-skinparam UseCaseBorderColor #1e3a5f
-skinparam UseCaseBackgroundColor #e3f2fd
-skinparam PackageBorderColor #1e3a5f
-skinparam PackageBackgroundColor #b0d4f1
-skinparam ActorBorderColor #1e3a5f
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #333333
+skinparam actorBackgroundColor #87CEEB
+skinparam actorBorderColor #333333
+skinparam packageBackgroundColor #87CEEB
+skinparam packageBorderColor #333333
 
-title **SISTEM SIM4LON - DISTRIBUSI GAS LPG**\nUse Case Diagram
+title SISTEM SIM4LON - DISTRIBUSI GAS LPG
 
 ' ==================== ACTORS ====================
+left to right direction
+
 actor "Admin" as Admin
-actor "Operator" as Operator
 actor "Pangkalan" as Pangkalan
+actor "Operator" as Operator
 
 ' ==================== SYSTEM BOUNDARY ====================
-rectangle "Sistem SIM4LON" {
+rectangle "SISTEM SIM4LON - DISTRIBUSI GAS LPG" {
     
-    ' ========== AUTHENTICATION ==========
-    usecase "Login" as UC_Login
-    usecase "Kelola Profil" as UC_Profil
+    ' === USE CASES SEMUA AKTOR ===
+    usecase "Login" as UC1
+    usecase "Kelola Profil" as UC2
     
-    ' ========== MASTER DATA ==========
-    usecase "Kelola Pengguna" as UC_Pengguna
-    usecase "Kelola Pangkalan" as UC_KelolaPangkalan
-    usecase "Kelola Supir" as UC_Supir
-    usecase "Kelola Produk LPG" as UC_ProdukLPG
+    ' === USE CASES ADMIN ONLY ===
+    usecase "Kelola Pengguna" as UC3
+    usecase "Kelola Supir" as UC4
+    usecase "Lihat Log Aktivitas" as UC5
+    usecase "Kelola Pangkalan" as UC6
+    usecase "Kelola Perencanaan" as UC7
     
-    ' ========== OPERASIONAL ==========
-    usecase "Kelola Dashboard" as UC_Dashboard
-    usecase "Kelola Pesanan" as UC_Pesanan
-    usecase "Update Status" as UC_UpdateStatus
-    usecase "Assign Driver" as UC_AssignDriver
-    usecase "Kelola Pembayaran" as UC_Pembayaran
-    usecase "Cetak Nota" as UC_CetakNota
+    ' === USE CASES ADMIN + OPERATOR ===
+    usecase "Kelola Dashboard" as UC8
+    usecase "Kelola Stok" as UC9
+    usecase "Kelola Laporan" as UC10
     
-    ' ========== STOK ==========
-    usecase "Kelola Stok" as UC_Stok
-    usecase "Catat Penerimaan" as UC_Penerimaan
-    usecase "Catat Penyaluran" as UC_Penyaluran
-    usecase "Kelola Perencanaan" as UC_Perencanaan
+    usecase "Kelola Pembayaran\n--\nextension points\nCetak Nota" as UC11
+    usecase "Cetak Nota" as UC12
     
-    ' ========== LAPORAN ==========
-    usecase "Kelola Laporan" as UC_Laporan
+    usecase "Update Status\n--\nextension points\nAssign Driver" as UC13
+    usecase "Assign Driver" as UC14
     
-    ' ========== MONITORING ==========
-    usecase "Lihat Log Aktivitas" as UC_Log
+    usecase "Kelola Pesanan" as UC15
     
-    ' ========== PANGKALAN ==========
-    usecase "Dashboard Pangkalan" as UC_DashPangkalan
-    usecase "Kelola Konsumen" as UC_Konsumen
-    usecase "Catat Penjualan" as UC_CatatPenjualan
-    usecase "Kelola Stok Pangkalan" as UC_StokPangkalan
-    usecase "Buat Order ke Agen" as UC_OrderAgen
+    ' === USE CASES PANGKALAN ONLY ===
+    usecase "Kelola Penjualan" as UC16
+    usecase "Kelola Konsumen" as UC17
+    usecase "Buat Order ke Agen" as UC18
 }
 
-' ==================== ADMIN ASSOCIATIONS ====================
-Admin --> UC_Login
-Admin --> UC_Profil
-Admin --> UC_Pengguna
-Admin --> UC_KelolaPangkalan
-Admin --> UC_Supir
-Admin --> UC_ProdukLPG
-Admin --> UC_Dashboard
-Admin --> UC_Pesanan
-Admin --> UC_Pembayaran
-Admin --> UC_Stok
-Admin --> UC_Perencanaan
-Admin --> UC_Laporan
-Admin --> UC_Log
+' ==================== RELATIONSHIPS - ADMIN ====================
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC13
+Admin --> UC15
 
-' ==================== OPERATOR ASSOCIATIONS ====================
-Operator --> UC_Login
-Operator --> UC_Profil
-Operator --> UC_Dashboard
-Operator --> UC_Pesanan
-Operator --> UC_Pembayaran
-Operator --> UC_Stok
+' ==================== RELATIONSHIPS - OPERATOR ====================
+Operator --> UC1
+Operator --> UC2
+Operator --> UC8
+Operator --> UC9
+Operator --> UC10
+Operator --> UC11
+Operator --> UC13
+Operator --> UC15
 
-' ==================== PANGKALAN ASSOCIATIONS ====================
-Pangkalan --> UC_Login
-Pangkalan --> UC_Profil
-Pangkalan --> UC_DashPangkalan
-Pangkalan --> UC_Konsumen
-Pangkalan --> UC_CatatPenjualan
-Pangkalan --> UC_StokPangkalan
-Pangkalan --> UC_OrderAgen
+Operator --> UC12
+Operator --> UC14
+
+' ==================== RELATIONSHIPS - PANGKALAN ====================
+Pangkalan --> UC1
+Pangkalan --> UC2
+Pangkalan --> UC16
+Pangkalan --> UC17
+Pangkalan --> UC18
 
 ' ==================== INCLUDE RELATIONSHIPS ====================
-UC_Stok ..> UC_Penerimaan : <<include>>
-UC_Stok ..> UC_Penyaluran : <<include>>
+UC13 ..> UC15 : <<Include>>
 
 ' ==================== EXTEND RELATIONSHIPS ====================
-UC_AssignDriver ..> UC_UpdateStatus : <<extend>>
-UC_CetakNota ..> UC_Pembayaran : <<extend>>
+UC12 ..> UC11 : <<Extend>>
+UC14 ..> UC13 : <<Extend>>
 
 @enduml

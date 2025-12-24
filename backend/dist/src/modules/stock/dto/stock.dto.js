@@ -40,8 +40,8 @@ __decorate([
 ], CreateStockMovementDto.prototype, "movement_type", void 0);
 __decorate([
     (0, class_transformer_1.Transform)(({ value }) => parseInt(value, 10)),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.IsInt)({ message: 'Jumlah harus berupa angka bulat' }),
+    (0, class_validator_1.Min)(1, { message: 'Jumlah minimal 1 unit' }),
     __metadata("design:type", Number)
 ], CreateStockMovementDto.prototype, "qty", void 0);
 __decorate([
