@@ -95,6 +95,29 @@ export class OrderService {
             throw new BadRequestException('Silakan tambahkan minimal satu item LPG');
         }
 
+        // VALIDASI DRIVER: Cek apakah driver sedang mengantar order lain
+        // Best practice: Driver hanya bisa menangani 1 pengiriman sekaligus
+        if (dto.driver_id) {
+            const driverBusyOrder = await this.prisma.orders.findFirst({
+                where: {
+                    driver_id: dto.driver_id,
+                    current_status: 'DIKIRIM',  // Currently on delivery
+                    deleted_at: null,
+                },
+                select: {
+                    code: true,
+                    drivers: { select: { name: true } },
+                },
+            });
+
+            if (driverBusyOrder) {
+                throw new BadRequestException(
+                    `Supir ${driverBusyOrder.drivers?.name || 'tersebut'} sedang mengantar pesanan ${driverBusyOrder.code}. ` +
+                    `Pilih supir lain atau tunggu sampai pengiriman selesai.`
+                );
+            }
+        }
+
         // VALIDASI ALOKASI BULANAN: Khusus LPG 3kg subsidi
         // Calculate total 3kg being ordered
         const total3kgOrdered = dto.items
@@ -378,6 +401,29 @@ export class OrderService {
 
         // Destructure items from dto, rest is basic fields
         const { items, ...orderData } = dto;
+
+        // VALIDASI DRIVER: Cek apakah driver baru sedang mengantar order lain
+        // Skip validasi jika driver_id tidak berubah atau tidak ada
+        if (orderData.driver_id && orderData.driver_id !== existingOrder.driver_id) {
+            const driverBusyOrder = await this.prisma.orders.findFirst({
+                where: {
+                    driver_id: orderData.driver_id,
+                    current_status: 'DIKIRIM',
+                    deleted_at: null,
+                },
+                select: {
+                    code: true,
+                    drivers: { select: { name: true } },
+                },
+            });
+
+            if (driverBusyOrder) {
+                throw new BadRequestException(
+                    `Supir ${driverBusyOrder.drivers?.name || 'tersebut'} sedang mengantar pesanan ${driverBusyOrder.code}. ` +
+                    `Pilih supir lain atau tunggu sampai pengiriman selesai.`
+                );
+            }
+        }
 
         // If items are provided, recalculate totals and update items
         if (items && items.length > 0) {

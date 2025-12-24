@@ -762,6 +762,13 @@ export interface Driver {
     note: string | null;
     created_at: string;
     updated_at: string;
+    // Status ketersediaan driver (dari backend)
+    is_busy?: boolean;  // true jika sedang mengantar pesanan
+    active_order?: {     // Order yang sedang diantar (jika ada)
+        id: string;
+        code: string;
+        current_status: string;
+    } | null;
 }
 
 export const driversApi = {

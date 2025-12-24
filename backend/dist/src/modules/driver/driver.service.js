@@ -33,14 +33,30 @@ let DriverService = class DriverService {
                     _count: {
                         select: { orders: true },
                     },
+                    orders: {
+                        where: {
+                            current_status: 'DIKIRIM',
+                            deleted_at: null,
+                        },
+                        select: {
+                            id: true,
+                            code: true,
+                            current_status: true,
+                        },
+                    },
                 },
             }),
             this.prisma.drivers.count({ where }),
             this.prisma.drivers.count({ where: { deleted_at: null, is_active: true } }),
             this.prisma.drivers.count({ where: { deleted_at: null, is_active: false } }),
         ]);
+        const driversWithStatus = drivers.map(driver => ({
+            ...driver,
+            is_busy: driver.orders.length > 0,
+            active_order: driver.orders[0] || null,
+        }));
         return {
-            data: drivers,
+            data: driversWithStatus,
             meta: {
                 total,
                 page,

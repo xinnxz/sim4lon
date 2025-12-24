@@ -14,7 +14,7 @@ export class DriverService {
             where.is_active = isActive;
         }
 
-        // Get data, filtered count, and stats counts in parallel
+        // dapatkan data, total, total aktif, total tidak aktif
         const [drivers, total, totalActive, totalInactive] = await Promise.all([
             this.prisma.drivers.findMany({
                 where,
@@ -25,6 +25,19 @@ export class DriverService {
                     _count: {
                         select: { orders: true },
                     },
+                    // aktif skrg untuk mengetahui driver sedang on delivery
+
+                    orders: {
+                        where: {
+                            current_status: 'DIKIRIM',  // driver sedang on delivery
+                            deleted_at: null,
+                        },
+                        select: {
+                            id: true,
+                            code: true,
+                            current_status: true,
+                        },
+                    },
                 },
             }),
             this.prisma.drivers.count({ where }),
@@ -34,8 +47,15 @@ export class DriverService {
             this.prisma.drivers.count({ where: { deleted_at: null, is_active: false } }),
         ]);
 
+        // Map drivers to include is_busy status
+        const driversWithStatus = drivers.map(driver => ({
+            ...driver,
+            is_busy: driver.orders.length > 0,  // Driver is busy if has active DIKIRIM orders
+            active_order: driver.orders[0] || null,  // Current order being delivered
+        }));
+
         return {
-            data: drivers,
+            data: driversWithStatus,
             meta: {
                 total,
                 page,
