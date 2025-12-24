@@ -267,7 +267,7 @@ export default function AdminSidebar() {
           <p className="text-[14px] text-center text-muted-foreground/40 mt-2 font-medium">
             SIM4LON v1.3
           </p>
-          <p className="text-[9px] text-center text-muted-foreground/40 font-normal">
+          <p className="text-[12px] text-center text-muted-foreground/40 font-normal">
             by Luthfi
           </p>
         </div>

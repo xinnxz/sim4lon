@@ -1,12 +1,13 @@
 # DOKUMENTASI TEKNIS SISTEM
-# SIM4LON - Sistem Informasi Manajemen LPG 4 Jalur Online
+# SIM4LON - Sistem Informasi Manajemen LPG
 
 ---
 
-**Document Version:** 1.0  
-**Date:** 23 Desember 2024  
-**Author:** System Analyst  
-**Status:** Final
+**Document Version:** 1.1  
+**Date:** 24 Desember 2025  
+**Author:** Luthfi Alfaridz (CEO ReonTech)  
+**Company:** ReonTech  
+**Status:** Final 
 
 ---
 
