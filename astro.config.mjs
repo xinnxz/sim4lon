@@ -110,15 +110,15 @@ export default defineConfig({
   build: {
     concurrency: 4,
     format: "file",
-    assets: "",
-    assetsPrefix: ".",
+    // Use default Astro assets folder - fixes 404 on nested routes like /pangkalan/*
+    assets: "_astro",
     rollupOptions: {
       maxParallelFileOps: 24,
       output: {
         manualChunks: undefined,
-        entryFileNames: "[name].[hash].js",
-        chunkFileNames: "[name].[hash].js",
-        assetFileNames: "[name].[hash].[ext]",
+        entryFileNames: "_astro/[name].[hash].js",
+        chunkFileNames: "_astro/[name].[hash].js",
+        assetFileNames: "_astro/[name].[hash].[ext]",
         generatedCode: {
           preset: "es2022",
         },
@@ -157,9 +157,9 @@ export default defineConfig({
       rollupOptions: {
         maxParallelFileOps: 24,
         output: {
-          entryFileNames: "[name].[hash].js",
-          chunkFileNames: "[name].[hash].js",
-          assetFileNames: "[name].[hash][extname]",
+          entryFileNames: "_astro/[name].[hash].js",
+          chunkFileNames: "_astro/[name].[hash].js",
+          assetFileNames: "_astro/[name].[hash][extname]",
         },
       },
     },
