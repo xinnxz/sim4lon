@@ -141,11 +141,13 @@ export class ConsumerOrderService {
                 this.logger.log(`[CREATE] Consumer verified: ${consumer.name}`);
             }
 
-            // Generate order code
-            const orderCount = await this.prisma.consumer_orders.count({
-                where: { pangkalan_id: pangkalanId },
-            });
-            const orderCode = `PORD-${String(orderCount + 1).padStart(4, '0')}`;
+            // Generate order code with timestamp for guaranteed uniqueness
+            // Format: PORD-YYMMDD-HHMM-XXX (date + time + random)
+            const now = new Date();
+            const datePart = now.toISOString().slice(2, 10).replace(/-/g, ''); // YYMMDD
+            const timePart = now.toISOString().slice(11, 16).replace(/:/g, ''); // HHMM
+            const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const orderCode = `PORD-${datePart}-${timePart}-${randomPart}`;
             this.logger.log(`[CREATE] Generated order code: ${orderCode}`);
 
             // Calculate total
