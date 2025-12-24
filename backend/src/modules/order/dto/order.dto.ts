@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsInt, IsNumber, Min, IsNotEmpty, Matches } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsInt, IsNumber, Min, IsNotEmpty, Matches, ArrayNotEmpty, ArrayMinSize } from 'class-validator';
 import { Type } from 'class-transformer';
 import { status_pesanan } from '@prisma/client';
 
@@ -30,8 +30,8 @@ export class OrderItemDto {
     @Min(0)
     price_per_unit: number;
 
-    @IsInt()
-    @Min(1)
+    @IsInt({ message: 'Jumlah harus berupa angka bulat' })
+    @Min(1, { message: 'Jumlah minimal 1 unit' })
     qty: number;
 
     @IsOptional()
@@ -52,7 +52,9 @@ export class CreateOrderDto {
     @IsString()
     note?: string;
 
-    @IsArray()
+    @IsArray({ message: 'Items harus berupa array' })
+    @ArrayNotEmpty({ message: 'Silakan tambahkan minimal satu item LPG' })
+    @ArrayMinSize(1, { message: 'Minimal 1 item LPG diperlukan' })
     @ValidateNested({ each: true })
     @Type(() => OrderItemDto)
     items: OrderItemDto[];

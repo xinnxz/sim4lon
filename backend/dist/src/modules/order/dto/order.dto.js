@@ -44,8 +44,8 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderItemDto.prototype, "price_per_unit", void 0);
 __decorate([
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.IsInt)({ message: 'Jumlah harus berupa angka bulat' }),
+    (0, class_validator_1.Min)(1, { message: 'Jumlah minimal 1 unit' }),
     __metadata("design:type", Number)
 ], OrderItemDto.prototype, "qty", void 0);
 __decorate([
@@ -76,7 +76,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "note", void 0);
 __decorate([
-    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsArray)({ message: 'Items harus berupa array' }),
+    (0, class_validator_1.ArrayNotEmpty)({ message: 'Silakan tambahkan minimal satu item LPG' }),
+    (0, class_validator_1.ArrayMinSize)(1, { message: 'Minimal 1 item LPG diperlukan' }),
     (0, class_validator_1.ValidateNested)({ each: true }),
     (0, class_transformer_1.Type)(() => OrderItemDto),
     __metadata("design:type", Array)

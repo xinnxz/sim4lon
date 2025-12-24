@@ -604,6 +604,23 @@
   }
 }
 
+/* ============================================
+   PANGKALAN PAGES - LARGER UI (10% ZOOM)
+   Untuk membuat tampilan pangkalan lebih besar
+   ============================================ */
+.pangkalan-scale {
+  zoom: 1.1;  /* 110% zoom - same as Chrome browser 110% */
+}
+
+/* Safari fallback using transform (Safari doesn't support zoom well) */
+@supports not (zoom: 1.1) {
+  .pangkalan-scale {
+    transform: scale(1.1);
+    transform-origin: top left;
+    width: 90.91%;  /* 100% / 1.1 to compensate for scale */
+  }
+}
+
 @layer components {
   /* Sidebar group label styling */
   [data-sidebar="group-label"] {
