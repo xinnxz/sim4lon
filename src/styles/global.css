@@ -12,7 +12,7 @@
   max-width: 100%;
 }
 .ReactCrop *,
-.ReactCrop *::before,
+.ReactCrop *::before, 
 .ReactCrop *::after {
   box-sizing: border-box;
 }
