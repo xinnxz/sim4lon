@@ -42,9 +42,6 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         if (!user || !user.is_active) {
             throw new common_1.UnauthorizedException('User tidak ditemukan atau tidak aktif');
         }
-        if (payload.session_id && user.session_id && payload.session_id !== user.session_id) {
-            throw new common_1.UnauthorizedException('Sesi tidak valid. Anda mungkin sudah login di perangkat lain.');
-        }
         return user;
     }
 };
