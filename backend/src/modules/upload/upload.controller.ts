@@ -31,10 +31,10 @@ function generateFilename(originalname: string): string {
     return `avatar-${timestamp}-${random}${ext}`;
 }
 
-// File filter to accept only images
+// File filter to accept only static images (no GIF/animated)
 const imageFileFilter = (req: any, file: any, callback: any) => {
-    if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
-        callback(new BadRequestException('Hanya file gambar yang diperbolehkan (JPEG, PNG, GIF, WebP)'), false);
+    if (!file.mimetype.match(/^image\/(jpeg|png|webp)$/)) {
+        callback(new BadRequestException('Gambar kudu wajib JPEG, PNG, WebP.'), false);
     } else {
         callback(null, true);
     }
@@ -77,6 +77,48 @@ export class UploadController {
 
         return {
             message: 'Avatar berhasil diupload',
+            filename: filename,
+            url: publicUrl,
+        };
+    }
+
+    /**
+     * Upload company logo to Supabase Storage (requires authentication)
+     * Same validation as avatar: no GIF allowed
+     */
+    @Post('logo')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            fileFilter: imageFileFilter,  // Same filter - no GIF
+            limits: {
+                fileSize: 2 * 1024 * 1024, // Max 2MB
+            },
+        }),
+    )
+    async uploadLogo(@UploadedFile() file: Express.Multer.File) {
+        if (!file) {
+            throw new BadRequestException('File tidak ditemukan');
+        }
+
+        // Generate logo filename with prefix
+        const timestamp = Date.now();
+        const random = Math.round(Math.random() * 1e9);
+        const ext = extname(file.originalname);
+        const filename = `logo-${timestamp}-${random}${ext}`;
+
+        // Upload to Supabase Storage
+        const publicUrl = await this.supabaseStorage.uploadFile(
+            file.buffer,
+            filename,
+            file.mimetype,
+        );
+
+        console.log('Company logo uploaded to Supabase:', filename);
+
+        return {
+            message: 'Logo berhasil diupload',
             filename: filename,
             url: publicUrl,
         };

@@ -101,10 +101,11 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
                 }
                 this.logger.log(`[CREATE] Consumer verified: ${consumer.name}`);
             }
-            const orderCount = await this.prisma.consumer_orders.count({
-                where: { pangkalan_id: pangkalanId },
-            });
-            const orderCode = `PORD-${String(orderCount + 1).padStart(4, '0')}`;
+            const now = new Date();
+            const datePart = now.toISOString().slice(2, 10).replace(/-/g, '');
+            const timePart = now.toISOString().slice(11, 16).replace(/:/g, '');
+            const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const orderCode = `PORD-${datePart}-${timePart}-${randomPart}`;
             this.logger.log(`[CREATE] Generated order code: ${orderCode}`);
             const totalAmount = dto.qty * dto.price_per_unit;
             this.logger.log(`[CREATE] Total amount: ${totalAmount}`);

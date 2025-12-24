@@ -7,4 +7,9 @@ export declare class UploadController {
         filename: string;
         url: string;
     }>;
+    uploadLogo(file: Express.Multer.File): Promise<{
+        message: string;
+        filename: string;
+        url: string;
+    }>;
 }

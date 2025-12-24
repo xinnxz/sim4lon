@@ -26,8 +26,8 @@ function generateFilename(originalname) {
     return `avatar-${timestamp}-${random}${ext}`;
 }
 const imageFileFilter = (req, file, callback) => {
-    if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
-        callback(new common_1.BadRequestException('Hanya file gambar yang diperbolehkan (JPEG, PNG, GIF, WebP)'), false);
+    if (!file.mimetype.match(/^image\/(jpeg|png|webp)$/)) {
+        callback(new common_1.BadRequestException('Gambar kudu wajib JPEG, PNG, WebP.'), false);
     }
     else {
         callback(null, true);
@@ -51,6 +51,22 @@ let UploadController = class UploadController {
             url: publicUrl,
         };
     }
+    async uploadLogo(file) {
+        if (!file) {
+            throw new common_1.BadRequestException('File tidak ditemukan');
+        }
+        const timestamp = Date.now();
+        const random = Math.round(Math.random() * 1e9);
+        const ext = (0, path_1.extname)(file.originalname);
+        const filename = `logo-${timestamp}-${random}${ext}`;
+        const publicUrl = await this.supabaseStorage.uploadFile(file.buffer, filename, file.mimetype);
+        console.log('Company logo uploaded to Supabase:', filename);
+        return {
+            message: 'Logo berhasil diupload',
+            filename: filename,
+            url: publicUrl,
+        };
+    }
 };
 exports.UploadController = UploadController;
 __decorate([
@@ -68,6 +84,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadController.prototype, "uploadAvatar", null);
+__decorate([
+    (0, common_1.Post)('logo'),
+    (0, common_1.UseGuards)(guards_1.JwtAuthGuard),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.memoryStorage)(),
+        fileFilter: imageFileFilter,
+        limits: {
+            fileSize: 2 * 1024 * 1024,
+        },
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UploadController.prototype, "uploadLogo", null);
 exports.UploadController = UploadController = __decorate([
     (0, common_1.Controller)('upload'),
     __metadata("design:paramtypes", [supabase_storage_service_1.SupabaseStorageService])
