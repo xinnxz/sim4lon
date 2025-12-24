@@ -24,7 +24,7 @@ __decorate([
 ], CreateAgenOrderDto.prototype, "lpg_type", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Min)(1, { message: 'Jumlah minimal 1 unit' }),
     __metadata("design:type", Number)
 ], CreateAgenOrderDto.prototype, "qty", void 0);
 __decorate([
@@ -40,7 +40,7 @@ exports.ReceiveAgenOrderDto = ReceiveAgenOrderDto;
 exports.ReceiveDto = ReceiveAgenOrderDto;
 __decorate([
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Min)(1, { message: 'Jumlah diterima minimal 1 unit' }),
     __metadata("design:type", Number)
 ], ReceiveAgenOrderDto.prototype, "qty_received", void 0);
 __decorate([

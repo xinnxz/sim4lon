@@ -37,7 +37,7 @@ export class CreateConsumerOrderDto {
     lpg_type: lpg_type;
 
     @IsNumber()
-    @Min(1)
+    @Min(1, { message: 'Jumlah minimal 1 unit' })
     @Type(() => Number)
     qty: number;
 
@@ -70,7 +70,7 @@ export class UpdateConsumerOrderDto {
 
     @IsOptional()
     @IsNumber()
-    @Min(1)
+    @Min(1, { message: 'Jumlah minimal 1 unit' })
     @Type(() => Number)
     qty?: number;
 

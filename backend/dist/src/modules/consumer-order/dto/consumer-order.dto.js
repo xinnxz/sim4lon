@@ -49,7 +49,7 @@ __decorate([
 ], CreateConsumerOrderDto.prototype, "lpg_type", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Min)(1, { message: 'Jumlah minimal 1 unit' }),
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], CreateConsumerOrderDto.prototype, "qty", void 0);
@@ -92,7 +92,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Min)(1, { message: 'Jumlah minimal 1 unit' }),
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateConsumerOrderDto.prototype, "qty", void 0);

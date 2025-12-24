@@ -18,8 +18,8 @@ export class CreateStockMovementDto {
     movement_type: string;
 
     @Transform(({ value }) => parseInt(value, 10))
-    @IsInt()
-    @Min(1)
+    @IsInt({ message: 'Jumlah harus berupa angka bulat' })
+    @Min(1, { message: 'Jumlah minimal 1 unit' })
     qty: number;
 
     @IsOptional()

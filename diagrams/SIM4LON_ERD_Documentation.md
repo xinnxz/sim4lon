@@ -38,7 +38,7 @@ Artinya: Satu pangkalan bisa memiliki **nol atau banyak** pesanan.
 
 ---
 
-## 3. DAFTAR ENTITAS (21 Tabel)
+## 3. DAFTAR ENTITAS (23 Tabel)
 
 ### Master Data (5 Entitas)
 

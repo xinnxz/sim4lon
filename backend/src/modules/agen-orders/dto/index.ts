@@ -8,7 +8,7 @@ export class CreateAgenOrderDto {
     lpg_type: string;
 
     @IsNumber()
-    @Min(1)
+    @Min(1, { message: 'Jumlah minimal 1 unit' })
     qty: number;
 
     @IsOptional()
@@ -21,7 +21,7 @@ export class CreateAgenOrderDto {
  */
 export class ReceiveAgenOrderDto {
     @IsNumber()
-    @Min(1)
+    @Min(1, { message: 'Jumlah diterima minimal 1 unit' })
     qty_received: number;
 
     @IsOptional()

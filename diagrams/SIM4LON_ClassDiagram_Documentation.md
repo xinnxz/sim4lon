@@ -26,6 +26,7 @@ Enum adalah tipe data dengan nilai terbatas yang sudah ditentukan.
 ---
 
 ## 3. DAFTAR CLASS (ENTITAS)
+ada total 22 Class:
 
 ### 3.1 User Management
 
