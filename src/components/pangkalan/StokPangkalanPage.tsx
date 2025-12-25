@@ -668,9 +668,19 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
         }
     }
 
-    const handleExportPDF = () => {
+    const handleExportPDF = async () => {
         try {
             toast.loading('Generating PDF...', { id: 'pdf-export' })
+
+            // Fetch movements if not already loaded
+            let movementsData = movements
+            if (movementsData.length === 0) {
+                try {
+                    movementsData = await pangkalanStockApi.getMovements({ limit: 100 })
+                } catch (e) {
+                    console.warn('Could not fetch movements for PDF:', e)
+                }
+            }
 
             const doc = new jsPDF({ orientation: 'portrait' })
             const pageWidth = doc.internal.pageSize.getWidth()
@@ -712,7 +722,12 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
             doc.setTextColor(30, 64, 175)
             doc.text(`Total Stok: ${totalStock} Tabung`, pageWidth - margin - 10, 52, { align: 'right' })
 
-            // Stock Table
+            // ========== STOCK TABLE ==========
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(11)
+            doc.setTextColor(30, 64, 175)
+            doc.text('STOK SAAT INI', margin, 68)
+
             const stockHeaders = ['NO', 'TIPE LPG', 'NAMA PRODUK', 'STOK', 'STATUS']
             const stockTableData: (string | number)[][] = []
             let no = 1
@@ -728,7 +743,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
             })
 
             autoTable(doc, {
-                startY: 65,
+                startY: 72,
                 head: [stockHeaders],
                 body: stockTableData,
                 theme: 'grid',
@@ -750,17 +765,109 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                 didParseCell: (data) => {
                     if (data.column.index === 4 && data.section === 'body') {
                         const val = String(data.cell.raw)
-                        if (val === 'Rendah') {
+                        if (val === 'KRITIS' || val === 'Rendah') {
                             data.cell.styles.textColor = [220, 38, 38]
                             data.cell.styles.fontStyle = 'bold'
-                        } else if (val === 'Aman') {
+                        } else if (val === 'AMAN' || val === 'Aman') {
                             data.cell.styles.textColor = [22, 163, 74]
                         }
                     }
                 }
             })
 
-            // Footer
+            // ========== RIWAYAT PERGERAKAN STOK ==========
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let finalY = (doc as any).lastAutoTable?.finalY || 120
+
+            if (movementsData.length > 0) {
+                // Check if need new page
+                if (finalY > 200) {
+                    doc.addPage()
+                    finalY = 20
+                } else {
+                    finalY += 15
+                }
+
+                doc.setFont('helvetica', 'bold')
+                doc.setFontSize(11)
+                doc.setTextColor(30, 64, 175)
+                doc.text('RIWAYAT PERGERAKAN STOK', margin, finalY)
+
+                const historyHeaders = ['NO', 'TANGGAL', 'TIPE', 'JENIS', 'QTY', 'CATATAN']
+                const historyTableData: (string | number)[][] = []
+                let histNo = 1
+
+                // Limit to last 50 movements to fit in PDF
+                const limitedMovements = movementsData.slice(0, 50)
+
+                limitedMovements.forEach(move => {
+                    const moveDate = new Date(move.created_at)
+                    const dateStr = moveDate.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    const moveType = move.movement_type === 'IN' ? 'MASUK' :
+                        move.movement_type === 'OUT' ? 'KELUAR' :
+                            move.movement_type
+
+                    historyTableData.push([
+                        histNo++,
+                        dateStr,
+                        move.lpg_type.toUpperCase(),
+                        moveType,
+                        move.qty,
+                        move.note || '-'
+                    ])
+                })
+
+                autoTable(doc, {
+                    startY: finalY + 4,
+                    head: [historyHeaders],
+                    body: historyTableData,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 3 },
+                    headStyles: {
+                        fillColor: [100, 116, 139], // Slate-500
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        halign: 'center'
+                    },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 12 },
+                        1: { cellWidth: 35 },
+                        2: { halign: 'center', cellWidth: 18 },
+                        3: { halign: 'center', cellWidth: 20 },
+                        4: { halign: 'center', cellWidth: 15 },
+                        5: { cellWidth: 55 }
+                    },
+                    alternateRowStyles: { fillColor: [248, 250, 252] },
+                    didParseCell: (data) => {
+                        if (data.column.index === 3 && data.section === 'body') {
+                            const val = String(data.cell.raw)
+                            if (val === 'MASUK') {
+                                data.cell.styles.textColor = [22, 163, 74] // Green
+                            } else if (val === 'KELUAR') {
+                                data.cell.styles.textColor = [220, 38, 38] // Red
+                            }
+                        }
+                    }
+                })
+
+                // Note if movements are limited
+                if (movementsData.length > 50) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const histFinalY = (doc as any).lastAutoTable?.finalY || 200
+                    doc.setFont('helvetica', 'italic')
+                    doc.setFontSize(8)
+                    doc.setTextColor(100)
+                    doc.text(`* Menampilkan 50 dari ${movementsData.length} riwayat terbaru`, margin, histFinalY + 5)
+                }
+            }
+
+            // Footer - page numbers
             const pageCount = doc.getNumberOfPages()
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i)

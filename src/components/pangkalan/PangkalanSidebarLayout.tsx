@@ -25,23 +25,45 @@ interface PangkalanSidebarLayoutProps {
 }
 
 export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLayoutProps) {
-    // Force blue accent color for pangkalan pages
+    // Force blue accent color for pangkalan pages AND ensure theme consistency
     useEffect(() => {
+        const root = document.documentElement;
+
         // Store original accent to restore later
-        const originalAccent = document.documentElement.getAttribute('data-accent')
+        const originalAccent = root.getAttribute('data-accent');
 
         // Force blue accent for pangkalan
-        document.documentElement.setAttribute('data-accent', 'blue')
+        root.setAttribute('data-accent', 'blue');
+
+        // THEME PERSISTENCE: Ensure theme is consistent on navigation
+        // This fixes the bug where DevTools or navigation causes theme to flip
+        const savedTheme = localStorage.getItem('theme');
+
+        // Remove both classes first to avoid conflicts
+        root.classList.remove('dark', 'light');
+
+        if (savedTheme === 'dark') {
+            root.classList.add('dark');
+        } else if (savedTheme === 'light') {
+            root.classList.add('light');
+        } else {
+            // System preference fallback
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                root.classList.add('dark');
+            } else {
+                root.classList.add('light');
+            }
+        }
 
         // Cleanup: restore original accent when leaving pangkalan pages
         return () => {
             if (originalAccent) {
-                document.documentElement.setAttribute('data-accent', originalAccent)
+                root.setAttribute('data-accent', originalAccent);
             } else {
-                document.documentElement.removeAttribute('data-accent')
+                root.removeAttribute('data-accent');
             }
-        }
-    }, [])
+        };
+    }, []);
 
     return (
         <SidebarProvider
