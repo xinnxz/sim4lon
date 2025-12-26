@@ -1,22 +1,23 @@
 
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import EditProfilAdminForm from '@/components/edit-profil-admin/EditProfilAdminForm.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Edit Profil Admin - SIM4LON">
-  <AdminHeader client:load />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main className="flex-1 flex flex-col">
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <EditProfilAdminForm client:load />
+  <ProtectedDashboard client:load>
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <EditProfilAdminForm client:load />
+          </div>
         </div>
-      </div>
-      <AdminFooter />
-    </main>
-  </AppSidebarLayout>
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>

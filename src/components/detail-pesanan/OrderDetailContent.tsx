@@ -1,4 +1,16 @@
-import { useState } from 'react'
+/**
+ * OrderDetailContent - Detail pesanan dengan API integration
+ * 
+ * PENJELASAN:
+ * Component ini menampilkan detail pesanan dengan UI original
+ * tetapi data diambil dari API backend:
+ * - Fetch order dari API berdasarkan ID URL
+ * - Map API response ke struktur UI original
+ * - Update status via API
+ * - Assign driver via API
+ */
+
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,196 +24,338 @@ import OrderTimelineStatus from './OrderTimelineStatus'
 import OrderActionsPanel from './OrderActionsPanel'
 import CustomerInfoCard from './CustomerInfoCard'
 import DeliveryInfoCard from './DeliveryInfoCard'
-import { MOCK_DRIVER_LIST, getDriverById } from '@/data/user'
+import { ordersApi, driversApi, type Order as ApiOrder, type Driver, type OrderStatus } from '@/lib/api'
+import { toast } from 'sonner'
 
-// Mock order data
-const mockOrder = {
-  id: 'ORD-2024-12345',
-  status: 'pending_payment',
-  statusLabel: 'Menunggu Pembayaran',
-  createdDate: '2024-01-15',
-  createdTime: '10:30',
-  dueDate: '2024-01-20',
-customer: {
-    name: 'Pangkalan Maju Jaya',
-    address: 'Jl. Raya Industri No. 45, Jakarta Timur',
-    email: 'pangkalan.majujaya@email.com',
-    contact: 'Budi Santoso',
-    contactPhone: '0812-3456789'
-  },
-  items: [
-    { id: 1, type: '3kg', quantity: 50, price: 25000, subtotal: 1250000 },
-    { id: 2, type: '12kg', quantity: 20, price: 75000, subtotal: 1500000 },
-  ],
-  subtotal: 2750000,
-  tax: 275000,
-  total: 3025000,
-  paymentMethod: null,
-  paidAmount: 0,
+// Status mapping dari backend ke UI
+const STATUS_MAP: Record<OrderStatus, { status: string; label: string }> = {
+  DRAFT: { status: 'created', label: 'Draft' },
+  MENUNGGU_PEMBAYARAN: { status: 'pending_payment', label: 'Menunggu Pembayaran' },
+  DIPROSES: { status: 'payment_confirmed', label: 'Pembayaran Diterima' },
+  SIAP_KIRIM: { status: 'ready_to_ship', label: 'Siap Dikirim' }, // Legacy
+  DIKIRIM: { status: 'in_delivery', label: 'Sedang Dikirim' },
+  SELESAI: { status: 'completed', label: 'Pesanan Selesai' },
+  BATAL: { status: 'cancelled', label: 'Dibatalkan' },
+}
+
+// Interface untuk UI order structure
+interface UIOrder {
+  id: string
+  apiId: string
+  status: string
+  statusLabel: string
+  createdDate: string
+  createdTime: string
+  customer: {
+    name: string
+    address: string
+    email: string
+    contact: string
+    contactPhone: string
+  }
+  items: { id: number; type: string; quantity: number; price: number; subtotal: number }[]
+  subtotal: number
+  tax: number
+  total: number
+  paymentMethod: string | null
+  paidAmount: number
   delivery: {
-    status: 'not_scheduled',
-    statusLabel: 'Belum Dijadwalkan',
-    driver: null,
-    driverPhone: null,
-    estimatedDate: null,
-    notes: 'Pengiriman akan dijadwalkan setelah pembayaran dikonfirmasi'
-  },
-timeline: [
-      { status: 'created', label: 'Pesanan Dibuat', date: '2024-01-15 10:30', completed: true },
-      { status: 'pending_payment', label: 'Menunggu Pembayaran', date: null, completed: false },
-      { status: 'payment_confirmed', label: 'Pembayaran Diterima', date: null, completed: false },
-      { status: 'driver_assigned', label: 'Driver Ditugaskan', date: null, completed: false },
-      { status: 'completed', label: 'Pesanan Selesai', date: null, completed: false },
+    status: string
+    statusLabel: string
+    driver: string | null
+    driverPhone: string | null
+    estimatedDate: string | null
+    notes: string
+  }
+  timeline: { status: string; label: string; date: string | null; completed: boolean }[]
+}
+
+// Helper: Map API order ke UI structure
+function mapApiToUI(apiOrder: ApiOrder): UIOrder {
+  const statusInfo = STATUS_MAP[apiOrder.current_status] || { status: 'unknown', label: 'Unknown' }
+  const createdAt = new Date(apiOrder.created_at)
+
+  return {
+    id: apiOrder.code || `ORD-${apiOrder.id.slice(0, 4).toUpperCase()}`,
+    apiId: apiOrder.id,
+    status: statusInfo.status,
+    statusLabel: statusInfo.label,
+    createdDate: createdAt.toLocaleDateString('id-ID'),
+    createdTime: createdAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+    customer: {
+      name: apiOrder.pangkalans?.name || 'Unknown',
+      address: apiOrder.pangkalans?.address || '-',
+      email: apiOrder.pangkalans?.email || '-',
+      contact: apiOrder.pangkalans?.pic_name || '-',
+      contactPhone: apiOrder.pangkalans?.phone || '-'
+    },
+    items: apiOrder.order_items.map((item, idx) => ({
+      id: idx + 1,
+      type: item.label || item.lpg_type,
+      quantity: item.qty,
+      price: item.price_per_unit,
+      subtotal: item.sub_total
+    })),
+    subtotal: (apiOrder as any).subtotal || apiOrder.total_amount,
+    tax: (apiOrder as any).tax_amount || 0,
+    total: apiOrder.total_amount,
+    paymentMethod: null,
+    paidAmount: 0,
+    delivery: {
+      status: apiOrder.drivers ? 'assigned' : 'not_scheduled',
+      statusLabel: apiOrder.drivers ? 'Sedang Dikirim' : 'Belum Dijadwalkan',
+      driver: apiOrder.drivers?.name || null,
+      driverPhone: apiOrder.drivers?.phone || null,
+      estimatedDate: null,
+      notes: apiOrder.note || 'Tidak ada catatan'
+    },
+    timeline: buildTimeline(apiOrder)
+  }
+}
+
+// Helper: Build timeline from API timeline_tracks
+function buildTimeline(apiOrder: ApiOrder) {
+  const baseTimeline = [
+    { status: 'created', label: 'Pesanan Dibuat', date: null as string | null, completed: false },
+    { status: 'pending_payment', label: 'Menunggu Pembayaran', date: null as string | null, completed: false },
+    { status: 'payment_confirmed', label: 'Pembayaran Diterima', date: null as string | null, completed: false },
+    { status: 'in_delivery', label: 'Sedang Dikirim', date: null as string | null, completed: false },
+    { status: 'completed', label: 'Pesanan Selesai', date: null as string | null, completed: false },
   ]
+
+  // Mark created as completed
+  baseTimeline[0].completed = true
+  baseTimeline[0].date = new Date(apiOrder.created_at).toLocaleString('id-ID')
+
+  // Update based on timeline_tracks from API
+  if (apiOrder.timeline_tracks) {
+    apiOrder.timeline_tracks.forEach(track => {
+      const mappedStatus = STATUS_MAP[track.status]?.status
+      const idx = baseTimeline.findIndex(t => t.status === mappedStatus)
+      if (idx !== -1) {
+        baseTimeline[idx].completed = true
+        baseTimeline[idx].date = new Date(track.created_at).toLocaleString('id-ID')
+      }
+    })
+  }
+
+  return baseTimeline
 }
 
 export default function OrderDetailContent() {
-  const [order, setOrder] = useState(mockOrder)
+  const [order, setOrder] = useState<UIOrder | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [drivers, setDrivers] = useState<Driver[]>([])
   const [isDriverModalOpen, setIsDriverModalOpen] = useState(false)
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null)
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
 
-  const handlePaymentClick = () => {
-    window.location.href = './catat-pembayaran.html'
+  // Get order ID from URL
+  const getOrderId = () => {
+    if (typeof window === 'undefined') return null
+    const params = new URLSearchParams(window.location.search)
+    return params.get('id')
   }
 
-  const handlePaymentConfirmed = () => {
-    // Update order status to payment confirmed
-    const updatedOrder = {
-      ...order,
-status: 'payment_confirmed',
-      statusLabel: 'Pembayaran Diterima',
-      delivery: {
-        ...order.delivery,
-        status: 'ready_to_ship',
-        statusLabel: 'Siap Dikirim',
-        notes: 'Stok dialokasikan dan pesanan menanti penjadwalan pengiriman.'
-      },
-      timeline: order.timeline.map((item) => {
-        if (item.status === 'payment_confirmed') {
-          return {
-            ...item,
-            date: new Date().toLocaleString('id-ID'),
-            completed: true
-          }
-        }
-        return item
+  // Fetch order and drivers on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      const orderId = getOrderId()
+      if (!orderId) {
+        toast.error('ID pesanan tidak ditemukan')
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const [apiOrder, driversRes] = await Promise.all([
+          ordersApi.getById(orderId),
+          driversApi.getAll(1, 100, undefined, true)
+        ])
+
+        setOrder(mapApiToUI(apiOrder))
+        setDrivers(driversRes.data)
+      } catch (error) {
+        console.error('Failed to fetch order:', error)
+        toast.error('Gagal memuat data pesanan')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  // API: Update status
+  const updateStatus = async (newStatus: OrderStatus, description: string) => {
+    if (!order) return
+
+    try {
+      setIsUpdating(true)
+      const updated = await ordersApi.updateStatus(order.apiId, { status: newStatus, description })
+      setOrder(mapApiToUI(updated))
+      toast.success(`Status diubah ke ${STATUS_MAP[newStatus].label}`)
+    } catch (error: any) {
+      console.error('Failed to update status:', error)
+      toast.error(error.message || 'Gagal mengubah status')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // API: Update status with payment method (for Konfirmasi Lunas/Cash)
+  const updateStatusWithPayment = async (newStatus: OrderStatus, description: string, paymentMethod: 'TUNAI' | 'TRANSFER') => {
+    if (!order) return
+
+    try {
+      setIsUpdating(true)
+      const updated = await ordersApi.updateStatus(order.apiId, {
+        status: newStatus,
+        description,
+        payment_method: paymentMethod  // Include payment method in request
       })
+      setOrder(mapApiToUI(updated))
+      toast.success(`Status diubah ke ${STATUS_MAP[newStatus].label}`)
+    } catch (error: any) {
+      console.error('Failed to update status:', error)
+      toast.error(error.message || 'Gagal mengubah status')
+    } finally {
+      setIsUpdating(false)
     }
-    setOrder(updatedOrder)
   }
 
-const handlePrintInvoice = () => {
-    if (typeof window !== 'undefined') {
-      setTimeout(() => {
-        window.print()
-      }, 100)
-    }
+  // Handlers
+  const handlePaymentClick = () => {
+    window.location.href = `/catat-pembayaran?id=${order?.apiId}`
+  }
+
+  const handlePaymentConfirmed = async () => {
+    // Konfirmasi Lunas (Cash) - set payment_method ke TUNAI di database
+    await updateStatusWithPayment('DIPROSES', 'Pembayaran dikonfirmasi (Cash)', 'TUNAI')
+  }
+
+  const handlePrintInvoice = () => {
+    if (!order) return
+    // Redirect to nota page - if paid, show nota; if not, show invoice
+    const isPaid = order.status === 'payment_confirmed' ||
+      order.status === 'DIPROSES' ||
+      order.status === 'SELESAI'
+    const docType = isPaid ? 'nota' : 'invoice'
+    window.location.href = `/nota-pembayaran?id=${order.apiId}&type=${docType}`
   }
 
   const handleSendWhatsApp = () => {
-    const message = `Halo, berikut adalah detail pesanan Anda:\n\nID Pesanan: ${order.id}\nTotal: Rp ${order.total.toLocaleString('id-ID')}\n\nTerima kasih telah memesan.`
-    const whatsappUrl = `https://wa.me/${order.customer.contactPhone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, '_blank')
+    if (!order) return
+    // Redirect to nota page for WhatsApp share
+    // If not paid, only allow invoice (not nota)
+    const isPaid = order.status === 'payment_confirmed' ||
+      order.status === 'DIPROSES' ||
+      order.status === 'SELESAI'
+    const docType = isPaid ? 'nota' : 'invoice'
+    window.location.href = `/nota-pembayaran?id=${order.apiId}&type=${docType}`
   }
 
-const handleSelectDriver = (driverId: string) => {
-     const driver = getDriverById(driverId)
-     if (driver) {
-       setSelectedDriverId(driverId)
-       // Update delivery info with selected driver
-       const updatedOrder = {
-         ...order,
-         status: 'driver_assigned',
-         statusLabel: 'Driver Ditugaskan',
-         delivery: {
-           ...order.delivery,
-           driver: driver.nama,
-           driverPhone: driver.telepon,
-           notes: 'Driver telah ditugaskan'
-         },
-         timeline: order.timeline.map((item) => {
-           if (item.status === 'driver_assigned') {
-             return {
-               ...item,
-               date: new Date().toLocaleString('id-ID'),
-               completed: true
-             }
-           }
-           return item
-         })
-       }
-       setOrder(updatedOrder)
-       setIsDriverModalOpen(false)
-     }
-   }
+  const handleSelectDriver = async (driverId: string) => {
+    if (!order) return
 
-const handleCompleteOrder = () => {
-     const updatedOrder = {
-       ...order,
-       status: 'completed',
-       statusLabel: 'Pesanan Selesai',
-       timeline: order.timeline.map((item) => {
-         if (item.status === 'completed') {
-           return {
-             ...item,
-             date: new Date().toLocaleString('id-ID'),
-             completed: true
-           }
-         }
-         return item
-       })
-     }
-     setOrder(updatedOrder)
-   }
+    try {
+      setIsUpdating(true)
+      // First, update driver assignment
+      await ordersApi.update(order.apiId, { driver_id: driverId })
 
-const handleEditOrder = () => {
-      window.location.href = `./buat-pesanan.html?id=${order.id}`
+      // Then, update status to DIKIRIM (driver assigned = being delivered)
+      const updated = await ordersApi.updateStatus(order.apiId, {
+        status: 'DIKIRIM',
+        note: 'Driver ditugaskan, pesanan sedang dikirim'
+      })
+
+      setOrder(mapApiToUI(updated))
+      setIsDriverModalOpen(false)
+      toast.success('Driver berhasil ditugaskan')
+    } catch (error: any) {
+      console.error('Failed to assign driver:', error)
+      toast.error(error.message || 'Gagal menugaskan driver')
+    } finally {
+      setIsUpdating(false)
     }
+  }
 
-const handleCancelOrder = () => {
-      setIsCancelModalOpen(true)
-    }
+  const handleCompleteOrder = async () => {
+    await updateStatus('SELESAI', 'Pesanan selesai')
+  }
 
-    const confirmCancelOrder = () => {
-      const updatedOrder = {
-        ...order,
-        status: 'cancelled',
-        statusLabel: 'Pesanan Dibatalkan',
-        timeline: order.timeline.map((item) => ({
-          ...item,
-          completed: false
-        }))
-      }
-      setOrder(updatedOrder)
-      setIsCancelModalOpen(false)
-      window.location.href = './daftar-pesanan.html'
+  const handleConfirmOrder = async () => {
+    await updateStatus('MENUNGGU_PEMBAYARAN', 'Pesanan dikonfirmasi, menunggu pembayaran')
+  }
+
+  const handleEditOrder = () => {
+    if (order) {
+      window.location.href = `/buat-pesanan?id=${order.apiId}`
     }
+  }
+
+  const handleCancelOrder = () => {
+    setIsCancelModalOpen(true)
+  }
+
+  const confirmCancelOrder = async () => {
+    await updateStatus('BATAL', 'Pesanan dibatalkan')
+    setIsCancelModalOpen(false)
+    window.location.href = '/daftar-pesanan'
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Memuat detail pesanan...</span>
+      </div>
+    )
+  }
+
+  // Error state
+  if (!order) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
+        <SafeIcon name="AlertCircle" className="h-16 w-16 text-destructive" />
+        <h2 className="text-xl font-semibold">Pesanan Tidak Ditemukan</h2>
+        <Button onClick={() => window.location.href = '/daftar-pesanan'}>
+          <SafeIcon name="ArrowLeft" className="mr-2 h-4 w-4" />
+          Kembali ke Daftar
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header with Back Button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-<Button 
-             variant="ghost" 
-             size="icon"
-             onClick={() => window.location.href = './daftar-pesanan.html'}
-           >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.location.href = '/daftar-pesanan'}
+          >
             <SafeIcon name="ArrowLeft" className="h-5 w-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Detail Pesanan</h1>
-            <p className="text-muted-foreground">ID: {order.id}</p>
+            <p className="text-muted-foreground font-mono">ID: {order.id}</p>
           </div>
         </div>
-<Badge 
-          className={`text-base px-4 py-2 ${
-            order.status === 'pending_payment' ? 'bg-yellow-100 text-yellow-800' :
-            order.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800' :
-            order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-            'bg-gray-100 text-gray-800'
-          }`}
+        <Badge
+          variant="status"
+          className={`text-base px-4 py-2 ${order.status === 'pending_payment' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' :
+            order.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' :
+              order.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300' :
+                order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
+                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300' :
+                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+            }`}
         >
           {order.statusLabel}
         </Badge>
@@ -213,7 +367,7 @@ const handleCancelOrder = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Order Details */}
         <div className="lg:col-span-2 space-y-6">
-{/* Order Summary */}
+          {/* Order Summary */}
           <OrderSummaryCard order={order} />
 
           {/* Timeline Status */}
@@ -228,89 +382,126 @@ const handleCancelOrder = () => {
           {/* Delivery Info */}
           <DeliveryInfoCard delivery={order.delivery} />
 
-{/* Actions Panel */}
-           <OrderActionsPanel 
-             orderStatus={order.status}
-             onPaymentClick={handlePaymentClick}
-             onPaymentConfirmed={handlePaymentConfirmed}
-             onPrintInvoice={handlePrintInvoice}
-             onSendWhatsApp={handleSendWhatsApp}
-             onDriverAssignClick={() => setIsDriverModalOpen(true)}
-             onCompleteOrder={handleCompleteOrder}
-             onEditOrder={handleEditOrder}
-             onCancelOrder={handleCancelOrder}
-             isPaymentConfirmed={order.status === 'payment_confirmed'}
-             isDriverAssigned={order.delivery.driver !== null}
-           />
+          {/* Actions Panel */}
+          <OrderActionsPanel
+            orderStatus={order.status}
+            onPaymentClick={handlePaymentClick}
+            onPaymentConfirmed={handlePaymentConfirmed}
+            onPrintInvoice={handlePrintInvoice}
+            onSendWhatsApp={handleSendWhatsApp}
+            onDriverAssignClick={() => setIsDriverModalOpen(true)}
+            onCompleteOrder={handleCompleteOrder}
+            onEditOrder={handleEditOrder}
+            onCancelOrder={handleCancelOrder}
+            onConfirmOrder={handleConfirmOrder}
+            isPaymentConfirmed={order.status === 'payment_confirmed'}
+            isDriverAssigned={order.delivery.driver !== null}
+          />
         </div>
       </div>
 
-{/* Driver Assignment Modal */}
-       <Dialog open={isDriverModalOpen} onOpenChange={setIsDriverModalOpen}>
-         <DialogContent className="max-w-md">
-           <DialogHeader>
-             <DialogTitle>Pilih Driver</DialogTitle>
-           </DialogHeader>
-           <div className="space-y-2 max-h-80 overflow-y-auto">
-             {MOCK_DRIVER_LIST.map((driver) => (
-               <button
-                 key={driver.userId}
-                 onClick={() => handleSelectDriver(driver.userId)}
-                 className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left"
-               >
-                 <Avatar className="h-10 w-10">
-                   <AvatarImage src={driver.avatarUrl} alt={driver.nama} />
-                   <AvatarFallback>{driver.nama.charAt(0)}</AvatarFallback>
-                 </Avatar>
-                 <div className="flex-1">
-                   <p className="font-medium text-sm">{driver.nama}</p>
-                   <p className="text-xs text-muted-foreground">{driver.telepon}</p>
-                 </div>
-                 {selectedDriverId === driver.userId && (
-                   <SafeIcon name="Check" className="h-5 w-5 text-primary" />
-                 )}
-               </button>
-             ))}
-           </div>
-         </DialogContent>
-       </Dialog>
+      {/* Driver Assignment Modal - Now with API drivers */}
+      <Dialog open={isDriverModalOpen} onOpenChange={setIsDriverModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pilih Driver</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {drivers.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                Tidak ada supir tersedia
+              </div>
+            ) : (
+              drivers.map((driver) => {
+                const isBusy = driver.is_busy || false;
+                return (
+                  <button
+                    key={driver.id}
+                    onClick={() => !isBusy && handleSelectDriver(driver.id)}
+                    disabled={isUpdating || isBusy}
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left
+                      ${isBusy
+                        ? 'opacity-60 cursor-not-allowed bg-muted/50 border-dashed'
+                        : 'hover:bg-accent disabled:opacity-50'
+                      }`}
+                    title={isBusy ? `Sedang mengantar ${driver.active_order?.code || 'pesanan'}` : 'Pilih supir ini'}
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className={isBusy ? 'bg-orange-100 text-orange-600' : ''}>
+                        {driver.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{driver.name}</p>
+                        {isBusy && (
+                          <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200">
+                            <SafeIcon name="Truck" className="h-3 w-3 mr-1" />
+                            Mengantar
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {isBusy
+                          ? `Sedang antar: ${driver.active_order?.code || 'pesanan'}`
+                          : driver.phone || 'Tersedia'}
+                      </p>
+                    </div>
+                    {selectedDriverId === driver.id && !isBusy && (
+                      <SafeIcon name="Check" className="h-5 w-5 text-primary" />
+                    )}
+                    {!isBusy && (
+                      <SafeIcon name="ChevronRight" className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-       {/* Cancel Order Confirmation Modal */}
-       <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
-         <DialogContent className="max-w-md">
-           <DialogHeader>
-             <DialogTitle className="flex items-center gap-2">
-               <SafeIcon name="AlertCircle" className="h-5 w-5 text-destructive" />
-               Batalkan Pesanan
-             </DialogTitle>
-           </DialogHeader>
-           <div className="space-y-4">
-             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-               <p className="text-sm font-medium text-destructive mb-2">Tindakan ini tidak dapat dibatalkan</p>
-               <p className="text-sm text-muted-foreground">
-                 Apakah Anda yakin ingin membatalkan pesanan <span className="font-semibold">{order.id}</span>? Pesanan akan ditandai sebagai dibatalkan dan tidak dapat diproses lebih lanjut.
-               </p>
-             </div>
-             <div className="flex gap-3 pt-4">
-               <Button
-                 onClick={() => setIsCancelModalOpen(false)}
-                 variant="outline"
-                 className="flex-1"
-               >
-                 Batal
-               </Button>
-               <Button
-                 onClick={confirmCancelOrder}
-                 variant="destructive"
-                 className="flex-1"
-               >
-                 <SafeIcon name="Trash2" className="mr-2 h-4 w-4" />
-                 Batalkan Pesanan
-               </Button>
-             </div>
-           </div>
-         </DialogContent>
-       </Dialog>
-     </div>
-   )
- }
+      {/* Cancel Order Confirmation Modal */}
+      <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <SafeIcon name="AlertCircle" className="h-5 w-5 text-destructive" />
+              Batalkan Pesanan
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <p className="text-sm font-medium text-destructive mb-2">Tindakan ini tidak dapat dibatalkan</p>
+              <p className="text-sm text-muted-foreground">
+                Apakah Anda yakin ingin membatalkan pesanan <span className="font-semibold">{order.id}</span>? Pesanan akan ditandai sebagai dibatalkan dan tidak dapat diproses lebih lanjut.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={() => setIsCancelModalOpen(false)}
+                variant="outline"
+                className="flex-1"
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={confirmCancelOrder}
+                variant="destructive"
+                className="flex-1"
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <SafeIcon name="Trash2" className="mr-2 h-4 w-4" />
+                )}
+                Batalkan Pesanan
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

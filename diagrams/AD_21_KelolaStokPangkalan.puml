@@ -1,0 +1,50 @@
+@startuml AD_21_KelolaStokPangkalan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-21: Kelola Stok Pangkalan**\nSistem SIM4LON
+
+|Pangkalan|
+start
+:Buka halaman Stok;
+
+|Sistem|
+:Load pangkalan_stocks\nuntuk pangkalan ini;
+:Load pangkalan_stock_movements\nterbaru;
+:Hitung status stok\n(normal/warning/critical);
+:Tampilkan dashboard stok;
+
+|Pangkalan|
+:Lihat stok per jenis LPG;
+:Lihat riwayat pergerakan;
+
+if (Perlu penyesuaian manual?) then (ya)
+    :Klik "Sesuaikan Stok";
+    
+    |Sistem|
+    :Tampilkan form penyesuaian;
+    
+    |Pangkalan|
+    :Pilih jenis LPG;
+    :Masukkan qty baru;
+    :Isi alasan penyesuaian;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Hitung selisih;
+    :Update pangkalan_stocks;
+    :Buat stock_movement\n(ADJUSTMENT);
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+    stop
+else (tidak)
+    :Selesai melihat;
+    stop
+endif
+
+@enduml

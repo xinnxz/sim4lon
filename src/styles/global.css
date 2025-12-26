@@ -3,6 +3,89 @@
 @tailwind components;
 @tailwind utilities;
 
+/* react-image-crop CSS */
+.ReactCrop {
+  position: relative;
+  display: inline-block;
+  cursor: crosshair;
+  overflow: hidden;
+  max-width: 100%;
+}
+.ReactCrop *,
+.ReactCrop *::before, 
+.ReactCrop *::after {
+  box-sizing: border-box;
+}
+.ReactCrop--disabled, .ReactCrop--locked {
+  cursor: inherit;
+}
+.ReactCrop__child-wrapper {
+  max-height: inherit;
+}
+.ReactCrop__child-wrapper > img,
+.ReactCrop__child-wrapper > video {
+  display: block;
+  max-width: 100%;
+  max-height: inherit;
+}
+.ReactCrop__crop-selection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate3d(0, 0, 0);
+  cursor: move;
+  box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+  touch-action: none;
+  border: 1px dashed #fff;
+}
+.ReactCrop--disabled .ReactCrop__crop-selection {
+  cursor: inherit;
+}
+.ReactCrop--circular-crop .ReactCrop__crop-selection {
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+}
+.ReactCrop--invisible-crop .ReactCrop__crop-selection {
+  display: none;
+}
+.ReactCrop__drag-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  outline: 1px solid transparent;
+}
+.ReactCrop__drag-handle::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: -10px;
+}
+.ReactCrop .ord-nw { top: 0; left: 0; margin-top: -5px; margin-left: -5px; cursor: nw-resize; }
+.ReactCrop .ord-n { top: 0; left: 50%; margin-top: -5px; margin-left: -5px; cursor: n-resize; }
+.ReactCrop .ord-ne { top: 0; right: 0; margin-top: -5px; margin-right: -5px; cursor: ne-resize; }
+.ReactCrop .ord-e { top: 50%; right: 0; margin-top: -5px; margin-right: -5px; cursor: e-resize; }
+.ReactCrop .ord-se { bottom: 0; right: 0; margin-bottom: -5px; margin-right: -5px; cursor: se-resize; }
+.ReactCrop .ord-s { bottom: 0; left: 50%; margin-bottom: -5px; margin-left: -5px; cursor: s-resize; }
+.ReactCrop .ord-sw { bottom: 0; left: 0; margin-bottom: -5px; margin-left: -5px; cursor: sw-resize; }
+.ReactCrop .ord-w { top: 50%; left: 0; margin-top: -5px; margin-left: -5px; cursor: w-resize; }
+.ReactCrop__drag-bar.ord-n { top: 0; left: 0; width: 100%; height: 6px; margin-top: -3px; }
+.ReactCrop__drag-bar.ord-e { right: 0; top: 0; width: 6px; height: 100%; margin-right: -3px; }
+.ReactCrop__drag-bar.ord-s { bottom: 0; left: 0; width: 100%; height: 6px; margin-bottom: -3px; }
+.ReactCrop__drag-bar.ord-w { top: 0; left: 0; width: 6px; height: 100%; margin-left: -3px; }
+.ReactCrop--new-crop .ReactCrop__drag-bar,
+.ReactCrop--new-crop .ReactCrop__drag-handle,
+.ReactCrop--fixed-aspect .ReactCrop__drag-bar {
+  display: none;
+}
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-n,
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-e,
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-s,
+.ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-w {
+  display: none;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -43,18 +126,498 @@
      --shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.08);
      --shadow-xl: 0 8px 20px -4px rgb(0 0 0 / 0.15);
    }
+
+  /* ============================================
+     ACCENT COLOR THEMES
+     Gunakan data-accent attribute di html element
+     ============================================ */
+  
+  /* Hijau (Default - Pertamina Green) */
+  :root[data-accent="green"], :root {
+    --primary: 152 100% 30%;
+    --ring: 152 100% 30%;
+    --sidebar-primary: 152 100% 30%;
+    --sidebar-ring: 152 100% 30%;
+    --chart-1: 152 100% 30%;
+  }
+
+  /* Biru (Corporate Blue) */
+  :root[data-accent="blue"] {
+    --primary: 217 91% 50%;
+    --ring: 217 91% 50%;
+    --sidebar-primary: 217 91% 50%;
+    --sidebar-ring: 217 91% 50%;
+    --chart-1: 217 91% 50%;
+  }
+
+  /* Merah (Professional Red) */
+  :root[data-accent="red"] {
+    --primary: 0 72% 51%;
+    --ring: 0 72% 51%;
+    --sidebar-primary: 0 72% 51%;
+    --sidebar-ring: 0 72% 51%;
+    --chart-1: 0 72% 51%;
+  }
+
+  /* ============================================
+     DARK MODE THEME
+     Diaktifkan dengan menambahkan class .dark pada html element
+     ============================================ */
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 152 100% 40%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 48 100% 50%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 152 100% 40%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 152 100% 40%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 22%;
+    --sidebar-ring: 152 100% 40%;
+    --chart-2: 48 100% 50%;
+    --chart-3: 215 20% 50%;
+    --chart-4: 152 60% 45%;
+    --chart-5: 48 80% 45%;
+  }
+
+  /* Dark mode accent colors */
+  .dark[data-accent="green"] {
+    --primary: 152 100% 40%;
+    --ring: 152 100% 40%;
+    --sidebar-primary: 152 100% 40%;
+    --sidebar-ring: 152 100% 40%;
+    --chart-1: 152 100% 40%;
+  }
+
+  .dark[data-accent="blue"] {
+    --primary: 217 91% 60%;
+    --ring: 217 91% 60%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-ring: 217 91% 60%;
+    --chart-1: 217 91% 60%;
+  }
+
+  .dark[data-accent="red"] {
+    --primary: 0 72% 55%;
+    --ring: 0 72% 55%;
+    --sidebar-primary: 0 72% 55%;
+    --sidebar-ring: 0 72% 55%;
+    --chart-1: 0 72% 55%;
+  }
+
+  /* ============================================
+     DARK MODE OVERRIDES
+     Override hardcoded Tailwind colors in dark mode
+     ============================================ */
+  
+  /* Override bg-white in dark mode */
+  .dark .bg-white {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  /* Override bg-gray-50 in dark mode */
+  .dark .bg-gray-50,
+  .dark .bg-slate-50 {
+    background-color: hsl(var(--muted)) !important;
+  }
+  
+  /* Override bg-gray-100 in dark mode */
+  .dark .bg-gray-100,
+  .dark .bg-slate-100 {
+    background-color: hsl(217 33% 20%) !important;
+  }
+  
+  /* Override border colors in dark mode */
+  .dark .border-gray-100,
+  .dark .border-gray-200,
+  .dark .border-slate-100,
+  .dark .border-slate-200 {
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  /* Override text colors that become invisible in dark mode */
+  .dark .text-gray-900,
+  .dark .text-slate-900 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-800,
+  .dark .text-slate-800 {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .text-gray-700,
+  .dark .text-slate-700 {
+    color: hsl(215 20% 75%) !important;
+  }
+  
+  .dark .text-gray-600,
+  .dark .text-slate-600 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+  
+  /* Override specific card shadows for dark mode */
+  .dark .shadow-lg {
+    --tw-shadow-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Override hover states */
+  .dark .hover\:bg-gray-50:hover,
+  .dark .hover\:bg-slate-50:hover {
+    background-color: hsl(217 33% 20%) !important;
+  }
+  
+  .dark .hover\:bg-gray-100:hover,
+  .dark .hover\:bg-slate-100:hover {
+    background-color: hsl(217 33% 22%) !important;
+  }
+
+  /* Override info/blue backgrounds */
+  .dark .bg-blue-50 {
+    background-color: hsl(217 91% 15%) !important;
+  }
+  .dark .bg-blue-100 {
+    background-color: hsl(217 91% 20%) !important;
+  }
+  .dark .border-blue-200 {
+    border-color: hsl(217 91% 30%) !important;
+  }
+  .dark .text-blue-600,
+  .dark .text-blue-700 {
+    color: hsl(217 91% 70%) !important;
+  }
+  
+  /* Override green backgrounds for status */
+  .dark .bg-green-50 {
+    background-color: hsl(152 100% 12%) !important;
+  }
+  .dark .bg-green-100 {
+    background-color: hsl(152 100% 18%) !important;
+  }
+  
+  /* Override yellow/warning backgrounds */
+  .dark .bg-yellow-50,
+  .dark .bg-amber-50 {
+    background-color: hsl(45 100% 12%) !important;
+  }
+  .dark .bg-yellow-100,
+  .dark .bg-amber-100 {
+    background-color: hsl(45 100% 18%) !important;
+  }
+  
+  /* Override orange backgrounds */
+  .dark .bg-orange-50 {
+    background-color: hsl(25 100% 12%) !important;
+  }
+  .dark .bg-orange-100 {
+    background-color: hsl(25 100% 18%) !important;
+  }
+  
+  /* Override purple backgrounds */
+  .dark .bg-purple-50 {
+    background-color: hsl(270 100% 12%) !important;
+  }
+  .dark .bg-purple-100 {
+    background-color: hsl(270 100% 18%) !important;
+  }
+  
+  /* Override red backgrounds */
+  .dark .bg-red-50 {
+    background-color: hsl(0 100% 12%) !important;
+  }
+  .dark .bg-red-100 {
+    background-color: hsl(0 100% 18%) !important;
+  }
+
+  /* Override gradient for LPG subtle */
+  .dark .gradient-lpg-subtle {
+    background: hsl(var(--card)) !important;
+  }
+  
+  /* ============================================
+     DARK MODE - FLAT SOLID DESIGN
+     Professional dark mode uses solid colors, not gradients
+     ============================================ */
+  
+  /* Dashboard background - subtle primary hint for dark mode */
+  .dark .dashboard-gradient-bg {
+    background: 
+      radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.02) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(var(--primary) / 0.015) 0%, transparent 50%),
+      hsl(var(--background)) !important;
+  }
+  
+  /* Mesh gradient for dark mode - subtle primary hint */
+  .dark .mesh-gradient-bg {
+    background: 
+      radial-gradient(at 40% 20%, hsl(var(--primary) / 0.03) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(var(--primary) / 0.02) 0px, transparent 40%),
+      hsl(var(--background)) !important;
+  }
+  
+  /* Card premium styling for dark mode - FLAT SOLID COLOR */
+  .dark .card-premium {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: 
+      0 4px 12px -2px rgba(0, 0, 0, 0.25),
+      0 0 0 0 transparent !important;
+  }
+  
+  .dark .card-premium:hover {
+    border-color: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 
+      0 8px 24px -4px rgba(0, 0, 0, 0.4),
+      0 0 0 0 transparent !important;
+  }
+  
+  /* Chart card premium for dark mode - FLAT SOLID */
+  .dark .chart-card-premium {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: 
+      0 2px 8px -2px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  .dark .chart-card-premium:hover {
+    border-color: hsl(var(--primary) / 0.2) !important;
+    box-shadow: 
+      0 8px 20px -4px rgba(0, 0, 0, 0.35) !important;
+  }
+  
+  /* ========== DARK MODE ENHANCED CARDS ========== */
+  
+  /* Glass card for dark mode - Premium solid look */
+  .dark .glass-card {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border) / 0.4) !important;
+    border-top-color: hsl(var(--border) / 0.6) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 
+      0 4px 16px -4px rgba(0, 0, 0, 0.4),
+      0 2px 4px -2px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 hsl(var(--border) / 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  /* Subtle hover effect with primary color glow */
+  .dark .glass-card:hover {
+    border-color: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 
+      0 8px 24px -6px rgba(0, 0, 0, 0.5),
+      0 4px 8px -4px rgba(0, 0, 0, 0.3),
+      0 0 0 1px hsl(var(--primary) / 0.1),
+      inset 0 1px 0 hsl(var(--border) / 0.2) !important;
+  }
+  
+  /* Remove gradient overlay in dark mode */
+  .dark .glass-card::before {
+    display: none !important;
+  }
+  
+  /* Override shimmer effect background colors */
+  .dark .shimmer-effect::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    ) !important;
+  }
+  
+  /* Particles for dark mode */
+  .dark .particle {
+    background: hsl(var(--primary) / 0.3) !important;
+    box-shadow: 
+      0 0 20px hsl(var(--primary) / 0.2),
+      0 0 40px hsl(var(--primary) / 0.1) !important;
+  }
+  
+  /* Card gradient - SOLID in dark mode */
+  .dark .card-gradient {
+    background: hsl(var(--card)) !important;
+  }
+  
+  /* Card interactive - NO gradient overlay in dark mode */
+  .dark .card-interactive::before {
+    display: none !important;
+  }
+  
+  /* Override any remaining Tailwind gradients in dark mode */
+  .dark .from-card,
+  .dark .via-card,
+  .dark .to-card\/70,
+  .dark .to-card\/80 {
+    --tw-gradient-from: hsl(var(--card)) !important;
+    --tw-gradient-to: hsl(var(--card)) !important;
+    --tw-gradient-via: hsl(var(--card)) !important;
+  }
+  
+  /* Dark mode input focus - themed ring */
+  .dark input:focus,
+  .dark select:focus,
+  .dark textarea:focus {
+    border-color: hsl(var(--primary) / 0.5) !important;
+    box-shadow: 
+      0 0 0 2px hsl(var(--primary) / 0.15),
+      0 2px 8px -2px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Dark mode table rows - subtle hover */
+  .dark tbody tr:hover {
+    background: hsl(var(--muted) / 0.5) !important;
+  }
+  
+  /* Dark mode badge/pill glow on primary variants */
+  .dark .bg-primary {
+    box-shadow: 0 2px 8px -2px hsl(var(--primary) / 0.4) !important;
+  }
+  
+  /* Dark mode button hover enhancement */
+  .dark button:hover:not(:disabled) {
+    transition: all 0.2s ease !important;
+  }
+  
+  /* Premium card wrapper for charts in dark mode */
+  .dark [class*="chart-card"] {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border) / 0.3) !important;
+    box-shadow: 
+      0 4px 20px -6px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 hsl(var(--border) / 0.1) !important;
+  }
 }
 
 @layer base {
+  /* Global scaling - makes entire UI proportionally smaller */
+  html {
+    font-size: 14px; /* Default is 16px, this makes everything ~87.5% smaller */
+  }
+  
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
+  }
+  
+  /* ========== SLIM SCROLLBAR STYLING ========== */
+  
+  /* Scrollbar container - thin by default, visible on hover */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+  }
+  
+  .scrollbar-thin:hover {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+  
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Table container specific - extra slim */
+  .overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  
+  .overflow-x-auto:hover {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+  
+  .overflow-x-auto:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+  }
+  
+  .overflow-x-auto:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
+  
+  /* Dark mode scrollbar adjustments */
+  .dark .scrollbar-thin:hover::-webkit-scrollbar-thumb,
+  .dark .overflow-x-auto:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+  }
+  
+  .dark .scrollbar-thin:hover::-webkit-scrollbar-thumb:hover,
+  .dark .overflow-x-auto:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
+}
+
+/* ============================================
+   PANGKALAN PAGES - LARGER UI (10% ZOOM)
+   Untuk membuat tampilan pangkalan lebih besar
+   ============================================ */
+.pangkalan-scale {
+  zoom: 1.1;  /* 110% zoom - same as Chrome browser 110% */
+}
+
+/* Safari fallback using transform (Safari doesn't support zoom well) */
+@supports not (zoom: 1.1) {
+  .pangkalan-scale {
+    transform: scale(1.1);
+    transform-origin: top left;
+    width: 90.91%;  /* 100% / 1.1 to compensate for scale */
   }
 }
 
@@ -74,6 +637,34 @@
     @apply rounded-xl border-2 border-border bg-card text-card-foreground shadow-[0_2px_8px_-1px_rgb(0_0_0_/0.08),0_1px_3px_-1px_rgb(0_0_0_/0.06)] hover:shadow-[0_8px_20px_-4px_rgb(0_0_0_/0.15),0_4px_12px_-2px_rgb(0_0_0_/0.12)] hover:border-primary/60 transition-all duration-300;
   }
 
+  /* Modern interactive card with glass morphism feel */
+  .card-interactive {
+    @apply relative overflow-hidden;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)];
+    @apply hover:scale-[1.02] hover:-translate-y-1;
+    @apply hover:border-primary/50;
+  }
+
+  .card-interactive::before {
+    content: '';
+    @apply absolute inset-0 opacity-0;
+    @apply bg-gradient-to-br from-primary/5 via-transparent to-transparent;
+    @apply transition-opacity duration-300;
+    @apply pointer-events-none;
+  }
+
+  .card-interactive:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Glow effect on hover */
+  .card-glow:hover {
+    box-shadow: 
+      0 20px 40px -12px rgba(0, 0, 0, 0.15),
+      0 0 20px -5px hsl(152 100% 30% / 0.15);
+  }
+
   /* Enhanced border styling for interactive elements */
   .border-enhanced {
     @apply border-2 border-solid transition-all duration-300;
@@ -85,6 +676,183 @@
 
   .card-gradient {
     @apply bg-gradient-to-br from-card to-card/80;
+  }
+
+  /* Ripple effect placeholder - for future enhancement */
+  .card-ripple {
+    @apply relative overflow-hidden;
+  }
+
+  /* ===== PREMIUM DASHBOARD STYLES ===== */
+  
+  /* Glassmorphism Card - Modern frosted glass effect */
+  .glass-card {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      135deg, 
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(255, 255, 255, 0.7) 100%
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0) 50%
+    );
+  }
+
+  /* Premium Card with Gradient Border */
+  .card-premium {
+    @apply relative rounded-xl overflow-hidden;
+    background: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--card)/0.95) 100%);
+    box-shadow: 
+      0 4px 20px -4px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 20px 40px -8px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(22, 163, 74, 0.2),
+      0 0 30px -5px rgba(22, 163, 74, 0.1);
+  }
+
+  /* Gradient Glow Border Animation */
+  .gradient-border {
+    @apply relative;
+  }
+
+  .gradient-border::before {
+    content: '';
+    @apply absolute -inset-[2px] rounded-xl pointer-events-none;
+    background: linear-gradient(
+      135deg, 
+      hsl(152 100% 40% / 0.4) 0%, 
+      hsl(48 100% 60% / 0.3) 50%,
+      hsl(152 100% 40% / 0.4) 100%
+    );
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .gradient-border:hover::before {
+    opacity: 1;
+  }
+
+  /* Shimmer Effect */
+  .shimmer-effect {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer-effect::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .shimmer-effect:hover::after {
+    transform: translateX(100%);
+  }
+
+  /* Dashboard Gradient Background - Subtle Primary Theme */
+  .dashboard-gradient-bg {
+    background: 
+      radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(var(--primary) / 0.025) 0%, transparent 50%),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.15) 100%);
+  }
+
+  /* Glowing Status Indicator */
+  .glow-indicator {
+    @apply relative;
+  }
+
+  .glow-indicator-success::after {
+    content: '';
+    @apply absolute -inset-1 rounded-full pointer-events-none;
+    background: radial-gradient(circle, hsl(152 100% 40% / 0.3) 0%, transparent 70%);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .glow-indicator-warning::after {
+    content: '';
+    @apply absolute -inset-1 rounded-full pointer-events-none;
+    background: radial-gradient(circle, hsl(45 100% 50% / 0.3) 0%, transparent 70%);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .glow-indicator-danger::after {
+    content: '';
+    @apply absolute -inset-1 rounded-full pointer-events-none;
+    background: radial-gradient(circle, hsl(0 84% 60% / 0.3) 0%, transparent 70%);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  /* Premium Icon Container */
+  .icon-container-premium {
+    @apply relative flex items-center justify-center;
+    background: linear-gradient(135deg, var(--color-from) 0%, var(--color-to) 100%);
+    box-shadow: 0 4px 15px -3px var(--color-shadow);
+  }
+
+  /* Chart Card Premium Styling */
+  .chart-card-premium {
+    @apply rounded-2xl border-0 overflow-hidden;
+    background: linear-gradient(
+      145deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--card)/0.97) 100%
+    );
+    box-shadow: 
+      0 4px 20px -4px rgba(0, 0, 0, 0.08),
+      0 0 0 1px hsl(var(--border)/0.5);
+  }
+
+  .chart-card-premium:hover {
+    box-shadow: 
+      0 12px 40px -8px rgba(0, 0, 0, 0.12),
+      0 0 0 1px hsl(152 100% 40% / 0.15);
+  }
+
+  /* KPI Value Animation */
+  .kpi-value {
+    @apply font-bold;
+    background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--foreground)/0.8) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* Header Gradient Text - Theme Aware */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 20%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 
@@ -357,4 +1125,651 @@
   .button-interactive {
     @apply active:scale-95 transition-transform duration-150 ease-out;
   }
+
+  /* Modern Hidden Scrollbar for Sidebar - elegant auto-hide */
+  .sidebar-scrollbar-hidden {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  .sidebar-scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Sidebar scrollbar hidden completely */
+  .sidebar-scrollbar-modern {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .sidebar-scrollbar-modern::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Thin scrollbar for tables */
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(155, 155, 155, 0.7);
+  }
+}
+
+/* ===== PREMIUM DASHBOARD ANIMATIONS ===== */
+
+@layer components {
+  /* 1. Animated Counter - Numbers count up smoothly */
+  @keyframes countUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-countUp {
+    animation: countUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 2. Floating Orbs - Ambient decoration */
+  @keyframes floatOrb {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    25% {
+      transform: translate(10px, -15px) scale(1.05);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translate(-5px, -25px) scale(1);
+      opacity: 0.35;
+    }
+    75% {
+      transform: translate(-15px, -10px) scale(0.95);
+      opacity: 0.3;
+    }
+  }
+
+  .animate-floatOrb {
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+
+  .animate-floatOrb-delayed {
+    animation: floatOrb 10s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  /* 3. Gradient Morph - Animated background gradients */
+  @keyframes gradientMorph {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-gradientMorph {
+    background-size: 200% 200%;
+    animation: gradientMorph 15s ease infinite;
+  }
+
+  /* 4. 3D Card Tilt Effect */
+  .card-3d-tilt {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .card-3d-tilt:hover {
+    transform: perspective(1000px) rotateX(-2deg) rotateY(2deg) translateZ(10px);
+  }
+
+  /* 5. Glow Pulse - Ambient glow effect */
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 
+        0 4px 20px -4px rgba(0, 0, 0, 0.1),
+        0 0 0 0 rgba(22, 163, 74, 0);
+    }
+    50% {
+      box-shadow: 
+        0 8px 30px -4px rgba(0, 0, 0, 0.15),
+        0 0 30px -5px rgba(22, 163, 74, 0.15);
+    }
+  }
+
+  .animate-glowPulse {
+    animation: glowPulse 4s ease-in-out infinite;
+  }
+
+  /* 6. Icon Bounce - Micro-interaction */
+  @keyframes iconBounce {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+  }
+
+  .hover-icon-bounce:hover .icon-bounce-target {
+    animation: iconBounce 0.5s ease-in-out;
+  }
+
+  /* 7. Slide In with Blur - Premium reveal effect */
+  @keyframes slideInBlur {
+    from {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-slideInBlur {
+    animation: slideInBlur 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 8. Shine Effect - Button/Card highlight */
+  @keyframes shine {
+    0% {
+      left: -100%;
+    }
+    50%, 100% {
+      left: 100%;
+    }
+  }
+
+  .shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shine 3s ease-in-out infinite;
+  }
+
+  /* 9. Border Glow Animation */
+  @keyframes borderGlowAnim {
+    0%, 100% {
+      border-color: rgba(22, 163, 74, 0.2);
+      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+    }
+    50% {
+      border-color: rgba(22, 163, 74, 0.5);
+      box-shadow: 0 0 15px -5px rgba(22, 163, 74, 0.3);
+    }
+  }
+
+  .animate-borderGlow {
+    animation: borderGlowAnim 3s ease-in-out infinite;
+  }
+
+  /* 10. Scale In Bounce - Entrance with bounce */
+  @keyframes scaleInBounce {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleInBounce {
+    animation: scaleInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+
+  /* 11. Floating Particles Container - Enhanced visibility */
+  .particles-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.4), hsl(var(--primary) / 0.2));
+    box-shadow: 
+      0 0 20px hsl(var(--primary) / 0.2),
+      0 0 40px hsl(var(--primary) / 0.1);
+    animation: floatParticle 15s ease-in-out infinite;
+    filter: blur(0.5px);
+    /* GPU acceleration for better performance */
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
+
+  @keyframes floatParticle {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translate(20px, -30px) scale(1.2);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translate(-10px, -50px) scale(0.9);
+      opacity: 0.5;
+    }
+    75% {
+      transform: translate(-30px, -20px) scale(1.1);
+      opacity: 0.7;
+    }
+  }
+
+  .particle:nth-child(1) { 
+    top: 15%; left: 8%; 
+    width: 16px; height: 16px;
+    animation-delay: 0s; 
+    animation-duration: 12s;
+  }
+  .particle:nth-child(2) { 
+    top: 55%; left: 15%; 
+    width: 24px; height: 24px;
+    animation-delay: 2s; 
+    animation-duration: 18s;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.35), hsl(var(--primary) / 0.2));
+  }
+  .particle:nth-child(3) { 
+    top: 35%; left: 75%; 
+    width: 12px; height: 12px;
+    animation-delay: 4s; 
+    animation-duration: 14s;
+  }
+  .particle:nth-child(4) { 
+    top: 75%; left: 85%; 
+    width: 18px; height: 18px;
+    animation-delay: 1s; 
+    animation-duration: 16s;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.15));
+  }
+  .particle:nth-child(5) { 
+    top: 8%; left: 55%; 
+    width: 20px; height: 20px;
+    animation-delay: 3s; 
+    animation-duration: 20s;
+  }
+  .particle:nth-child(6) { 
+    top: 65%; left: 45%; 
+    width: 10px; height: 10px;
+    animation-delay: 5s; 
+    animation-duration: 13s;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.45), hsl(var(--primary) / 0.25));
+  }
+  .particle:nth-child(7) { 
+    top: 25%; left: 30%; 
+    width: 14px; height: 14px;
+    animation-delay: 2.5s; 
+    animation-duration: 17s;
+  }
+  .particle:nth-child(8) { 
+    top: 85%; left: 25%; 
+    width: 22px; height: 22px;
+    animation-delay: 4.5s; 
+    animation-duration: 19s;
+    background: linear-gradient(135deg, hsl(48 100% 65% / 0.5), hsl(152 80% 55% / 0.4));
+  }
+
+  /* 12. Mesh Gradient Background - Theme-aware */
+  .mesh-gradient-bg {
+    background: 
+      radial-gradient(at 40% 20%, hsl(var(--primary) / 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(var(--primary) / 0.04) 0px, transparent 40%),
+      radial-gradient(at 0% 50%, hsl(var(--primary) / 0.03) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(var(--muted) / 0.3) 0px, transparent 40%),
+      radial-gradient(at 0% 100%, hsl(var(--primary) / 0.03) 0px, transparent 40%),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.2) 100%);
+  }
+
+  /* 13. Premium KPI Card Styles */
+  .kpi-card-premium {
+    @apply relative overflow-hidden rounded-2xl border-0;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .kpi-card-premium:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .kpi-card-premium::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .kpi-card-premium:hover::before {
+    opacity: 1;
+  }
+
+  /* 14. Activity Item Hover Effect */
+  .activity-item-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .activity-item-hover:hover {
+    @apply bg-gradient-to-r from-muted/50 to-transparent;
+    transform: translateX(4px);
+  }
+
+  /* 15. Enhanced staggered delays for premium feel */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.3s; }
+
+  /* 16. Number Counter Animation for KPI values */
+  .kpi-number {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 17. Decorative Line Animation */
+  @keyframes lineGrow {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-lineGrow {
+    transform-origin: left;
+    animation: lineGrow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 18. Dashboard Header Gradient Animation */
+  @keyframes headerGradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .text-gradient-animated {
+    background: linear-gradient(
+      135deg, 
+      hsl(var(--primary)) 0%, 
+      hsl(var(--primary) / 0.7) 25%,
+      hsl(var(--accent)) 50%,
+      hsl(var(--primary) / 0.7) 75%,
+      hsl(var(--primary)) 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: headerGradient 6s ease infinite;
+  }
+
+  /* 19. Chart Reveal Animation */
+  @keyframes chartReveal {
+    from {
+      opacity: 0;
+      clip-path: inset(100% 0 0 0);
+    }
+    to {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .animate-chartReveal {
+    animation: chartReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* 20. Icon Rotate on Hover */
+  .icon-rotate-hover {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .group:hover .icon-rotate-hover,
+  .hover-parent:hover .icon-rotate-hover {
+    transform: rotate(12deg) scale(1.1);
+  }
+
+  /* ============================================
+     PREMIUM CARD ENTRANCE ANIMATIONS
+     Modern, elegant animations for summary cards
+     ============================================ */
+
+  /* 21. Fade In Up - Classic elegant entrance */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 22. Slide In Blur - Modern glass effect entrance */
+  @keyframes slideInBlur {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      filter: blur(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  .animate-slideInBlur {
+    animation: slideInBlur 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 23. Scale Fade In - Subtle pop effect */
+  @keyframes scaleFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleFadeIn {
+    animation: scaleFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 24. Premium Bounce In - Elegant pop with bounce */
+  @keyframes bounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) translateY(20px);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05) translateY(-5px);
+    }
+    70% {
+      transform: scale(0.95) translateY(2px);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .animate-bounceIn {
+    animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  /* 25. Float In - Smooth 3D floating effect */
+  @keyframes floatIn {
+    from {
+      opacity: 0;
+      transform: translateY(60px) rotateX(10deg);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotateX(0);
+    }
+  }
+
+  .animate-floatIn {
+    animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    perspective: 1000px;
+  }
+
+  /* ============================================
+     STAGGERED ANIMATION DELAYS
+     For sequential card entrance effect
+     ============================================ */
+  
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+
+  /* ============================================
+     PREMIUM CARD HOVER EFFECTS
+     Enhanced hover states for interactive cards
+     ============================================ */
+
+  .card-hover-lift {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .card-hover-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 20px 40px -15px rgba(0, 0, 0, 0.15),
+      0 10px 20px -10px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-hover-glow:hover {
+    box-shadow: 
+      0 0 30px rgba(34, 197, 94, 0.15),
+      0 10px 30px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .card-hover-glow:hover {
+    box-shadow: 
+      0 0 40px rgba(34, 197, 94, 0.2),
+      0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ============================================
+   THIN AUTO-HIDE SCROLLBAR
+   Scrollbar tipis yang tersembunyi, muncul saat hover
+   ============================================ */
+.scrollbar-thin-auto {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.scrollbar-thin-auto:hover {
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.scrollbar-thin-auto::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.scrollbar-thin-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin-auto::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.scrollbar-thin-auto:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+.scrollbar-thin-auto:hover::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Dark mode scrollbar */
+.dark .scrollbar-thin-auto:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.dark .scrollbar-thin-auto:hover::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.6);
 }

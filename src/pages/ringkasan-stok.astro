@@ -1,18 +1,17 @@
 
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
-import StockSummaryContent from '@/components/ringkasan-stok/StockSummaryContent.tsx'
+import RingkasanStokPageContent from '@/components/ringkasan-stok/RingkasanStokPageContent.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Stok LPG - SIM4LON">
-  <AdminHeader client:load />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main class="flex-1 flex flex-col">
-      <StockSummaryContent client:idle />
+  <ProtectedDashboard client:load>
+    <AppSidebarLayout client:load headerHeight="64px">
+      <RingkasanStokPageContent client:idle />
       <AdminFooter />
-    </main>
-  </AppSidebarLayout>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>

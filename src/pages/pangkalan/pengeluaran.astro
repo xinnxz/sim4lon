@@ -1,0 +1,18 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PangkalanSidebarLayout from '@/components/pangkalan/PangkalanSidebarLayout.tsx'
+import AdminFooter from '@/components/common/AdminFooter.tsx'
+import PengeluaranPage from '@/components/pangkalan/PengeluaranPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="Pengeluaran - SIM4LON Pangkalan">
+  <ProtectedDashboard client:load allowedRoles={['PANGKALAN']}>
+    <PangkalanSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col">
+        <PengeluaranPage client:idle />
+        <AdminFooter />
+      </main>
+    </PangkalanSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>

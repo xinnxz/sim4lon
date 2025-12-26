@@ -1,9 +1,21 @@
-import { useState, useEffect } from 'react'
+/**
+* CreateOrderForm - Form untuk membuat pesanan baru
+* 
+* PENJELASAN:
+* Component ini menampilkan form untuk membuat pesanan LPG baru dengan:
+* - Fetch pangkalan dari API (real data)
+* - Fetch produk LPG dari API (dynamic products)
+* - Submit pesanan via ordersApi
+* - Support edit mode untuk update pesanan existing
+*/
+
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -13,207 +25,598 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import SafeIcon from '@/components/common/SafeIcon'
-import LpgItemSelector from './LpgItemSelector'
-import OrderSummary from './OrderSummary'
+import { toast } from 'sonner'
+import {
+  pangkalanApi,
+  lpgProductsApi,
+  ordersApi,
+  type Pangkalan,
+  type LpgProductWithStock,
+  type OrderStatus
+} from '@/lib/api'
+import { formatCurrency } from '@/lib/currency'
+import { useAppSettings } from '@/hooks/useAppSettings'
 
-interface LpgItem {
-  id: string | number
-  type: '3kg' | '12kg' | '50kg'
-  quantity: number
+interface OrderItem {
+  id: string
+  productId: string
+  lpgType: string
+  label: string
   price: number
+  quantity: number
+  isTaxable: boolean  // true jika NON_SUBSIDI (kena PPN 12%)
 }
 
 interface OrderFormData {
   pangkalanId: string
-  items: LpgItem[]
+  note: string
+  items: OrderItem[]
 }
 
-interface EditOrderData {
-  orderId?: string
-  status?: string
-  statusLabel?: string
-  customer?: {
-    name: string
-    address: string
+/**
+ * Convert product size_kg to Prisma lpg_type ENUM NAME
+ * Prisma uses enum names (gr220, kg3, kg5, kg12, kg50) in code
+ * Prisma auto-converts to @map values (220gr, 3kg, 5.5kg, etc) for database storage
+ */
+const sizeKgToLpgType = (sizeKg: number | string): string => {
+  // Convert to number and handle edge cases
+  const size = typeof sizeKg === 'string' ? parseFloat(sizeKg) : sizeKg
+
+  // Debug logging
+  console.log('[sizeKgToLpgType] Input:', sizeKg, '→ Parsed:', size)
+
+  // Handle NaN
+  if (isNaN(size)) {
+    console.warn('[sizeKgToLpgType] Invalid size, defaulting to kg3')
+    return 'kg3'
   }
-}
 
-// Mock data
-const mockPangkalan = [
-  { id: '1', name: 'Pangkalan Maju Jaya', address: 'Jl. Raya Utama No. 123' },
-  { id: '2', name: 'Pangkalan Sejahtera', address: 'Jl. Gatot Subroto No. 456' },
-  { id: '3', name: 'Pangkalan Bersama', address: 'Jl. Ahmad Yani No. 789' },
-  { id: '4', name: 'Pangkalan Mitra Utama', address: 'Jl. Diponegoro No. 321' },
-]
+  // Use approximate comparison (within 0.1 tolerance) for floating point issues
+  const isApprox = (a: number, b: number) => Math.abs(a - b) < 0.1
 
-// Mock order data for edit mode
-const mockOrderData: Record<string, any> = {
-  'ORD-2024-12345': {
-    orderId: 'ORD-2024-12345',
-    status: 'pending_payment',
-    statusLabel: 'Menunggu Pembayaran',
-    customer: {
-      name: 'Pangkalan Maju Jaya',
-      address: 'Jl. Raya Industri No. 45, Jakarta Timur',
-    },
-    pangkalanId: '1',
-    items: [
-      { id: 1, type: '3kg', quantity: 50, price: 25000 },
-      { id: 2, type: '12kg', quantity: 20, price: 75000 },
-    ],
-    subtotal: 2750000,
-    tax: 275000,
-    total: 3025000,
+  let result: string
+  if (size <= 0.3) {
+    result = 'gr220'  // 0.22kg = 220gr (Bright Gas Can) - ENUM NAME
+  } else if (isApprox(size, 3)) {
+    result = 'kg3'
+  } else if (isApprox(size, 5.5) || isApprox(size, 5)) {
+    result = 'kg5'    // 5.5kg → kg5 (ENUM NAME, not "5.5kg")
+  } else if (isApprox(size, 12)) {
+    result = 'kg12'
+  } else if (isApprox(size, 50)) {
+    result = 'kg50'
+  } else {
+    result = `kg${Math.floor(size)}`  // Fallback: kg + size
   }
-}
 
-const lpgPrices: Record<'3kg' | '12kg' | '50kg', number> = {
-  '3kg': 25000,
-  '12kg': 85000,
-  '50kg': 350000,
+  console.log('[sizeKgToLpgType] Result:', result)
+  return result
 }
 
 export default function CreateOrderForm() {
+  // App settings (PPN rate, etc.)
+  const { settings: appSettings } = useAppSettings()
+
+  // Data state
+  const [pangkalanList, setPangkalanList] = useState<Pangkalan[]>([])
+  const [lpgProducts, setLpgProducts] = useState<LpgProductWithStock[]>([])
+  const [isLoadingData, setIsLoadingData] = useState(true)
+
+  // Form state
   const [formData, setFormData] = useState<OrderFormData>({
     pangkalanId: '',
+    note: '',
     items: [],
   })
-
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [editOrderData, setEditOrderData] = useState<EditOrderData | null>(null)
 
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [editOrderId, setEditOrderId] = useState<string | null>(null)
+  const [editOrderStatus, setEditOrderStatus] = useState<OrderStatus | null>(null)
+
+  // Hold +/- button refs for quantity stepper
+  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const holdCountRef = useRef(0)
+  const holdItemIdRef = useRef<string | null>(null)
+
+  // Start holding - with acceleration (longer hold = bigger increments)
+  const startHold = useCallback((itemId: string, action: 'increment' | 'decrement') => {
+    holdCountRef.current = 0
+    holdItemIdRef.current = itemId
+
+    // Wait 250ms before starting rapid mode
+    holdTimeoutRef.current = setTimeout(() => {
+      const tick = () => {
+        holdCountRef.current++
+
+        // Acceleration: 0-10 ticks: +1, 11-30: +5, 31+: +10
+        let step = 1
+        if (holdCountRef.current > 30) step = 10
+        else if (holdCountRef.current > 10) step = 5
+
+        const currentItemId = holdItemIdRef.current
+        if (!currentItemId) return
+
+        setFormData(prev => ({
+          ...prev,
+          items: prev.items.map(item => {
+            if (item.id !== currentItemId) return item
+            const newQty = action === 'increment'
+              ? item.quantity + step
+              : Math.max(0, item.quantity - step)
+            return { ...item, quantity: newQty }
+          })
+        }))
+
+        // Speed increases: 100ms → 80ms → 75ms
+        let delay = 100
+        if (holdCountRef.current > 20) delay = 75
+        else if (holdCountRef.current > 5) delay = 80
+
+        holdIntervalRef.current = setTimeout(tick, delay)
+      }
+      tick()
+    }, 450)
+  }, [])
+
+  // Stop holding
+  const stopHold = useCallback(() => {
+    holdCountRef.current = 0
+    holdItemIdRef.current = null
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current)
+      holdTimeoutRef.current = null
+    }
+    if (holdIntervalRef.current) {
+      clearTimeout(holdIntervalRef.current)
+      holdIntervalRef.current = null
+    }
+  }, [])
+
+  // Cleanup on unmount
   useEffect(() => {
+    return () => stopHold()
+  }, [stopHold])
+
+  /**
+   * Fetch pangkalan dan products saat mount
+   */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoadingData(true)
+        const [pangkalanRes, productsRes] = await Promise.all([
+          pangkalanApi.getAll(1, 100, undefined, true), // Only active pangkalan
+          lpgProductsApi.getWithStock(), // LPG products with stock info
+        ])
+
+        setPangkalanList(pangkalanRes.data)
+        setLpgProducts(productsRes)
+
+        // Keep items array empty on load (user will add items via button)
+        // Items will be added when user clicks "+ Tambah Item LPG"
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+        toast.error('Gagal memuat data pangkalan dan produk')
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+
+    fetchData()
+
+    // Check for edit mode
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const orderId = params.get('id')
-      
-      if (orderId && mockOrderData[orderId]) {
-        const orderData = mockOrderData[orderId]
+      if (orderId) {
         setIsEditMode(true)
-        setEditOrderData(orderData)
-        setFormData({
-          pangkalanId: orderData.pangkalanId,
-          items: orderData.items,
-        })
+        setEditOrderId(orderId)
+        loadOrderForEdit(orderId)
       }
     }
   }, [])
 
-  const isFormReadonly = editOrderData?.status === 'completed'
-  const isPaymentConfirmed = editOrderData?.status === 'payment_confirmed'
+  /**
+   * Load order data for edit mode
+   * PENJELASAN: Saat edit, perlu match productId dari lpgProducts
+   * berdasarkan lpg_type dari order item
+   */
+  const loadOrderForEdit = async (orderId: string) => {
+    try {
+      const order = await ordersApi.getById(orderId)
+      setEditOrderStatus(order.current_status)
 
+      // Wait for lpgProducts to load if not ready
+      const products = lpgProducts.length > 0 ? lpgProducts : await lpgProductsApi.getAll()
+
+      setFormData({
+        pangkalanId: order.pangkalan_id,
+        note: order.note || '',
+        items: order.order_items.map((item, index) => {
+          // Match productId by finding product with same size
+          // lpg_type format: "3kg", "kg12", "kg50" -> extract number
+          const sizeMatch = item.lpg_type.match(/\d+/)
+          const size = sizeMatch ? parseFloat(sizeMatch[0]) : 0
+
+          // Find matching product by size
+          const matchedProduct = products.find(p =>
+            parseFloat(String(p.size_kg)) === size ||
+            p.name.toLowerCase().includes(item.label?.toLowerCase() || '')
+          )
+
+          return {
+            id: String(index + 1),
+            productId: matchedProduct?.id || '',
+            lpgType: item.lpg_type,
+            label: item.label || matchedProduct?.name || item.lpg_type,
+            price: item.price_per_unit,
+            quantity: item.qty,
+            isTaxable: (item as any).is_taxable ?? false,
+          }
+        }),
+      })
+    } catch (error) {
+      console.error('Failed to load order:', error)
+      toast.error('Gagal memuat data pesanan')
+    }
+  }
+
+  /**
+   * Handle pangkalan selection
+   */
   const handlePangkalanChange = (value: string) => {
-    if (!isFormReadonly) {
-      setFormData(prev => ({ ...prev, pangkalanId: value }))
+    setFormData(prev => ({ ...prev, pangkalanId: value }))
+  }
+
+  /**
+   * Handle product selection for an item
+   */
+  const handleProductChange = (itemId: string, productId: string) => {
+    const product = lpgProducts.find(p => p.id === productId)
+    if (!product) return
+
+    // Use selling_price directly, fallback to old prices[] for backward compat
+    const defaultPrice = product.selling_price
+      || product.prices?.find(p => p.is_default)?.price
+      || product.prices?.[0]?.price
+      || 0
+
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item =>
+        item.id === itemId
+          ? {
+            ...item,
+            productId,
+            lpgType: sizeKgToLpgType(Number(product.size_kg)),
+            label: product.name,
+            price: Number(defaultPrice),
+            isTaxable: product.category === 'NON_SUBSIDI',  // Update tax status
+          }
+          : item
+      ),
+    }))
+  }
+
+  /**
+   * Handle quantity change - allow typing without immediate validation
+   * PENJELASAN: Validasi max stok hanya saat blur, bukan setiap keystroke
+   */
+  const handleQuantityChange = (itemId: string, quantity: number) => {
+    // Allow 0 during typing, validation happens on blur
+    if (quantity < 0) quantity = 0
+
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item =>
+        item.id === itemId ? { ...item, quantity } : item
+      ),
+    }))
+  }
+
+  /**
+   * Validate quantity on blur - ensure min 1 and cap to max stock
+   * PERBAIKAN: Validasi stok bahkan ketika maxStock = 0 (stok habis)
+   */
+  const handleQuantityBlur = (itemId: string) => {
+    const item = formData.items.find(i => i.id === itemId)
+    if (!item) return
+
+    let newQuantity = item.quantity
+    const product = lpgProducts.find(p => p.id === item.productId)
+    const maxStock = product?.stock?.current ?? 0
+
+    // Ensure min 1 (orders must have at least 1)
+    if (newQuantity < 1) {
+      newQuantity = 1
+    }
+
+    // Cap to max stock - SELALU validasi, termasuk saat stok = 0
+    if (newQuantity > maxStock) {
+      if (maxStock === 0) {
+        toast.error(`Stok ${product?.name} habis! Tidak dapat memesan.`)
+        newQuantity = 0  // Set to 0 to indicate invalid
+      } else {
+        toast.warning(`Jumlah melebihi stok! Maksimal ${product?.name}: ${maxStock} unit`)
+        newQuantity = maxStock
+      }
+    }
+
+    // Update if changed
+    if (newQuantity !== item.quantity) {
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.map(i =>
+          i.id === itemId ? { ...i, quantity: newQuantity } : i
+        ),
+      }))
     }
   }
 
-  const handleItemsChange = (items: LpgItem[]) => {
-    if (!isPaymentConfirmed) {
-      setFormData(prev => ({ ...prev, items }))
+  /**
+   * Add new item
+   * PRIORITAS: LPG 3kg Subsidi sebagai default pertama kali
+   */
+  const handleAddItem = () => {
+    if (lpgProducts.length === 0) return
+
+    // Find first product not already selected in existing items
+    const selectedProductIds = formData.items.map(item => item.productId)
+    const availableProducts = lpgProducts.filter(p => !selectedProductIds.includes(p.id))
+
+    // If all products are already selected, don't add more items
+    if (availableProducts.length === 0) {
+      toast.warning('Semua jenis LPG sudah dipilih')
+      return
     }
+
+    // Sort available products: 3kg Subsidi first, then other Subsidi, then Non-Subsidi
+    const sortedProducts = [...availableProducts].sort((a, b) => {
+      // Priority 1: SUBSIDI before NON_SUBSIDI
+      if (a.category !== b.category) {
+        return a.category === 'SUBSIDI' ? -1 : 1
+      }
+      // Priority 2: 3kg first within SUBSIDI category
+      const aSize = parseFloat(String(a.size_kg)) || 0
+      const bSize = parseFloat(String(b.size_kg)) || 0
+      if (a.category === 'SUBSIDI') {
+        // 3kg gets highest priority
+        if (Math.abs(aSize - 3) < 0.5) return -1
+        if (Math.abs(bSize - 3) < 0.5) return 1
+      }
+      // Default: sort by size ascending
+      return aSize - bSize
+    })
+
+    const newId = String(Math.max(...formData.items.map(i => parseInt(i.id)), 0) + 1)
+    const defaultProduct = sortedProducts[0]  // Now LPG 3kg Subsidi will be first!
+    // Use selling_price directly, fallback to old prices[] for backward compat
+    const defaultPrice = defaultProduct.selling_price || defaultProduct.prices?.find(p => p.is_default)?.price || defaultProduct.prices?.[0]?.price || 0
+    // NON_SUBSIDI products are taxable (12% PPN)
+    const isTaxable = defaultProduct.category === 'NON_SUBSIDI'
+
+    setFormData(prev => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        {
+          id: newId,
+          productId: defaultProduct.id,
+          lpgType: sizeKgToLpgType(Number(defaultProduct.size_kg)),
+          label: defaultProduct.name,
+          price: defaultPrice,
+          quantity: 1,
+          isTaxable: isTaxable,
+        },
+      ],
+    }))
   }
 
-  const calculateTotal = () => {
+  /**
+   * Remove item
+   */
+  const handleRemoveItem = (itemId: string) => {
+    if (formData.items.length <= 1) {
+      toast.error('Minimal harus ada satu item LPG')
+      return
+    }
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.filter(item => item.id !== itemId),
+    }))
+  }
+
+  /**
+   * Calculate total
+   */
+  const calculateSubtotal = () => {
     return formData.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   }
 
+  /**
+   * Calculate PPN for non-subsidi items
+   * Uses dynamic rate from app settings
+   */
+  const calculateTax = () => {
+    const ppnDecimal = appSettings.ppnRate / 100 // Convert 12 to 0.12
+    return formData.items.reduce((sum, item) => {
+      if (item.isTaxable) {
+        return sum + Math.round(item.price * item.quantity * ppnDecimal)
+      }
+      return sum
+    }, 0)
+  }
+
+  /**
+   * Calculate grand total (subtotal + tax)
+   */
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateTax()
+  }
+
+  /**
+   * Handle form submission
+   * PERBAIKAN: Tambah validasi stok sebelum submit
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.pangkalanId) {
-      alert('Silakan pilih pangkalan')
+      toast.error('Silakan pilih pangkalan')
       return
     }
 
-    if (!isEditMode && formData.items.length === 0) {
-      alert('Silakan tambahkan minimal satu item LPG')
+    if (formData.items.length === 0) {
+      toast.error('Silakan tambahkan minimal satu item LPG')
       return
+    }
+
+    // VALIDASI STOK: Cek semua item tidak melebihi stok
+    for (const item of formData.items) {
+      const product = lpgProducts.find(p => p.id === item.productId)
+      const maxStock = product?.stock?.current ?? 0
+
+      if (item.quantity > maxStock) {
+        toast.error(`Jumlah ${product?.name || item.lpgType} (${item.quantity}) melebihi stok tersedia (${maxStock})!`)
+        return
+      }
+
+      if (item.quantity < 1) {
+        toast.error(`Jumlah ${product?.name || item.lpgType} harus minimal 1`)
+        return
+      }
+
+      // VALIDASI HARGA: Cek harga tidak boleh 0
+      if (item.price <= 0) {
+        toast.error(`Harga ${product?.name || item.lpgType} tidak valid (Rp 0)`)
+        return
+      }
     }
 
     setIsSubmitting(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (isEditMode) {
-        console.log('Order updated:', formData)
-        alert('Pesanan berhasil diperbarui!')
-      } else {
-        console.log('Order created:', formData)
-        alert('Pesanan berhasil dibuat!')
-      }
-      window.location.href = './detail-pesanan.html'
-    }, 1000)
-  }
 
-  const handleCancel = () => {
-    if (isEditMode && editOrderData?.orderId) {
-      window.location.href = `./detail-pesanan.html?id=${editOrderData.orderId}`
-    } else {
-      window.location.href = './daftar-pesanan.html'
+    try {
+      // Ensure all numeric values are proper numbers
+      const orderDto = {
+        pangkalan_id: formData.pangkalanId,
+        note: formData.note || undefined,
+        items: formData.items.map(item => ({
+          lpg_type: item.lpgType,
+          lpg_product_id: item.productId,  // For dynamic product stock tracking
+          label: item.label,
+          price_per_unit: Number(item.price),  // Ensure it's a number
+          qty: Math.floor(Number(item.quantity)),  // Ensure it's an integer
+          is_taxable: item.isTaxable,  // Send tax status for PPN calculation
+        })),
+      }
+
+      // DEBUG: Log what's being sent
+      console.log('=== DEBUG ORDER SUBMISSION ===')
+      console.log('isEditMode:', isEditMode)
+      console.log('editOrderId:', editOrderId)
+      console.log('orderDto:', JSON.stringify(orderDto, null, 2))
+
+      let result
+      if (isEditMode && editOrderId) {
+        // UPDATE existing order
+        result = await ordersApi.update(editOrderId, orderDto)
+        toast.success('Pesanan berhasil diperbarui!')
+      } else {
+        // CREATE new order
+        result = await ordersApi.create(orderDto)
+        toast.success('Pesanan berhasil dibuat!')
+      }
+
+      // Redirect to order detail
+      window.location.href = `/detail-pesanan?id=${result.id}`
+    } catch (error: any) {
+      console.error('Failed to submit order:', error)
+      toast.error(error.message || (isEditMode ? 'Gagal memperbarui pesanan' : 'Gagal membuat pesanan'))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const selectedPangkalan = mockPangkalan.find(p => p.id === formData.pangkalanId)
+  /**
+   * Handle cancel
+   */
+  const handleCancel = () => {
+    if (isEditMode && editOrderId) {
+      window.location.href = `/detail-pesanan?id=${editOrderId}`
+    } else {
+      window.location.href = '/daftar-pesanan'
+    }
+  }
+
+  const selectedPangkalan = pangkalanList.find(p => p.id === formData.pangkalanId)
+  const isFormDisabled = editOrderStatus === 'SELESAI' || editOrderStatus === 'BATAL'
+
+  // Loading state
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <SafeIcon name="Loader2" className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="mt-2 text-muted-foreground">Memuat data...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid gap-6 lg:grid-cols-3 dashboard-gradient-bg min-h-screen p-6">
       {/* Form Section */}
       <div className="lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isEditMode ? 'Edit Pesanan' : 'Detail Pesanan'}
-            </CardTitle>
-            <CardDescription>
-              {isEditMode 
-                ? `Perbarui informasi pesanan ${editOrderData?.orderId}` 
-                : 'Lengkapi informasi pesanan LPG baru'}
-            </CardDescription>
-            {isEditMode && editOrderData && (
-              <div className="mt-4 flex items-center gap-3 pt-4 border-t">
-                <span className="text-sm text-muted-foreground">Status Pesanan:</span>
-                <Badge 
-                  className={`${
-                    editOrderData.status === 'pending_payment' ? 'bg-yellow-100 text-yellow-800' :
-                    editOrderData.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800' :
-                    editOrderData.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {editOrderData.statusLabel}
-                </Badge>
+        <div className="chart-card-premium rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
+              <div>
+                <h2 className="text-xl font-bold text-gradient-primary">
+                  {isEditMode ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {isEditMode
+                    ? 'Perbarui informasi pesanan'
+                    : 'Lengkapi informasi pesanan LPG baru'}
+                </p>
+              </div>
+            </div>
+            {isEditMode && editOrderStatus && (
+              <div className="mt-4 flex items-center gap-3 pt-4 border-t border-border/50">
+                <span className="text-sm text-muted-foreground">Status:</span>
+                <Badge variant="secondary">{editOrderStatus}</Badge>
               </div>
             )}
-          </CardHeader>
-          <CardContent>
-            {isFormReadonly && (
+          </div>
+          <div className="p-6">
+            {isFormDisabled && (
               <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                 <p className="text-sm font-medium text-destructive">
-                  Pesanan dengan status selesai tidak dapat diubah
+                  Pesanan dengan status selesai atau dibatalkan tidak dapat diubah
                 </p>
               </div>
             )}
-            {isPaymentConfirmed && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm font-medium text-blue-900">
-                  Hanya catatan yang dapat diedit. Item dan jumlah pesanan terkunci.
-                </p>
-              </div>
-            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Pangkalan Selection */}
               <div className="space-y-2">
                 <Label htmlFor="pangkalan" className="text-base font-semibold">
                   Pilih Pangkalan <span className="text-destructive">*</span>
                 </Label>
-                <Select value={formData.pangkalanId} onValueChange={handlePangkalanChange} disabled={isFormReadonly}>
+                <Select
+                  value={formData.pangkalanId}
+                  onValueChange={handlePangkalanChange}
+                  disabled={isFormDisabled}
+                >
                   <SelectTrigger id="pangkalan" className="h-10">
                     <SelectValue placeholder="Pilih pangkalan..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockPangkalan.map(pangkalan => (
+                    {pangkalanList.map(pangkalan => (
                       <SelectItem key={pangkalan.id} value={pangkalan.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">{pangkalan.name}</span>
@@ -223,12 +626,6 @@ export default function CreateOrderForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                {selectedPangkalan && (
-                  <div className="mt-2 p-3 bg-secondary rounded-lg border border-border">
-                    <p className="text-sm font-medium text-foreground">{selectedPangkalan.name}</p>
-                    <p className="text-xs text-muted-foreground">{selectedPangkalan.address}</p>
-                  </div>
-                )}
               </div>
 
               <Separator />
@@ -240,15 +637,185 @@ export default function CreateOrderForm() {
                     Item LPG <span className="text-destructive">*</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {isPaymentConfirmed 
-                      ? 'Item dan jumlah pesanan tidak dapat diubah setelah pembayaran dikonfirmasi' 
-                      : 'Tambahkan jenis dan jumlah LPG yang ingin dipesan'}
+                    Pilih jenis dan jumlah LPG yang ingin dipesan
                   </p>
                 </div>
-                <LpgItemSelector 
-                  items={formData.items}
-                  onItemsChange={handleItemsChange}
-                  disabled={isFormReadonly || isPaymentConfirmed}
+
+                <div className="space-y-3">
+                  {formData.items.map((item, index) => (
+                    <Card key={item.id} className="border border-border">
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Item {index + 1}
+                            </span>
+                            {formData.items.length > 1 && !isFormDisabled && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveItem(item.id)}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <SafeIcon name="Trash2" className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* LPG Type */}
+                            <div className="space-y-2">
+                              <Label className="text-sm">Jenis LPG</Label>
+                              <Select
+                                value={item.productId}
+                                onValueChange={(value) => handleProductChange(item.id, value)}
+                                disabled={isFormDisabled}
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder="Pilih produk..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {lpgProducts
+                                    // Filter out products already selected in OTHER items (allow current item's product)
+                                    .filter(product => {
+                                      const isSelectedInOtherItem = formData.items.some(
+                                        otherItem => otherItem.id !== item.id && otherItem.productId === product.id
+                                      )
+                                      return !isSelectedInOtherItem
+                                    })
+                                    .map(product => {
+                                      // Use selling_price directly, fallback to old prices[]
+                                      const price = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+                                      const stock = product.stock?.current || 0
+                                      const isOutOfStock = stock <= 0
+                                      return (
+                                        <SelectItem
+                                          key={product.id}
+                                          value={product.id}
+                                          disabled={isOutOfStock}
+                                          className={isOutOfStock ? 'opacity-50' : ''}
+                                        >
+                                          <div className="flex items-center justify-between w-full gap-2">
+                                            <span>{product.name} - {formatCurrency(price)}</span>
+                                            <span className={`text-xs ${isOutOfStock ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                              (Stok: {stock})
+                                            </span>
+                                          </div>
+                                        </SelectItem>
+                                      )
+                                    })}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* Quantity with +/- buttons */}
+                            <div className="space-y-2">
+                              <Label className="text-sm">Jumlah</Label>
+                              <div className="flex items-center gap-1">
+                                {/* Minus Button - with hold support */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-9 w-9 shrink-0 hover:bg-destructive/10 hover:border-destructive/50 active:scale-95 transition-all select-none"
+                                  onClick={() => handleQuantityChange(item.id, Math.max(0, item.quantity - 1))}
+                                  onMouseDown={() => startHold(item.id, 'decrement')}
+                                  onMouseUp={stopHold}
+                                  onMouseLeave={stopHold}
+                                  onTouchStart={() => startHold(item.id, 'decrement')}
+                                  onTouchEnd={stopHold}
+                                  disabled={isFormDisabled || item.quantity <= 0}
+                                >
+                                  <SafeIcon name="Minus" className="h-4 w-4" />
+                                </Button>
+
+                                {/* Quantity Input */}
+                                <Input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={item.quantity || ''}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '')
+                                    handleQuantityChange(item.id, parseInt(val) || 0)
+                                  }}
+                                  onBlur={() => handleQuantityBlur(item.id)}
+                                  onWheel={(e) => e.currentTarget.blur()}
+                                  placeholder="0"
+                                  className="h-9 text-center font-medium"
+                                  disabled={isFormDisabled}
+                                />
+
+                                {/* Plus Button - with hold support */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-9 w-9 shrink-0 hover:bg-primary/10 hover:border-primary/50 active:scale-95 transition-all select-none"
+                                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                  onMouseDown={() => startHold(item.id, 'increment')}
+                                  onMouseUp={stopHold}
+                                  onMouseLeave={stopHold}
+                                  onTouchStart={() => startHold(item.id, 'increment')}
+                                  onTouchEnd={stopHold}
+                                  disabled={isFormDisabled}
+                                >
+                                  <SafeIcon name="Plus" className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Price Display */}
+                          <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                            <span className="text-sm text-muted-foreground">Harga per unit:</span>
+                            <span className="font-semibold text-foreground">
+                              {formatCurrency(item.price)}
+                            </span>
+                          </div>
+
+                          {/* Subtotal */}
+                          <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
+                            <span className="text-sm font-medium text-foreground">Subtotal:</span>
+                            <span className="font-bold text-primary">
+                              {formatCurrency(item.price * item.quantity)}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Add Item Button */}
+                {!isFormDisabled && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddItem}
+                    className="w-full border-dashed"
+                  >
+                    <SafeIcon name="Plus" className="mr-2 h-4 w-4" />
+                    Tambah Item LPG
+                  </Button>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Note */}
+              <div className="space-y-2">
+                <Label htmlFor="note" className="text-base font-semibold">
+                  Catatan (Opsional)
+                </Label>
+                <Textarea
+                  id="note"
+                  placeholder="Tambahkan catatan untuk pesanan ini..."
+                  value={formData.note}
+                  onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
+                  className="min-h-[100px]"
+                  disabled={isFormDisabled}
                 />
               </div>
 
@@ -267,7 +834,7 @@ export default function CreateOrderForm() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !formData.pangkalanId || formData.items.length === 0 || isFormReadonly}
+                  disabled={isSubmitting || !formData.pangkalanId || formData.items.length === 0 || isFormDisabled}
                   className="bg-primary hover:bg-primary/90"
                 >
                   {isSubmitting ? (
@@ -284,19 +851,135 @@ export default function CreateOrderForm() {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Summary Section */}
       <div className="lg:col-span-1">
-        <OrderSummary 
-          pangkalan={selectedPangkalan}
-          items={formData.items}
-          total={calculateTotal()}
-          isEditMode={isEditMode}
-          editOrderStatus={editOrderData?.status}
-        />
+        <div className="sticky top-6 glass-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 8px 32px -8px rgba(22, 163, 74, 0.15)' }}>
+          <div className="p-5 border-b border-border/50">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <h3 className="text-lg font-semibold">Ringkasan Pesanan</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {isEditMode ? 'Verifikasi perubahan pesanan' : 'Verifikasi detail sebelum menyimpan'}
+            </p>
+          </div>
+          <div className="p-5 space-y-4">
+            {/* Pangkalan Info */}
+            {selectedPangkalan ? (
+              <div className="space-y-2 p-3 bg-secondary rounded-lg border border-border">
+                <div className="flex items-start gap-2">
+                  <SafeIcon name="Store" className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{selectedPangkalan.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{selectedPangkalan.address}</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 bg-muted rounded-lg border border-dashed border-border">
+                <p className="text-sm text-muted-foreground text-center">
+                  Pilih pangkalan untuk melihat detail
+                </p>
+              </div>
+            )}
+
+            <Separator />
+
+            {/* Items Summary */}
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-foreground">Item Pesanan</p>
+              {formData.items.length > 0 ? (
+                <div className="space-y-2">
+                  {formData.items.map(item => (
+                    <div key={item.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                          {item.lpgType}
+                        </Badge>
+                        <span className="text-muted-foreground">× {item.quantity}</span>
+                      </div>
+                      <span className="font-medium text-foreground">
+                        {formatCurrency(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Belum ada item</p>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Summary Stats */}
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Item:</span>
+                <span className="font-medium">{formData.items.reduce((sum, item) => sum + item.quantity, 0)} tabung</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Jenis LPG:</span>
+                <span className="font-medium">{new Set(formData.items.map(i => i.lpgType)).size} jenis</span>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Price Breakdown with PPN */}
+            <div className="space-y-3 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+              {/* Subtotal */}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal:</span>
+                <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
+              </div>
+
+              {/* PPN 12% (if any taxable items) */}
+              {calculateTax() > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    PPN 12%
+                    <Badge variant="outline" className="text-[10px] px-1 py-0 bg-orange-50 text-orange-600 border-orange-200">
+                      Non-Subsidi
+                    </Badge>
+                  </span>
+                  <span className="font-medium text-orange-600">
+                    + {formatCurrency(calculateTax())}
+                  </span>
+                </div>
+              )}
+
+              <Separator className="my-2" />
+
+              {/* Grand Total */}
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm font-medium text-foreground">Total Pembayaran:</span>
+                <span className="text-2xl font-bold text-primary">
+                  {formatCurrency(calculateTotal())}
+                </span>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                {calculateTax() > 0 ? 'Sudah termasuk PPN untuk produk Non-Subsidi' : 'Produk Subsidi tidak dikenakan PPN'}
+              </p>
+            </div>
+
+            {/* Status Info */}
+            {!isEditMode && (
+              <div className="p-3  from-blue-50 to-blue-100/50 rounded-lg border border-blue-200">
+                <div className="flex gap-2">
+                  <SafeIcon name="Info" className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-700">
+                    Pesanan akan dibuat dengan status <strong>Menunggu Pembayaran</strong>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

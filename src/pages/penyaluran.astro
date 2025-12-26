@@ -1,0 +1,25 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
+import AdminFooter from '@/components/common/AdminFooter.tsx'
+import PenyaluranPage from '@/components/penyaluran/PenyaluranPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="Penyaluran - SIM4LON">
+  <ProtectedDashboard client:load allowedRoles={['ADMIN']}>
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col dashboard-gradient-bg min-w-0">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-[calc(100vw-16rem)]">
+            {/* Content */}
+            <div class="animate-fadeInUp">
+              <PenyaluranPage client:load />
+            </div>
+          </div>
+        </div>
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>

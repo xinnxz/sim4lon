@@ -1,53 +1,60 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/decorators';
-import { UserRole } from '@prisma/client';
+import { user_role } from '@prisma/client';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
 export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Get()
-    async findAll(
+    @Roles(user_role.ADMIN)
+    findAll(
         @Query('page') page?: string,
         @Query('limit') limit?: string,
-        @Query('role') role?: string,
         @Query('search') search?: string,
+        @Query('exclude_roles') excludeRoles?: string,
     ) {
-        const result = await this.userService.findAll({
-            page: page ? parseInt(page) : 1,
-            limit: limit ? parseInt(limit) : 10,
-            role,
+        // Parse exclude_roles from comma-separated string to array
+        const excludeRolesArray = excludeRoles ? excludeRoles.split(',') : undefined;
+        return this.userService.findAll(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 10,
             search,
-        });
-
-        return { success: true, ...result };
+            excludeRolesArray,
+        );
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const user = await this.userService.findOne(id);
-        return { success: true, data: user };
+    @Roles(user_role.ADMIN)
+    findOne(@Param('id') id: string) {
+        return this.userService.findOne(id);
     }
 
     @Post()
-    async create(@Body() body: { email: string; password: string; name: string; role: UserRole; phone?: string }) {
-        const user = await this.userService.create(body);
-        return { success: true, data: user };
+    @Roles(user_role.ADMIN)
+    create(@Body() dto: CreateUserDto) {
+        return this.userService.create(dto);
     }
 
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() body: { name?: string; phone?: string; isActive?: boolean }) {
-        const user = await this.userService.update(id, body);
-        return { success: true, data: user };
+    @Put(':id')
+    @Roles(user_role.ADMIN)
+    update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+        return this.userService.update(id, dto);
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: string) {
-        const result = await this.userService.remove(id);
-        return { success: true, ...result };
+    @Roles(user_role.ADMIN)
+    remove(@Param('id') id: string) {
+        return this.userService.remove(id);
+    }
+
+    @Post(':id/reset-password')
+    @Roles(user_role.ADMIN)
+    resetPassword(@Param('id') id: string) {
+        return this.userService.resetPassword(id);
     }
 }

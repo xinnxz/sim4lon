@@ -1,33 +1,41 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
-  app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:4321',
-    credentials: true,
-  });
+    // Increase body size limit for logo uploads (base64 images)
+    app.use(bodyParser.json({ limit: '5mb' }));
+    app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
-  // Cookie parser for JWT in cookies
-  app.use(cookieParser());
+    // Enable CORS
+    app.enableCors({
+        origin: process.env.CORS_ORIGIN || '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+    });
 
-  // Global validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
+    // Global prefix
+    app.setGlobalPrefix('api');
 
-  // Global prefix
-  app.setGlobalPrefix('api');
+    // Global validation pipe
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
+        }),
+    );
 
-  const port = process.env.PORT || 4000;
-  await app.listen(port);
-  console.log(`🚀 Server running on http://localhost:${port}/api`);
+    const port = process.env.PORT || 3000;
+    await app.listen(port);
+
+    console.log(`🚀 SIM4LON Backend is running on: http://localhost:${port}/api`);
 }
+
 bootstrap();

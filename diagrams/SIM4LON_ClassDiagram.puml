@@ -1,0 +1,587 @@
+@startuml SIM4LON_ClassDiagram
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam classBackgroundColor #87CEEB
+skinparam classBorderColor #1565c0
+skinparam classArrowColor #333
+skinparam classFontSize 10
+skinparam stereotypeFontSize 9
+
+' ========== LAYOUT SETTINGS ==========
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+top to bottom direction
+
+title **SIM4LON - Class Diagram**\nSistem Distribusi Gas LPG\n22 Classes | 7 Enumerations
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                       ENUMERATIONS                           ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Enumerations" <<Rectangle>> #FFFDE7 {
+    enum user_role <<enumeration>> {
+        ADMIN
+        OPERATOR
+        PANGKALAN
+    }
+    
+    enum status_pesanan <<enumeration>> {
+        DRAFT
+        MENUNGGU_PEMBAYARAN
+        DIPROSES
+        SIAP_KIRIM
+        DIKIRIM
+        SELESAI
+        BATAL
+    }
+    
+    enum lpg_type <<enumeration>> {
+        kg3
+        kg5
+        kg12
+        kg50
+        gr220
+    }
+    
+    enum lpg_category <<enumeration>> {
+        SUBSIDI
+        NON_SUBSIDI
+    }
+    
+    enum payment_method <<enumeration>> {
+        TUNAI
+        TRANSFER
+    }
+    
+    enum stock_movement_type <<enumeration>> {
+        MASUK
+        KELUAR
+    }
+    
+    enum consumer_type <<enumeration>> {
+        RUMAH_TANGGA
+        WARUNG
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                      MASTER DATA                             ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Master Data" <<Rectangle>> #E8F5E9 {
+    class users {
+        -id : string
+        -code : string
+        -email : string
+        -password : string
+        -name : string
+        -phone : string
+        -avatar_url : string
+        -role : user_role
+        -pangkalan_id : string
+        -session_id : string
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +register(dto) : users
+        +login(dto) : AuthToken
+        +getProfile(userId) : users
+        +updateProfile(userId, dto) : users
+        +changePassword(userId, old, new) : boolean
+    }
+    
+    class agen {
+        -id : string
+        -code : string
+        -name : string
+        -address : string
+        -pic_name : string
+        -phone : string
+        -email : string
+        -note : string
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +findAll() : agen[]
+        +findOne(id) : agen
+        +create(dto) : agen
+        +update(id, dto) : agen
+        +remove(id) : boolean
+    }
+    
+    class pangkalans {
+        -id : string
+        -code : string
+        -name : string
+        -address : string
+        -region : string
+        -pic_name : string
+        -phone : string
+        -email : string
+        -capacity : int
+        -alokasi_bulanan : int
+        -agen_id : string
+        -note : string
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +findAll(page, limit, isActive) : pangkalans[]
+        +findOne(id) : pangkalans
+        +create(dto) : pangkalans
+        +update(id, dto) : pangkalans
+        +remove(id) : boolean
+    }
+    
+    class drivers {
+        -id : string
+        -code : string
+        -name : string
+        -phone : string
+        -vehicle_id : string
+        -note : string
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +findAll() : drivers[]
+        +findOne(id) : drivers
+        +create(dto) : drivers
+        +update(id, dto) : drivers
+        +remove(id) : boolean
+    }
+    
+    class lpg_products {
+        -id : string
+        -name : string
+        -size_kg : decimal
+        -category : lpg_category
+        -color : string
+        -description : string
+        -selling_price : decimal
+        -cost_price : decimal
+        -brand : string
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +findAll() : lpg_products[]
+        +findOne(id) : lpg_products
+        +create(dto) : lpg_products
+        +update(id, dto) : lpg_products
+        +remove(id) : boolean
+    }
+    
+    class company_profile {
+        -id : string
+        -company_name : string
+        -address : string
+        -phone : string
+        -email : string
+        -pic_name : string
+        -sppbe_number : string
+        -region : string
+        -logo_url : string
+        -ppn_rate : decimal
+        -invoice_prefix : string
+        -order_code_prefix : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +getProfile() : company_profile
+        +updateProfile(dto) : company_profile
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                    ORDER MANAGEMENT                          ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Order Management" <<Rectangle>> #E3F2FD {
+    class orders {
+        -id : string
+        -code : string
+        -pangkalan_id : string
+        -driver_id : string
+        -order_date : date
+        -current_status : status_pesanan
+        -subtotal : decimal
+        -tax_amount : decimal
+        -total_amount : decimal
+        -note : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +findAll(page, limit, status) : orders[]
+        +findOne(id) : orders
+        +create(dto) : orders
+        +update(id, dto) : orders
+        +updateStatus(id, dto) : orders
+        +remove(id) : boolean
+        +getStats(todayOnly) : OrderStats
+    }
+    
+    class order_items {
+        -id : string
+        -order_id : string
+        -lpg_type : lpg_type
+        -label : string
+        -price_per_unit : decimal
+        -qty : int
+        -sub_total : decimal
+        -is_taxable : boolean
+        -tax_amount : decimal
+        -created_at : timestamp
+        -updated_at : timestamp
+    }
+    
+    class timeline_tracks {
+        -id : string
+        -order_id : string
+        -status : status_pesanan
+        -description : string
+        -note : string
+        -created_at : timestamp
+    }
+    
+    class invoices {
+        -id : string
+        -order_id : string
+        -invoice_number : string
+        -invoice_date : date
+        -due_date : date
+        -billing_address : string
+        -billed_to_name : string
+        -sub_total : decimal
+        -tax_rate : decimal
+        -tax_amount : decimal
+        -grand_total : decimal
+        -payment_status : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        -deleted_at : timestamp
+        --
+        +generateInvoice(orderId) : invoices
+        +getInvoiceById(id) : invoices
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                        PAYMENT                               ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Payment" <<Rectangle>> #FFF3E0 {
+    class order_payment_details {
+        -id : string
+        -order_id : string
+        -is_paid : boolean
+        -is_dp : boolean
+        -payment_method : payment_method
+        -amount_paid : decimal
+        -payment_date : timestamp
+        -proof_url : string
+        -created_at : timestamp
+        -updated_at : timestamp
+    }
+    
+    class payment_records {
+        -id : string
+        -order_id : string
+        -invoice_id : string
+        -method : payment_method
+        -amount : decimal
+        -payment_time : timestamp
+        -proof_url : string
+        -recorded_by_user_id : string
+        -note : string
+        -created_at : timestamp
+        --
+        +recordPayment(dto) : payment_records
+        +getPaymentHistory(orderId) : payment_records[]
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                   STOCK MANAGEMENT (Agen)                    ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Stock Management (Agen)" <<Rectangle>> #FCE4EC {
+    class stock_histories {
+        -id : string
+        -lpg_product_id : string
+        -lpg_type : lpg_type
+        -movement_type : stock_movement_type
+        -qty : int
+        -note : string
+        -recorded_by_user_id : string
+        -timestamp : timestamp
+        -created_at : timestamp
+        --
+        +getHistory(filter) : stock_histories[]
+        +createMovement(dto) : stock_histories
+        +getSummary() : StockSummary
+    }
+    
+    class penerimaan_stok {
+        -id : string
+        -no_so : string
+        -no_lo : string
+        -nama_material : string
+        -qty_pcs : int
+        -qty_kg : decimal
+        -tanggal : date
+        -sumber : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(query) : penerimaan_stok[]
+        +create(dto) : penerimaan_stok
+        +delete(id) : boolean
+        +getInOutAgen(bulan) : InOutSummary
+    }
+    
+    class perencanaan_harian {
+        -id : string
+        -pangkalan_id : string
+        -tanggal : date
+        -alokasi_bulan : int
+        -lpg_type : lpg_type
+        -jumlah_normal : int
+        -jumlah_fakultatif : int
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(query) : perencanaan_harian[]
+        +getRekapitulasi(bulan) : Rekapitulasi
+        +create(dto) : perencanaan_harian
+        +bulkUpdate(dto) : perencanaan_harian[]
+        +autoGenerate(bulan, lpgType) : Result
+    }
+    
+    class penyaluran_harian {
+        -id : string
+        -pangkalan_id : string
+        -tanggal : date
+        -tipe_pembayaran : string
+        -lpg_type : lpg_type
+        -jumlah_normal : int
+        -jumlah_fakultatif : int
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(query) : penyaluran_harian[]
+        +getRekapitulasi(bulan) : Rekapitulasi
+        +create(dto) : penyaluran_harian
+        +bulkUpdate(dto) : penyaluran_harian[]
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                   PANGKALAN SAAS MODULE                      ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Pangkalan SAAS Module" <<Rectangle>> #F3E5F5 {
+    class consumers {
+        -id : string
+        -pangkalan_id : string
+        -name : string
+        -nik : string
+        -kk : string
+        -phone : string
+        -address : string
+        -note : string
+        -consumer_type : consumer_type
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(pangkalanId) : consumers[]
+        +findOne(id) : consumers
+        +create(dto) : consumers
+        +update(id, dto) : consumers
+        +remove(id) : boolean
+    }
+    
+    class consumer_orders {
+        -id : string
+        -code : string
+        -pangkalan_id : string
+        -consumer_id : string
+        -consumer_name : string
+        -lpg_type : lpg_type
+        -qty : int
+        -price_per_unit : decimal
+        -cost_price : decimal
+        -total_amount : decimal
+        -payment_status : string
+        -note : string
+        -sale_date : timestamp
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(pangkalanId) : consumer_orders[]
+        +create(dto) : consumer_orders
+        +getStats(pangkalanId) : SalesStats
+        +getChartData(pangkalanId) : ChartData
+    }
+    
+    class pangkalan_stocks {
+        -id : string
+        -pangkalan_id : string
+        -lpg_type : lpg_type
+        -qty : int
+        -warning_level : int
+        -critical_level : int
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +getStocks(pangkalanId) : pangkalan_stocks[]
+        +updateStock(pangkalanId, lpgType, qty) : pangkalan_stocks
+    }
+    
+    class lpg_prices {
+        -id : string
+        -pangkalan_id : string
+        -lpg_type : lpg_type
+        -cost_price : decimal
+        -selling_price : decimal
+        -is_active : boolean
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +getPrices(pangkalanId) : lpg_prices[]
+        +updatePrice(pangkalanId, dto) : lpg_prices
+    }
+    
+    class expenses {
+        -id : string
+        -pangkalan_id : string
+        -category : string
+        -amount : decimal
+        -description : string
+        -expense_date : timestamp
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(pangkalanId) : expenses[]
+        +create(dto) : expenses
+        +update(id, dto) : expenses
+        +remove(id) : boolean
+    }
+    
+    class agen_orders {
+        -id : string
+        -code : string
+        -pangkalan_id : string
+        -agen_id : string
+        -lpg_type : lpg_type
+        -qty_ordered : int
+        -qty_received : int
+        -status : string
+        -order_date : timestamp
+        -received_date : timestamp
+        -note : string
+        -created_at : timestamp
+        -updated_at : timestamp
+        --
+        +findAll(pangkalanId) : agen_orders[]
+        +create(dto) : agen_orders
+        +updateStatus(id, status) : agen_orders
+        +confirm(id, qtyReceived) : agen_orders
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                     AUDIT & LOGGING                          ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+package "Audit & Logging" <<Rectangle>> #ECEFF1 {
+    class activity_logs {
+        -id : string
+        -user_id : string
+        -order_id : string
+        -type : string
+        -title : string
+        -description : string
+        -pangkalan_name : string
+        -detail_numeric : decimal
+        -icon_name : string
+        -order_status : status_pesanan
+        -timestamp : timestamp
+        -created_at : timestamp
+        --
+        +logActivity(type, title, data) : activity_logs
+        +getActivities(limit) : activity_logs[]
+    }
+}
+
+' ╔══════════════════════════════════════════════════════════════╗
+' ║                      RELATIONSHIPS                           ║
+' ╚══════════════════════════════════════════════════════════════╝
+
+' === ENUM RELATIONS ===
+users ..> user_role
+orders ..> status_pesanan
+order_items ..> lpg_type
+timeline_tracks ..> status_pesanan
+order_payment_details ..> payment_method
+payment_records ..> payment_method
+stock_histories ..> stock_movement_type
+stock_histories ..> lpg_type
+consumers ..> consumer_type
+consumer_orders ..> lpg_type
+pangkalan_stocks ..> lpg_type
+lpg_prices ..> lpg_type
+perencanaan_harian ..> lpg_type
+penyaluran_harian ..> lpg_type
+agen_orders ..> lpg_type
+activity_logs ..> status_pesanan
+lpg_products ..> lpg_category
+
+' === MASTER DATA RELATIONS ===
+users "0..*" --o "0..1" pangkalans
+agen "1" --o "0..*" pangkalans
+
+' === ORDER RELATIONS ===
+orders "0..*" --o "1" pangkalans
+orders "0..*" --o "0..1" drivers
+orders "1" *-- "1..*" order_items
+orders "1" *-- "0..*" timeline_tracks
+orders "1" *-- "0..1" order_payment_details
+orders "1" --o "0..*" invoices
+orders "1" --o "0..*" payment_records
+orders "1" --o "0..*" activity_logs
+
+' === PAYMENT RELATIONS ===
+payment_records "0..*" --o "1" users
+payment_records "0..*" --o "0..1" invoices
+
+' === STOCK RELATIONS ===
+stock_histories "0..*" --o "0..1" lpg_products
+stock_histories "0..*" --o "0..1" users
+penyaluran_harian "0..*" --o "1" pangkalans
+perencanaan_harian "0..*" --o "1" pangkalans
+
+' === PANGKALAN SAAS RELATIONS ===
+consumers "0..*" --o "1" pangkalans
+consumer_orders "0..*" --o "1" pangkalans
+consumer_orders "0..*" --o "0..1" consumers
+pangkalan_stocks "0..*" --o "1" pangkalans
+lpg_prices "0..*" --o "1" pangkalans
+expenses "0..*" --o "1" pangkalans
+agen_orders "0..*" --o "1" pangkalans
+agen_orders "0..*" --o "0..1" agen
+
+' === AUDIT RELATIONS ===
+activity_logs "0..*" --o "0..1" users
+
+@enduml

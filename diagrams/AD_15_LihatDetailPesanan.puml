@@ -1,0 +1,42 @@
+@startuml AD_15_LihatDetailPesanan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-15: Lihat Detail Pesanan**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman Pesanan;
+:Klik pada baris pesanan;
+
+|Sistem|
+:Load data pesanan\ndengan relasi;
+:Load order_items;
+:Load timeline_tracks;
+:Load payment_details;
+:Load data pangkalan;
+:Load data driver (jika ada);
+:Tampilkan halaman detail;
+
+|User|
+:Lihat informasi pesanan;
+:Lihat daftar item;
+:Lihat timeline status;
+:Lihat status pembayaran;
+
+if (Ingin aksi lanjutan?) then (ya)
+    :Pilih aksi\n(Update Status/Assign Driver/Catat Bayar);
+    
+    |Sistem|
+    :Redirect ke aksi terkait;
+    stop
+else (tidak)
+    :Kembali ke daftar;
+    stop
+endif
+
+@enduml

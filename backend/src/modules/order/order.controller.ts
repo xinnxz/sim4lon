@@ -1,56 +1,63 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Roles } from '../auth/decorators';
-import { UserRole, StatusPesanan } from '@prisma/client';
+import { CreateOrderDto, UpdateOrderDto, UpdateOrderStatusDto } from './dto';
+import { JwtAuthGuard } from '../auth/guards';
+import { status_pesanan } from '@prisma/client';
 
 @Controller('orders')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@UseGuards(JwtAuthGuard)
 export class OrderController {
     constructor(private readonly orderService: OrderService) { }
 
     @Get()
-    async findAll(
+    findAll(
         @Query('page') page?: string,
         @Query('limit') limit?: string,
-        @Query('status') status?: StatusPesanan,
-        @Query('pangkalanId') pangkalanId?: string,
-        @Query('startDate') startDate?: string,
-        @Query('endDate') endDate?: string,
+        @Query('status') status?: status_pesanan,
+        @Query('pangkalan_id') pangkalanId?: string,
+        @Query('driver_id') driverId?: string,
+        @Query('sort_by') sortBy?: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name',
+        @Query('sort_order') sortOrder?: 'asc' | 'desc',
     ) {
-        const result = await this.orderService.findAll({
-            page: page ? parseInt(page) : 1,
-            limit: limit ? parseInt(limit) : 10,
+        return this.orderService.findAll(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 10,
             status,
             pangkalanId,
-            startDate,
-            endDate,
-        });
-        return { success: true, ...result };
+            driverId,
+            sortBy || 'created_at',
+            sortOrder || 'desc',
+        );
+    }
+
+    @Get('stats')
+    getStats(@Query('today') today?: string) {
+        const todayOnly = today === 'true';
+        return this.orderService.getStats(todayOnly);
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const data = await this.orderService.findOne(id);
-        return { success: true, data };
+    findOne(@Param('id') id: string) {
+        return this.orderService.findOne(id);
     }
 
     @Post()
-    async create(@Body() body: any) {
-        const data = await this.orderService.create(body);
-        return { success: true, data };
+    create(@Body() dto: CreateOrderDto) {
+        return this.orderService.create(dto);
+    }
+
+    @Put(':id')
+    update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
+        return this.orderService.update(id, dto);
     }
 
     @Patch(':id/status')
-    async updateStatus(@Param('id') id: string, @Body() body: { status: StatusPesanan; description?: string }) {
-        const data = await this.orderService.updateStatus(id, body);
-        return { success: true, data };
+    updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+        return this.orderService.updateStatus(id, dto);
     }
 
-    @Patch(':id/assign-driver')
-    async assignDriver(@Param('id') id: string, @Body() body: { driverId: string }) {
-        const data = await this.orderService.assignDriver(id, body.driverId);
-        return { success: true, data };
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.orderService.remove(id);
     }
 }

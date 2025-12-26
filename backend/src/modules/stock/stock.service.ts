@@ -1,105 +1,148 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { LpgType, StockMovementType } from '@prisma/client';
+import { PrismaService } from '../../prisma';
+import { CreateStockMovementDto, mapLpgTypeToEnum, mapMovementTypeToEnum } from './dto';
+import { lpg_type, stock_movement_type } from '@prisma/client';
 
 @Injectable()
 export class StockService {
     constructor(private prisma: PrismaService) { }
 
-    async getSummary() {
-        // Get all stock movements grouped by lpgType
-        const movements = await this.prisma.stockHistory.groupBy({
-            by: ['lpgType', 'movementType'],
-            _sum: { qty: true },
-        });
+    async getHistory(
+        page = 1,
+        limit = 10,
+        lpgType?: string,
+        movementType?: string,
+    ) {
+        const skip = (page - 1) * limit;
 
-        // Calculate current stock for each type
-        const stockMap = new Map<LpgType, number>();
+        const where: any = {};
+        if (lpgType) where.lpg_type = mapLpgTypeToEnum(lpgType) as lpg_type;
+        if (movementType) where.movement_type = mapMovementTypeToEnum(movementType) as stock_movement_type;
 
-        for (const lpgType of [LpgType.kg3, LpgType.kg12, LpgType.kg50]) {
-            stockMap.set(lpgType, 0);
-        }
+        const [histories, total] = await Promise.all([
+            this.prisma.stock_histories.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { timestamp: 'desc' },
+                include: {
+                    users: {
+                        select: { id: true, name: true },
+                    },
+                },
+            }),
+            this.prisma.stock_histories.count({ where }),
+        ]);
 
-        for (const m of movements) {
-            const current = stockMap.get(m.lpgType) || 0;
-            const qty = m._sum.qty || 0;
-
-            if (m.movementType === StockMovementType.MASUK) {
-                stockMap.set(m.lpgType, current + qty);
-            } else {
-                stockMap.set(m.lpgType, current - qty);
-            }
-        }
-
-        // Get last update for each type
-        const lastUpdates = await this.prisma.stockHistory.groupBy({
-            by: ['lpgType'],
-            _max: { timestamp: true },
-        });
-
-        const labels = {
-            [LpgType.kg3]: 'LPG 3 Kg',
-            [LpgType.kg12]: 'LPG 12 Kg',
-            [LpgType.kg50]: 'LPG 50 Kg',
+        return {
+            data: histories,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
         };
-
-        return Array.from(stockMap.entries()).map(([lpgType, currentStock]) => ({
-            lpgType,
-            label: labels[lpgType],
-            currentStock,
-            lastUpdate: lastUpdates.find((u) => u.lpgType === lpgType)?._max.timestamp || null,
-        }));
     }
 
-    async recordMovement(data: {
-        pangkalanId: string;
-        lpgType: LpgType;
-        movementType: StockMovementType;
-        qty: number;
-        note?: string;
-    }) {
-        const movement = await this.prisma.stockHistory.create({
-            data: {
-                pangkalanId: data.pangkalanId,
-                lpgType: data.lpgType,
-                movementType: data.movementType,
-                qty: data.qty,
-                note: data.note,
+    async createMovement(dto: CreateStockMovementDto, userId: string) {
+        console.log('=== createMovement called ===');
+        console.log('DTO:', JSON.stringify(dto));
+        console.log('userId:', userId);
+
+        try {
+            const movementTypeEnum = mapMovementTypeToEnum(dto.movement_type) as stock_movement_type;
+            console.log('Mapped movement_type:', movementTypeEnum);
+
+            // Build data object - support both legacy lpg_type and new lpg_product_id
+            const data: any = {
+                movement_type: movementTypeEnum,
+                qty: dto.qty,
+                note: dto.note,
+                recorded_by_user_id: userId,
+            };
+
+            // If lpg_product_id is provided, use it (for dynamic products)
+            if (dto.lpg_product_id) {
+                data.lpg_product_id = dto.lpg_product_id;
+                console.log('Using lpg_product_id:', dto.lpg_product_id);
+            }
+
+            // If lpg_type is provided, also set it (for legacy compatibility)
+            if (dto.lpg_type) {
+                const lpgTypeEnum = mapLpgTypeToEnum(dto.lpg_type) as lpg_type;
+                data.lpg_type = lpgTypeEnum;
+                console.log('Also setting lpg_type:', lpgTypeEnum);
+            }
+
+            const history = await this.prisma.stock_histories.create({
+                data,
+                include: {
+                    users: {
+                        select: { id: true, name: true },
+                    },
+                },
+            });
+
+            console.log('Created successfully:', history.id);
+            return history;
+        } catch (error) {
+            console.error('=== createMovement ERROR ===');
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+    async getSummary() {
+        // Get current stock for each LPG type
+        const stockData = await this.prisma.stock_histories.groupBy({
+            by: ['lpg_type', 'movement_type'],
+            where: {
+                lpg_type: { not: null } // Only include entries with lpg_type
+            },
+            _sum: {
+                qty: true,
             },
         });
 
-        // Get new stock count
-        const summary = await this.getSummary();
-        const newStock = summary.find((s) => s.lpgType === data.lpgType)?.currentStock || 0;
+        // Calculate net stock for each type
+        const summary: Record<string, { in: number; out: number; current: number }> = {};
 
-        return {
-            ...movement,
-            newStock,
-        };
-    }
+        for (const data of stockData) {
+            const type = data.lpg_type;
+            if (!type) continue; // Skip null types
 
-    async getHistory(query: {
-        lpgType?: LpgType;
-        movementType?: StockMovementType;
-        startDate?: string;
-        endDate?: string;
-        limit?: number;
-    }) {
-        const { lpgType, movementType, startDate, endDate, limit = 50 } = query;
+            if (!summary[type]) {
+                summary[type] = { in: 0, out: 0, current: 0 };
+            }
 
-        const where: any = {};
-        if (lpgType) where.lpgType = lpgType;
-        if (movementType) where.movementType = movementType;
-        if (startDate || endDate) {
-            where.timestamp = {};
-            if (startDate) where.timestamp.gte = new Date(startDate);
-            if (endDate) where.timestamp.lte = new Date(endDate);
+            if (data.movement_type === 'MASUK') {
+                summary[type].in = data._sum.qty || 0;
+            } else {
+                summary[type].out = data._sum.qty || 0;
+            }
         }
 
-        return this.prisma.stockHistory.findMany({
-            where,
+        // Calculate current stock
+        for (const type of Object.keys(summary)) {
+            summary[type].current = summary[type].in - summary[type].out;
+        }
+
+        return summary;
+    }
+
+    async getHistoryByType(lpgType: lpg_type, limit = 20) {
+        const histories = await this.prisma.stock_histories.findMany({
+            where: { lpg_type: lpgType },
             take: limit,
             orderBy: { timestamp: 'desc' },
+            include: {
+                users: {
+                    select: { id: true, name: true },
+                },
+            },
         });
+
+        return histories;
     }
 }

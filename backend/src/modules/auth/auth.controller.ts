@@ -1,51 +1,40 @@
-import { Controller, Post, Body, Get, UseGuards, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Post, Body, Get, Put, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser } from './decorators/current-user.decorator';
+import { LoginDto, RegisterDto, UpdateProfileDto, ChangePasswordDto } from './dto';
+import { JwtAuthGuard } from './guards';
+import { CurrentUser, Public } from './decorators';
 
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
+    @Public()
+    @Post('register')
+    register(@Body() dto: RegisterDto) {
+        return this.authService.register(dto);
+    }
+
+    @Public()
     @Post('login')
-    async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
-        const result = await this.authService.login(loginDto);
-
-        // Set JWT in HttpOnly cookie
-        res.cookie('token', result.accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        });
-
-        return {
-            success: true,
-            data: {
-                user: result.user,
-            },
-        };
+    login(@Body() dto: LoginDto) {
+        return this.authService.login(dto);
     }
 
-    @Post('logout')
     @UseGuards(JwtAuthGuard)
-    async logout(@Res({ passthrough: true }) res: Response) {
-        res.clearCookie('token');
-        return {
-            success: true,
-            message: 'Logged out',
-        };
+    @Get('profile')
+    getProfile(@CurrentUser('id') userId: string) {
+        return this.authService.getProfile(userId);
     }
 
-    @Get('me')
     @UseGuards(JwtAuthGuard)
-    async getProfile(@CurrentUser() user: any) {
-        const profile = await this.authService.getProfile(user.sub);
-        return {
-            success: true,
-            data: profile,
-        };
+    @Put('profile')
+    updateProfile(@CurrentUser('id') userId: string, @Body() dto: UpdateProfileDto) {
+        return this.authService.updateProfile(userId, dto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('change-password')
+    changePassword(@CurrentUser('id') userId: string, @Body() dto: ChangePasswordDto) {
+        return this.authService.changePassword(userId, dto.oldPassword, dto.newPassword);
     }
 }

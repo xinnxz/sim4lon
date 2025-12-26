@@ -1,0 +1,84 @@
+@startuml SD_14_ConfirmReceipt
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-14: CONFIRM RECEIPT (PANGKALAN)\n<size:10>Sistem SIM4LON</size>
+
+actor "Pangkalan" as User
+boundary "OrderAgenPage" as OAP
+control "AgenOrderService" as AOS
+database "agen_orders" as OrderDB
+database "pangkalan_stocks" as StockDB
+database "pangkalan_stock_movements" as MovementDB
+
+== Lihat Order yang Dikirim ==
+
+User -> OAP : 1: Buka halaman Order ke Agen
+activate OAP
+
+OAP -> AOS : 1.1: getOrders(pangkalanId, status='DIKIRIM')
+activate AOS
+AOS -> OrderDB : 1.1.1: SELECT * FROM agen_orders\nWHERE pangkalan_id = ? AND status = 'DIKIRIM'
+activate OrderDB
+OrderDB --> AOS : 1.1.1.1: orderList
+deactivate OrderDB
+AOS --> OAP : 1.1.2: orderList
+deactivate AOS
+
+OAP --> User : 1.2: Tampilkan order yang siap dikonfirmasi
+
+== Konfirmasi Penerimaan ==
+
+User -> OAP : 2: Klik order yang akan dikonfirmasi
+User -> OAP : 3: Input qty yang diterima
+User -> OAP : 4: Tambah catatan (opsional)
+User -> OAP : 5: Klik "Konfirmasi Terima"
+
+OAP -> AOS : 5.1: confirmReceipt(orderId, qtyReceived, note)
+activate AOS
+
+AOS -> OrderDB : 5.1.1: UPDATE agen_orders\nSET status = 'DITERIMA',\nqty_received = ?,\nreceived_date = NOW()
+activate OrderDB
+OrderDB --> AOS : 5.1.1.1: updated
+deactivate OrderDB
+
+AOS -> StockDB : 5.1.2: SELECT * FROM pangkalan_stocks\nWHERE pangkalan_id = ? AND lpg_type = ?
+activate StockDB
+StockDB --> AOS : 5.1.2.1: currentStock or null
+deactivate StockDB
+
+alt Stock record exists
+    AOS -> StockDB : 5.1.3: UPDATE pangkalan_stocks\nSET qty = qty + ?
+    activate StockDB
+    StockDB --> AOS : 5.1.3.1: updated
+    deactivate StockDB
+else Stock record not exists
+    AOS -> StockDB : 5.1.3: INSERT INTO pangkalan_stocks\n{pangkalan_id, lpg_type, qty}
+    activate StockDB
+    StockDB --> AOS : 5.1.3.1: created
+    deactivate StockDB
+end
+
+AOS -> MovementDB : 5.1.4: INSERT INTO pangkalan_stock_movements\n{pangkalan_id, lpg_type, movement_type='MASUK',\nqty, source='AGEN'}
+activate MovementDB
+MovementDB --> AOS : 5.1.4.1: created
+deactivate MovementDB
+
+AOS --> OAP : 5.2: {success, newStockQty}
+deactivate AOS
+
+OAP --> User : 5.3: Tampilkan pesan sukses\n"Stok berhasil ditambahkan"
+OAP --> User : 5.4: Refresh halaman
+
+deactivate OAP
+
+note right of AOS
+  Stok pangkalan bertambah
+  setelah konfirmasi terima
+end note
+
+@enduml

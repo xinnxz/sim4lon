@@ -1,0 +1,173 @@
+import { PrismaService } from '../../prisma';
+export declare class ReportsService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    getSalesReport(startDate: Date, endDate: Date): Promise<{
+        summary: {
+            total_orders: number;
+            total_revenue: number;
+            average_order: number;
+            status_breakdown: Record<string, number>;
+        };
+        data: {
+            id: string;
+            date: Date;
+            code: string;
+            pangkalan: string;
+            pangkalan_code: string;
+            subtotal: number;
+            tax: number;
+            total: number;
+            status: import("@prisma/client").$Enums.status_pesanan;
+            items: {
+                type: import("@prisma/client").$Enums.lpg_type;
+                label: string | null;
+                qty: number;
+                price: number;
+                subtotal: number;
+            }[];
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+    }>;
+    getPaymentsReport(startDate: Date, endDate: Date): Promise<{
+        summary: {
+            total_payments: number;
+            total_amount: number;
+            average_payment: number;
+            method_breakdown: Record<string, {
+                count: number;
+                amount: number;
+            }>;
+        };
+        data: {
+            id: string;
+            date: Date;
+            invoice_number: string;
+            order_code: string;
+            pangkalan: string;
+            amount: number;
+            method: import("@prisma/client").$Enums.payment_method;
+            note: string | null;
+            recorded_by: string;
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+    }>;
+    getStockMovementReport(startDate: Date, endDate: Date, productId?: string): Promise<{
+        summary: {
+            total_in: number;
+            total_out: number;
+            net_change: number;
+            current_balance: number;
+            movement_count: number;
+        };
+        data: {
+            id: string;
+            date: Date;
+            product: string;
+            type: import("@prisma/client").$Enums.stock_movement_type;
+            qty: number;
+            note: string | null;
+            recorded_by: string;
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+    }>;
+    getPangkalanReport(startDate: Date, endDate: Date): Promise<{
+        summary: {
+            total_pangkalan: number;
+            total_orders_subsidi: number;
+            total_tabung_subsidi: number;
+            total_revenue_subsidi: number;
+            total_nonsubsidi_orders: number;
+            total_nonsubsidi_tabung: number;
+            total_nonsubsidi_revenue: number;
+            total_all_orders: number;
+            total_all_tabung: number;
+            total_all_revenue: number;
+            tabung_by_type: {
+                kg3: number;
+                kg5: number;
+                kg12: number;
+                kg50: number;
+                gr220: number;
+            };
+            total_consumers: number;
+            active_consumers: number;
+            top_pangkalan: string;
+        };
+        data: {
+            id: string;
+            code: string;
+            name: string;
+            address: string;
+            region: string;
+            pic_name: string;
+            phone: string;
+            alokasi_bulanan: number;
+            total_orders_from_agen: number;
+            total_tabung_from_agen: number;
+            total_consumer_orders: number;
+            total_tabung_to_consumers: number;
+            total_revenue: number;
+            total_nonsubsidi_orders: number;
+            total_nonsubsidi_tabung: number;
+            total_nonsubsidi_revenue: number;
+            total_all_orders: number;
+            total_all_tabung: number;
+            total_all_revenue: number;
+            total_registered_consumers: number;
+            active_consumers: number;
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+    }>;
+    getSubsidiConsumers(pangkalanId: string, startDate: Date, endDate: Date): Promise<{
+        error: string;
+        summary?: undefined;
+        data?: undefined;
+        period?: undefined;
+    } | {
+        summary: {
+            pangkalan_id: string;
+            pangkalan_code: string;
+            pangkalan_name: string;
+            total_consumers: number;
+            registered_consumers: number;
+            walk_in_count: number;
+            total_transactions: number;
+            total_tabung: number;
+        };
+        data: {
+            id: string;
+            name: string;
+            nik: string | null;
+            kk: string | null;
+            phone: string | null;
+            address: string | null;
+            consumer_type: string;
+            total_purchases: number;
+            total_tabung: number;
+            last_purchase: Date;
+            purchases: Array<{
+                date: Date;
+                qty: number;
+                amount: number;
+            }>;
+        }[];
+        period: {
+            start: Date;
+            end: Date;
+        };
+        error?: undefined;
+    }>;
+}

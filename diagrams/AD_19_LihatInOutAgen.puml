@@ -1,0 +1,42 @@
+@startuml AD_19_LihatInOutAgen
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-19: Lihat In-Out Agen**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman In-Out Agen;
+:Pilih bulan;
+
+|Sistem|
+:Query penerimaan_stok\nbulan tersebut;
+:Query penyaluran_harian\nbulan tersebut;
+:Hitung total MASUK per hari;
+:Hitung total KELUAR per hari;
+:Hitung saldo per hari;
+:Tampilkan tabel rekap\n(Tanggal | Masuk | Keluar | Saldo);
+
+|User|
+:Lihat rekap harian;
+
+if (Ingin export?) then (ya)
+    :Klik "Export Excel";
+    
+    |Sistem|
+    :Generate file Excel;
+    :Download file;
+    
+    |User|
+    :File tersimpan;
+    stop
+else (tidak)
+    :Selesai melihat;
+    stop
+endif
+
+@enduml

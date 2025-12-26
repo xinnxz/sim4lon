@@ -60,7 +60,7 @@ const calculateDashboardData = (orders: typeof MOCK_ORDER_DATA): { kpis: Dashboa
       colorClass: 'green',
     },
     {
-      title: "Pesanan Belum Diproses",
+      title: "Menunggu Pembayaran",
       value: pendingOrders.toString(),
       iconName: "Hourglass",
       colorClass: 'yellow',

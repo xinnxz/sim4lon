@@ -1,51 +1,45 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { PangkalanService } from './pangkalan.service';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Roles } from '../auth/decorators';
-import { UserRole } from '@prisma/client';
+import { CreatePangkalanDto, UpdatePangkalanDto } from './dto';
+import { JwtAuthGuard } from '../auth/guards';
 
-@Controller('pangkalan')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Controller('pangkalans')
+@UseGuards(JwtAuthGuard)
 export class PangkalanController {
     constructor(private readonly pangkalanService: PangkalanService) { }
 
     @Get()
-    async findAll(@Query('search') search?: string, @Query('isActive') isActive?: string) {
-        const data = await this.pangkalanService.findAll({
+    findAll(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+        @Query('is_active') isActive?: string,
+        @Query('search') search?: string,
+    ) {
+        return this.pangkalanService.findAll(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 10,
+            isActive !== undefined ? isActive === 'true' : undefined,
             search,
-            isActive: isActive ? isActive === 'true' : undefined,
-        });
-        return { success: true, data };
+        );
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const data = await this.pangkalanService.findOne(id);
-        return { success: true, data };
-    }
-
-    @Get(':id/summary')
-    async getSummary(@Param('id') id: string) {
-        const data = await this.pangkalanService.getSummary(id);
-        return { success: true, data };
+    findOne(@Param('id') id: string) {
+        return this.pangkalanService.findOne(id);
     }
 
     @Post()
-    async create(@Body() body: any) {
-        const data = await this.pangkalanService.create(body);
-        return { success: true, data };
+    create(@Body() dto: CreatePangkalanDto) {
+        return this.pangkalanService.create(dto);
     }
 
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() body: any) {
-        const data = await this.pangkalanService.update(id, body);
-        return { success: true, data };
+    @Put(':id')
+    update(@Param('id') id: string, @Body() dto: UpdatePangkalanDto) {
+        return this.pangkalanService.update(id, dto);
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: string) {
-        const result = await this.pangkalanService.remove(id);
-        return { success: true, ...result };
+    remove(@Param('id') id: string) {
+        return this.pangkalanService.remove(id);
     }
 }

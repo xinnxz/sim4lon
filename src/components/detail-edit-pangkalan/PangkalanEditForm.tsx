@@ -1,8 +1,30 @@
+/**
+ * PangkalanEditForm - Form Edit Pangkalan dengan Cascading Dropdown
+ * 
+ * PENJELASAN:
+ * Form untuk edit data pangkalan dengan:
+ * - Cascading dropdown Kabupaten → Kecamatan
+ * - Zod validation
+ * - Pre-populate dari existing region data
+ */
 
-import { useState } from 'react'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
@@ -13,33 +35,76 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import {
-  Select,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select'
-import { useForm } from 'react-hook-form'
 import SafeIcon from '@/components/common/SafeIcon'
+import { type Pangkalan } from '@/lib/api'
+import { KABUPATEN_DATA, getKecamatanByKabupaten } from '@/data/regions'
 
-interface Pangkalan {
-  id: string
-  nama: string
-  alamat: string
-  kontak: string
-  email: string
-  catatan: string
-  createdAt: string
-  updatedAt: string
-  picName: string
-  area: string
-  status: string
+/**
+ * Helper: Parse existing region string to kabupaten/kecamatan
+ * Format: "Kecamatan, Kabupaten Xxx" 
+ */
+function parseRegion(region: string | null): { kabupaten: string; kecamatan: string } {
+  if (!region) return { kabupaten: '', kecamatan: '' }
+
+  // Try to match "Kecamatan, Kabupaten Xxx" format
+  const parts = region.split(',')
+  if (parts.length >= 2) {
+    const kecamatan = parts[0].trim()
+    const kabupatenName = parts[1].trim()
+    // Find kabupaten ID by name
+    const kabupaten = KABUPATEN_DATA.find(k =>
+      k.name === kabupatenName || kabupatenName.includes(k.name.replace('Kabupaten ', ''))
+    )
+    if (kabupaten) {
+      return { kabupaten: kabupaten.id, kecamatan }
+    }
+  }
+
+  // Fallback: try to find kecamatan in any kabupaten
+  for (const kab of KABUPATEN_DATA) {
+    if (kab.kecamatan.includes(region)) {
+      return { kabupaten: kab.id, kecamatan: region }
+    }
+  }
+
+  return { kabupaten: '', kecamatan: region }
 }
+
+/**
+ * Validation schema
+ */
+const pangkalanSchema = z.object({
+  name: z.string()
+    .min(3, 'Nama pangkalan minimal 3 karakter')
+    .max(100, 'Nama pangkalan maksimal 100 karakter'),
+  address: z.string()
+    .min(10, 'Alamat minimal 10 karakter')
+    .max(255, 'Alamat maksimal 255 karakter'),
+  kabupaten: z.string()
+    .min(1, 'Kabupaten harus dipilih'),
+  kecamatan: z.string()
+    .min(1, 'Kecamatan harus dipilih'),
+  pic_name: z.string()
+    .min(2, 'Nama PIC minimal 2 karakter')
+    .max(100, 'Nama PIC maksimal 100 karakter'),
+  phone: z.string()
+    .regex(/^(\+62|0)[0-9]{9,12}$/, 'Nomor telepon tidak valid (contoh: 08xx atau +62xx)'),
+  email: z.string()
+    .min(1, 'Email wajib diisi')
+    .email('Format email tidak valid'),
+  capacity: z.string().optional(),
+  alokasi_bulanan: z.string().optional(),
+  note: z.string()
+    .max(500, 'Catatan maksimal 500 karakter')
+    .optional(),
+  is_active: z.boolean(),
+})
+
+type PangkalanFormValues = z.infer<typeof pangkalanSchema>
 
 interface PangkalanEditFormProps {
   pangkalan: Pangkalan
-  onSave: (data: Omit<Pangkalan, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>
+  onSave: (data: Partial<Pangkalan>) => Promise<void>
   onCancel: () => void
   isSaving: boolean
 }
@@ -50,20 +115,53 @@ export default function PangkalanEditForm({
   onCancel,
   isSaving
 }: PangkalanEditFormProps) {
-const form = useForm({
+  // Parse existing region to kabupaten/kecamatan
+  const parsedRegion = parseRegion(pangkalan.region)
+  const [selectedKabupaten, setSelectedKabupaten] = useState(parsedRegion.kabupaten)
+
+  const form = useForm<PangkalanFormValues>({
+    resolver: zodResolver(pangkalanSchema),
     defaultValues: {
-      nama: pangkalan.nama,
-      alamat: pangkalan.alamat,
-      area: pangkalan.area,
-      kontak: pangkalan.kontak,
-      email: pangkalan.email,
-      picName: pangkalan.picName,
-      catatan: pangkalan.catatan,
-      status: pangkalan.status,
-    }
+      name: pangkalan.name || '',
+      address: pangkalan.address || '',
+      kabupaten: parsedRegion.kabupaten,
+      kecamatan: parsedRegion.kecamatan,
+      pic_name: pangkalan.pic_name || '',
+      phone: pangkalan.phone || '',
+      email: pangkalan.email || '',
+      capacity: pangkalan.capacity?.toString() || '',
+      alokasi_bulanan: pangkalan.alokasi_bulanan?.toString() || '',
+      note: pangkalan.note || '',
+      is_active: pangkalan.is_active,
+    },
   })
 
-  const onSubmit = async (data: any) => {
+  // Get kecamatan list based on selected kabupaten
+  const kecamatanList = getKecamatanByKabupaten(selectedKabupaten)
+
+  /**
+   * Submit form - combine kabupaten+kecamatan into region
+   */
+  const onSubmit = async (values: PangkalanFormValues) => {
+    // Combine kabupaten + kecamatan into region
+    const kabupatenName = KABUPATEN_DATA.find(k => k.id === values.kabupaten)?.name || values.kabupaten
+    const region = `${values.kecamatan}, ${kabupatenName}`
+
+    const data: Partial<Pangkalan> = {
+      name: values.name,
+      address: values.address,
+      region: region,
+      pic_name: values.pic_name,
+      phone: values.phone,
+      is_active: values.is_active,
+    }
+
+    // Only add optional fields if they have values
+    if (values.email) data.email = values.email
+    if (values.capacity) data.capacity = parseInt(values.capacity, 10)
+    if (values.alokasi_bulanan) data.alokasi_bulanan = parseInt(values.alokasi_bulanan, 10)
+    if (values.note) data.note = values.note
+
     await onSave(data)
   }
 
@@ -78,131 +176,151 @@ const form = useForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Nama Pangkalan */}
-            <FormField
-              control={form.control}
-              name="nama"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Pangkalan</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Masukkan nama pangkalan"
-                      {...field}
-                      disabled={isSaving}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Nama resmi pangkalan LPG
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Nama Pangkalan + Email - Grid Layout */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* Nama Pangkalan */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Nama Pangkalan *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: Pangkalan Maju Jaya"
+                        {...field}
+                        disabled={isSaving}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-{/* Alamat */}
+              {/* Email */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Email *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="email@example.com"
+                        {...field}
+                        disabled={isSaving}
+                        type="email"
+                      />
+                    </FormControl>
+                    <FormDescription>Untuk kirim invoice/nota</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Alamat */}
             <FormField
               control={form.control}
-              name="alamat"
+              name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Alamat</FormLabel>
+                  <FormLabel className="text-base font-semibold">Alamat Lengkap *</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Masukkan alamat lengkap pangkalan"
+                      placeholder="Masukkan alamat lengkap..."
                       {...field}
                       disabled={isSaving}
                       rows={3}
                     />
                   </FormControl>
                   <FormDescription>
-                    Alamat lengkap termasuk kota dan kode pos
+                    Alamat lengkap pangkalan
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Area & PIC Name */}
+            {/* Wilayah - Cascading Dropdowns */}
             <div className="grid gap-4 sm:grid-cols-2">
-<FormField
+              {/* Kabupaten */}
+              <FormField
                 control={form.control}
-                name="area"
+                name="kabupaten"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Area / Wilayah</FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange} disabled={isSaving}>
+                    <FormLabel className="text-base font-semibold">Kabupaten *</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        setSelectedKabupaten(value)
+                        // Reset kecamatan when kabupaten changes
+                        form.setValue('kecamatan', '')
+                      }}
+                      defaultValue={field.value}
+                      disabled={isSaving}
+                    >
+                      <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Pilih area" />
+                          <SelectValue placeholder="Pilih Kabupaten" />
                         </SelectTrigger>
-<SelectContent>
-                            <SelectItem value="Agrabinta">Agrabinta</SelectItem>
-                            <SelectItem value="Bojongpicung">Bojongpicung</SelectItem>
-                            <SelectItem value="Campaka">Campaka</SelectItem>
-                            <SelectItem value="Cianjur">Cianjur</SelectItem>
-                            <SelectItem value="Cibeber">Cibeber</SelectItem>
-                            <SelectItem value="Cibinong">Cibinong</SelectItem>
-                            <SelectItem value="Cidaun">Cidaun</SelectItem>
-                            <SelectItem value="Cikalongkulon">Cikalongkulon</SelectItem>
-                            <SelectItem value="Cilaku">Cilaku</SelectItem>
-                            <SelectItem value="Cijati">Cijati</SelectItem>
-                            <SelectItem value="Cipanas">Cipanas</SelectItem>
-                            <SelectItem value="Ciranjang">Ciranjang</SelectItem>
-                            <SelectItem value="Cugenang">Cugenang</SelectItem>
-                            <SelectItem value="Gekbrong">Gekbrong</SelectItem>
-                            <SelectItem value="Kadupandak">Kadupandak</SelectItem>
-                            <SelectItem value="Karangtengah">Karangtengah</SelectItem>
-                            <SelectItem value="Leles">Leles</SelectItem>
-                            <SelectItem value="Mande">Mande</SelectItem>
-                            <SelectItem value="Naringgul">Naringgul</SelectItem>
-                            <SelectItem value="Pacet">Pacet</SelectItem>
-                            <SelectItem value="Pagelaran">Pagelaran</SelectItem>
-                            <SelectItem value="Sindangbarang">Sindangbarang</SelectItem>
-                            <SelectItem value="Sukaluyu">Sukaluyu</SelectItem>
-                            <SelectItem value="Sukanagara">Sukanagara</SelectItem>
-                            <SelectItem value="Sukaresmi">Sukaresmi</SelectItem>
-                            <SelectItem value="Takokak">Takokak</SelectItem>
-                            <SelectItem value="Tanggeung">Tanggeung</SelectItem>
-                            <SelectItem value="Warungkondang">Warungkondang</SelectItem>
-                          </SelectContent>
-                      </Select>
-                    </FormControl>
+                      </FormControl>
+                      <SelectContent>
+                        {KABUPATEN_DATA.map((kab) => (
+                          <SelectItem key={kab.id} value={kab.id}>
+                            {kab.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Kecamatan */}
               <FormField
                 control={form.control}
-                name="picName"
+                name="kecamatan"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nama PIC (Person In Charge)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: Budi Santoso"
-                        {...field}
-                        disabled={isSaving}
-                      />
-                    </FormControl>
+                    <FormLabel className="text-base font-semibold">Kecamatan *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isSaving || !selectedKabupaten}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedKabupaten ? "Pilih Kecamatan" : "Pilih Kabupaten dulu"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {kecamatanList.map((kec) => (
+                          <SelectItem key={kec} value={kec}>
+                            {kec}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Kontak & Email */}
+            {/* PIC Name & Phone */}
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
-                name="kontak"
+                name="pic_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nomor Telepon</FormLabel>
+                    <FormLabel className="text-base font-semibold">Nama PIC *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="0812-3456-7890"
+                        placeholder="Nama penanggung jawab"
                         {...field}
                         disabled={isSaving}
                       />
@@ -214,16 +332,16 @@ const form = useForm({
 
               <FormField
                 control={form.control}
-                name="email"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-base font-semibold">No. Telepon *</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
-                        placeholder="email@pangkalan.com"
+                        placeholder="08xx atau +62xx"
                         {...field}
                         disabled={isSaving}
+                        type="tel"
                       />
                     </FormControl>
                     <FormMessage />
@@ -232,64 +350,112 @@ const form = useForm({
               />
             </div>
 
-{/* Status */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Status Pangkalan</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      {field.value === 'Aktif' ? 'Pangkalan sedang aktif' : 'Pangkalan sedang nonaktif'}
-                    </div>
-                  </div>
-                  <FormControl>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">{field.value === 'Aktif' ? 'Aktif' : 'Nonaktif'}</span>
-                      <select
+            {/* Kapasitas + Alokasi Bulanan - Grid Layout */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* Capacity */}
+              <FormField
+                control={form.control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Kapasitas</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: 500"
                         {...field}
                         disabled={isSaving}
-                        className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="Aktif">Aktif</option>
-                        <option value="Nonaktif">Nonaktif</option>
-                      </select>
-                    </div>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                        type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                      />
+                    </FormControl>
+                    <FormDescription>Kapasitas penyimpanan (unit)</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Alokasi Bulanan */}
+              <FormField
+                control={form.control}
+                name="alokasi_bulanan"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Alokasi Bulanan *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: 500"
+                        {...field}
+                        disabled={isSaving}
+                        type="number"
+                        min={0}
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                      />
+                    </FormControl>
+                    <FormDescription>Tabung/bulan untuk auto-generate</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Catatan */}
             <FormField
               control={form.control}
-              name="catatan"
+              name="note"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Catatan</FormLabel>
+                  <FormLabel className="text-base font-semibold">Catatan (Opsional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Masukkan catatan atau informasi tambahan"
+                      placeholder="Catatan tambahan..."
                       {...field}
                       disabled={isSaving}
-                      rows={4}
+                      rows={3}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Informasi tambahan tentang pangkalan (opsional)
-                  </FormDescription>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Status Aktif */}
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base font-semibold">Status Aktif</FormLabel>
+                    <FormDescription>
+                      Pangkalan aktif dapat menerima pesanan
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isSaving}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSaving}
+              >
+                <SafeIcon name="X" className="mr-2 h-4 w-4" />
+                Batal
+              </Button>
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="flex-1"
+                className="min-w-[140px]"
               >
                 {isSaving ? (
                   <>
@@ -302,16 +468,6 @@ const form = useForm({
                     Simpan Perubahan
                   </>
                 )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={isSaving}
-                className="flex-1"
-              >
-                <SafeIcon name="X" className="mr-2 h-4 w-4" />
-                Batal
               </Button>
             </div>
           </form>

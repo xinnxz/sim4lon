@@ -56,8 +56,8 @@ const recentActivities: Activity[] = [
 
 const statusColors = {
   completed: 'bg-green-100 text-green-700',
-  pending: 'bg-yellow-100 text-yellow-700',
-  'in-progress': 'bg-blue-100 text-blue-700'
+  pending: 'bg-amber-100 text-amber-700',
+  'in-progress': 'bg-indigo-100 text-indigo-700'
 }
 
 const statusLabels = {
@@ -81,18 +81,16 @@ export default function DashboardRecentActivity() {
             .map((activity, index) => (
               <div key={activity.id}>
                 <div className="flex gap-3">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                    activity.status === 'completed' ? 'bg-green-100' :
-                    activity.status === 'pending' ? 'bg-yellow-100' :
-                    'bg-blue-100'
-                  }`}>
-                    <SafeIcon 
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${activity.status === 'completed' ? 'bg-green-100' :
+                      activity.status === 'pending' ? 'bg-amber-100' :
+                        'bg-indigo-100'
+                    }`}>
+                    <SafeIcon
                       name={activity.icon}
-                      className={`h-5 w-5 ${
-                        activity.status === 'completed' ? 'text-green-700' :
-                        activity.status === 'pending' ? 'text-yellow-700' :
-                        'text-blue-700'
-                      }`}
+                      className={`h-5 w-5 ${activity.status === 'completed' ? 'text-green-700' :
+                          activity.status === 'pending' ? 'text-amber-700' :
+                            'text-indigo-700'
+                        }`}
                     />
                   </div>
                   <div className="flex-1 space-y-1">
@@ -127,18 +125,16 @@ export default function DashboardRecentActivity() {
             .map((activity, index) => (
               <div key={activity.id}>
                 <div className="flex gap-3">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                    activity.status === 'completed' ? 'bg-green-100' :
-                    activity.status === 'pending' ? 'bg-yellow-100' :
-                    'bg-blue-100'
-                  }`}>
-                    <SafeIcon 
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${activity.status === 'completed' ? 'bg-green-100' :
+                      activity.status === 'pending' ? 'bg-amber-100' :
+                        'bg-indigo-100'
+                    }`}>
+                    <SafeIcon
                       name={activity.icon}
-                      className={`h-5 w-5 ${
-                        activity.status === 'completed' ? 'text-green-700' :
-                        activity.status === 'pending' ? 'text-yellow-700' :
-                        'text-blue-700'
-                      }`}
+                      className={`h-5 w-5 ${activity.status === 'completed' ? 'text-green-700' :
+                          activity.status === 'pending' ? 'text-amber-700' :
+                            'text-indigo-700'
+                        }`}
                     />
                   </div>
                   <div className="flex-1 space-y-1">

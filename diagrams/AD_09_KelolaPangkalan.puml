@@ -1,0 +1,84 @@
+@startuml AD_09_KelolaPangkalan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-09: Kelola Pangkalan**\nSistem SIM4LON
+
+|Admin|
+start
+:Buka halaman Master Pangkalan;
+
+|Sistem|
+:Load daftar pangkalan\ndengan pagination;
+:Tampilkan statistik\n(total, aktif, nonaktif);
+
+|Admin|
+:Pilih aksi;
+
+switch (Aksi?)
+case (Tambah Baru)
+    :Klik "Tambah Pangkalan";
+    
+    |Sistem|
+    :Tampilkan form pangkalan;
+    
+    |Admin|
+    :Isi data pangkalan\n(nama, alamat, region, PIC);
+    :Isi alokasi bulanan;
+    :Masukkan email & password\nuntuk akun login (opsional);
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Validasi input;
+    :Generate kode pangkalan\n(PKL-XXX);
+    :Simpan data pangkalan;
+    :Buat user PANGKALAN\n(jika ada kredensial);
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Edit)
+    :Klik "Edit" pada pangkalan;
+    
+    |Sistem|
+    :Load data pangkalan;
+    :Tampilkan form edit;
+    
+    |Admin|
+    :Ubah data yang diperlukan;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Update data pangkalan;
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Hapus)
+    :Klik "Hapus" pada pangkalan;
+    
+    |Sistem|
+    :Tampilkan konfirmasi;
+    
+    |Admin|
+    :Konfirmasi hapus;
+    
+    |Sistem|
+    :Soft delete pangkalan\n(set deleted_at);
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+endswitch
+
+:Refresh daftar pangkalan;
+stop
+
+@enduml

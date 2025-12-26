@@ -3,11 +3,14 @@
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import AdminHeader from '@/components/common/AdminHeader.tsx'
 import NotaPembayaranPage from '@/components/nota-pembayaran/NotaPembayaranPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Nota Pembayaran - SIM4LON">
-  <AdminHeader client:load />
-  <main className="flex-1 bg-background">
-    <NotaPembayaranPage client:load />
-  </main>
+  <ProtectedDashboard client:load>
+    <AdminHeader client:load />
+    <main className="flex-1 bg-background">
+      <NotaPembayaranPage client:load />
+    </main>
+  </ProtectedDashboard>
 </BaseLayout>

@@ -1,0 +1,31 @@
+@startuml AD_25_ExportLaporan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-25: Export Laporan**\nSistem SIM4LON
+
+|User|
+start
+:Berada di halaman laporan\n(sudah ada data);
+:Klik "Export Excel";
+
+|Sistem|
+:Ambil data laporan saat ini;
+:Tentukan format kolom\nsesuai jenis laporan;
+:Generate file Excel\ndengan header;
+:Isi data ke rows;
+:Set styling (border, width);
+:Generate nama file\n(Laporan_JenisLaporan_Tanggal.xlsx);
+:Kirim file ke browser;
+
+|User|
+:Browser download file;
+:File tersimpan di\nfolder Downloads;
+:Buka file dengan Excel;
+stop
+
+@enduml

@@ -1,40 +1,55 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Roles } from '../auth/decorators';
-import { UserRole, PaymentMethod } from '@prisma/client';
+import { CreatePaymentRecordDto, UpdateOrderPaymentDto } from './dto';
+import { JwtAuthGuard } from '../auth/guards';
+import { CurrentUser } from '../auth/decorators';
+import { payment_method } from '@prisma/client';
 
 @Controller('payments')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@UseGuards(JwtAuthGuard)
 export class PaymentController {
     constructor(private readonly paymentService: PaymentService) { }
 
-    @Get(':orderId')
-    async getPaymentDetail(@Param('orderId') orderId: string) {
-        const data = await this.paymentService.getPaymentDetail(orderId);
-        return { success: true, data };
-    }
-
-    @Post(':orderId')
-    async recordPayment(
-        @Param('orderId') orderId: string,
-        @Body() body: {
-            paymentMethod: PaymentMethod;
-            amountPaid: number;
-            paymentDate?: string;
-            isDp?: boolean;
-            note?: string;
-        },
+    @Get('records')
+    findAllRecords(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+        @Query('order_id') orderId?: string,
+        @Query('invoice_id') invoiceId?: string,
+        @Query('method') method?: payment_method,
     ) {
-        const data = await this.paymentService.recordPayment(orderId, body);
-        return { success: true, data };
+        return this.paymentService.findAllRecords(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 10,
+            orderId,
+            invoiceId,
+            method,
+        );
     }
 
-    @Post(':orderId/upload-proof')
-    async uploadProof(@Param('orderId') orderId: string, @Body() body: { proofUrl: string }) {
-        // Note: In production, implement file upload to R2/S3
-        const data = await this.paymentService.uploadProof(orderId, body.proofUrl);
-        return { success: true, data };
+    @Get('records/:id')
+    findOneRecord(@Param('id') id: string) {
+        return this.paymentService.findOneRecord(id);
+    }
+
+    @Post('records')
+    createRecord(
+        @Body() dto: CreatePaymentRecordDto,
+        @CurrentUser('id') userId: string,
+    ) {
+        return this.paymentService.createRecord(dto, userId);
+    }
+
+    @Get('orders/:orderId')
+    getOrderPayment(@Param('orderId') orderId: string) {
+        return this.paymentService.getOrderPayment(orderId);
+    }
+
+    @Put('orders/:orderId')
+    updateOrderPayment(
+        @Param('orderId') orderId: string,
+        @Body() dto: UpdateOrderPaymentDto,
+    ) {
+        return this.paymentService.updateOrderPayment(orderId, dto);
     }
 }

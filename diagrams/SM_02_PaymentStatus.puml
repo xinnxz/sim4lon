@@ -1,0 +1,82 @@
+@startuml SM_02_PaymentStatus
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam state {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+    FontSize 12
+    ArrowColor #E65100
+}
+
+skinparam state {
+    BackgroundColor<<unpaid>> #F44336
+    FontColor<<unpaid>> white
+    BackgroundColor<<partial>> #FF9800
+    FontColor<<partial>> white
+    BackgroundColor<<paid>> #4CAF50
+    FontColor<<paid>> white
+}
+
+title <size:18>**STATE MACHINE DIAGRAM**</size>\n<size:14>SM-02: Status Pembayaran (Payment Status)</size>\n<size:10>Sistem SIM4LON</size>
+
+[*] --> UNPAID : Pesanan dibuat
+
+state UNPAID <<unpaid>> {
+    UNPAID : is_paid = false
+    UNPAID : is_dp = false
+    UNPAID : amount_paid = 0
+    UNPAID : --
+    UNPAID : Belum ada pembayaran
+}
+
+state PARTIAL <<partial>> {
+    PARTIAL : is_paid = false
+    PARTIAL : is_dp = true
+    PARTIAL : amount_paid < total_amount
+    PARTIAL : --
+    PARTIAL : Down Payment (DP) diterima
+}
+
+state PAID <<paid>> {
+    PAID : is_paid = true
+    PAID : is_dp = false
+    PAID : amount_paid = total_amount
+    PAID : --
+    PAID : Pembayaran lunas
+}
+
+UNPAID --> PARTIAL : Bayar DP\n[amount < total]
+
+UNPAID --> PAID : Bayar Lunas\n[amount >= total]
+
+PARTIAL --> PAID : Bayar Sisa\n[total_paid >= total]
+
+PARTIAL --> PARTIAL : Bayar Tambahan\n[total_paid < total]
+
+PAID --> [*]
+
+note right of UNPAID
+  <b>Initial State</b>
+  Saat pesanan baru dibuat,
+  status pembayaran = UNPAID
+end note
+
+note right of PARTIAL
+  <b>Intermediate State</b>
+  Sudah ada uang masuk
+  tapi belum lunas
+end note
+
+note right of PAID
+  <b>Final State</b>
+  Pembayaran sudah lengkap
+  Order bisa diproses
+end note
+
+note bottom of PARTIAL
+  <b>Guard Condition:</b>
+  amount_paid + new_payment >= total_amount
+  → Transition ke PAID
+end note
+
+@enduml

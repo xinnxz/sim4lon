@@ -1,18 +1,28 @@
 
 ---
+/**
+ * Dashboard Admin Page
+ * 
+ * PROTEKSI ROUTE:
+ * Halaman ini dilindungi oleh ProtectedDashboard component.
+ * User yang tidak login atau tidak punya role ADMIN akan di-redirect.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AdminHeader from '@/components/common/AdminHeader.tsx'
 import AppSidebarLayout from '@/components/common/AppSidebarLayout.tsx'
 import AdminFooter from '@/components/common/AdminFooter.tsx'
 import DashboardContent from '@/components/dashboard-admin/DashboardContent.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
 ---
 
 <BaseLayout title="Dashboard Admin - SIM4LON">
-  <AdminHeader client:load userName="Admin User" userRole="Administrator" notificationCount={3} />
-  <AppSidebarLayout client:load headerHeight="64px">
-    <main class="flex-1 flex flex-col">
-      <DashboardContent client:idle />
-      <AdminFooter />
-    </main>
-  </AppSidebarLayout>
+  <!-- ProtectedDashboard akan cek auth sebelum render konten -->
+  <ProtectedDashboard client:load allowedRoles={['ADMIN', 'OPERATOR']}>
+    <AppSidebarLayout client:load headerHeight="64px">
+      <main class="flex-1 flex flex-col">
+        <DashboardContent client:idle />
+        <AdminFooter />
+      </main>
+    </AppSidebarLayout>
+  </ProtectedDashboard>
 </BaseLayout>
+

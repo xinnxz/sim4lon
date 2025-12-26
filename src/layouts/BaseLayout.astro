@@ -16,6 +16,40 @@ const { title = 'Project', description = 'Built with Astro' } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/logo-sim4lon-nobg.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/logo-sim4lon-nobg.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo-sim4lon-nobg.png" />
+    
+    <!-- Theme & Accent Color Persistence Script -->
+    <!-- Runs before render to prevent flash of unstyled content (FOUC) -->
+    <script is:inline>
+      (function() {
+        // Apply saved theme
+        const savedTheme = localStorage.getItem('theme');
+        const root = document.documentElement;
+        
+        if (savedTheme === 'dark') {
+          root.classList.add('dark');
+        } else if (savedTheme === 'light') {
+          root.classList.add('light');
+        } else {
+          // System preference
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            root.classList.add('dark');
+          } else {
+            root.classList.add('light');
+          }
+        }
+        
+        // Apply saved accent color
+        const savedAccent = localStorage.getItem('accentColor');
+        if (savedAccent) {
+          root.setAttribute('data-accent', savedAccent);
+        }
+      })();
+    </script>
   </head>
   <body>
     <Toaster client:load />

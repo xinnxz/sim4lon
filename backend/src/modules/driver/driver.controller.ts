@@ -1,42 +1,43 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { DriverService } from './driver.service';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Roles } from '../auth/decorators';
-import { UserRole } from '@prisma/client';
+import { CreateDriverDto, UpdateDriverDto } from './dto';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('drivers')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@UseGuards(JwtAuthGuard)
 export class DriverController {
     constructor(private readonly driverService: DriverService) { }
 
     @Get()
-    async findAll() {
-        const drivers = await this.driverService.findAll();
-        return { success: true, data: drivers };
+    findAll(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+        @Query('is_active') isActive?: string,
+    ) {
+        return this.driverService.findAll(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 10,
+            isActive !== undefined ? isActive === 'true' : undefined,
+        );
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const driver = await this.driverService.findOne(id);
-        return { success: true, data: driver };
+    findOne(@Param('id') id: string) {
+        return this.driverService.findOne(id);
     }
 
     @Post()
-    async create(@Body() body: { userId: string; name: string; phone?: string; vehicleId?: string; note?: string }) {
-        const driver = await this.driverService.create(body);
-        return { success: true, data: driver };
+    create(@Body() dto: CreateDriverDto) {
+        return this.driverService.create(dto);
     }
 
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() body: any) {
-        const driver = await this.driverService.update(id, body);
-        return { success: true, data: driver };
+    @Put(':id')
+    update(@Param('id') id: string, @Body() dto: UpdateDriverDto) {
+        return this.driverService.update(id, dto);
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: string) {
-        const result = await this.driverService.remove(id);
-        return { success: true, ...result };
+    remove(@Param('id') id: string) {
+        return this.driverService.remove(id);
     }
 }

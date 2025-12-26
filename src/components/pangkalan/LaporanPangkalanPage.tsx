@@ -1,0 +1,1243 @@
+/**
+ * LaporanPangkalanPage - Enhanced Laporan UI/UX with Best Practices
+ * 
+ * Features:
+ * - Professional gradient cards with hover effects
+ * - Enhanced charts with better tooltips and animations
+ * - Clean table design with alternating rows
+ * - Responsive grid layout
+ * - Smooth transitions and micro-animations
+ * - Color-coded financial indicators
+ */
+
+'use client'
+
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import SafeIcon from '@/components/common/SafeIcon'
+import {
+    authApi,
+    consumerOrdersApi,
+    lpgPricesApi,
+    expensesApi,
+    type UserProfile,
+    type ConsumerOrder,
+    type ChartDataPoint,
+    type PangkalanLpgPrice,
+    type Expense,
+} from '@/lib/api'
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+    Area,
+    AreaChart,
+    ComposedChart,
+} from 'recharts'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import { toast } from 'sonner'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+// Note: All prices are fetched dynamically from lpgPricesApi
+
+// Custom tooltip component
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-slate-900/95 backdrop-blur-sm px-4 py-3 rounded-xl shadow-2xl border border-slate-700">
+                <p className="text-white font-semibold text-sm mb-2">{label}</p>
+                {payload.map((item: any, index: number) => (
+                    <div key={index} className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                        <span className="text-slate-300">{item.name}:</span>
+                        <span className="text-white font-medium">
+                            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.value)}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+    return null
+}
+
+export default function LaporanPangkalanPage() {
+    const [profile, setProfile] = useState<UserProfile | null>(null)
+    const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+    const [recentSales, setRecentSales] = useState<ConsumerOrder[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [selectedPeriod, setSelectedPeriod] = useState('hariini')
+    const [customStartDate, setCustomStartDate] = useState('')
+    const [customEndDate, setCustomEndDate] = useState('')
+    const [showCustom, setShowCustom] = useState(false)
+    const [allSales, setAllSales] = useState<ConsumerOrder[]>([]) // Store all sales for filtering
+    const [prices, setPrices] = useState<PangkalanLpgPrice[]>([]) // Dynamic prices from API
+    const [allExpenses, setAllExpenses] = useState<Expense[]>([]) // All expenses
+    const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]) // Filtered expenses by period
+
+    // Calculate date range based on selected period
+    const getDateRange = () => {
+        const now = new Date()
+        // Create today at midnight in LOCAL timezone
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+        switch (selectedPeriod) {
+            case 'hariini':
+                return { start: today, end: now }
+            case 'mingguini': {
+                // Get day of week (0=Sunday, 1=Monday, etc.)
+                const dayOfWeek = now.getDay()
+                // Calculate days to subtract to get to Monday
+                // Sunday (0) -> subtract 6, Monday (1) -> subtract 0, etc.
+                const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+                // Create start of week (Monday at midnight)
+                const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToSubtract, 0, 0, 0)
+                console.log('📅 Week calc:', {
+                    dayOfWeek,
+                    daysToSubtract,
+                    now: now.toISOString(),
+                    startOfWeek: startOfWeek.toISOString()
+                })
+                return { start: startOfWeek, end: now }
+            }
+            case 'bulanini': {
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+                return { start: startOfMonth, end: now }
+            }
+            case 'custom':
+                if (customStartDate && customEndDate) {
+                    return {
+                        start: new Date(customStartDate),
+                        end: new Date(customEndDate + 'T23:59:59')
+                    }
+                }
+                return { start: today, end: now }
+            default:
+                return { start: today, end: now }
+        }
+    }
+
+    // Filter sales based on date range
+    const filterSalesByDateRange = (sales: ConsumerOrder[]) => {
+        const { start, end } = getDateRange()
+
+        // Get timestamps for comparison
+        const startTime = start.getTime()
+        const endTime = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999).getTime()
+
+        // Debug log
+        console.log('🔍 Filter Debug:', {
+            period: selectedPeriod,
+            startTime: new Date(startTime).toISOString(),
+            endTime: new Date(endTime).toISOString(),
+            totalSales: sales.length,
+        })
+
+        const filtered = sales.filter(sale => {
+            const saleTime = new Date(sale.sale_date).getTime()
+            const match = saleTime >= startTime && saleTime <= endTime
+            return match
+        })
+
+        console.log('🔍 Filtered result:', filtered.length)
+        return filtered
+    }
+
+    // Initial fetch all data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true)
+                setError(null)
+
+                const now = new Date()
+                const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+
+                const [chartDataResult, allSalesResult, pricesData, expensesData] = await Promise.all([
+                    consumerOrdersApi.getChartData(),
+                    consumerOrdersApi.getRecent(200), // Get more sales for filtering
+                    lpgPricesApi.getAll(), // Fetch dynamic prices
+                    expensesApi.getAll(monthStart, monthEnd), // Fetch expenses for current month
+                ])
+
+                setChartData(chartDataResult || [])
+                setAllSales(allSalesResult || [])
+                setPrices(pricesData || [])
+                setAllExpenses(expensesData || [])
+
+                // Also fetch profile
+                const profileData = await authApi.getProfile()
+                setProfile(profileData)
+            } catch (err: any) {
+                console.error('❌ [Laporan] Error:', err)
+                setError(`Gagal memuat data: ${err?.message || 'Unknown error'}`)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    // Apply filter when period changes
+    useEffect(() => {
+        if (allSales.length === 0) return
+
+        // Calculate date range based on selected period
+        const now = new Date()
+        let startDate: Date
+        let endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+
+        switch (selectedPeriod) {
+            case 'hariini':
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+                break
+            case '7hari':
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0)
+                break
+            case 'mingguini': {
+                const dayOfWeek = now.getDay()
+                const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToSubtract, 0, 0, 0)
+                break
+            }
+            case 'bulanini':
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+                break
+            case 'custom':
+                if (customStartDate && customEndDate) {
+                    startDate = new Date(customStartDate)
+                    endDate = new Date(customEndDate + 'T23:59:59')
+                } else {
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+                }
+                break
+            default:
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+        }
+
+        const startTime = startDate.getTime()
+        const endTime = endDate.getTime()
+
+        const filtered = allSales.filter(sale => {
+            const saleTime = new Date(sale.sale_date).getTime()
+            return saleTime >= startTime && saleTime <= endTime
+        })
+
+        // Also filter expenses by the same period
+        const filteredExp = allExpenses.filter(exp => {
+            const expTime = new Date(exp.expense_date).getTime()
+            return expTime >= startTime && expTime <= endTime
+        })
+
+        setRecentSales(filtered)
+        setFilteredExpenses(filteredExp)
+    }, [selectedPeriod, customStartDate, customEndDate, allSales, allExpenses])
+
+    // Handle custom date apply
+    const handleApplyCustomDate = () => {
+        setSelectedPeriod('custom')
+    }
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        }).format(value)
+    }
+
+    const formatCurrencyShort = (value: number) => {
+        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`
+        if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`
+        return value.toString()
+    }
+
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr)
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+    }
+
+    // Get cost price for a given lpg_type from dynamic prices
+    const getCostPrice = (lpgType: string): number => {
+        const priceData = prices.find(p => p.lpg_type === lpgType)
+        if (priceData) return Number(priceData.cost_price)
+        // Fallback defaults if not found
+        const fallbacks: Record<string, number> = {
+            'gr220': 17000, 'kg3': 16000, 'kg5': 52000, 'kg12': 142000, 'kg50': 590000,
+        }
+        return fallbacks[lpgType] || 16000
+    }
+
+    // Calculate totals from FILTERED sales data using ACTUAL prices (MEMOIZED)
+    const filteredTotals = useMemo(() => {
+        return recentSales.reduce((acc, sale) => {
+            const costPrice = getCostPrice(sale.lpg_type)
+            const modal = sale.qty * costPrice
+            const penjualan = Number(sale.total_amount)
+            const marginKotor = penjualan - modal
+
+            return {
+                qty: acc.qty + sale.qty,
+                penjualan: acc.penjualan + penjualan,
+                modal: acc.modal + modal,
+                marginKotor: acc.marginKotor + marginKotor,
+                laba: acc.laba + marginKotor,
+            }
+        }, { qty: 0, penjualan: 0, modal: 0, marginKotor: 0, laba: 0 })
+    }, [recentSales, prices])
+
+    // Calculate daily summary from recentSales + filteredExpenses (MEMOIZED)
+    const dailySummaryArray = useMemo(() => {
+        // First, build sales summary by date
+        const summary = recentSales.reduce((acc, sale) => {
+            const dateKey = new Date(sale.sale_date).toISOString().split('T')[0]
+            if (!acc[dateKey]) {
+                acc[dateKey] = { date: dateKey, qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, marginKotor: 0, laba: 0 }
+            }
+            const costPrice = getCostPrice(sale.lpg_type)
+            const modal = sale.qty * costPrice
+            const penjualan = Number(sale.total_amount)
+            const margin = penjualan - modal
+
+            acc[dateKey].qty += sale.qty
+            acc[dateKey].penjualan += penjualan
+            acc[dateKey].modal += modal
+            acc[dateKey].marginKotor += margin
+            return acc
+        }, {} as Record<string, { date: string; qty: number; penjualan: number; modal: number; pengeluaran: number; marginKotor: number; laba: number }>)
+
+        // Then, add expenses to each date
+        filteredExpenses.forEach(exp => {
+            const dateKey = new Date(exp.expense_date).toISOString().split('T')[0]
+            if (!summary[dateKey]) {
+                // Create entry for expense-only day (no sales)
+                summary[dateKey] = { date: dateKey, qty: 0, penjualan: 0, modal: 0, pengeluaran: 0, marginKotor: 0, laba: 0 }
+            }
+            summary[dateKey].pengeluaran += Number(exp.amount)
+        })
+
+        // Calculate laba for each day: marginKotor - pengeluaran
+        Object.values(summary).forEach(day => {
+            day.laba = day.marginKotor - day.pengeluaran
+        })
+
+        // Sort by date (newest first)
+        return Object.values(summary).sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+    }, [recentSales, prices, filteredExpenses])
+
+    // Calculate total pengeluaran from filtered expenses
+    const totalPengeluaran = useMemo(() => {
+        return filteredExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
+    }, [filteredExpenses])
+
+    // For backward compatibility - use filtered totals for summary cards
+    const totals = {
+        qty: filteredTotals.qty,
+        penjualan: filteredTotals.penjualan,
+        modal: filteredTotals.modal,
+        pengeluaran: totalPengeluaran, // Now using actual expense data!
+        laba: filteredTotals.laba - totalPengeluaran, // Laba = MarginKotor - Pengeluaran
+    }
+
+    const marginKotor = filteredTotals.marginKotor
+    const marginPercentage = totals.penjualan > 0 ? ((marginKotor / totals.penjualan) * 100).toFixed(1) : '0'
+
+    // Get period label for display
+    const getPeriodLabel = () => {
+        switch (selectedPeriod) {
+            case 'hariini': return 'Hari Ini'
+            case '7hari': return '7 Hari'
+            case 'mingguini': return 'Minggu Ini'
+            case 'bulanini': return 'Bulan Ini'
+            case 'custom': return `${customStartDate} - ${customEndDate}`
+            default: return 'Hari Ini'
+        }
+    }
+
+    // Prepare chart data (MEMOIZED)
+    const enhancedChartData = useMemo(() => {
+        return chartData.map(day => ({
+            name: formatDate(day.date),
+            fullDate: day.date,
+            penjualan: day.penjualan,
+            modal: day.modal,
+            margin: day.penjualan - day.modal,
+            pengeluaran: day.pengeluaran,
+            laba: day.laba,
+        }))
+    }, [chartData])
+
+    // Export to Excel - Always exports CURRENT MONTH data with proper number/date formats
+    const handleExportExcel = useCallback(() => {
+        if (allSales.length === 0) {
+            toast.error('Tidak ada data untuk di-export')
+            return
+        }
+
+        try {
+            toast.loading('Generating Excel...', { id: 'excel-export' })
+
+            const wb = XLSX.utils.book_new()
+            const now = new Date()
+            const pangkalanName = profile?.pangkalans?.name || profile?.name || 'PANGKALAN'
+            const monthName = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase()
+
+            // Helper: Format date as DD/MM/YYYY (Excel-friendly)
+            const formatDateExcel = (dateStr: string) => {
+                const date = new Date(dateStr)
+                const day = date.getDate().toString().padStart(2, '0')
+                const month = (date.getMonth() + 1).toString().padStart(2, '0')
+                const year = date.getFullYear()
+                return `${day}/${month}/${year}`
+            }
+
+            // Filter sales for CURRENT MONTH only (ignores UI filter)
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+            const monthlySales = allSales.filter(sale => {
+                const saleTime = new Date(sale.sale_date).getTime()
+                return saleTime >= monthStart.getTime() && saleTime <= monthEnd.getTime()
+            })
+
+            const wsData: (string | number)[][] = []
+
+            // Title row
+            wsData.push([`DATA PENJUALAN ${pangkalanName.toUpperCase()} BULAN ${monthName}`])
+            wsData.push([]) // Empty row
+
+            // Headers
+            wsData.push([
+                'NO', 'TANGGAL', 'NAMA PELANGGAN', 'QTY',
+                'HARGA BELI', 'HARGA JUAL', 'MARGIN SATUAN', 'TOTAL BELI', 'TOTAL JUAL',
+                'MARGIN KOTOR', 'PENGELUARAN', 'LABA BERSIH', 'TIPE LPG'
+            ])
+
+            let rowNo = 1
+            let grandTotalQty = 0
+            let grandTotalModal = 0
+            let grandTotalPenjualan = 0
+            let grandTotalMargin = 0
+
+            // Group sales by date (sorted)
+            const salesByDate = monthlySales.reduce((acc, sale) => {
+                const dateKey = formatDateExcel(sale.sale_date)
+                if (!acc[dateKey]) acc[dateKey] = []
+                acc[dateKey].push(sale)
+                return acc
+            }, {} as Record<string, typeof monthlySales>)
+
+            // Process each date group
+            Object.entries(salesByDate)
+                .sort(([a], [b]) => {
+                    const [dayA, monthA, yearA] = a.split('/').map(Number)
+                    const [dayB, monthB, yearB] = b.split('/').map(Number)
+                    return new Date(yearA, monthA - 1, dayA).getTime() - new Date(yearB, monthB - 1, dayB).getTime()
+                })
+                .forEach(([dateLabel, dateSales]) => {
+                    dateSales.forEach((sale) => {
+                        const costPrice = getCostPrice(sale.lpg_type)
+                        const hargaJual = Number(sale.price_per_unit)
+                        const marginSatuan = hargaJual - costPrice
+                        const totalModal = sale.qty * costPrice
+                        const totalPenjualan = Number(sale.total_amount)
+                        const marginKotor = totalPenjualan - totalModal
+                        const pengeluaran = 0
+                        const labaBersih = marginKotor - pengeluaran
+
+                        grandTotalQty += sale.qty
+                        grandTotalModal += totalModal
+                        grandTotalPenjualan += totalPenjualan
+                        grandTotalMargin += marginKotor
+
+                        // All currency values as pure numbers (best practice for Excel formulas)
+                        wsData.push([
+                            rowNo++,
+                            dateLabel, // DD/MM/YYYY format
+                            sale.consumer_name || sale.consumers?.name || 'Walk-in',
+                            sale.qty,
+                            costPrice,       // Pure number
+                            hargaJual,       // Pure number
+                            marginSatuan,    // Pure number
+                            totalModal,      // Pure number
+                            totalPenjualan,  // Pure number
+                            marginKotor,     // Pure number
+                            pengeluaran,     // Pure number
+                            labaBersih,      // Pure number
+                            sale.lpg_type.toUpperCase()
+                        ])
+                    })
+                })
+
+            // Total row with pure numbers
+            wsData.push([])
+            wsData.push([
+                'TOTAL', '', '', grandTotalQty,
+                '', '', '', grandTotalModal, grandTotalPenjualan,
+                grandTotalMargin, 0, grandTotalMargin, ''
+            ])
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData)
+
+            // Column widths
+            ws['!cols'] = [
+                { wch: 5 },   // NO
+                { wch: 15 },  // TANGGAL
+                { wch: 20 },  // NAMA PELANGGAN
+                { wch: 6 },   // QTY
+                { wch: 16 },  // HARGA BELI
+                { wch: 16 },  // HARGA JUAL
+                { wch: 16 },  // MARGIN SATUAN
+                { wch: 18 },  // TOTAL BELI
+                { wch: 18 },  // TOTAL JUAL
+                { wch: 16 },  // MARGIN KOTOR
+                { wch: 14 },  // PENGELUARAN
+                { wch: 16 },  // LABA BERSIH
+                { wch: 10 },  // TIPE LPG
+            ]
+
+            // Merge title
+            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }]
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Laporan Penjualan')
+
+            const fileName = `Laporan_${pangkalanName.replace(/\s/g, '_')}_${monthName.replace(/\s/g, '_')}.xlsx`
+            XLSX.writeFile(wb, fileName)
+
+            toast.success('Excel berhasil di-download!', { id: 'excel-export' })
+        } catch (error) {
+            console.error('Excel export error:', error)
+            toast.error('Gagal export Excel', { id: 'excel-export' })
+        }
+    }, [allSales, prices, profile])
+
+    // Export to PDF - Always exports CURRENT MONTH data with Rp currency format
+    const handleExportPDF = useCallback(() => {
+        if (allSales.length === 0) {
+            toast.error('Tidak ada data untuk di-export')
+            return
+        }
+
+        try {
+            toast.loading('Generating PDF...', { id: 'pdf-export' })
+
+            const doc = new jsPDF({ orientation: 'landscape' })
+            const pageWidth = doc.internal.pageSize.getWidth()
+            const margin = 14
+            const now = new Date()
+
+            // Helpers
+            const formatRp = (value: number) => `Rp ${value.toLocaleString('id-ID')}`
+            const formatDatePremium = (dateStr: string) => {
+                return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })
+            }
+
+            // Filter for CURRENT MONTH only (ignores UI filter)
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+            const monthlySales = allSales.filter(sale => {
+                const saleTime = new Date(sale.sale_date).getTime()
+                return saleTime >= monthStart.getTime() && saleTime <= monthEnd.getTime()
+            })
+
+            const monthName = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase()
+            const pangkalanName = profile?.pangkalans?.name || profile?.name || 'PANGKALAN'
+
+            // Calculate totals
+            let totalQty = 0, totalModal = 0, totalPenjualan = 0, totalLaba = 0
+            monthlySales.forEach(sale => {
+                const costPrice = getCostPrice(sale.lpg_type)
+                const modal = sale.qty * costPrice
+                const penjualan = Number(sale.total_amount)
+                totalQty += sale.qty
+                totalModal += modal
+                totalPenjualan += penjualan
+                totalLaba += penjualan - modal
+            })
+
+            // ========== HEADER ==========
+            // Watermark/branding in top right
+            doc.setFont('helvetica', 'italic')
+            doc.setFontSize(9)
+            doc.setTextColor(150)
+            doc.text('Sim4lon by Luthfi', pageWidth - margin, 10, { align: 'right' })
+
+            // Main title
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(14)
+            doc.setTextColor(30, 64, 175)
+            doc.text(`LAPORAN PENJUALAN ${pangkalanName.toUpperCase()}`, pageWidth / 2, 15, { align: 'center' })
+
+            doc.setFontSize(10)
+            doc.setTextColor(100)
+            doc.text(`Bulan: ${monthName}`, pageWidth / 2, 22, { align: 'center' })
+
+            // ========== SUMMARY BOX ==========
+            doc.setDrawColor(200)
+            doc.setFillColor(248, 250, 252)
+            doc.roundedRect(margin, 28, pageWidth - 2 * margin, 20, 3, 3, 'F')
+
+            doc.setFontSize(9)
+            doc.setTextColor(60)
+            const summaryY = 38
+            doc.text(`Total Transaksi: ${monthlySales.length}`, margin + 5, summaryY)
+            doc.text(`Total Qty: ${totalQty} unit`, margin + 60, summaryY)
+            doc.text(`Total Penjualan: ${formatRp(totalPenjualan)}`, margin + 110, summaryY)
+            doc.text(`Total Modal: ${formatRp(totalModal)}`, margin + 175, summaryY)
+            doc.setTextColor(22, 163, 74)
+            doc.text(`Laba: ${formatRp(totalLaba)}`, margin + 235, summaryY)
+
+            // ========== TABLE (same columns as Excel) ==========
+            const headers = [
+                'NO', 'TANGGAL', 'NAMA PELANGGAN', 'QTY',
+                'HARGA BELI', 'HARGA JUAL', 'MARGIN SATUAN', 'TOTAL BELI', 'TOTAL JUAL',
+                'MARGIN KOTOR', 'PENGELUARAN', 'LABA BERSIH', 'TIPE'
+            ]
+
+            const tableData: (string | number)[][] = []
+            let rowNo = 1
+
+            monthlySales.forEach(sale => {
+                const costPrice = getCostPrice(sale.lpg_type)
+                const hargaJual = Number(sale.price_per_unit)
+                const marginSatuan = hargaJual - costPrice
+                const totalBeli = sale.qty * costPrice
+                const totalJual = Number(sale.total_amount)
+                const marginKotor = totalJual - totalBeli
+                const pengeluaran = 0
+                const labaBersih = marginKotor - pengeluaran
+
+                tableData.push([
+                    rowNo++,
+                    formatDatePremium(sale.sale_date),
+                    sale.consumer_name || sale.consumers?.name || 'Walk-in',
+                    sale.qty,
+                    formatRp(costPrice),
+                    formatRp(hargaJual),
+                    formatRp(marginSatuan),
+                    formatRp(totalBeli),
+                    formatRp(totalJual),
+                    formatRp(marginKotor),
+                    formatRp(pengeluaran),
+                    formatRp(labaBersih),
+                    sale.lpg_type.toUpperCase()
+                ])
+            })
+
+            autoTable(doc, {
+                startY: 52,
+                head: [headers],
+                body: tableData,
+                theme: 'grid',
+                margin: { left: 5, right: 5 },
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 1,
+                    lineColor: [200, 200, 200],
+                    lineWidth: 0.1,
+                    overflow: 'linebreak',
+                },
+                headStyles: {
+                    fillColor: [30, 64, 175],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    fontSize: 8,
+                    halign: 'center',
+                    cellPadding: 4,
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 14 },  // NO
+                    1: { cellWidth: 24 },                    // TANGGAL
+                    2: { cellWidth: 'auto' },                // NAMA PELANGGAN (flexible)
+                    3: { halign: 'center', cellWidth: 14 },  // QTY
+                    4: { halign: 'right', cellWidth: 20 },   // HARGA BELI
+                    5: { halign: 'right', cellWidth: 20 },   // HARGA JUAL
+                    6: { halign: 'right', cellWidth: 20 },   // MARGIN SATUAN
+                    7: { halign: 'right', cellWidth: 26 },   // TOTAL BELI
+                    8: { halign: 'right', cellWidth: 26 },   // TOTAL JUAL
+                    9: { halign: 'right', cellWidth: 24 },   // MARGIN KOTOR
+                    10: { halign: 'right', cellWidth: 24 },  // PENGELUARAN
+                    11: { halign: 'right', cellWidth: 24 },  // LABA BERSIH
+                    12: { halign: 'center', cellWidth: 14 }, // TIPE
+                },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                didParseCell: (data) => {
+                    // Highlight positive LABA BERSIH in green (column index 11)
+                    if (data.column.index === 11 && data.section === 'body') {
+                        const rawValue = String(data.cell.raw).replace(/[^\d]/g, '')
+                        if (parseInt(rawValue) > 0) {
+                            data.cell.styles.textColor = [22, 163, 74]
+                            data.cell.styles.fontStyle = 'bold'
+                        }
+                    }
+                }
+            })
+
+            // Footer
+            const pageCount = doc.getNumberOfPages()
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i)
+                doc.setFontSize(8)
+                doc.setTextColor(150)
+                doc.text(
+                    `Halaman ${i} dari ${pageCount} | Dicetak: ${new Date().toLocaleString('id-ID')}`,
+                    pageWidth / 2,
+                    doc.internal.pageSize.getHeight() - 10,
+                    { align: 'center' }
+                )
+            }
+
+            doc.save(`Laporan_${pangkalanName.replace(/\s/g, '_')}_${monthName.replace(/\s/g, '_')}.pdf`)
+            toast.success('PDF berhasil di-download!', { id: 'pdf-export' })
+        } catch (error) {
+            console.error('PDF export error:', error)
+            toast.error('Gagal export PDF', { id: 'pdf-export' })
+        }
+    }, [allSales, prices, profile])
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px]">
+                <div className="text-center">
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <SafeIcon name="BarChart3" className="h-6 w-6 text-blue-600" />
+                        </div>
+                    </div>
+                    <p className="text-slate-500 mt-4 font-medium">Memuat data laporan...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px]">
+                <div className="text-center max-w-md">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <SafeIcon name="AlertTriangle" className="h-8 w-8 text-red-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Gagal Memuat Data</h3>
+                    <p className="text-slate-500 mb-4">{error}</p>
+                    <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+                        <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
+                        Coba Lagi
+                    </Button>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="space-y-8 pb-8">
+            {/* Header Section - Animated */}
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
+                    <div className="flex items-center gap-3">
+                        <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500 animate-lineGrow" />
+                        <div>
+                            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Laporan Penjualan</h1>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                                <SafeIcon name="Calculator" className="h-4 w-4 animate-pulse" />
+                                Perhitungan: Qty × (Harga Jual - Modal)
+                            </p>
+                        </div>
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="default"
+                                className="rounded-xl shadow-sm hover:shadow-md transition-all"
+                            >
+                                <SafeIcon name="Download" className="h-4 w-4 mr-2" />
+                                Export
+                                <SafeIcon name="ChevronDown" className="h-3 w-3 ml-1" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-600" />
+                                Export Excel
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-600" />
+                                Export PDF
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                {/* Date Filter Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+                        {[
+                            { value: 'hariini', label: 'Hari Ini', icon: 'Calendar' },
+                            { value: '7hari', label: '7 Hari', icon: 'CalendarClock' },
+                            { value: 'mingguini', label: 'Minggu Ini', icon: 'CalendarDays' },
+                            { value: 'bulanini', label: 'Bulan Ini', icon: 'CalendarRange' },
+                        ].map((period) => (
+                            <button
+                                key={period.value}
+                                onClick={() => { setSelectedPeriod(period.value); setShowCustom(false) }}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedPeriod === period.value && !showCustom
+                                    ? 'bg-white shadow-sm text-blue-600'
+                                    : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                            >
+                                <SafeIcon name={period.icon as any} className="h-4 w-4" />
+                                {period.label}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setShowCustom(!showCustom)}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${showCustom
+                                ? 'bg-white shadow-sm text-blue-600'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                        >
+                            <SafeIcon name="Settings2" className="h-4 w-4" />
+                            Custom
+                        </button>
+                    </div>
+
+                    {/* Custom Date Range */}
+                    {showCustom && (
+                        <div className="flex items-center gap-2 animate-in slide-in-from-left-2 duration-200">
+                            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
+                                <SafeIcon name="CalendarDays" className="h-4 w-4 text-slate-400" />
+                                <input
+                                    type="date"
+                                    value={customStartDate}
+                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                    className="bg-transparent border-none text-sm focus:outline-none w-32"
+                                />
+                                <span className="text-slate-400">-</span>
+                                <input
+                                    type="date"
+                                    value={customEndDate}
+                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                    className="bg-transparent border-none text-sm focus:outline-none w-32"
+                                />
+                            </div>
+                            <Button
+                                size="sm"
+                                className="rounded-lg bg-blue-600 hover:bg-blue-700"
+                                onClick={handleApplyCustomDate}
+                            >
+                                <SafeIcon name="Search" className="h-4 w-4 mr-1" />
+                                Terapkan
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Calculation Info Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl border border-slate-200 p-4 shadow-sm">
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2 text-slate-600">
+                        <SafeIcon name="Calculator" className="h-4 w-4" />
+                        <span className="font-medium">Perhitungan:</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-white">Modal = Qty × Harga Beli</Badge>
+                        <span className="text-slate-400">→</span>
+                        <Badge variant="outline" className="bg-white">Penjualan = Qty × Harga Jual</Badge>
+                        <span className="text-slate-400">→</span>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Laba = Penjualan - Modal</Badge>
+                    </div>
+                </div>
+            </div>
+
+            {/* Summary Cards with Period Indicator */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-slate-900">Ringkasan</h2>
+                        <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                            <SafeIcon name="Calendar" className="h-3 w-3 mr-1" />
+                            {getPeriodLabel()}
+                        </Badge>
+                    </div>
+                    <p className="text-sm text-slate-500">{recentSales.length} transaksi</p>
+                </div>
+                <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+                    {/* Total Penjualan */}
+                    <div className="animate-slideInBlur stagger-1" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="Banknote" className="h-4 w-4" />
+                                    </div>
+                                    Total Penjualan
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
+                                <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
+                                    <SafeIcon name="Flame" className="h-3.5 w-3.5" />
+                                    {totals.qty} tabung terjual
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Total Modal */}
+                    <div className="animate-slideInBlur stagger-2" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="Wallet" className="h-4 w-4" />
+                                    </div>
+                                    Total Beli
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
+                                <p className="text-slate-300 text-sm mt-2">Biaya pembelian LPG</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Margin Kotor */}
+                    <div className="animate-slideInBlur stagger-3" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="ArrowUpRight" className="h-4 w-4" />
+                                    </div>
+                                    Margin Kotor
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
+                                <p className="text-cyan-100 text-sm mt-2">Sebelum pengeluaran</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Pengeluaran */}
+                    <div className="animate-slideInBlur stagger-4" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="MinusCircle" className="h-4 w-4" />
+                                    </div>
+                                    Pengeluaran
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
+                                <p className="text-orange-100 text-sm mt-2">Biaya operasional</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Laba Bersih */}
+                    <div className="animate-slideInBlur stagger-5" style={{ opacity: 0 }}>
+                        <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+                            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
+                            <CardHeader className="pb-2 relative">
+                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
+                                    </div>
+                                    Laba Bersih
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative">
+                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="bg-white/20 text-white hover:bg-white/30 text-xs">
+                                        {marginPercentage}% margin
+                                    </Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* Penjualan vs Modal Bar Chart */}
+                <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <SafeIcon name="BarChart3" className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    Penjualan vs Pembelian
+                                </CardTitle>
+                                <CardDescription className="mt-1">Perbandingan harian selama 7 hari</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="h-[280px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={enhancedChartData} barGap={4} barCategoryGap="25%">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#64748B" fontSize={12} tickFormatter={formatCurrencyShort} tickLine={false} axisLine={false} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="penjualan" name="Penjualan" fill="#3B82F6" radius={[6, 6, 0, 0]} />
+                                    <Bar dataKey="modal" name="Modal" fill="#CBD5E1" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="flex justify-center gap-8 mt-4 pt-4 border-t border-slate-100">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                                <span className="text-sm text-slate-600">Penjualan</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-slate-300" />
+                                <span className="text-sm text-slate-600">Pembelian</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Trend Laba Bersih Area Chart */}
+                <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                        <SafeIcon name="TrendingUp" className="h-4 w-4 text-green-600" />
+                                    </div>
+                                    Trend Laba Bersih
+                                </CardTitle>
+                                <CardDescription className="mt-1">Perkembangan profit harian</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="h-[280px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={enhancedChartData}>
+                                    <defs>
+                                        <linearGradient id="labaGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#22C55E" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#22C55E" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#64748B" fontSize={12} tickFormatter={formatCurrencyShort} tickLine={false} axisLine={false} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="laba"
+                                        name="Laba Bersih"
+                                        stroke="#22C55E"
+                                        strokeWidth={3}
+                                        fill="url(#labaGradient)"
+                                        dot={{ r: 5, fill: '#22C55E', strokeWidth: 3, stroke: '#fff' }}
+                                        activeDot={{ r: 7, stroke: '#22C55E', strokeWidth: 3, fill: '#fff' }}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Daily Summary Table */}
+            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                    <SafeIcon name="Calendar" className="h-4 w-4 text-purple-600" />
+                                </div>
+                                Ringkasan Per Tanggal
+                            </CardTitle>
+                            <CardDescription className="mt-1">Perhitungan laba harian</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="text-left py-4 px-6 font-semibold text-slate-700">Tanggal</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Qty</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Pembelian</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-slate-700">Penjualan</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-cyan-600">Margin Kotor</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-orange-600">Pengeluaran</th>
+                                    <th className="text-right py-4 px-6 font-semibold text-green-600">Laba Bersih</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {dailySummaryArray.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="text-center py-12">
+                                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                            <p className="text-slate-400">Belum ada data untuk periode ini</p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    dailySummaryArray.map((day, index) => {
+                                        const margin = day.penjualan - day.modal
+                                        return (
+                                            <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                                <td className="py-4 px-6 text-slate-900 font-medium">{formatDate(day.date)}</td>
+                                                <td className="text-right py-4 px-6 text-slate-700">{day.qty}</td>
+                                                <td className="text-right py-4 px-6 text-slate-700">{formatCurrency(day.modal)}</td>
+                                                <td className="text-right py-4 px-6 text-slate-900 font-medium">{formatCurrency(day.penjualan)}</td>
+                                                <td className="text-right py-4 px-6 text-cyan-600 font-medium">{formatCurrency(margin)}</td>
+                                                <td className="text-right py-4 px-6 text-orange-600">{formatCurrency(day.pengeluaran)}</td>
+                                                <td className="text-right py-4 px-6">
+                                                    <span className={`font-bold ${day.laba >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {formatCurrency(day.laba)}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
+                                )}
+                            </tbody>
+                            <tfoot>
+                                <tr className="bg-gradient-to-r from-slate-100 to-slate-50 font-semibold">
+                                    <td className="py-4 px-6 text-slate-900">TOTAL</td>
+                                    <td className="text-right py-4 px-6 text-slate-900">{totals.qty}</td>
+                                    <td className="text-right py-4 px-6 text-slate-900">{formatCurrency(totals.modal)}</td>
+                                    <td className="text-right py-4 px-6 text-blue-600 font-bold">{formatCurrency(totals.penjualan)}</td>
+                                    <td className="text-right py-4 px-6 text-cyan-600 font-bold">{formatCurrency(marginKotor)}</td>
+                                    <td className="text-right py-4 px-6 text-orange-600 font-bold">{formatCurrency(totals.pengeluaran)}</td>
+                                    <td className="text-right py-4 px-6 text-green-600 font-bold text-lg">{formatCurrency(totals.laba)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Transaction Detail Table */}
+            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                    <SafeIcon name="Receipt" className="h-4 w-4 text-amber-600" />
+                                </div>
+                                Detail Transaksi
+                            </CardTitle>
+                            <CardDescription className="mt-1">Rincian penjualan per pelanggan</CardDescription>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                            {recentSales.length} transaksi
+                        </Badge>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto max-h-[450px]">
+                        <table className="w-full text-sm">
+                            <thead className="sticky top-0 bg-white shadow-sm z-10">
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Tanggal</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Pelanggan</th>
+                                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Qty</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Harga Beli</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Harga Jual</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-blue-600">Margin/Unit</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Total Beli</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Total Jual</th>
+                                    <th className="text-right py-3 px-4 font-semibold text-green-600">Laba</th>
+                                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Tipe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {recentSales.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={10} className="text-center py-12">
+                                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                            <p className="text-slate-400">Belum ada transaksi</p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    recentSales.map((sale, index) => {
+                                        const costPrice = getCostPrice(sale.lpg_type)
+                                        const hargaJual = Number(sale.price_per_unit)
+                                        const marginPerUnit = hargaJual - costPrice
+                                        const totalBeli = sale.qty * costPrice
+                                        const totalJual = Number(sale.total_amount)
+                                        const laba = totalJual - totalBeli
+                                        return (
+                                            <tr key={sale.id} className={`border-b border-slate-100 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                                                <td className="py-3 px-4 text-slate-600">
+                                                    {new Date(sale.sale_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    <span className="font-medium text-slate-900 uppercase text-xs">
+                                                        {sale.consumers?.name || sale.consumer_name || 'Walk-in'}
+                                                    </span>
+                                                </td>
+                                                <td className="text-center py-3 px-4 text-slate-700 font-medium">{sale.qty}</td>
+                                                <td className="text-right py-3 px-4 text-slate-600">{formatCurrency(costPrice)}</td>
+                                                <td className="text-right py-3 px-4 text-slate-700">{formatCurrency(hargaJual)}</td>
+                                                <td className="text-right py-3 px-4">
+                                                    <span className="font-medium text-blue-600">{formatCurrency(marginPerUnit)}</span>
+                                                </td>
+                                                <td className="text-right py-3 px-4 text-slate-600">{formatCurrency(totalBeli)}</td>
+                                                <td className="text-right py-3 px-4 text-slate-900 font-medium">{formatCurrency(totalJual)}</td>
+                                                <td className="text-right py-3 px-4">
+                                                    <span className="font-bold text-green-600">{formatCurrency(laba)}</span>
+                                                </td>
+                                                <td className="text-center py-3 px-4">
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                                        {sale.lpg_type.toUpperCase()}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}

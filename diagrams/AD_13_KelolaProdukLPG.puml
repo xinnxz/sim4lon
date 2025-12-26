@@ -1,0 +1,78 @@
+@startuml AD_13_KelolaProdukLPG
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-13: Kelola Produk LPG**\nSistem SIM4LON
+
+|Admin|
+start
+:Buka halaman Master Produk LPG;
+
+|Sistem|
+:Load daftar produk LPG;
+:Tampilkan dengan kategori\n(Subsidi/Non-Subsidi);
+
+|Admin|
+:Pilih aksi;
+
+switch (Aksi?)
+case (Tambah Baru)
+    :Klik "Tambah Produk";
+    
+    |Sistem|
+    :Tampilkan form produk;
+    
+    |Admin|
+    :Isi nama produk\n(contoh: Elpiji 3kg Hijau);
+    :Isi ukuran (kg);
+    :Pilih kategori\n(SUBSIDI/NON_SUBSIDI);
+    :Isi warna tabung;
+    :Isi harga jual;
+    :Isi harga modal (opsional);
+    :Isi merek;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Validasi input;
+    :Simpan produk baru;
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Edit Harga)
+    :Klik "Edit" pada produk;
+    
+    |Sistem|
+    :Load data produk;
+    :Tampilkan form edit;
+    
+    |Admin|
+    :Ubah harga jual/modal;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Update data produk;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Nonaktifkan)
+    :Klik toggle status;
+    
+    |Sistem|
+    :Update is_active = false;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+endswitch
+
+:Refresh daftar;
+stop
+
+@enduml

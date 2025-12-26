@@ -1,0 +1,82 @@
+@startuml SD_08_GenerateInvoice
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-08: GENERATE INVOICE\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "OrderDetailPage" as ODP
+control "InvoiceService" as IS
+database "invoices" as InvoicesDB
+database "orders" as OrdersDB
+database "order_items" as ItemsDB
+database "company_profile" as CompanyDB
+
+== Trigger Generate Invoice ==
+
+Admin -> ODP : 1: Klik "Generate Invoice"
+activate ODP
+
+ODP -> IS : 1.1: generateInvoice(orderId)
+activate IS
+
+IS -> InvoicesDB : 1.1.1: SELECT * FROM invoices\nWHERE order_id = ?
+activate InvoicesDB
+InvoicesDB --> IS : 1.1.1.1: existing or null
+deactivate InvoicesDB
+
+alt Invoice sudah ada
+    IS --> ODP : 1.1.2: return existingInvoice
+    ODP --> Admin : 1.2: Tampilkan invoice yang ada
+else Invoice belum ada
+    
+    == Load Order Data ==
+    
+    IS -> OrdersDB : 1.1.3: SELECT * FROM orders\nWHERE id = ?
+    activate OrdersDB
+    OrdersDB --> IS : 1.1.3.1: orderData
+    deactivate OrdersDB
+    
+    IS -> ItemsDB : 1.1.4: SELECT * FROM order_items\nWHERE order_id = ?
+    activate ItemsDB
+    ItemsDB --> IS : 1.1.4.1: items[]
+    deactivate ItemsDB
+    
+    IS -> CompanyDB : 1.1.5: SELECT * FROM company_profile\nLIMIT 1
+    activate CompanyDB
+    CompanyDB --> IS : 1.1.5.1: companyData
+    deactivate CompanyDB
+    
+    == Calculate & Generate ==
+    
+    IS -> IS : 1.1.6: generateInvoiceNumber()\n→ "INV-2024-0001"
+    IS -> IS : 1.1.7: calculateSubtotal(items)
+    IS -> IS : 1.1.8: calculateTax(ppn_rate)
+    IS -> IS : 1.1.9: calculateGrandTotal()
+    IS -> IS : 1.1.10: setDueDate(+7 days)
+    
+    IS -> InvoicesDB : 1.1.11: INSERT INTO invoices\n{invoice_number, order_id, invoice_date, due_date,\nbilling_address, sub_total, tax_rate, tax_amount, grand_total}
+    activate InvoicesDB
+    InvoicesDB --> IS : 1.1.11.1: invoiceId
+    deactivate InvoicesDB
+    
+    IS --> ODP : 1.2: InvoiceModel
+    deactivate IS
+    
+    ODP --> Admin : 1.3: Tampilkan invoice baru
+    ODP --> Admin : 1.4: Opsi: Cetak / Download PDF
+end
+
+deactivate ODP
+
+note right of IS
+  Invoice number format:
+  INV-YYYY-XXXX
+  (tahun + sequence)
+end note
+
+@enduml
