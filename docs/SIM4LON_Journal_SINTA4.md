@@ -4,7 +4,7 @@
 
 ---
 
-**Luthfi Alfaridz¹**, **[Ummay Evi Siti Sarah²]²**
+**Luthfi Alfaridz¹**, **Siti Sarah²**
 
 ¹²³Program Studi Teknik Informatika, Fakultas Teknik  
 Universitas Suryakancana, Cianjur, Indonesia  
@@ -14,7 +14,7 @@ Email: ¹luthfifahmi.alv@gmail.com
 
 ## ABSTRAK
 
-Distribusi gas LPG merupakan kegiatan vital dalam rantai pasok energi nasional. Namun, banyak agen LPG yang masih menggunakan pencatatan manual sehingga menimbulkan permasalahan ketidakakuratan data, kesulitan pelacakan pesanan, sampai dengan lambatnya pembuatan laporan. Penelitian ini bertujuan untuk merancang dan mengimplementasikan sistem informasi manajemen distribusi LPG berbasis web dengan arsitektur multi-tenant. Metode pengembangan menggunakan Waterfall dengan perancangan UML. Teknologi yang digunakan meliputi React 18 untuk frontend, NestJS 10 untuk backend, dan PostgreSQL 15 untuk database. Hasil pengujian black-box menunjukkan seluruh 28 test case berfungsi sesuai spesifikasi dengan tingkat keberhasilan 100%. Sistem berhasil mengintegrasikan proses pencatatan pesanan, manajemen stok, pembayaran, dan pelaporan dalam satu platform terpadu yang dapat meningkatkan efisiensi operasional bisnis distribusi LPG.
+Distribusi gas LPG merupakan kegiatan vital dalam rantai pasok energi nasional. Namun, banyak agen LPG yang masih menggunakan pencatatan manual sehingga menimbulkan permasalahan ketidakakuratan data, kesulitan pelacakan pesanan, sampai dengan lambatnya pembuatan laporan. Penelitian ini bertujuan untuk merancang dan mengimplementasikan sistem informasi manajemen distribusi LPG berbasis web dengan arsitektur multi-tenant. Metode pengembangan menggunakan Waterfall dengan perancangan UML. Teknologi yang digunakan meliputi React 18 untuk frontend, NestJS 10 untuk backend, dan PostgreSQL 15 untuk database. Hasil pengujian black-box menunjukkan seluruh 28 test case berfungsi sesuai spesifikasi dengan tingkat keberhasilan 100%. Sistem berhasil mengintegrasikan proses pencatatan pesanan, manajemen stok, pembayaran, dan pelaporan dalam satu platform yang dapat meningkatkan efisiensi operasional bisnis distribusi LPG.
 
 **Kata Kunci:** Sistem Informasi, Distribusi LPG, Multi-Tenant, React, NestJS, PostgreSQL
 
@@ -50,8 +50,8 @@ Berdasarkan uraian di atas, penelitian ini bertujuan untuk merancang dan mengimp
 
 Berdasarkan latar belakang yang telah diuraikan, rumusan masalah dalam penelitian ini adalah:
 
-1. Bagaimana merancang sistem informasi manajemen distribusi LPG berbasis web dengan pendekatan UML yang dapat mengakomodasi arsitektur multi-tenant?
-2. Bagaimana mengimplementasikan sistem tersebut menggunakan teknologi web modern yaitu React untuk frontend, NestJS untuk backend, dan PostgreSQL untuk database?
+1. Bagaimana cara merancang sistem informasi manajemen distribusi LPG berbasis web dengan pendekatan UML yang dapat mengakomodasi arsitektur multi-tenant?
+2. Bagaimana mengimplementasikan sistem ini menggunakan teknologi web modern yaitu React untuk frontend, NestJS untuk backend, dan PostgreSQL untuk database?
 3. Bagaimana hasil pengujian fungsionalitas sistem yang telah dibangun menggunakan metode black-box testing?
 
 ### 1.3 Tujuan Penelitian
@@ -218,31 +218,31 @@ Penelitian ini menggunakan metode pengembangan **Waterfall** yang terdiri dari l
 │                                                 │
 │  ┌───────────────────────┐                      │
 │  │ 1. REQUIREMENTS       │                      │
-│  │    ANALYSIS           │ Sep - Okt 2024       │
+│  │    ANALYSIS           │ Sep - Okt 2025       │
 │  └───────────┬───────────┘                      │
 │              │                                  │
 │              ▼                                  │
 │  ┌───────────────────────┐                      │
 │  │ 2. SYSTEM DESIGN      │                      │
-│  │    (UML Modeling)     │ Okt - Nov 2024       │
+│  │    (UML Modeling)     │ Okt - Nov 2025       │
 │  └───────────┬───────────┘                      │
 │              │                                  │
 │              ▼                                  │
 │  ┌───────────────────────┐                      │
 │  │ 3. IMPLEMENTATION     │                      │
-│  │    (Coding)           │ Nov - Des 2024       │
+│  │    (Coding)           │ Nov - Des 2025       │
 │  └───────────┬───────────┘                      │
 │              │                                  │
 │              ▼                                  │
 │  ┌───────────────────────┐                      │
 │  │ 4. TESTING            │                      │
-│  │    (Black-box)        │ Des 2024             │
+│  │    (Black-box)        │ Des 2025             │
 │  └───────────┬───────────┘                      │
 │              │                                  │
 │              ▼                                  │
 │  ┌───────────────────────┐                      │
 │  │ 5. DEPLOYMENT         │                      │
-│  │    (Cloud)            │ Des 2024             │
+│  │    (Cloud)            │ Des 2025             │
 │  └───────────────────────┘                      │
 │                                                 │
 └─────────────────────────────────────────────────┘
@@ -251,19 +251,19 @@ Penelitian ini menggunakan metode pengembangan **Waterfall** yang terdiri dari l
 
 Penjelasan setiap tahapan:
 
-1. **Requirements Analysis (September - Oktober 2024)**
+1. **Requirements Analysis (September - Oktober 2025)**
    Pada tahap ini dilakukan pengumpulan data melalui observasi dan wawancara untuk mengidentifikasi kebutuhan sistem. Hasil analisis didokumentasikan dalam bentuk kebutuhan fungsional dan non-fungsional.
 
-2. **System Design (Oktober - November 2024)**
+2. **System Design (Oktober - November 2025)**
    Tahap perancangan sistem menggunakan UML yang mencakup Use Case Diagram, Class Diagram, Activity Diagram, Sequence Diagram, State Machine Diagram, dan Entity Relationship Diagram.
 
-3. **Implementation (November - Desember 2024)**
+3. **Implementation (November - Desember 2025)**
    Tahap implementasi meliputi pengembangan frontend dengan React, backend dengan NestJS, dan database dengan PostgreSQL. Prisma digunakan sebagai ORM untuk interaksi database.
 
-4. **Testing (Desember 2024)**
+4. **Testing (Desember 2025)**
    Pengujian dilakukan dengan metode black-box testing untuk memastikan seluruh fungsionalitas berjalan sesuai spesifikasi.
 
-5. **Deployment (Desember 2024)**
+5. **Deployment (Desember 2025)**
    Sistem di-deploy ke cloud dengan Vercel untuk frontend dan Railway untuk backend dan database.
 
 ### 3.2 Teknik Pengumpulan Data
@@ -271,7 +271,7 @@ Penjelasan setiap tahapan:
 Pengumpulan data dilakukan melalui tiga teknik:
 
 **3.2.1 Observasi**
-Observasi dilakukan dengan mengamati langsung proses bisnis di agen LPG wilayah Cianjur selama dua minggu (14-28 September 2024). Aspek yang diamati meliputi:
+Observasi dilakukan dengan mengamati langsung proses bisnis di agen LPG wilayah Cianjur selama dua minggu (14-28 September 2025). Aspek yang diamati meliputi:
 - Alur pemesanan dari pangkalan ke agen
 - Proses pencatatan dan administrasi
 - Mekanisme pengiriman dan distribusi
@@ -556,4 +556,4 @@ Sistem ini dapat meningkatkan efisiensi operasional agen LPG melalui integrasi p
 
 *Artikel ini merupakan hasil penelitian Tugas Akhir*  
 *Program Studi Teknik Informatika, Universitas Suryakancana*  
-*© 2024*
+*© 2025*
