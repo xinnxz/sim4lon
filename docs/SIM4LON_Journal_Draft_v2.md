@@ -61,10 +61,9 @@ SIM4LON (Sistem Informasi Manajemen Distribusi Untuk LPG Online) dirancang untuk
 
 ### 1.4 Manfaat Penelitian
 
-**Manfaat Teoritis:**
 Penelitian ini berkontribusi dalam pengembangan ilmu pengetahuan di bidang sistem informasi, khususnya penerapan arsitektur multi-tenant pada aplikasi distribusi berbasis web.
 
-**Manfaat Praktis:**
+**Manfaat:**
 1. Bagi agen LPG: Mengotomatisasi proses operasional harian, meningkatkan efisiensi waktu, dan mengurangi kesalahan pencatatan.
 2. Bagi pangkalan: Kemudahan melakukan pemesanan dan memantau status pesanan secara real-time.
 3. Bagi peneliti: Menambah wawasan dan pengalaman dalam implementasi teknologi web modern.
