@@ -98,7 +98,7 @@ export default function LoginForm() {
       {/* Mobile Header - Only visible on mobile */}
       <div className="sm:hidden text-center mb-6">
         <img
-          src="/logo-pertamina-2.png"
+          src="/logo-sim4lon-nobg.png"
           alt="Pertamina"
           className="h-16 mx-auto mb-3 drop-shadow-lg"
         />
@@ -111,7 +111,7 @@ export default function LoginForm() {
         <CardHeader className="hidden sm:block space-y-2 text-center px-6 pt-8 pb-4">
           <div className="flex justify-center mb-4">
             <img
-              src="/logo-pertamina-2.png"
+              src="/logo-sim4lon-nobg.png"
               alt="Pertamina"
               className="h-16 object-contain transition-all duration-300"
             />
