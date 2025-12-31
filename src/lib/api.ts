@@ -1186,6 +1186,46 @@ export interface RecentActivitiesData {
 }
 
 /**
+ * DSS (Decision Support System) Alerts Types
+ */
+export interface LowStockAlert {
+    id: string;
+    name: string;
+    currentStock: number;
+    threshold: number;
+    severity: 'critical' | 'warning';
+    recommendation: string;
+}
+
+export interface PaymentOverdueAlert {
+    orderId: string;
+    orderCode: string;
+    pangkalanName: string;
+    totalAmount: number;
+    amountPaid: number;
+    daysOverdue: number;
+    severity: 'critical' | 'warning';
+    recommendation: string;
+}
+
+export interface DSSAlertsSummary {
+    totalLowStockProducts: number;
+    criticalStockProducts: number;
+    totalOverduePayments: number;
+    criticalOverduePayments: number;
+    pendingOrdersCount: number;
+    urgentOrdersCount: number;
+    overallHealthScore: number;
+}
+
+export interface DSSAlertsData {
+    lowStockAlerts: LowStockAlert[];
+    paymentOverdueAlerts: PaymentOverdueAlert[];
+    summary: DSSAlertsSummary;
+    generatedAt: string;
+}
+
+/**
  * Dashboard API
  * 
  * PENJELASAN:
@@ -1242,6 +1282,13 @@ export const dashboardApi = {
      */
     async getRecentActivities(): Promise<RecentActivitiesData> {
         return apiRequest('/dashboard/activities');
+    },
+
+    /**
+     * Get DSS (Decision Support System) Alerts
+     */
+    async getDSSAlerts(): Promise<DSSAlertsData> {
+        return apiRequest('/dashboard/dss-alerts');
     },
 };
 

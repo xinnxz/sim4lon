@@ -2,6 +2,7 @@
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import AdminSidebar from '@/components/common/AdminSidebar'
 import AdminHeader from '@/components/common/AdminHeader'
+import FloatingVoiceWidget from '@/components/common/FloatingVoiceWidget'
 
 interface AppSidebarLayoutProps {
   children: React.ReactNode
@@ -49,6 +50,9 @@ export default function AppSidebarLayout({
           </SidebarInset>
         </div>
       </div>
+
+      {/* FLOATING VOICE WIDGET - Voice Order Button */}
+      <FloatingVoiceWidget />
     </SidebarProvider>
   )
 }

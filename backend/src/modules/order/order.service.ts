@@ -291,7 +291,7 @@ export class OrderService {
 
                 if (product && item.qty > currentStock) {
                     throw new BadRequestException(
-                        `Stok ${product.name} tidak mencukupi! Tersedia: ${currentStock}, Diminta: ${item.qty}`
+                        `Stok ${product.name} ga cukup! Stok sekarang cuman: ${currentStock}`
                     );
                 }
             }
@@ -329,6 +329,14 @@ export class OrderService {
 
         const totalAmount = subtotal + totalTax;
 
+        // VOICE ORDER EXPRESS: Determine initial status
+        // If is_voice_order=true && is_paid_cash=true → DIPROSES (skip DRAFT & MENUNGGU_PEMBAYARAN)
+        // Otherwise → DRAFT (normal flow)
+        const initialStatus = (dto.is_voice_order && dto.is_paid_cash) ? 'DIPROSES' : 'DRAFT';
+        const initialDescription = dto.is_voice_order
+            ? 'Voice Order - Pembayaran Tunai Diterima'
+            : 'Order dibuat';
+
         const order = await this.prisma.orders.create({
             data: {
                 code: orderCode,
@@ -338,14 +346,14 @@ export class OrderService {
                 subtotal: subtotal,
                 tax_amount: totalTax,
                 total_amount: totalAmount,
-                current_status: 'DRAFT',
+                current_status: initialStatus as any,
                 order_items: {
                     create: orderItemsData,
                 },
                 timeline_tracks: {
                     create: {
-                        status: 'DRAFT',
-                        description: 'Order dibuat',
+                        status: initialStatus as any,
+                        description: initialDescription,
                     },
                 },
             },
@@ -355,6 +363,20 @@ export class OrderService {
                 timeline_tracks: true,
             },
         });
+
+        // VOICE ORDER EXPRESS: Auto-create payment record if paid cash
+        if (dto.is_voice_order && dto.is_paid_cash) {
+            await this.prisma.order_payment_details.create({
+                data: {
+                    order_id: order.id,
+                    is_paid: true,
+                    is_dp: false,
+                    payment_method: 'TUNAI',
+                    amount_paid: totalAmount,
+                    payment_date: new Date(),
+                },
+            });
+        }
 
         // STOCK DEDUCTION: Kurangi stok saat order dibuat
         // Gunakan dto.items untuk akses lpg_product_id (untuk dynamic products)
@@ -383,14 +405,14 @@ export class OrderService {
         ).join(', ');
 
         await this.activityService.create({
-            type: 'order_created',
-            title: 'Pesanan Baru Dibuat',
+            type: dto.is_voice_order ? 'voice_order_created' : 'order_created',
+            title: dto.is_voice_order ? 'Voice Order Dibuat (Lunas)' : 'Pesanan Baru Dibuat',
             description: `${pangkalanName} - ${productBreakdown} - Rp ${totalAmount.toLocaleString('id-ID')}`,
             order_id: order.id,
             pangkalan_name: pangkalanName,
             detail_numeric: totalQty,
-            icon_name: 'ShoppingCart',
-            order_status: 'DRAFT',
+            icon_name: dto.is_voice_order ? 'Mic' : 'ShoppingCart',
+            order_status: initialStatus,
         });
 
         return order;

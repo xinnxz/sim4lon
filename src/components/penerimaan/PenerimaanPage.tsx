@@ -807,6 +807,12 @@ export default function PenerimaanPage() {
                                                 min="1"
                                                 value={item.qty_pcs}
                                                 onChange={(e) => updateItem(item.id, 'qty_pcs', e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !isSaving && headerData.no_so && headerData.no_lo && totals.totalPcs > 0) {
+                                                        e.preventDefault()
+                                                        handleSubmit()
+                                                    }
+                                                }}
                                                 placeholder="0"
                                                 className="h-10 text-center font-bold"
                                             />

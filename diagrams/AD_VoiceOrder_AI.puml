@@ -1,0 +1,87 @@
+@startuml AD_VoiceOrder_AI
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-Voice: Voice Order dengan AI**\nSistem SIM4LON
+
+|Admin|
+start
+:Klik tombol mikrofon;
+
+|Sistem|
+:Request izin mikrofon;
+
+|Admin|
+if (Izin diberikan?) then (ya)
+    
+    |Sistem|
+    :Aktifkan Web Speech API;
+    :Tampilkan status Mendengarkan;
+    
+    |Admin|
+    :Ucapkan perintah suara;
+    note right: Contoh:\n"50 tabung 12 kilo ke Reon"
+    
+    |Sistem|
+    :Konversi speech ke text;
+    :Tampilkan transcript real-time;
+    
+    if (Auto-stop atau klik Selesai?) then (ya)
+        :Kirim ke Gemini AI;
+        :Parse quantity dan product;
+        :Fuzzy match nama pangkalan;
+        note right: Levenshtein algorithm\nuntuk nama mirip
+        :Query pangkalan dari DB;
+        :Query product dan harga;
+        :Cek ketersediaan stok;
+        
+        if (Data valid?) then (ya)
+            :Tampilkan konfirmasi pesanan;
+            
+            |Admin|
+            if (Konfirmasi pesanan?) then (ya)
+                
+                |Sistem|
+                :Generate kode ORD-XXXX;
+                :Simpan pesanan ke database;
+                :Buat timeline track;
+                :Log aktivitas;
+                
+                |Admin|
+                :Tampilkan pesan sukses;
+                
+                if (Lihat pesanan?) then (ya)
+                    :Navigate ke detail pesanan;
+                    stop
+                else (tidak)
+                    :Tutup modal;
+                    stop
+                endif
+                
+            else (tidak)
+                :Kembali ke awal;
+                stop
+            endif
+            
+        else (tidak)
+            |Admin|
+            :Tampilkan pesan error;
+            note right: Stok habis atau\npangkalan tidak ditemukan
+            stop
+        endif
+        
+    else (tidak)
+        :Lanjut mendengarkan;
+    endif
+    
+else (tidak)
+    |Sistem|
+    :Tampilkan error\nizin mikrofon ditolak;
+    stop
+endif
+
+@enduml

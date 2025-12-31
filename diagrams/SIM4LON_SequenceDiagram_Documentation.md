@@ -35,9 +35,9 @@ Sequence Diagram menggambarkan **interaksi antar objek** dalam urutan waktu untu
 
 | Fase | Jumlah | Fokus |
 |------|--------|-------|
-| **Fase 1** | 8 | Core Business Processes |
+| **Fase 1** | 8 + 1 Voice | Core Business Processes |
 | **Fase 2** | 10 | Supporting Processes |
-| **Total** | **18** | |
+| **Total** | **19** | |
 
 ---
 
@@ -92,6 +92,46 @@ Sequence Diagram menggambarkan **interaksi antar objek** dalam urutan waktu untu
 - Auto-generate kode pesanan
 
 ---
+
+### SD-Voice: Speech-to-Order Flow 🎤
+
+| Komponen | Deskripsi |
+|----------|-----------|
+| **File** | `SD_Voice_CreateOrder.puml` |
+| **Aktor** | Admin/Operator |
+| **Tujuan** | Membuat pesanan menggunakan perintah suara |
+| **Scope** | Frontend-only (tidak ada perubahan backend) |
+
+**Participants Baru:**
+| Komponen | Stereotype | Fungsi |
+|----------|------------|--------|
+| VoiceOrderInput | <<Component>> | UI tombol mikrofon |
+| useSpeechRecognition | <<Hook>> | React Hook untuk Web Speech API |
+| voiceOrderParser | <<Module>> | NLP Parser (regex + fuzzy matching) |
+| WebSpeechAPI | <<Browser>> | Browser API untuk speech recognition |
+
+**Alur Utama:**
+1. User klik tombol mikrofon 🎤
+2. VoiceOrderInput → useSpeechRecognition: `startListening()`
+3. useSpeechRecognition → WebSpeechAPI: `recognition.start()`
+4. Browser request izin mikrofon
+5. User berbicara: *"Pesan 50 tabung 3 kilo ke Mitra"*
+6. WebSpeechAPI → useSpeechRecognition: `onResult(transcript)`
+7. VoiceOrderInput → voiceOrderParser: `parseVoiceCommand(transcript)`
+8. voiceOrderParser:
+   - `extractQuantity()` → 50
+   - `extractProduct()` → "3kg"
+   - `extractPangkalan()` → fuzzy match → "Mitra Jaya"
+9. VoiceOrderInput: Tampilkan dialog konfirmasi
+10. User konfirmasi hasil
+11. VoiceOrderInput → CreateOrderForm: `onVoiceOrderParsed(intent)`
+12. CreateOrderForm: Auto-fill form
+13. **Lanjut ke SD-03 (Create Order)**
+
+**Fitur Khusus:**
+- 100% frontend, tidak ada request ke backend
+- Fallback ke manual input jika voice gagal
+- Fuzzy matching untuk nama pangkalan
 
 ### SD-04: Update Status Pesanan
 

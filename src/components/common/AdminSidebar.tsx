@@ -265,7 +265,7 @@ export default function AdminSidebar() {
         <div className="mt-auto pt-2 px-3">
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
           <p className="text-[14px] text-center text-muted-foreground/40 mt-2 font-medium">
-            SIM4LON v1.3
+            SIM4LON v1.4
           </p>
           <p className="text-[12px] text-center text-muted-foreground/40 font-normal">
             by Luthfi

@@ -1,0 +1,127 @@
+@startuml SIM4LON_ModelIIS
+
+!define OP_COLOR #C8E6C9
+!define OP_DARK #4CAF50
+!define TECH_COLOR #BBDEFB
+!define TECH_DARK #2196F3
+!define MGR_COLOR #FFE0B2
+!define MGR_DARK #FF9800
+!define IIS_COLOR #FFCDD2
+!define IIS_DARK #E53935
+!define OUT_COLOR #E1BEE7
+!define OUT_DARK #9C27B0
+
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 8
+skinparam shadowing true
+
+skinparam rectangle {
+    BorderThickness 2
+    FontSize 11
+}
+
+skinparam package {
+    BorderThickness 2
+    FontStyle bold
+    FontSize 12
+}
+
+title <size:18>**Model of Integrated Information System (IIS)**</size>\n<size:12>SIM4LON - Optimizing LPG Distribution Management</size>\n
+
+' ==================== OPERATIONAL FACTORS ====================
+' Based on ACTUAL application features from backend modules
+package "**OPERATIONAL FACTORS**" as OPS <<Rectangle>> #E8F5E9 {
+    rectangle "**ORDER MANAGEMENT**\n• Order Creation\n• Status Tracking\n• Driver Assignment" as order OP_COLOR
+    
+    rectangle "**STOCK MANAGEMENT**\n• Penerimaan (Stok Masuk)\n• Penyaluran (Stok Keluar)\n• Stock Summary" as stock OP_COLOR
+    
+    rectangle "**PAYMENT PROCESSING**\n• DP Recording\n• Installment Tracking\n• Payment Status" as payment OP_COLOR
+}
+
+' ==================== IT/IS FACTORS ====================
+' Based on ACTUAL technology stack
+package "**IT/IS FACTORS**\n(Information Technology)" as TECH <<Rectangle>> #E3F2FD {
+    rectangle "**INTEGRATED DATABASE**\n• PostgreSQL 15\n• Prisma ORM\n• Multi-tenant Schema" as db TECH_COLOR
+    
+    rectangle "**REST API BACKEND**\n• NestJS 11\n• JWT Authentication\n• Modular Architecture" as api TECH_COLOR
+    
+    rectangle "**WEB-BASED INTERFACE**\n• React 18 + Astro\n• Responsive Design\n• Role-based Views" as ui TECH_COLOR
+}
+
+' ==================== MANAGERIAL FACTORS ====================
+' Based on ACTUAL security and policy features
+package "**MANAGERIAL FACTORS**" as MGR <<Rectangle>> #FFF3E0 {
+    rectangle "**ACCESS CONTROL**\n• RBAC (Admin/Operator/Pangkalan)\n• Single-session Login\n• JWT Token Validation" as access MGR_COLOR
+    
+    rectangle "**REPORTING POLICIES**\n• Sales Report\n• Payment Report\n• Stock Movement Report" as report MGR_COLOR
+    
+    rectangle "**AUDIT TRAIL**\n• Activity Logging\n• Timeline Tracking\n• User Action History" as audit MGR_COLOR
+}
+
+' ==================== INTEGRATED INFORMATION SYSTEM ====================
+rectangle "<size:14><b>INTEGRATED INFORMATION SYSTEM</b></size>\n(SIM4LON Platform)" as IIS IIS_COLOR {
+    rectangle "**Business Process**\n• Ordering → Distribution\n• Payment → Reporting" as bp #FFEBEE
+    
+    rectangle "**UML Design**\n• Use Case | Activity\n• Sequence | ERD" as uml #FFEBEE
+    
+    rectangle "**Infrastructure**\n• Cloud (Vercel + Railway)\n• REST API | Supabase" as infra #FFEBEE
+}
+
+' ==================== OUTCOME ====================
+rectangle "<size:14><b>OPTIMIZED LPG DISTRIBUTION</b></size>\n\n✓ Streamlined order processing\n✓ Real-time stock visibility\n✓ Accurate payment tracking\n✓ Automated report generation\n✓ Multi-tenant data isolation" as OUTCOME OUT_COLOR
+
+' ==================== FLOW RELATIONSHIPS ====================
+' Operational factors support IIS
+order -[OP_DARK,thickness=2]--> IIS
+stock -[OP_DARK,thickness=2]--> IIS
+payment -[OP_DARK,thickness=2]--> IIS
+
+' IT/IS factors enable IIS
+db -[TECH_DARK,thickness=2]--> IIS
+api -[TECH_DARK,thickness=2]--> IIS
+ui -[TECH_DARK,thickness=2]--> IIS
+
+' Managerial factors govern IIS
+access -[MGR_DARK,thickness=2]--> IIS
+report -[MGR_DARK,thickness=2]--> IIS
+audit -[MGR_DARK,thickness=2]--> IIS
+
+' IIS achieves outcome
+IIS ==[OUT_DARK,thickness=3]==> OUTCOME
+
+' ==================== FLOW LABELS ====================
+note right of OPS
+  <color:OP_DARK><b>supports</b></color>
+  daily operations
+end note
+
+note right of TECH
+  <color:TECH_DARK><b>enables</b></color>
+  system integration
+end note
+
+note right of MGR
+  <color:MGR_DARK><b>governs</b></color>
+  policies & security
+end note
+
+note right of OUTCOME
+  <color:OUT_DARK><b>achieves</b></color>
+  business goals
+end note
+
+' ==================== LEGEND ====================
+legend bottom
+  |= Color |= Factor |= Role |
+  | <OP_COLOR> | Operational | Supports daily business operations |
+  | <TECH_COLOR> | IT/IS (Technological) | Enables system functionality |
+  | <MGR_COLOR> | Managerial | Governs access & policies |
+  | <IIS_COLOR> | Integrated IS | Core system platform |
+  | <OUT_COLOR> | Outcome | Business optimization results |
+endlegend
+
+footer \n**SIM4LON - Model of Integrated Information System**\nLPG Distribution Management | Cianjur Regency, West Java, Indonesia
+
+@enduml

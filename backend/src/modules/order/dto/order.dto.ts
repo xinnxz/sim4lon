@@ -58,6 +58,18 @@ export class CreateOrderDto {
     @ValidateNested({ each: true })
     @Type(() => OrderItemDto)
     items: OrderItemDto[];
+
+    /**
+     * VOICE ORDER EXPRESS FLAGS
+     * Jika is_voice_order=true dan is_paid_cash=true:
+     * - Status langsung DIPROSES (skip DRAFT & MENUNGGU_PEMBAYARAN)
+     * - Payment otomatis dicatat sebagai TUNAI, LUNAS
+     */
+    @IsOptional()
+    is_voice_order?: boolean;
+
+    @IsOptional()
+    is_paid_cash?: boolean;
 }
 
 export class UpdateOrderDto {

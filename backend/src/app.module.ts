@@ -28,6 +28,8 @@ import { PerencanaanModule } from './modules/perencanaan/perencanaan.module';
 import { PenyaluranModule } from './modules/penyaluran/penyaluran.module';
 import { PenerimaanModule } from './modules/penerimaan/penerimaan.module';
 import { CompanyProfileModule } from './modules/company-profile/company-profile.module';
+// AI Features
+import { GeminiModule } from './modules/gemini/gemini.module';
 
 @Module({
     imports: [
@@ -62,6 +64,8 @@ import { CompanyProfileModule } from './modules/company-profile/company-profile.
         PenerimaanModule,
         // Settings
         CompanyProfileModule,
+        // AI Features
+        GeminiModule,
     ],
     controllers: [AppController],
     providers: [AppService],

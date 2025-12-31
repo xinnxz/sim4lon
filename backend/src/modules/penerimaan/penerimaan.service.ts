@@ -25,7 +25,10 @@ export class PenerimaanService {
         if (query.bulan) {
             const [year, month] = query.bulan.split('-').map(Number);
             const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 0);
+            // Set endDate to end of last day of month (23:59:59.999)
+            const lastDayOfMonth = new Date(year, month, 0);
+            const endDate = new Date(lastDayOfMonth);
+            endDate.setHours(23, 59, 59, 999);
             where.tanggal = { gte: startDate, lte: endDate };
         }
 
@@ -41,7 +44,10 @@ export class PenerimaanService {
                 where,
                 skip,
                 take: limit,
-                orderBy: { tanggal: 'desc' },
+                orderBy: [
+                    { tanggal: 'desc' },
+                    { created_at: 'desc' }  // Secondary sort: newest entries first
+                ],
             }),
             this.prisma.penerimaan_stok.count({ where }),
         ]);
@@ -73,25 +79,37 @@ export class PenerimaanService {
                 },
             });
 
-            // 2. Get product ID - use provided or find default (LPG 3kg Subsidi)
+            // 2. Detect lpg_type from nama_material
+            const detectedLpgType = this.detectLpgTypeFromMaterial(dto.nama_material);
+
+            // 3. Get product ID - use provided, or find matching product by size
             let productId = dto.lpg_product_id;
             if (!productId) {
-                const defaultProduct = await tx.lpg_products.findFirst({
-                    where: { size_kg: 3, category: 'SUBSIDI', is_active: true, deleted_at: null },
+                // Find product matching the detected LPG type
+                const sizeMap: Record<string, number> = {
+                    'kg3': 3, 'kg5': 5.5, 'kg12': 12, 'kg50': 50, 'gr220': 0.22
+                };
+                const targetSize = sizeMap[detectedLpgType] || 3;
+
+                const matchingProduct = await tx.lpg_products.findFirst({
+                    where: {
+                        size_kg: { gte: targetSize - 0.5, lte: targetSize + 0.5 },
+                        is_active: true,
+                        deleted_at: null
+                    },
                     select: { id: true },
                 });
-                productId = defaultProduct?.id;
+                productId = matchingProduct?.id;
             }
 
-            // 3. Sync to stock_histories for accurate stock tracking
-            // Now includes lpg_product_id for chart integration
+            // 4. Sync to stock_histories for accurate stock tracking
             await tx.stock_histories.create({
                 data: {
                     movement_type: 'MASUK',
                     qty: dto.qty_pcs,
                     note: `Penerimaan SPBE - SO: ${dto.no_so}, LO: ${dto.no_lo}`,
-                    lpg_type: lpg_type.kg3, // Default 3kg for subsidi
-                    lpg_product_id: productId || null, // Link to product for chart
+                    lpg_type: detectedLpgType, // Use detected type, not hardcoded!
+                    lpg_product_id: productId || null,
                     timestamp: new Date(dto.tanggal),
                 },
             });
@@ -184,5 +202,38 @@ export class PenerimaanService {
             total_penyaluran: totalPenyaluran,
             daily: dailyData,
         };
+    }
+
+    /**
+     * Detect LPG type from material name
+     * Examples:
+     * - "REFILL/ISI LPG @3KG (NET)" → kg3
+     * - "REFILL/ISI LPG @12KG (NET)" → kg12
+     * - "REFILL/ISI LPG @50KG (NET)" → kg50
+     * - "REFILL/ISI LPG @5.5KG (NET)" → kg5
+     * - "REFILL/ISI LPG @220GR (NET)" → gr220
+     */
+    private detectLpgTypeFromMaterial(namaMaterial: string): lpg_type {
+        const upper = namaMaterial.toUpperCase();
+
+        // Check for specific sizes in the material name
+        if (upper.includes('50KG') || upper.includes('50 KG')) {
+            return lpg_type.kg50;
+        }
+        if (upper.includes('12KG') || upper.includes('12 KG')) {
+            return lpg_type.kg12;
+        }
+        if (upper.includes('5.5KG') || upper.includes('5,5KG') || upper.includes('5.5 KG')) {
+            return lpg_type.kg5;
+        }
+        if (upper.includes('3KG') || upper.includes('3 KG')) {
+            return lpg_type.kg3;
+        }
+        if (upper.includes('220GR') || upper.includes('220 GR') || upper.includes('220G')) {
+            return lpg_type.gr220;
+        }
+
+        // Default to 3kg if nothing detected (most common subsidi type)
+        return lpg_type.kg3;
     }
 }

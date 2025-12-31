@@ -69,4 +69,34 @@ export declare class DashboardController {
             user: string;
         }[];
     }>;
+    getDSSAlerts(): Promise<{
+        lowStockAlerts: {
+            id: string;
+            name: string;
+            currentStock: number;
+            threshold: number;
+            severity: "critical" | "warning";
+            recommendation: string;
+        }[];
+        paymentOverdueAlerts: {
+            orderId: string;
+            orderCode: string;
+            pangkalanName: string;
+            totalAmount: number;
+            amountPaid: number;
+            daysOverdue: number;
+            severity: string;
+            recommendation: string;
+        }[];
+        summary: {
+            totalLowStockProducts: number;
+            criticalStockProducts: number;
+            totalOverduePayments: number;
+            criticalOverduePayments: number;
+            pendingOrdersCount: number;
+            urgentOrdersCount: number;
+            overallHealthScore: number;
+        };
+        generatedAt: string;
+    }>;
 }

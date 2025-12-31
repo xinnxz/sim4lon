@@ -97,4 +97,17 @@ export class DashboardController {
     async getRecentActivities() {
         return this.dashboardService.getRecentActivities();
     }
+
+    /**
+     * GET /api/dashboard/dss-alerts
+     * 
+     * Decision Support System Alerts:
+     * - Low Stock Alerts (products below threshold)
+     * - Payment Overdue Alerts (unpaid orders > 7 days)
+     * - Operational Health Score
+     */
+    @Get('dss-alerts')
+    async getDSSAlerts() {
+        return this.dashboardService.getDSSAlerts();
+    }
 }
