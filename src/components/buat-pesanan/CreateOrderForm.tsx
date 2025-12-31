@@ -551,6 +551,48 @@ export default function CreateOrderForm() {
     }
   }
 
+  /**
+   * Handle voice order confirmed
+   * Auto-fill form dengan hasil dari voice recognition
+   */
+  const handleVoiceOrderConfirmed = (result: {
+    pangkalanId: string | null
+    items: Array<{ productId: string; quantity: number }>
+  }) => {
+    // Set pangkalan jika ada
+    if (result.pangkalanId) {
+      setFormData(prev => ({ ...prev, pangkalanId: result.pangkalanId! }))
+    }
+
+    // Set items dari voice order
+    if (result.items.length > 0) {
+      const newItems: OrderItem[] = result.items.map((item, index) => {
+        const product = lpgProducts.find(p => p.id === item.productId)
+        if (!product) return null
+
+        // Get price
+        const defaultPrice = product.selling_price
+          || product.prices?.find(p => p.is_default)?.price
+          || product.prices?.[0]?.price
+          || 0
+
+        return {
+          id: String(index + 1),
+          productId: item.productId,
+          lpgType: sizeKgToLpgType(Number(product.size_kg)),
+          label: product.name,
+          price: Number(defaultPrice),
+          quantity: item.quantity,
+          isTaxable: product.category === 'NON_SUBSIDI',
+        }
+      }).filter((item): item is OrderItem => item !== null)
+
+      if (newItems.length > 0) {
+        setFormData(prev => ({ ...prev, items: newItems }))
+      }
+    }
+  }
+
   const selectedPangkalan = pangkalanList.find(p => p.id === formData.pangkalanId)
   const isFormDisabled = editOrderStatus === 'SELESAI' || editOrderStatus === 'BATAL'
 

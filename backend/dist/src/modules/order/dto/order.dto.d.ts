@@ -12,6 +12,8 @@ export declare class CreateOrderDto {
     driver_id?: string;
     note?: string;
     items: OrderItemDto[];
+    is_voice_order?: boolean;
+    is_paid_cash?: boolean;
 }
 export declare class UpdateOrderDto {
     pangkalan_id?: string;

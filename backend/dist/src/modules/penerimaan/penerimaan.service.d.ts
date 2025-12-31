@@ -8,8 +8,6 @@ export declare class PenerimaanService {
     findAll(query: GetPenerimaanQueryDto): Promise<{
         data: {
             id: string;
-            created_at: Date;
-            updated_at: Date;
             no_so: string;
             no_lo: string;
             nama_material: string;
@@ -17,6 +15,8 @@ export declare class PenerimaanService {
             qty_kg: import("@prisma/client/runtime/library").Decimal;
             tanggal: Date;
             sumber: string | null;
+            created_at: Date;
+            updated_at: Date;
         }[];
         meta: {
             total: number;
@@ -27,8 +27,6 @@ export declare class PenerimaanService {
     }>;
     create(dto: CreatePenerimaanDto): Promise<{
         id: string;
-        created_at: Date;
-        updated_at: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
@@ -36,11 +34,11 @@ export declare class PenerimaanService {
         qty_kg: import("@prisma/client/runtime/library").Decimal;
         tanggal: Date;
         sumber: string | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
     delete(id: string): Promise<{
         id: string;
-        created_at: Date;
-        updated_at: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
@@ -48,6 +46,8 @@ export declare class PenerimaanService {
         qty_kg: import("@prisma/client/runtime/library").Decimal;
         tanggal: Date;
         sumber: string | null;
+        created_at: Date;
+        updated_at: Date;
     }>;
     getInOutAgen(bulan: string): Promise<{
         bulan: string;
@@ -63,4 +63,5 @@ export declare class PenerimaanService {
             stok_akhir: number;
         }>;
     }>;
+    private detectLpgTypeFromMaterial;
 }

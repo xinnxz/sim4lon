@@ -393,7 +393,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                       />
                     </FormControl>
                     <FormDescription>
-                      Jumlah alokasi tabung LPG per bulan
+                      Jumlah alokasi tabung LPG (3kg) per bulan
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -34,6 +34,7 @@ Activity Diagram menggambarkan alur kerja (workflow) dari setiap proses bisnis d
 |-------|------|-------|------|
 | AD-01 | Login | User | `AD_01_Login.puml` |
 | AD-02 | Buat Pesanan | User | `AD_02_BuatPesanan.puml` |
+| AD-02-V | Buat Pesanan (Voice) | User | `AD_02_BuatPesanan_Voice.puml` |
 | AD-03 | Update Status Pesanan | User | `AD_03_UpdateStatusPesanan.puml` |
 | AD-04 | Catat Pembayaran | User | `AD_04_CatatPembayaran.puml` |
 | AD-05 | Catat Penerimaan Stok | User | `AD_05_CatatPenerimaanStok.puml` |
@@ -113,6 +114,46 @@ Activity Diagram menggambarkan alur kerja (workflow) dari setiap proses bisnis d
 8. Sistem generate kode pesanan (ORD-XXXX)
 9. Sistem simpan pesanan dengan status DRAFT
 10. Sistem buat timeline track "Pesanan Dibuat"
+
+---
+
+### AD-02-V: Buat Pesanan dengan Voice Input 🎤
+
+| Komponen | Deskripsi |
+|----------|-----------|
+| **Tujuan** | Membuat pesanan LPG menggunakan perintah suara |
+| **Aktor** | Admin, Operator |
+| **Pre-kondisi** | Browser mendukung Web Speech API, izin mikrofon diberikan |
+| **Post-kondisi** | Pesanan tersimpan dengan status DRAFT |
+
+**Alur Utama (Voice):**
+1. User buka halaman Pesanan
+2. User klik "Buat Pesanan Baru"
+3. Sistem load daftar pangkalan dan produk
+4. 🎤 User klik tombol mikrofon
+5. Sistem request izin mikrofon
+6. Jika izin diberikan, sistem mulai mendengarkan
+7. 🎤 User ucapkan perintah: *"Pesan 50 tabung 3 kilo ke Pangkalan Mitra"*
+8. Sistem convert speech-to-text (Web Speech API)
+9. Sistem parse intent dengan NLP:
+   - Produk: 3kg
+   - Qty: 50
+   - Pangkalan: fuzzy match → "Mitra Jaya"
+10. Sistem tampilkan dialog konfirmasi
+11. User konfirmasi hasil
+12. Sistem auto-fill form pesanan
+13. User review dan klik "Simpan"
+14. Sistem generate kode pesanan (ORD-XXXX)
+15. Sistem simpan pesanan dengan status DRAFT
+
+**Alur Alternatif:**
+- Jika izin mikrofon ditolak → Tampilkan error, fallback ke input manual
+- Jika voice tidak dikenali → User bisa coba ulang atau input manual
+- Jika confidence rendah → Tampilkan warning, user bisa edit manual
+
+**Teknologi:**
+- Web Speech API (browser-native)
+- Custom NLP Parser (regex + fuzzy matching)
 
 ---
 

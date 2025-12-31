@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import CreateOrderButton from './CreateOrderButton'
 import DashboardKPICards from './DashboardKPICards'
+import DSSAlertSection from './DSSAlertSection'
 import SalesChart from './charts/SalesChart'
 import StockChart from './charts/StockChart'
 import ProfitChart from './charts/ProfitChart'
@@ -61,6 +62,11 @@ export default function DashboardContent() {
       {/* KPI Cards */}
       <div className="relative z-10">
         <DashboardKPICards />
+      </div>
+
+      {/* DSS Alert Section - Decision Support System */}
+      <div className="relative z-10">
+        <DSSAlertSection />
       </div>
 
       {/* Sales Chart */}

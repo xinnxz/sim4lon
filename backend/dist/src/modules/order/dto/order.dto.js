@@ -57,6 +57,8 @@ class CreateOrderDto {
     driver_id;
     note;
     items;
+    is_voice_order;
+    is_paid_cash;
 }
 exports.CreateOrderDto = CreateOrderDto;
 __decorate([
@@ -83,6 +85,14 @@ __decorate([
     (0, class_transformer_1.Type)(() => OrderItemDto),
     __metadata("design:type", Array)
 ], CreateOrderDto.prototype, "items", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateOrderDto.prototype, "is_voice_order", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateOrderDto.prototype, "is_paid_cash", void 0);
 class UpdateOrderDto {
     pangkalan_id;
     driver_id;

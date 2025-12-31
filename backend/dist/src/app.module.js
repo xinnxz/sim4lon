@@ -36,6 +36,7 @@ const perencanaan_module_1 = require("./modules/perencanaan/perencanaan.module")
 const penyaluran_module_1 = require("./modules/penyaluran/penyaluran.module");
 const penerimaan_module_1 = require("./modules/penerimaan/penerimaan.module");
 const company_profile_module_1 = require("./modules/company-profile/company-profile.module");
+const gemini_module_1 = require("./modules/gemini/gemini.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -70,6 +71,7 @@ exports.AppModule = AppModule = __decorate([
             penyaluran_module_1.PenyaluranModule,
             penerimaan_module_1.PenerimaanModule,
             company_profile_module_1.CompanyProfileModule,
+            gemini_module_1.GeminiModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

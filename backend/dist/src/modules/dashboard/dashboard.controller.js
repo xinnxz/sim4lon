@@ -39,6 +39,9 @@ let DashboardController = class DashboardController {
     async getRecentActivities() {
         return this.dashboardService.getRecentActivities();
     }
+    async getDSSAlerts() {
+        return this.dashboardService.getDSSAlerts();
+    }
 };
 exports.DashboardController = DashboardController;
 __decorate([
@@ -83,6 +86,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DashboardController.prototype, "getRecentActivities", null);
+__decorate([
+    (0, common_1.Get)('dss-alerts'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "getDSSAlerts", null);
 exports.DashboardController = DashboardController = __decorate([
     (0, common_1.Controller)('dashboard'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

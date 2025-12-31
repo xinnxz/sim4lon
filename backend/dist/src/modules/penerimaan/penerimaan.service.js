@@ -32,7 +32,9 @@ let PenerimaanService = class PenerimaanService {
         if (query.bulan) {
             const [year, month] = query.bulan.split('-').map(Number);
             const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 0);
+            const lastDayOfMonth = new Date(year, month, 0);
+            const endDate = new Date(lastDayOfMonth);
+            endDate.setHours(23, 59, 59, 999);
             where.tanggal = { gte: startDate, lte: endDate };
         }
         if (query.tanggal_awal || query.tanggal_akhir) {
@@ -46,7 +48,10 @@ let PenerimaanService = class PenerimaanService {
                 where,
                 skip,
                 take: limit,
-                orderBy: { tanggal: 'desc' },
+                orderBy: [
+                    { tanggal: 'desc' },
+                    { created_at: 'desc' }
+                ],
             }),
             this.prisma.penerimaan_stok.count({ where }),
         ]);
@@ -73,20 +78,29 @@ let PenerimaanService = class PenerimaanService {
                     sumber: dto.sumber,
                 },
             });
+            const detectedLpgType = this.detectLpgTypeFromMaterial(dto.nama_material);
             let productId = dto.lpg_product_id;
             if (!productId) {
-                const defaultProduct = await tx.lpg_products.findFirst({
-                    where: { size_kg: 3, category: 'SUBSIDI', is_active: true, deleted_at: null },
+                const sizeMap = {
+                    'kg3': 3, 'kg5': 5.5, 'kg12': 12, 'kg50': 50, 'gr220': 0.22
+                };
+                const targetSize = sizeMap[detectedLpgType] || 3;
+                const matchingProduct = await tx.lpg_products.findFirst({
+                    where: {
+                        size_kg: { gte: targetSize - 0.5, lte: targetSize + 0.5 },
+                        is_active: true,
+                        deleted_at: null
+                    },
                     select: { id: true },
                 });
-                productId = defaultProduct?.id;
+                productId = matchingProduct?.id;
             }
             await tx.stock_histories.create({
                 data: {
                     movement_type: 'MASUK',
                     qty: dto.qty_pcs,
                     note: `Penerimaan SPBE - SO: ${dto.no_so}, LO: ${dto.no_lo}`,
-                    lpg_type: client_1.lpg_type.kg3,
+                    lpg_type: detectedLpgType,
                     lpg_product_id: productId || null,
                     timestamp: new Date(dto.tanggal),
                 },
@@ -155,6 +169,25 @@ let PenerimaanService = class PenerimaanService {
             total_penyaluran: totalPenyaluran,
             daily: dailyData,
         };
+    }
+    detectLpgTypeFromMaterial(namaMaterial) {
+        const upper = namaMaterial.toUpperCase();
+        if (upper.includes('50KG') || upper.includes('50 KG')) {
+            return client_1.lpg_type.kg50;
+        }
+        if (upper.includes('12KG') || upper.includes('12 KG')) {
+            return client_1.lpg_type.kg12;
+        }
+        if (upper.includes('5.5KG') || upper.includes('5,5KG') || upper.includes('5.5 KG')) {
+            return client_1.lpg_type.kg5;
+        }
+        if (upper.includes('3KG') || upper.includes('3 KG')) {
+            return client_1.lpg_type.kg3;
+        }
+        if (upper.includes('220GR') || upper.includes('220 GR') || upper.includes('220G')) {
+            return client_1.lpg_type.gr220;
+        }
+        return client_1.lpg_type.kg3;
     }
 };
 exports.PenerimaanService = PenerimaanService;

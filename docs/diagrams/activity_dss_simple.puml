@@ -1,0 +1,49 @@
+@startuml DSS_Alert_Simple
+
+title Activity Diagram: DSS Alert Generation Process
+
+skinparam backgroundColor #FEFEFE
+skinparam activity {
+    BackgroundColor #DAE8FC
+    BorderColor #6C8EBF
+}
+
+|#D5E8D4|Admin|
+start
+:Access Dashboard;
+
+|#DAE8FC|System|
+:Fetch DSS Alerts API;
+
+:Analyze Stock Levels;
+
+if (Stock < Threshold?) then (Yes)
+  #F8CECC:Generate Low Stock Alert;
+else (No)
+endif
+
+:Analyze Payment Status;
+
+if (Payment Overdue?) then (Yes)
+  #F8CECC:Generate Payment Alert;
+else (No)
+endif
+
+:Calculate Health Score (0-100);
+
+#E1D5E7:Generate Recommendations;
+
+:Compile DSS Response;
+
+|#D5E8D4|Admin|
+:View DSS Dashboard;
+note right
+  - Health Score Gauge
+  - Low Stock Alerts
+  - Payment Alerts
+  - Recommendations
+end note
+
+stop
+
+@enduml

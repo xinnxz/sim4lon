@@ -379,6 +379,132 @@ let DashboardService = class DashboardService {
             })),
         };
     }
+    async getDSSAlerts() {
+        const LOW_STOCK_THRESHOLD = 50;
+        const OVERDUE_DAYS = 1;
+        const products = await this.prisma.lpg_products.findMany({
+            where: {
+                is_active: true,
+                deleted_at: null
+            },
+            orderBy: { size_kg: 'asc' }
+        });
+        const stockData = await this.prisma.client.stock_histories.groupBy({
+            by: ['lpg_product_id', 'movement_type'],
+            where: {
+                lpg_product_id: { not: null }
+            },
+            _sum: {
+                qty: true
+            }
+        });
+        const lowStockAlerts = [];
+        products.forEach(product => {
+            const productStock = stockData.filter(s => s.lpg_product_id === product.id);
+            const inQty = productStock.find(s => s.movement_type === 'MASUK')?._sum.qty || 0;
+            const outQty = productStock.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
+            const currentStock = inQty - outQty;
+            if (currentStock < LOW_STOCK_THRESHOLD) {
+                const severity = currentStock < (LOW_STOCK_THRESHOLD / 2) ? 'critical' : 'warning';
+                lowStockAlerts.push({
+                    id: product.id,
+                    name: product.name,
+                    currentStock,
+                    threshold: LOW_STOCK_THRESHOLD,
+                    severity,
+                    recommendation: severity === 'critical'
+                        ? `Segera lakukan pengadaan ${product.name}. Stok sangat rendah!`
+                        : `Pertimbangkan untuk memesan ${product.name} dalam waktu dekat.`
+                });
+            }
+        });
+        const overdueDate = new Date();
+        overdueDate.setDate(overdueDate.getDate() - OVERDUE_DAYS);
+        const overdueOrders = await this.prisma.client.orders.findMany({
+            where: {
+                created_at: {
+                    lt: overdueDate
+                },
+                current_status: {
+                    notIn: ['BATAL', 'SELESAI']
+                },
+                order_payment_details: {
+                    is_paid: false
+                }
+            },
+            include: {
+                pangkalans: {
+                    select: {
+                        name: true
+                    }
+                },
+                order_payment_details: {
+                    select: {
+                        amount_paid: true,
+                        is_paid: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'asc'
+            },
+            take: 10
+        });
+        const paymentOverdueAlerts = overdueOrders.map(order => {
+            const daysOverdue = Math.floor((new Date().getTime() - new Date(order.created_at).getTime()) / (1000 * 60 * 60 * 24));
+            const severity = daysOverdue > 14 ? 'critical' : 'warning';
+            const amountPaid = Number(order.order_payment_details?.amount_paid) || 0;
+            return {
+                orderId: order.id,
+                orderCode: order.code,
+                pangkalanName: order.pangkalans?.name || 'Unknown',
+                totalAmount: Number(order.total_amount),
+                amountPaid: amountPaid,
+                daysOverdue,
+                severity,
+                recommendation: severity === 'critical'
+                    ? `Hubungi ${order.pangkalans?.name} segera untuk penagihan. Pembayaran tertunda ${daysOverdue} hari.`
+                    : `Follow up pembayaran dari ${order.pangkalans?.name}. Sudah ${daysOverdue} hari belum lunas.`
+            };
+        });
+        const pendingOrdersCount = await this.prisma.client.orders.count({
+            where: {
+                current_status: {
+                    in: ['DRAFT', 'MENUNGGU_PEMBAYARAN', 'DIPROSES', 'SIAP_KIRIM']
+                }
+            }
+        });
+        const urgentOrdersCount = await this.prisma.client.orders.count({
+            where: {
+                current_status: {
+                    in: ['SIAP_KIRIM', 'DIKIRIM']
+                }
+            }
+        });
+        const summary = {
+            totalLowStockProducts: lowStockAlerts.length,
+            criticalStockProducts: lowStockAlerts.filter(a => a.severity === 'critical').length,
+            totalOverduePayments: paymentOverdueAlerts.length,
+            criticalOverduePayments: paymentOverdueAlerts.filter(a => a.severity === 'critical').length,
+            pendingOrdersCount,
+            urgentOrdersCount,
+            overallHealthScore: this.calculateHealthScore(lowStockAlerts.length, paymentOverdueAlerts.length, pendingOrdersCount)
+        };
+        return {
+            lowStockAlerts,
+            paymentOverdueAlerts,
+            summary,
+            generatedAt: new Date().toISOString()
+        };
+    }
+    calculateHealthScore(lowStockCount, overdueCount, pendingCount) {
+        let score = 100;
+        score -= Math.min(lowStockCount * 10, 30);
+        score -= Math.min(overdueCount * 8, 40);
+        if (pendingCount > 20)
+            score -= Math.min((pendingCount - 20) * 2, 30);
+        return Math.max(score, 0);
+    }
 };
 exports.DashboardService = DashboardService;
 exports.DashboardService = DashboardService = __decorate([
