@@ -87,8 +87,8 @@ export interface UseSpeechRecognitionResult {
     isSupported: boolean
     /** Confidence score (0-1) dari hasil terakhir */
     confidence: number
-    /** Mulai mendengarkan */
-    startListening: () => void
+    /** Mulai mendengarkan (async - meminta izin mikrofon) */
+    startListening: () => Promise<void>
     /** Berhenti mendengarkan */
     stopListening: () => void
     /** Reset transcript */
@@ -261,7 +261,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
     }, [isSupported, autoStop, silenceTimeout, resetSilenceTimer, clearSilenceTimer, onSpeechEnd])
 
     // Start listening
-    const startListening = useCallback(() => {
+    const startListening = useCallback(async () => {
         if (!recognitionRef.current) {
             setError('Browser tidak mendukung Speech Recognition')
             return
@@ -274,7 +274,36 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}):
         setConfidence(0)
         transcriptRef.current = ''
 
+        // Request microphone permission explicitly before starting
         try {
+            console.log('[SpeechRecognition] Requesting microphone permission...')
+
+            // List available audio input devices
+            const devices = await navigator.mediaDevices.enumerateDevices()
+            const audioInputs = devices.filter(d => d.kind === 'audioinput')
+            console.log('[SpeechRecognition] Available audio inputs:', audioInputs.map(d => d.label || d.deviceId))
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            })
+            console.log('[SpeechRecognition] Microphone permission granted!')
+            console.log('[SpeechRecognition] Active track:', stream.getAudioTracks()[0]?.label)
+
+            // Keep stream open briefly to ensure audio pipeline is ready
+            await new Promise(resolve => setTimeout(resolve, 100))
+            stream.getTracks().forEach(track => track.stop())
+        } catch (permError: any) {
+            console.error('[SpeechRecognition] Microphone permission denied:', permError)
+            setError('Izin mikrofon ditolak. Silakan aktifkan di pengaturan browser.')
+            return
+        }
+
+        try {
+            console.log('[SpeechRecognition] Starting recognition...')
             recognitionRef.current.start()
         } catch (err) {
             // Already started
