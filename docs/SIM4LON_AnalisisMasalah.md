@@ -94,27 +94,76 @@ Kebutuhan fungsional adalah kebutuhan yang berkaitan langsung dengan fungsi atau
 
 ### 3.1.3.2 Kebutuhan Non-Fungsional
 
-Kebutuhan non-fungsional adalah kebutuhan yang berkaitan dengan kualitas sistem, bukan fungsi spesifik.
+Analisis kebutuhan non-fungsional menggambarkan kebutuhan yang diperlukan untuk menjalankan sistem yang dibangun. Analisis kebutuhan non-fungsional dilakukan untuk mengetahui spesifikasi kebutuhan untuk sistem. Spesifikasi kebutuhan melibatkan analisis perangkat keras (*hardware*), analisis perangkat lunak (*software*), serta analisis pengguna (*user*).
 
-#### a. Kebutuhan Pengguna
+#### a. Analisis Perangkat Keras
 
-| Kode | Kebutuhan | Deskripsi |
-|------|-----------|-----------|
-| KNF-01 | **Admin** | Admin dapat melakukan mengatur dan mengelola seluruh data pesanan, stok, pangkalan, driver, pembayaran, dan laporan. Admin memiliki akses penuh ke semua fitur sistem. |
-| KNF-02 | **Operator** | Operator dapat melakukan proses operasional harian seperti mencatat pesanan, update status, dan monitoring stok, namun tidak dapat mengakses fitur administratif seperti manajemen pengguna. |
-| KNF-03 | **Pangkalan** | Pangkalan dapat melakukan akses terbatas untuk melihat stok di agen, melihat riwayat transaksi, dan mengelola penjualan di tingkat pangkalan. |
+Dalam menjalankan aplikasi SIM4LON dibutuhkannya perangkat keras sehingga sistem yang dibangun dapat berjalan dengan baik dan sesuai kebutuhan tanpa adanya kendala. Kebutuhan spesifikasi perangkat keras dibagi menjadi spesifikasi untuk pengembang dan spesifikasi minimum untuk pengguna.
 
-#### b. Kebutuhan Sistem
+**Tabel 3.3 Spesifikasi Perangkat Keras Pengembang Aplikasi**
 
-| Kode | Aspek | Kebutuhan |
-|------|-------|-----------|
-| KNF-S01 | **Performa** | Sistem harus mampu merespons dalam waktu kurang dari 3 detik untuk operasi normal |
-| KNF-S02 | **Ketersediaan** | Sistem harus tersedia 24/7 dengan uptime minimal 99% |
-| KNF-S03 | **Keamanan** | Sistem harus mengimplementasikan autentikasi JWT dan enkripsi password |
-| KNF-S04 | **Skalabilitas** | Sistem harus mampu menangani pertumbuhan data dan pengguna |
-| KNF-S05 | **Kompatibilitas** | Sistem harus dapat diakses dari browser modern (Chrome, Firefox, Safari, Edge) |
-| KNF-S06 | **Responsivitas** | Sistem harus responsive dan dapat diakses dari perangkat mobile |
-| KNF-S07 | **Backup** | Sistem harus memiliki mekanisme backup data secara berkala |
+| No | Perangkat | Spesifikasi |
+|----|-----------|-------------|
+| 1. | Laptop | ASUS ROG Strix G513RC |
+| 2. | Processor | AMD Ryzen 7 6800H with Radeon Graphics |
+| 3. | RAM | 32 GB DDR5 |
+| 4. | Storage | Micron 2450 NVMe SSD 512 GB |
+| 5. | Sistem Operasi | Windows 11 |
+| 6. | Koneksi Internet | Stabil minimal 10 Mbps |
+
+**Tabel 3.4 Spesifikasi Perangkat Keras Minimum Pengguna (PC/Laptop)**
+
+| No | Perangkat | Spesifikasi |
+|----|-----------|-------------|
+| 1. | Processor | Intel Core i3 / AMD Ryzen 3 atau setara |
+| 2. | RAM | Minimal 4 GB |
+| 3. | Storage | Minimal 1 GB ruang kosong |
+| 4. | Layar | Resolusi minimal 1366 x 768 piksel |
+| 5. | Koneksi Internet | Stabil minimal 5 Mbps |
+
+**Tabel 3.5 Spesifikasi Perangkat Keras Minimum Pengguna (Smartphone/Tablet)**
+
+| No | Perangkat | Spesifikasi |
+|----|-----------|-------------|
+| 1. | Processor | Qualcomm Snapdragon 600 series / MediaTek Helio atau setara |
+| 2. | RAM | Minimal 3 GB |
+| 3. | Storage | Minimal 500 MB ruang kosong |
+| 4. | Layar | Resolusi minimal 720 x 1280 piksel (HD) |
+| 5. | Koneksi Internet | Stabil minimal 3 Mbps (4G/WiFi) |
+
+#### b. Analisis Perangkat Lunak
+
+Perangkat lunak yang dibutuhkan untuk mendukung aplikasi yang akan dibangun adalah sebagai berikut:
+
+**Tabel 3.5 Perangkat Lunak Pengembangan Aplikasi**
+
+| No | Perangkat | Keterangan |
+|----|-----------|------------|
+| 1. | Windows 10/11 atau macOS | Sistem operasi untuk development |
+| 2. | Visual Studio Code | IDE untuk pengembangan kode |
+| 3. | Node.js v20+ | Runtime JavaScript untuk backend |
+| 4. | PostgreSQL 15 | Database relasional |
+| 5. | Git | Version control system |
+| 6. | PlantUML | Tool untuk membuat diagram UML |
+| 7. | Balsamiq Mockup | Tool untuk membuat wireframe UI |
+| 8. | Browser (Chrome/Firefox) | Untuk testing aplikasi |
+
+**Tabel 3.6 Perangkat Lunak Pengguna**
+
+| No | Perangkat | Keterangan |
+|----|-----------|------------|
+| 1. | Browser | Google Chrome, Mozilla Firefox, Microsoft Edge, atau Safari |
+| 2. | Sistem Operasi | Windows, Linux, macOS, Android, iOS |
+
+#### c. Analisis Pengguna
+
+Analisis pengguna menunjukkan siapa saja yang nanti akan terlibat dalam aplikasi SIM4LON, serta hak akses apa saja yang ada dalam perangkat lunak tersebut. Aplikasi yang dibangun ini memiliki tiga pengguna yaitu:
+
+1. **Admin**, yaitu pengguna dengan hak akses tertinggi yang bertanggung jawab atas pengelolaan seluruh data sistem. Admin dapat melakukan manajemen pengguna, manajemen pangkalan, manajemen driver, konfigurasi sistem, serta memiliki akses penuh ke semua fitur termasuk laporan dan log aktivitas. Admin berperan sebagai administrator yang memastikan sistem berjalan dengan baik dan data terjaga integritasnya.
+
+2. **Operator**, yaitu staff operasional yang bertugas untuk menjalankan aktivitas harian di agen LPG. Operator dapat melakukan pencatatan pesanan, update status pesanan, assign driver, pencatatan pembayaran, monitoring stok, dan pembuatan laporan. Namun, operator tidak memiliki akses ke fitur administratif seperti manajemen pengguna dan pengaturan sistem. Peran operator sangat penting dalam membantu kelancaran operasional distribusi LPG.
+
+3. **Pangkalan**, yaitu pemilik atau pengelola pangkalan LPG yang menjadi mitra agen. Pangkalan memiliki akses terbatas yang hanya dapat melihat stok tersedia di agen, melihat riwayat pesanan milik sendiri, mencatat penjualan ke konsumen akhir, mengelola data konsumen tetap, dan melihat laporan penjualan pangkalan sendiri. Implementasi multi-tenant memastikan setiap pangkalan hanya dapat mengakses data miliknya sendiri.
 
 ---
 
