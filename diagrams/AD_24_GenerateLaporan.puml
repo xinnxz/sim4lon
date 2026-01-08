@@ -6,61 +6,65 @@ skinparam ActivityBorderColor #1565c0
 skinparam PartitionBackgroundColor #e3f2fd
 skinparam PartitionBorderColor #1565c0
 
-title **AD-24: Generate Laporan**\nSistem SIM4LON
+title **AD-24: Generate & Export Laporan (Agen)**\nSistem SIM4LON
 
-|User|
+|#e3f2fd|Admin/Operator|
 start
 :Buka halaman Laporan;
-:Pilih jenis laporan;
+:Pilih periode (preset/custom);
 
-switch (Jenis Laporan?)
+:Pilih tab laporan;
+
+switch (Tab?)
 case (Penjualan)
-    :Pilih periode (tanggal);
-    :Pilih pangkalan (opsional);
+    :Filter: status, pangkalan;
     
-    |Sistem|
-    :Query orders dengan filter;
-    :Hitung total penjualan;
-    :Hitung per status;
-    :Tampilkan laporan penjualan;
-
-case (Pembayaran)
-    :Pilih periode;
-    :Pilih metode (opsional);
-    
-    |Sistem|
-    :Query payment_records;
-    :Hitung total per metode;
-    :Tampilkan laporan pembayaran;
+    |#e8f5e9|Sistem|
+    :Query orders;
+    :Hitung summary;
+    :Tampilkan grafik & tabel;
 
 case (Stok)
-    :Pilih periode;
-    :Pilih jenis LPG;
+    :Filter: jenis LPG;
     
     |Sistem|
     :Query stock_histories;
-    :Hitung total MASUK;
-    :Hitung total KELUAR;
-    :Tampilkan laporan pergerakan;
+    :Hitung masuk/keluar;
+    :Tampilkan grafik & tabel;
+
+case (Per Pangkalan)
+    :Pilih pangkalan;
+    
+    |Sistem|
+    :Query orders per pangkalan;
+    :Hitung ranking;
+    :Tampilkan data per pangkalan;
 
 endswitch
 
-|User|
-:Lihat laporan di layar;
+|Admin/Operator|
+:Lihat laporan;
 
-if (Ingin export?) then (ya)
-    :Klik "Export";
+if (Export?) then (ya)
+    :Pilih format;
+    
+    split
+        :Export Excel;
+        |Sistem|
+        :Generate XLSX;
+    split again
+        :Export PDF;
+        |Sistem|
+        :Generate PDF;
+    end split
     
     |Sistem|
-    :Generate file Excel;
     :Download file;
     
-    |User|
+    |Admin/Operator|
     :File tersimpan;
-    stop
-else (tidak)
-    :Selesai melihat;
-    stop
 endif
+
+stop
 
 @enduml

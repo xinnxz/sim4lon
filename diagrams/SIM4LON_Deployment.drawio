@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.10">
+  <diagram name="SIM4LON Deployment Diagram" id="deployment">
+    <mxGraphModel dx="1389" dy="703" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" value="SIM4LON Deployment Diagram" vertex="1">
+          <mxGeometry height="30" width="300" x="500" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="clientNode" parent="1" style="verticalAlign=top;align=center;shape=cube;size=10;direction=south;fontStyle=0;html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;&lt;device&gt;&gt;&#xa;Client PC" vertex="1">
+          <mxGeometry height="80" width="140" x="580" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="browser" parent="1" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;&lt;artifact&gt;&gt;&#xa;Web Browser" vertex="1">
+          <mxGeometry height="40" width="110" x="595" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="vercelNode" parent="1" style="verticalAlign=top;align=center;shape=cube;size=10;direction=south;fontStyle=0;html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;&lt;execution environment&gt;&gt;&#xa;Vercel" vertex="1">
+          <mxGeometry height="140" width="340" x="480" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="astroApp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;&lt;artifact&gt;&gt;&#xa;Astro 5 + React 18" vertex="1">
+          <mxGeometry height="40" width="130" x="500" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="tailwindArt" parent="1" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;&lt;artifact&gt;&gt;&#xa;Tailwind CSS" vertex="1">
+          <mxGeometry height="40" width="90" x="640" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="shadcnArt" parent="1" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;&lt;artifact&gt;&gt;&#xa;Shadcn/UI" vertex="1">
+          <mxGeometry height="40" width="70" x="740" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="rechartsArt" parent="1" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;&lt;artifact&gt;&gt;&#xa;Recharts" vertex="1">
+          <mxGeometry height="40" width="90" x="500" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="lucideArt" parent="1" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;&lt;artifact&gt;&gt;&#xa;Lucide Icons" vertex="1">
+          <mxGeometry height="40" width="90" x="600" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="railwayNode" parent="1" style="verticalAlign=top;align=center;shape=cube;size=10;direction=south;fontStyle=0;html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;&lt;execution environment&gt;&gt;&#xa;Railway" vertex="1">
+          <mxGeometry height="180" width="540" x="380" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="nestjsArt" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;&lt;artifact&gt;&gt;&#xa;NestJS 11" vertex="1">
+          <mxGeometry height="40" width="90" x="400" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="prismaArt" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;&lt;artifact&gt;&gt;&#xa;Prisma ORM 6" vertex="1">
+          <mxGeometry height="40" width="100" x="500" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="authComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Auth Module" vertex="1">
+          <mxGeometry height="40" width="90" x="610" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="orderComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Order Service" vertex="1">
+          <mxGeometry height="40" width="100" x="710" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="stockComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Stock Service" vertex="1">
+          <mxGeometry height="40" width="90" x="820" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="payComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Payment Service" vertex="1">
+          <mxGeometry height="40" width="110" x="400" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="pklComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Pangkalan Service" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="dashComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Dashboard Service" vertex="1">
+          <mxGeometry height="40" width="120" x="650" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="rptComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Report Service" vertex="1">
+          <mxGeometry height="40" width="100" x="780" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="geminiComp" parent="1" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;&lt;component&gt;&gt;&#xa;Gemini Service" vertex="1">
+          <mxGeometry height="40" width="100" x="400" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="pgNode" parent="1" style="verticalAlign=top;align=center;shape=cube;size=10;direction=south;fontStyle=0;html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;&lt;device&gt;&gt;&#xa;Railway PostgreSQL" vertex="1">
+          <mxGeometry height="130" width="200" x="70" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="pgDb" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;&lt;database&gt;&gt;&#xa;PostgreSQL 15&#xa;23 Tables&#xa;7 Enums" vertex="1">
+          <mxGeometry height="80" width="100" x="120" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="supaNode" parent="1" style="verticalAlign=top;align=center;shape=cube;size=10;direction=south;fontStyle=0;html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;&lt;device&gt;&gt;&#xa;Supabase Storage" vertex="1">
+          <mxGeometry height="120" width="180" x="555" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="bucket1" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;&lt;artifact&gt;&gt;&#xa;/profile-pictures/" vertex="1">
+          <mxGeometry height="35" width="140" x="575" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="bucket2" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;&lt;artifact&gt;&gt;&#xa;/payment-proofs/" vertex="1">
+          <mxGeometry height="35" width="140" x="575" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="gcloudNode" parent="1" style="verticalAlign=top;align=center;shape=cube;size=10;direction=south;fontStyle=0;html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;&lt;device&gt;&gt;&#xa;Google Cloud" vertex="1">
+          <mxGeometry height="100" width="180" x="140" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="geminiAI" parent="1" style="html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;&lt;artifact&gt;&gt;&#xa;Gemini 2.0 Flash&#xa;(Voice Order NLP)" vertex="1">
+          <mxGeometry height="50" width="140" x="160" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="conn1" edge="1" parent="1" source="clientNode" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1.008;exitY=0.603;exitDx=0;exitDy=0;exitPerimeter=0;" target="vercelNode" value="">
+          <mxGeometry relative="1" width="160" as="geometry" />
+        </mxCell>
+        <mxCell id="conn1Label" connectable="0" parent="conn1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt;&lt;HTTPS&gt;&gt;&#xa;:443" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn2" edge="1" parent="1" source="vercelNode" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="railwayNode" value="">
+          <mxGeometry relative="1" width="160" as="geometry" />
+        </mxCell>
+        <mxCell id="conn2Label" connectable="0" parent="conn2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt;&lt;REST API&gt;&gt;&#xa;:443" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn3" edge="1" parent="1" source="railwayNode" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="pgNode" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="310" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn3Label" connectable="0" parent="conn3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt;&lt;TCP&gt;&gt;&#xa;:5432" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn4" edge="1" parent="1" source="railwayNode" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="supaNode" value="">
+          <mxGeometry relative="1" width="160" as="geometry" />
+        </mxCell>
+        <mxCell id="conn4Label" connectable="0" parent="conn4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt;&lt;HTTPS&gt;&gt;&#xa;:443" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn5" edge="1" parent="1" source="railwayNode" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="gcloudNode" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn5Label" connectable="0" parent="conn5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt;&lt;HTTPS&gt;&gt;&#xa;:443" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legendFrame" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;startSize=25;" value="Legend" vertex="1">
+          <mxGeometry height="150" width="200" x="1020" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" parent="legendFrame" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" value="&lt;&lt;artifact&gt;&gt; Frontend" vertex="1">
+          <mxGeometry height="30" width="85" x="10" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" parent="legendFrame" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" value="&lt;&lt;artifact&gt;&gt; Backend" vertex="1">
+          <mxGeometry height="30" width="85" x="105" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" parent="legendFrame" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="&lt;&lt;component&gt;&gt; Service" vertex="1">
+          <mxGeometry height="30" width="85" x="10" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" parent="legendFrame" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" value="&lt;&lt;database&gt;&gt;" vertex="1">
+          <mxGeometry height="35" width="85" x="105" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5" parent="legendFrame" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" value="&lt;&lt;artifact&gt;&gt; Storage" vertex="1">
+          <mxGeometry height="30" width="85" x="10" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="leg6" parent="legendFrame" style="html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" value="&lt;&lt;artifact&gt;&gt; AI" vertex="1">
+          <mxGeometry height="30" width="85" x="105" y="110" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

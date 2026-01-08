@@ -1,0 +1,110 @@
+@startuml SD_19_GenerateExportReportPangkalan
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-19: GENERATE & EXPORT REPORT (PANGKALAN)\n<size:10>Sistem SIM4LON</size>
+
+actor "Pangkalan" as User
+boundary "LaporanPage" as LP
+control "LaporanService" as LS
+database "consumer_orders" as SalesDB
+database "expenses" as ExpensesDB
+database "lpg_prices" as PricesDB
+
+== Load Dashboard Laporan ==
+
+User -> LP : 1: Buka halaman Laporan
+activate LP
+
+LP -> LS : 1.1: getLaporanData(pangkalanId, periode)
+activate LS
+
+LS -> SalesDB : 1.1.1: SELECT * FROM consumer_orders\nWHERE pangkalan_id = ?\nAND sale_date BETWEEN ? AND ?
+activate SalesDB
+SalesDB --> LS : 1.1.1.1: salesData[]
+deactivate SalesDB
+
+LS -> ExpensesDB : 1.1.2: SELECT * FROM expenses\nWHERE pangkalan_id = ?\nAND tanggal BETWEEN ? AND ?
+activate ExpensesDB
+ExpensesDB --> LS : 1.1.2.1: expenseData[]
+deactivate ExpensesDB
+
+LS -> PricesDB : 1.1.3: SELECT * FROM lpg_prices\nWHERE pangkalan_id = ?
+activate PricesDB
+PricesDB --> LS : 1.1.3.1: priceList
+deactivate PricesDB
+
+LS -> LS : 1.1.4: calculateTotalPenjualan()
+LS -> LS : 1.1.5: calculateTotalPengeluaran()
+LS -> LS : 1.1.6: calculateLabaBersih()\n→ penjualan - pengeluaran
+
+LS --> LP : 1.2: {sales, expenses, summary, chartData}
+deactivate LS
+
+LP --> User : 1.3: Tampilkan ringkasan:\n- Total Penjualan\n- Total Pengeluaran\n- Laba Bersih
+
+LP --> User : 1.4: Render grafik trend 7 hari
+LP --> User : 1.5: Render tabel transaksi
+
+== Filter Periode ==
+
+User -> LP : 2: Pilih periode (hari/minggu/bulan)
+LP -> LS : 2.1: getLaporanData(pangkalanId, newPeriode)
+activate LS
+LS --> LP : 2.2: filteredData
+deactivate LS
+LP --> User : 2.3: Refresh tampilan
+
+== Export ke Excel ==
+
+User -> LP : 3: Klik "Export Excel"
+
+LP -> LS : 3.1: exportToExcel(reportData)
+activate LS
+
+LS -> LS : 3.1.1: createWorkbook()
+LS -> LS : 3.1.2: createSheet("Ringkasan")
+LS -> LS : 3.1.3: createSheet("Detail Penjualan")
+LS -> LS : 3.1.4: createSheet("Detail Pengeluaran")
+LS -> LS : 3.1.5: applyStyles()
+LS -> LS : 3.1.6: generateFileName()\n→ "Laporan_Pangkalan_[Nama]_[Periode].xlsx"
+
+LS --> LP : 3.2: excelBuffer
+deactivate LS
+
+LP -> LP : 3.3: triggerDownload()
+LP --> User : 3.4: File terdownload
+
+== Export ke PDF ==
+
+User -> LP : 4: Klik "Export PDF"
+
+LP -> LS : 4.1: exportToPDF(reportData)
+activate LS
+
+LS -> LS : 4.1.1: generatePDF()
+LS -> LS : 4.1.2: addHeader(logo, info)
+LS -> LS : 4.1.3: addSummaryTable()
+LS -> LS : 4.1.4: addDetailTables()
+LS -> LS : 4.1.5: addFooter()
+
+LS --> LP : 4.2: pdfBlob
+deactivate LS
+
+LP -> LP : 4.3: openPrintDialog() atau Download
+LP --> User : 4.4: PDF ready
+
+deactivate LP
+
+note right of LS
+  <b>Multi-tenant</b>
+  Pangkalan hanya dapat
+  melihat data miliknya
+  (filter by pangkalan_id)
+end note
+
+@enduml

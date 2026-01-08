@@ -5,82 +5,78 @@ skinparam ActivityBackgroundColor #87CEEB
 skinparam ActivityBorderColor #1565c0
 skinparam PartitionBackgroundColor #e3f2fd
 skinparam PartitionBorderColor #1565c0
+skinparam wrapWidth 120
 
-title **AD-Voice: Voice Order dengan AI**\nSistem SIM4LON
+title **AD-10: Voice Order AI**\nSistem SIM4LON
 
-|Admin|
+|#e3f2fd|Admin|
 start
 :Klik tombol mikrofon;
 
-|Sistem|
+|#e8f5e9|Sistem|
 :Request izin mikrofon;
 
 |Admin|
-if (Izin diberikan?) then (ya)
+if (Izin OK?) then (ya)
     
     |Sistem|
-    :Aktifkan Web Speech API;
-    :Tampilkan status Mendengarkan;
+    :Aktifkan Speech API;
+    :Status "Mendengarkan";
     
     |Admin|
-    :Ucapkan perintah suara;
-    note right: Contoh:\n"50 tabung 12 kilo ke Reon"
+    :Ucapkan perintah;
+    note right: "50 tabung\n12kg ke Reon"
     
     |Sistem|
-    :Konversi speech ke text;
-    :Tampilkan transcript real-time;
+    :Speech to text;
+    :Tampilkan transcript;
     
-    if (Auto-stop atau klik Selesai?) then (ya)
+    if (Selesai?) then (ya)
         :Kirim ke Gemini AI;
-        :Parse quantity dan product;
-        :Fuzzy match nama pangkalan;
-        note right: Levenshtein algorithm\nuntuk nama mirip
-        :Query pangkalan dari DB;
-        :Query product dan harga;
-        :Cek ketersediaan stok;
+        :Parse qty & product;
+        :Match pangkalan (fuzzy);
+        :Query DB;
+        :Cek stok;
         
-        if (Data valid?) then (ya)
-            :Tampilkan konfirmasi pesanan;
+        if (Valid?) then (ya)
+            :Tampilkan konfirmasi;
             
             |Admin|
-            if (Konfirmasi pesanan?) then (ya)
+            if (OK?) then (ya)
                 
                 |Sistem|
-                :Generate kode ORD-XXXX;
-                :Simpan pesanan ke database;
-                :Buat timeline track;
+                :Generate ORD-XXXX;
+                :Simpan order;
                 :Log aktivitas;
                 
                 |Admin|
-                :Tampilkan pesan sukses;
+                :Pesan sukses;
                 
-                if (Lihat pesanan?) then (ya)
-                    :Navigate ke detail pesanan;
-                    stop
+                if (Lihat?) then (ya)
+                    :Buka detail;
                 else (tidak)
-                    :Tutup modal;
-                    stop
+                    :Tutup;
                 endif
+                stop
                 
             else (tidak)
-                :Kembali ke awal;
+                :Batal;
                 stop
             endif
             
         else (tidak)
             |Admin|
-            :Tampilkan pesan error;
-            note right: Stok habis atau\npangkalan tidak ditemukan
+            :Error: stok/pangkalan;
             stop
         endif
         
     else (tidak)
-        :Lanjut mendengarkan;
+        :Lanjut dengar;
     endif
     
 else (tidak)
     |Sistem|
-    :Tampilkan error\nizin mikrofon ditolak;
+    :Error: izin ditolak;
     stop
 endif
 

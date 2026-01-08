@@ -1,4 +1,4 @@
-@startuml AD_25_ExportLaporan
+@startuml AD_25_LaporanPangkalan
 !theme plain
 skinparam backgroundColor #f0f8ff
 skinparam ActivityBackgroundColor #87CEEB
@@ -6,26 +6,56 @@ skinparam ActivityBorderColor #1565c0
 skinparam PartitionBackgroundColor #e3f2fd
 skinparam PartitionBorderColor #1565c0
 
-title **AD-25: Export Laporan**\nSistem SIM4LON
+title **AD-25: Generate & Export Laporan (Pangkalan)**\nSistem SIM4LON
 
-|User|
+|#e3f2fd|Pangkalan|
 start
-:Berada di halaman laporan\n(sudah ada data);
-:Klik "Export Excel";
+:Buka halaman Laporan;
+:Pilih periode (preset/custom);
 
-|Sistem|
-:Ambil data laporan saat ini;
-:Tentukan format kolom\nsesuai jenis laporan;
-:Generate file Excel\ndengan header;
-:Isi data ke rows;
-:Set styling (border, width);
-:Generate nama file\n(Laporan_JenisLaporan_Tanggal.xlsx);
-:Kirim file ke browser;
+|#e8f5e9|Sistem|
+:Load data penjualan konsumen;
+:Load data pengeluaran;
+:Hitung laba/rugi;
 
-|User|
-:Browser download file;
-:File tersimpan di\nfolder Downloads;
-:Buka file dengan Excel;
+|Pangkalan|
+:Lihat ringkasan:
+- Total Penjualan
+- Total Pengeluaran  
+- Laba Bersih;
+
+:Lihat grafik trend;
+:Lihat tabel transaksi;
+
+if (Export?) then (ya)
+    :Pilih format;
+    
+    split
+        :Export Excel;
+        |Sistem|
+        :Generate XLSX dengan:
+        - Summary
+        - Detail Penjualan
+        - Detail Pengeluaran;
+    split again
+        :Export PDF;
+        |Sistem|
+        :Generate PDF report;
+    end split
+    
+    |Sistem|
+    :Download file;
+    
+    |Pangkalan|
+    :File tersimpan;
+endif
+
 stop
+
+note right
+  Pangkalan hanya
+  melihat data milik
+  sendiri (multi-tenant)
+end note
 
 @enduml

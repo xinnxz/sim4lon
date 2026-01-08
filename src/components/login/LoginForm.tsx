@@ -17,6 +17,7 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [focusedField, setFocusedField] = useState<'email' | 'password' | null>(null)
+  const [showDemoCredentials, setShowDemoCredentials] = useState(false)
 
   /**
    * PENJELASAN: useEffect untuk cek apakah user sudah login
@@ -96,33 +97,77 @@ export default function LoginForm() {
   return (
     <div className="w-full px-4 sm:px-0">
       {/* Mobile Header - Only visible on mobile */}
-      <div className="sm:hidden text-center mb-6">
+      <div className="sm:hidden text-center mb-2">
         <img
           src="/logo-sim4lon-nobg.png"
-          alt="Pertamina"
-          className="h-16 mx-auto mb-3 drop-shadow-lg"
+          alt="SIM4LON Logo"
+          className="h-16 mx-auto mb-1 drop-shadow-lg"
         />
         <h1 className="text-2xl font-bold text-white drop-shadow-md">SIM4LON</h1>
-        <p className="text-white/90 text-sm">Sistem Informasi Distribusi LPG</p>
+        <p className="text-white/90 text-sm">Sistem Informasi Untuk Distribusi LPG</p>
       </div>
 
       <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden">
         {/* Desktop Header - Hidden on mobile */}
-        <CardHeader className="hidden sm:block space-y-2 text-center px-6 pt-8 pb-4">
-          <div className="flex justify-center mb-4">
+        <CardHeader className="hidden sm:block space-y-2 text-center px-6 pt-8 pb-2">
+          <div className="flex justify-center mb-2">
             <img
               src="/logo-sim4lon-nobg.png"
-              alt="Pertamina"
+              alt="SIM4LON Logo"
               className="h-16 object-contain transition-all duration-300"
             />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-800">SIM4LON</CardTitle>
           <CardDescription className="text-base text-gray-600">
-            Sistem Informasi Distribusi LPG
+            Sistem Informasi Untuk Distribusi LPG
           </CardDescription>
+
+          {/* Logo Mitra */}
+          <div className="pt-2 flex flex-col items-center gap-1.5">
+            <span className="text-gray-400 text-[10px] uppercase tracking-wider font-medium">Mitra Resmi</span>
+            <div className="flex items-center gap-4">
+              <img
+                src="/logo-pertamina.png"
+                alt="Pertamina"
+                className="h-7 object-contain opacity-80"
+              />
+              <img
+                src="/logo-bluegaz.png"
+                alt="Blue Gaz"
+                className="h-7 object-contain opacity-80"
+              />
+              <img
+                src="/logo-pgn.png"
+                alt="PGN"
+                className="h-9 object-contain opacity-80"
+              />
+            </div>
+          </div>
         </CardHeader>
 
         <CardContent className="px-5 sm:px-6 py-6 sm:pb-8">
+          {/* Logo Mitra - Mobile Only (inside card) */}
+          <div className="sm:hidden flex flex-col items-center gap-1.5 pb-2 mb-2 border-b border-gray-100">
+            <span className="text-gray-400 text-[10px] uppercase tracking-wider font-medium">Mitra Resmi</span>
+            <div className="flex items-center gap-4">
+              <img
+                src="/logo-pertamina.png"
+                alt="Pertamina"
+                className="h-6 object-contain opacity-80"
+              />
+              <img
+                src="/logo-bluegaz.png"
+                alt="Blue Gaz"
+                className="h-6 object-contain opacity-80"
+              />
+              <img
+                src="/logo-pgn.png"
+                alt="PGN"
+                className="h-8 object-contain opacity-80"
+              />
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Error Alert */}
             {error && (
@@ -227,32 +272,42 @@ export default function LoginForm() {
               </Button>
             </div>
 
-            {/* Demo Credentials Info */}
-            <div className="mt-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100/80 rounded-xl border border-gray-200/80 animate-fadeInUp space-y-2" style={{ animationDelay: '0.5s' }}>
-              <p className="text-xs font-medium text-gray-500 text-center mb-2">Akun Demo</p>
-              <div className="space-y-1.5">
-                <p className="text-xs text-gray-600 text-center flex items-center justify-center gap-2">
-                  <span className="inline-flex items-center justify-center w-14 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">Admin</span>
-                  <span className="font-mono text-gray-500">admin@agen.com</span>
-                </p>
-                <p className="text-xs text-gray-600 text-center flex items-center justify-center gap-2">
-                  <span className="inline-flex items-center justify-center w-14 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-semibold">Operator</span>
-                  <span className="font-mono text-gray-500">operator@demo.com</span>
-                </p>
-                <p className="text-xs text-gray-600 text-center flex items-center justify-center gap-2">
-                  <span className="inline-flex items-center justify-center w-14 px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-[10px] font-semibold">Pangkalan</span>
-                  <span className="font-mono text-gray-500">pkl001@demo.com</span>
-                </p>
+            {/* Demo Credentials Info - Click to Reveal */}
+            <div className="mt-3 animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
+              <button
+                type="button"
+                onClick={() => setShowDemoCredentials(!showDemoCredentials)}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              >
+                <SafeIcon
+                  name={showDemoCredentials ? 'ChevronUp' : 'ChevronDown'}
+                  className="h-3 w-3"
+                />
+                <span>{showDemoCredentials ? 'Sembunyikan' : 'Lihat'} Akun Demo</span>
+              </button>
+
+              {/* Collapsible Demo Info */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${showDemoCredentials ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0'
+                  }`}
+              >
+                <div className="px-3 py-2 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px]">
+                    <span><span className="text-emerald-600 font-medium">Admin</span> <span className="text-gray-400">admin@agen.com</span></span>
+                    <span><span className="text-blue-600 font-medium">Operator</span> <span className="text-gray-400">operator@demo.com</span></span>
+                    <span><span className="text-orange-600 font-medium">Pangkalan</span> <span className="text-gray-400">pkl001@demo.com</span></span>
+                  </div>
+                  <p className="text-[9px] text-gray-400 text-center mt-1">Password: admin123 / operator123 / pangkalan123</p>
+                </div>
               </div>
-              <p className="text-[10px] text-gray-400 text-center mt-2">Password: admin123 / operator123 / pangkalan123</p>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      {/* Footer - Mobile only */}
-      <p className="sm:hidden text-center text-white/70 text-xs mt-6">
-        © 2024 SIM4LON. All rights reserved.
+      {/* Footer - All devices */}
+      <p className="text-center text-white/70 text-xs mt-6">
+        © 2026 SIM4LON. All rights reserved.
       </p>
     </div>
   )
