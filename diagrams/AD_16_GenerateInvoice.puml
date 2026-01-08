@@ -6,32 +6,58 @@ skinparam ActivityBorderColor #1565c0
 skinparam PartitionBackgroundColor #e3f2fd
 skinparam PartitionBorderColor #1565c0
 
-title **AD-16: Generate Invoice**\nSistem SIM4LON
+title **AD-16: Generate Invoice / Nota**\nSistem SIM4LON
 
-|User|
+|#e3f2fd|User|
 start
-:Buka detail pesanan;
-:Klik "Generate Invoice";
+:Buka Detail Pesanan;
+:Klik "Cetak Invoice/Nota";
 
-|Sistem|
-:Cek apakah invoice\nsudah ada;
+|#e8f5e9|Sistem|
+:Navigasi ke halaman dokumen;
+:Fetch data order;
 
-if (Invoice sudah ada?) then (ya)
-    |User|
-    :Tampilkan invoice\nyang sudah ada;
-    stop
-else (tidak)
-    :Generate nomor invoice\n(INV-YYYY-XXXX);
-    :Hitung subtotal dari items;
-    :Hitung PPN (12% non-subsidi);
-    :Hitung grand total;
-    :Set due_date\n(+7 hari dari sekarang);
-    :Simpan data invoice;
+if (Order ditemukan?) then (ya)
+    :Load company profile;
+    :Cek status pembayaran;
     
     |User|
-    :Tampilkan invoice baru;
-    :Opsi: Cetak / Download;
+    if (Sudah lunas?) then (ya)
+        :Pilih: Invoice atau Nota;
+    else (tidak)
+        :Tampilkan Invoice saja;
+    endif
+    
+    |Sistem|
+    :Generate nomor dokumen;
+    :Render dokumen;
+    
+    |User|
+    :Lihat dokumen;
+    
+    split
+        :Cetak (Print);
+    split again
+        :Share WhatsApp;
+    split again
+        :Copy Link;
+    end split
+    
+    stop
+    
+else (tidak)
+    |User|
+    :Tampilkan error;
     stop
 endif
+
+note right
+  **Catatan:**
+  Invoice = pre-payment
+  Nota = post-payment (lunas)
+  
+  Keduanya di-render
+  on-demand dari data Order.
+end note
 
 @enduml
