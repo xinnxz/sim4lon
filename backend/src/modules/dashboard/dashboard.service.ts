@@ -39,14 +39,14 @@ export class DashboardService {
         // Count today's orders
         const todayOrders = await this.prisma.client.orders.count({
             where: {
-                created_at: { gte: today },
+                order_date: { gte: today },
             },
         });
 
         // Sum today's sales (total_amount) - exclude cancelled orders
         const salesData = await this.prisma.client.orders.aggregate({
             where: {
-                created_at: { gte: today },
+                order_date: { gte: today },
                 current_status: { not: 'BATAL' },
             },
             _sum: {
@@ -68,7 +68,7 @@ export class DashboardService {
         const completedOrders = await this.prisma.client.orders.count({
             where: {
                 current_status: 'SELESAI',
-                updated_at: { gte: today },
+                order_date: { gte: today },
             },
         });
 
@@ -188,7 +188,7 @@ export class DashboardService {
             // Sum total_amount from orders for this day (exclude cancelled orders)
             const salesData = await this.prisma.client.orders.aggregate({
                 where: {
-                    created_at: {
+                    order_date: {
                         gte: date,
                         lt: nextDay,
                     },
@@ -381,7 +381,7 @@ export class DashboardService {
             // Get completed orders for this day with their items
             const orders = await this.prisma.client.orders.findMany({
                 where: {
-                    created_at: {
+                    order_date: {
                         gte: date,
                         lt: nextDay,
                     },
@@ -614,7 +614,7 @@ export class DashboardService {
         // Query orders yang belum lunas dan sudah lewat OVERDUE_DAYS
         const overdueOrders = await this.prisma.client.orders.findMany({
             where: {
-                created_at: {
+                order_date: {
                     lt: overdueDate
                 },
                 current_status: {
@@ -639,13 +639,13 @@ export class DashboardService {
                 }
             },
             orderBy: {
-                created_at: 'asc'
+                order_date: 'asc'
             },
             take: 10
         });
 
         const paymentOverdueAlerts = overdueOrders.map(order => {
-            const daysOverdue = Math.floor((new Date().getTime() - new Date(order.created_at).getTime()) / (1000 * 60 * 60 * 24));
+            const daysOverdue = Math.floor((new Date().getTime() - new Date(order.order_date).getTime()) / (1000 * 60 * 60 * 24));
             const severity = daysOverdue > 14 ? 'critical' : 'warning';
             const amountPaid = Number(order.order_payment_details?.amount_paid) || 0;
 

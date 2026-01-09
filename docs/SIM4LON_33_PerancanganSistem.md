@@ -572,46 +572,60 @@ Database menggunakan **UUID v4** sebagai primary key untuk memastikan keunikan g
 Berikut ini merupakan *Deployment Diagram* dari Aplikasi SIM4LON berbasis web di PT Mitra Surya Natasya.
 
 ![Deployment Diagram SIM4LON](diagrams/2 Deployment/SIM4LON_Deployment.png)
+
 *Gambar 3.2 Deployment Diagram SIM4LON*
 
-Pada gambar 3.2 menunjukkan arsitektur deployment sistem SIM4LON yang menggunakan **arsitektur cloud-based** dengan pemisahan yang jelas antara frontend, backend, database, storage, dan layanan AI eksternal.
+Pada Gambar 3.2 menunjukkan arsitektur deployment sistem SIM4LON yang menggunakan **arsitektur cloud-based** dengan pemisahan yang jelas antara frontend, backend, database, storage, dan layanan AI eksternal.
 
-Berdasarkan pada deployment diagram di atas:
+### Deskripsi Node Deployment
 
-1. **Device** yang digunakan adalah perangkat yang digunakan oleh pengguna berupa browser. Aplikasi SIM4LON bersifat responsive sehingga dapat diakses dari berbagai perangkat seperti desktop, laptop, tablet, maupun smartphone melalui web browser modern.
+1. **Client Device** merupakan perangkat yang digunakan oleh pengguna untuk mengakses aplikasi melalui web browser. Aplikasi SIM4LON bersifat responsive sehingga dapat diakses dari berbagai perangkat seperti desktop, laptop, tablet, maupun smartphone melalui browser modern seperti Chrome, Firefox, Safari, atau Edge.
 
-2. **Vercel** (Frontend Platform), berfungsi sebagai platform hosting untuk aplikasi frontend. Menggunakan Astro 5 sebagai framework Static Site Generation (SSG) yang dikombinasikan dengan React 18 untuk komponen interaktif. Styling menggunakan Tailwind CSS dengan component library Shadcn/UI berbasis Radix UI. Untuk visualisasi data menggunakan Recharts dan icon menggunakan Lucide Icons.
+2. **Vercel Edge Network** berfungsi sebagai platform hosting untuk aplikasi frontend. Menggunakan Astro 5 sebagai framework Static Site Generation (SSG) yang dikombinasikan dengan React 18 untuk komponen interaktif. Styling menggunakan Tailwind CSS dengan component library Shadcn/UI berbasis Radix UI. Untuk visualisasi data menggunakan Recharts dan icon menggunakan Lucide Icons.
 
-3. **Railway** (Backend Platform), berfungsi sebagai platform untuk menjalankan backend API. Menggunakan NestJS 11 sebagai framework backend yang modular dengan Prisma ORM 6 sebagai query builder type-safe untuk komunikasi dengan database. Backend terdiri dari beberapa service yaitu Auth Module (JWT + Passport), Order Service, Stock Service, Payment Service, Pangkalan Service, Dashboard Service, dan Report Service.
+3. **Railway Container** berfungsi sebagai platform untuk menjalankan backend API. Menggunakan NestJS 11 sebagai framework backend yang modular dengan Prisma ORM 6 sebagai query builder type-safe untuk komunikasi dengan database. Backend terdiri dari beberapa service yaitu Auth Module (JWT + Passport), Order Service, Stock Service, Payment Service, Pangkalan Service, Dashboard Service, dan Report Service.
 
-4. **Railway PostgreSQL** (Database Server), digunakan untuk menyimpan dan mengelola seluruh data sistem. Menggunakan PostgreSQL versi 15 dengan 23 tabel dan 7 enum types. Database dilengkapi dengan extensions pgcrypto dan uuid-ossp untuk keamanan dan generasi UUID. Backup dilakukan secara otomatis setiap hari.
+4. **Railway PostgreSQL** digunakan untuk menyimpan dan mengelola seluruh data sistem. Menggunakan PostgreSQL versi 15 dengan 23 tabel dan 7 enum types. Database dilengkapi dengan extensions pgcrypto dan uuid-ossp untuk keamanan dan generasi UUID.
 
-5. **Supabase Storage** (Object Storage), digunakan untuk menyimpan file-file seperti foto profil pengguna dan bukti pembayaran. Storage bersifat S3-compatible dengan keamanan Row Level Security (RLS) enabled. Terdapat 2 bucket utama yaitu `/profile-pictures/` dan `/payment-proofs/`.
+5. **Supabase Storage** digunakan untuk menyimpan file-file seperti foto profil pengguna dan bukti pembayaran. Storage bersifat S3-compatible dengan keamanan Row Level Security (RLS) enabled. Terdapat 2 bucket utama yaitu `/profile-pictures/` dan `/payment-proofs/`.
 
-6. **Google Cloud** (AI Service), merupakan layanan eksternal yang digunakan untuk fitur Voice Order. Menggunakan Gemini 2.0 Flash API untuk Natural Language Processing (NLP) yang memproses perintah suara pengguna menjadi data pesanan terstruktur.
+6. **Google Cloud Gemini** merupakan layanan eksternal yang digunakan untuk fitur Voice Order. Menggunakan Gemini 2.0 Flash API untuk Natural Language Processing (NLP) yang memproses perintah suara pengguna menjadi data pesanan terstruktur.
 
-Semua komunikasi antar komponen menggunakan protokol terenkripsi. Client ke Vercel menggunakan HTTPS port 443, Vercel ke Railway menggunakan REST API via HTTPS, Railway ke PostgreSQL menggunakan TCP port 5432, Railway ke Supabase dan Google Cloud menggunakan HTTPS port 443.
+Semua komunikasi antar komponen menggunakan protokol terenkripsi HTTPS pada port 443, kecuali koneksi ke database yang menggunakan protokol TCP pada port 5432.
 
-### Ringkasan Node dan Komponen
+### Deployment Frontend (Vercel)
 
-| No | Node | Platform | Komponen Utama | Teknologi |
-|----|------|----------|----------------|-----------|
-| 1. | Client Device | Browser | Web Application | Chrome, Firefox, Safari, Edge |
-| 2. | Vercel Edge Network | Frontend Hosting | SIM4LON Web App | Astro 5, React 18, Tailwind CSS, Shadcn/UI |
-| 3. | Railway Container | Backend API | REST API Server | NestJS 11, Prisma ORM 6, JWT Auth |
-| 4. | Railway PostgreSQL | Database Server | Relational DB | PostgreSQL 15 (23 Tables, 7 Enums) |
-| 5. | Supabase Storage | Object Storage | File Storage | S3-Compatible, RLS Enabled |
-| 6. | Google Cloud | AI Service | Voice Order NLP | Gemini 2.0 Flash API |
+Aplikasi frontend SIM4LON di-deploy menggunakan platform **Vercel** yang menyediakan fitur edge deployment dengan CDN global. Proses deployment dilakukan secara otomatis setiap kali terjadi push ke repository GitHub.
 
-### Protokol Komunikasi
+![Dashboard Vercel SIM4LON](diagrams/2 Deployment/Deployment_Vercel_Dashboard.png)
 
-| Source | Destination | Protokol | Port | Keterangan |
-|--------|-------------|----------|------|------------|
-| Client | Vercel | HTTPS | 443 | Request halaman web & static assets |
-| Vercel | Railway API | HTTPS | 443 | REST API calls (JSON) |
-| Railway API | PostgreSQL | TCP | 5432 | Database queries (Prisma) |
-| Railway API | Supabase | HTTPS | 443 | File upload/download |
-| Railway API | Gemini AI | HTTPS | 443 | Voice order parsing |
+*Gambar 3.3 Dashboard Deployment Vercel SIM4LON*
+
+Pada Gambar 3.3 menunjukkan dashboard Vercel yang menampilkan status deployment aplikasi SIM4LON. Terlihat bahwa aplikasi berhasil di-deploy dengan status **Ready** dan dapat diakses melalui URL **https://sim4lon.vercel.app**. Vercel secara otomatis melakukan build menggunakan Astro dan mengoptimasi asset untuk performa loading yang cepat.
+
+### Deployment Backend (Railway)
+
+Backend API SIM4LON di-deploy menggunakan platform **Railway** yang menyediakan container-based deployment. Railway terhubung langsung dengan repository GitHub dan melakukan auto-deploy setiap ada perubahan pada folder `backend/`.
+
+![Dashboard Railway SIM4LON](diagrams/2 Deployment/Deployment_Railway_Dashboard.png)
+
+*Gambar 3.4 Dashboard Deployment Railway SIM4LON*
+
+Pada Gambar 3.4 menunjukkan dashboard Railway yang menampilkan service backend SIM4LON beserta database PostgreSQL. Backend berjalan pada container dengan domain **https://sim4lon-production.up.railway.app**. Railway menyediakan monitoring untuk CPU, memory, dan logs secara real-time.
+
+### Hasil Deployment Production
+
+Aplikasi SIM4LON telah berhasil di-deploy ke lingkungan production dan dapat diakses oleh pengguna melalui internet.
+
+![Tampilan Aplikasi Production](diagrams/2 Deployment/Deployment_Production_Live.png)
+
+*Gambar 3.5 Tampilan Aplikasi SIM4LON di Production*
+
+Pada Gambar 3.5 menunjukkan halaman login aplikasi SIM4LON yang diakses melalui browser dengan URL production. Aplikasi menampilkan antarmuka login yang responsif dengan branding perusahaan. Terdapat tiga role yang dapat login yaitu Admin, Operator, dan Pangkalan.
+
+Sistem menggunakan environment variable untuk konfigurasi production yang meliputi `PUBLIC_API_URL` untuk komunikasi frontend-backend, `DATABASE_URL` untuk koneksi database PostgreSQL yang terenkripsi, `JWT_SECRET` untuk autentikasi token, `SUPABASE_URL` untuk penyimpanan file, dan `GEMINI_API_KEY` untuk integrasi AI Voice Order.
+
+Proses deployment menggunakan **CI/CD (Continuous Integration/Continuous Deployment)** yang terotomasi. Ketika developer melakukan push code ke branch `main` di GitHub, Vercel dan Railway secara paralel mendeteksi perubahan dan menjalankan build masing-masing. Jika terdapat perubahan schema database, Prisma migrate otomatis dijalankan. Seluruh proses deployment hingga aplikasi live di production memakan waktu sekitar 2-5 menit.
 
 **File Diagram:** `diagrams/SIM4LON_Deployment.puml`
 
@@ -2158,13 +2172,55 @@ Deployment Diagram menggambarkan arsitektur fisik sistem, meliputi node (server)
 
 ## 3.3.8 Perancangan Antarmuka (UI Design)
 
-*User Interface* (UI) atau visual antarmuka adalah bagian visual dari situs web, aplikasi dan sistem operasi untuk interaksi dan komunikasi manusia dengan mesin. Menurut Satzinger (Aein 2021), user interface adalah sistem informasi yang membutuhkan interaksi pengguna untuk menghasilkan input dan output yang berinteraksi secara fisik, konseptual dan perseptual (Dona Fitriawin 2022). Perancangan antarmuka untuk aplikasi SIM4LON dibuat menggunakan tools **Balsamiq Mockup** yang menghasilkan wireframe dengan fokus pada struktur layout dan alur navigasi.
+*User Interface* (UI) adalah bagian visual dari aplikasi yang memfasilitasi interaksi antara pengguna dan sistem. Menurut Satzinger (Aein, 2021), user interface merupakan komponen sistem informasi yang membutuhkan interaksi pengguna untuk menghasilkan input dan output, baik secara fisik, konseptual, maupun perseptual. Perancangan antarmuka untuk aplikasi SIM4LON dibuat menggunakan **Balsamiq Mockup** yang menghasilkan wireframe dengan fokus pada struktur layout dan alur navigasi.
+
+### Daftar Halaman dan Hak Akses Role
+
+Sistem SIM4LON memiliki 3 role pengguna dengan hak akses berbeda terhadap halaman-halaman dalam sistem. Berikut adalah daftar lengkap 35 halaman beserta hak aksesnya:
+
+| No | Nama Halaman | Admin | Operator | Pangkalan |
+|----|--------------|:-----:|:--------:|:---------:|
+| 1 | Login | v | v | v |
+| 2 | Dashboard Admin | v | v |  |
+| 3 | Daftar Pesanan | v | v |  |
+| 4 | Buat Pesanan | v | v |  |
+| 5 | Detail Pesanan | v | v |  |
+| 6 | Catat Pembayaran | v | v |  |
+| 7 | Status Pembayaran | v | v |  |
+| 8 | Nota/Invoice | v | v |  |
+| 9 | Ringkasan Stok | v | v |  |
+| 10 | Penerimaan Stok | v |  |  |
+| 11 | Penyaluran | v |  |  |
+| 12 | In-Out Agen | v |  |  |
+| 13 | Pemakaian Stok | v | v |  |
+| 14 | Daftar Pangkalan | v |  |  |
+| 15 | Detail/Edit Pangkalan | v |  |  |
+| 16 | Daftar Driver | v |  |  |
+| 17 | Daftar Pengguna | v |  |  |
+| 18 | Tambah Pengguna | v |  |  |
+| 19 | Laporan | v |  |  |
+| 20 | Export Laporan | v |  |  |
+| 21 | Tren Penjualan | v |  |  |
+| 22 | Perencanaan | v |  |  |
+| 23 | Riwayat Aktivitas | v |  |  |
+| 24 | Pengaturan | v |  |  |
+| 25 | Profil Admin | v | v |  |
+| 26 | Edit Profil Admin | v | v |  |
+| 27 | Dashboard Pangkalan |  |  | v |
+| 28 | Stok Pangkalan |  |  | v |
+| 29 | Catat Penjualan |  |  | v |
+| 30 | Daftar Penjualan |  |  | v |
+| 31 | Daftar Konsumen |  |  | v |
+| 32 | Hutang Konsumen |  |  | v |
+| 33 | Pengeluaran |  |  | v |
+| 34 | Laporan Pangkalan |  |  | v |
+| 35 | Profil Pangkalan |  |  | v |
 
 ---
 
-### A. Portal Admin (34 Halaman)
+### A. Portal Admin (26 Halaman)
 
-> **Catatan Akses Role**: Halaman ini dapat diakses oleh **Admin** (akses penuh) dan **Operator** (akses terbatas). Halaman dengan tanda ⬚ hanya dapat diakses oleh Admin.
+Berikut adalah wireframe halaman-halaman yang tersedia pada Portal Admin:
 
 #### 1. Tampilan Halaman Login
 
@@ -2278,165 +2334,101 @@ Keterangan: Halaman ini menampilkan riwayat pemakaian stok internal agen. Mencak
 
 Keterangan: Halaman ini menampilkan tabel master data pangkalan mitra. Informasi yang ditampilkan meliputi kode pangkalan, nama, alamat, nomor telepon, status aktif, dan alokasi bulanan. Terdapat tombol untuk menambah, melihat detail, edit, dan menonaktifkan pangkalan.
 
-#### 15. Tampilan Halaman Tambah Pangkalan
+#### 15. Tampilan Halaman Detail/Edit Pangkalan
 
-![UI Halaman Tambah Pangkalan](diagrams/8 UI Mockup/UI_15_TambahPangkalan.png)
+![UI Halaman Detail Edit Pangkalan](diagrams/8 UI Mockup/UI_15_DetailEditPangkalan.png)
 
-*Gambar 3.27 UI Halaman Tambah Pangkalan*
+*Gambar 3.27 UI Halaman Detail/Edit Pangkalan*
 
-Keterangan: Halaman ini menampilkan form untuk menambahkan pangkalan baru ke sistem. Form berisi input nama pangkalan, nama pemilik, alamat, nomor telepon, region, alokasi bulanan, dan upload foto. Data pangkalan otomatis mendapat kode unik dari sistem.
+Keterangan: Halaman ini menampilkan informasi lengkap dari satu pangkalan termasuk profil, statistik pesanan, riwayat transaksi, dan akun user yang terkait. User dapat langsung mengedit informasi pangkalan pada halaman yang sama.
 
-#### 16. Tampilan Halaman Detail Pangkalan
+#### 16. Tampilan Halaman Daftar Driver
 
-![UI Halaman Detail Pangkalan](diagrams/8 UI Mockup/UI_16_DetailPangkalan.png)
+![UI Halaman Daftar Driver](diagrams/8 UI Mockup/UI_16_DaftarDriver.png)
 
-*Gambar 3.28 UI Halaman Detail Pangkalan*
+*Gambar 3.28 UI Halaman Daftar Driver*
 
-Keterangan: Halaman ini menampilkan informasi lengkap dari satu pangkalan termasuk profil, statistik pesanan, riwayat transaksi, dan akun user yang terkait. Terdapat ringkasan total pesanan bulan ini dan total outstanding payment.
+Keterangan: Halaman ini menampilkan tabel master data sopir/driver pengiriman. Informasi yang ditampilkan meliputi kode driver, nama, nomor telepon, nomor kendaraan, dan status aktif. Terdapat aksi untuk menambah, edit, dan menonaktifkan driver melalui modal.
 
-#### 17. Tampilan Halaman Edit Pangkalan
+#### 17. Tampilan Halaman Daftar Pengguna
 
-![UI Halaman Edit Pangkalan](diagrams/8 UI Mockup/UI_17_EditPangkalan.png)
+![UI Halaman Daftar Pengguna](diagrams/8 UI Mockup/UI_17_DaftarPengguna.png)
 
-*Gambar 3.29 UI Halaman Edit Pangkalan*
-
-Keterangan: Halaman ini sama dengan form tambah pangkalan namun field sudah terisi dengan data pangkalan yang ingin diedit. User dapat mengubah informasi yang diperlukan dan menyimpan perubahan.
-
-#### 18. Tampilan Halaman Daftar Driver
-
-![UI Halaman Daftar Driver](diagrams/8 UI Mockup/UI_18_DaftarDriver.png)
-
-*Gambar 3.30 UI Halaman Daftar Driver*
-
-Keterangan: Halaman ini menampilkan tabel master data sopir/driver pengiriman. Informasi yang ditampilkan meliputi kode driver, nama, nomor telepon, nomor kendaraan, dan status aktif. Terdapat aksi untuk menambah, edit, dan menonaktifkan driver.
-
-#### 19. Tampilan Halaman Tambah Driver
-
-![UI Halaman Tambah Driver](diagrams/8 UI Mockup/UI_19_TambahDriver.png)
-
-*Gambar 3.31 UI Halaman Tambah Driver*
-
-Keterangan: Halaman ini menampilkan form untuk menambahkan driver baru. Form berisi input nama driver, nomor telepon, nomor kendaraan (plat), dan foto. Setiap driver mendapat kode unik yang digenerate secara otomatis oleh sistem.
-
-#### 20. Tampilan Halaman Edit Driver
-
-![UI Halaman Edit Driver](diagrams/8 UI Mockup/UI_20_EditDriver.png)
-
-*Gambar 3.32 UI Halaman Edit Driver*
-
-Keterangan: Halaman ini sama dengan form tambah driver namun field sudah terisi dengan data driver yang ingin diedit. User dapat memperbarui informasi driver yang diperlukan.
-
-#### 21. Tampilan Halaman Daftar Pengguna
-
-![UI Halaman Daftar Pengguna](diagrams/8 UI Mockup/UI_21_DaftarPengguna.png)
-
-*Gambar 3.33 UI Halaman Daftar Pengguna*
+*Gambar 3.29 UI Halaman Daftar Pengguna*
 
 Keterangan: Halaman ini menampilkan tabel manajemen user sistem. Informasi yang ditampilkan meliputi nama, email, role (ADMIN/OPERATOR/PANGKALAN), pangkalan terkait (untuk role PANGKALAN), dan status aktif. Hanya admin yang dapat mengakses halaman ini.
 
-#### 22. Tampilan Halaman Tambah Pengguna
+#### 18. Tampilan Halaman Tambah Pengguna
 
-![UI Halaman Tambah Pengguna](diagrams/8 UI Mockup/UI_22_TambahPengguna.png)
+![UI Halaman Tambah Pengguna](diagrams/8 UI Mockup/UI_18_TambahPengguna.png)
 
-*Gambar 3.34 UI Halaman Tambah Pengguna*
+*Gambar 3.30 UI Halaman Tambah Pengguna*
 
 Keterangan: Halaman ini menampilkan form untuk membuat akun user baru. Form berisi input nama, email, password, konfirmasi password, role, dan pangkalan (jika role PANGKALAN). Admin dapat mengatur akses pengguna melalui pemilihan role.
 
-#### 23. Tampilan Halaman Edit Pengguna
+#### 19. Tampilan Halaman Laporan
 
-![UI Halaman Edit Pengguna](diagrams/8 UI Mockup/UI_23_EditPengguna.png)
+![UI Halaman Laporan](diagrams/8 UI Mockup/UI_19_Laporan.png)
 
-*Gambar 3.35 UI Halaman Edit Pengguna*
-
-Keterangan: Halaman ini sama dengan form tambah pengguna namun untuk mengedit data user yang sudah ada. Password dapat dikosongkan jika tidak ingin mengubah password user tersebut.
-
-#### 24. Tampilan Halaman Detail Pengguna
-
-![UI Halaman Detail Pengguna](diagrams/8 UI Mockup/UI_24_DetailPengguna.png)
-
-*Gambar 3.36 UI Halaman Detail Pengguna*
-
-Keterangan: Halaman ini menampilkan profil lengkap pengguna termasuk informasi akun, role, pangkalan terkait, dan riwayat aktivitas login terakhir.
-
-#### 25. Tampilan Halaman Produk LPG
-
-![UI Halaman Produk LPG](diagrams/8 UI Mockup/UI_25_ProdukLPG.png)
-
-*Gambar 3.37 UI Halaman Produk LPG*
-
-Keterangan: Halaman ini menampilkan master data produk LPG yang dijual oleh agen. Informasi meliputi kode produk, nama, ukuran (kg), kategori (SUBSIDI/NON_SUBSIDI), harga jual, dan harga beli. Admin dapat mengedit harga produk sesuai kebijakan.
-
-#### 26. Tampilan Halaman Laporan
-
-![UI Halaman Laporan](diagrams/8 UI Mockup/UI_26_Laporan.png)
-
-*Gambar 3.38 UI Halaman Laporan*
+*Gambar 3.31 UI Halaman Laporan*
 
 Keterangan: Halaman ini menampilkan dashboard laporan dengan berbagai jenis laporan yang tersedia. User dapat memilih jenis laporan (penjualan, stok, pembayaran), periode waktu, dan filter pangkalan. Data laporan ditampilkan dalam bentuk tabel dan chart.
 
-#### 27. Tampilan Halaman Export Laporan
+#### 20. Tampilan Halaman Export Laporan
 
-![UI Halaman Export Laporan](diagrams/8 UI Mockup/UI_27_ExportLaporan.png)
+![UI Halaman Export Laporan](diagrams/8 UI Mockup/UI_20_ExportLaporan.png)
 
-*Gambar 3.39 UI Halaman Export Laporan*
+*Gambar 3.32 UI Halaman Export Laporan*
 
 Keterangan: Halaman ini menampilkan opsi untuk mengexport laporan ke format Excel atau PDF. User dapat memilih jenis laporan, rentang tanggal, dan format output yang diinginkan. File akan didownload otomatis setelah diproses.
 
-#### 28. Tampilan Halaman Tren Penjualan
+#### 21. Tampilan Halaman Tren Penjualan
 
-![UI Halaman Tren Penjualan](diagrams/8 UI Mockup/UI_28_TrenPenjualan.png)
+![UI Halaman Tren Penjualan](diagrams/8 UI Mockup/UI_21_TrenPenjualan.png)
 
-*Gambar 3.40 UI Halaman Tren Penjualan*
+*Gambar 3.33 UI Halaman Tren Penjualan*
 
 Keterangan: Halaman ini menampilkan visualisasi data penjualan dalam bentuk grafik. Terdapat line chart untuk tren harian/mingguan/bulanan, bar chart untuk perbandingan per pangkalan, dan pie chart untuk distribusi per kategori produk.
 
-#### 29. Tampilan Halaman Perencanaan
+#### 22. Tampilan Halaman Perencanaan
 
-![UI Halaman Perencanaan](diagrams/8 UI Mockup/UI_29_Perencanaan.png)
+![UI Halaman Perencanaan](diagrams/8 UI Mockup/UI_22_Perencanaan.png)
 
-*Gambar 3.41 UI Halaman Perencanaan*
+*Gambar 3.34 UI Halaman Perencanaan*
 
 Keterangan: Halaman ini menampilkan grid perencanaan distribusi harian dalam format spreadsheet. Baris menunjukkan daftar pangkalan, kolom menunjukkan tanggal dalam satu bulan. User dapat mengatur jumlah normal dan fakultatif untuk setiap sel.
 
-#### 30. Tampilan Halaman Riwayat Aktivitas
+#### 23. Tampilan Halaman Riwayat Aktivitas
 
-![UI Halaman Riwayat Aktivitas](diagrams/8 UI Mockup/UI_30_RiwayatAktivitas.png)
+![UI Halaman Riwayat Aktivitas](diagrams/8 UI Mockup/UI_23_RiwayatAktivitas.png)
 
-*Gambar 3.42 UI Halaman Riwayat Aktivitas*
+*Gambar 3.35 UI Halaman Riwayat Aktivitas*
 
 Keterangan: Halaman ini menampilkan audit log semua aktivitas dalam sistem. Setiap entri mencakup timestamp, nama user, jenis aktivitas, dan deskripsi. Fitur ini berguna untuk tracking dan monitoring keamanan sistem.
 
-#### 31. Tampilan Halaman Notifikasi
+#### 24. Tampilan Halaman Pengaturan
 
-![UI Halaman Notifikasi](diagrams/8 UI Mockup/UI_31_Notifikasi.png)
+![UI Halaman Pengaturan](diagrams/8 UI Mockup/UI_24_Pengaturan.png)
 
-*Gambar 3.43 UI Halaman Notifikasi*
-
-Keterangan: Halaman ini menampilkan daftar semua notifikasi sistem termasuk alert stok menipis, pesanan baru, dan reminder pembayaran. User dapat menandai notifikasi sebagai sudah dibaca atau menghapusnya.
-
-#### 32. Tampilan Halaman Pengaturan
-
-![UI Halaman Pengaturan](diagrams/8 UI Mockup/UI_32_Pengaturan.png)
-
-*Gambar 3.44 UI Halaman Pengaturan*
+*Gambar 3.36 UI Halaman Pengaturan*
 
 Keterangan: Halaman ini menampilkan konfigurasi sistem termasuk profil perusahaan (nama, alamat, logo), pengaturan notifikasi, batas stok kritis, tarif pajak, dan prefix invoice. Hanya admin yang dapat mengubah pengaturan ini.
 
-#### 33. Tampilan Halaman Profil Admin
+#### 25. Tampilan Halaman Profil Admin
 
-![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_33_ProfilAdmin.png)
+![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_25_ProfilAdmin.png)
 
-*Gambar 3.45 UI Halaman Profil Admin*
+*Gambar 3.37 UI Halaman Profil Admin*
 
-Keterangan: Halaman ini menampilkan profil pengguna yang sedang login. Terdapat informasi nama, email, role, foto profil, dan opsi untuk mengedit profil atau mengubah password.
+Keterangan: Halaman ini menampilkan profil pengguna yang sedang login. Terdapat informasi nama, email, role, foto profil, dan opsi untuk mengedit profil atau mengubah password melalui modal.
 
-#### 34. Tampilan Halaman Ubah Password
+#### 26. Tampilan Halaman Edit Profil Admin
 
-![UI Halaman Ubah Password](diagrams/8 UI Mockup/UI_34_UbahPassword.png)
+![UI Halaman Edit Profil Admin](diagrams/8 UI Mockup/UI_26_EditProfilAdmin.png)
 
-*Gambar 3.46 UI Halaman Ubah Password*
+*Gambar 3.38 UI Halaman Edit Profil Admin*
 
-Keterangan: Halaman ini menampilkan form untuk mengubah password user yang sedang login. Form berisi input password lama, password baru, dan konfirmasi password baru. Sistem memvalidasi kekuatan password sebelum menyimpan.
+Keterangan: Halaman ini menampilkan form untuk mengedit informasi profil pengguna yang sedang login, termasuk nama, foto profil, dan preferensi lainnya.
 
 ---
 
@@ -2516,11 +2508,11 @@ Keterangan: Halaman ini menampilkan laporan khusus untuk pangkalan. Terdapat lap
 
 ---
 
-### C. Komponen Modal (31 Modal)
+### C. Komponen Modal (33 Modal)
 
 Modal adalah komponen dialog yang muncul di atas halaman utama untuk melakukan aksi spesifik tanpa meninggalkan konteks halaman. Berikut adalah daftar modal yang digunakan dalam sistem SIM4LON:
 
-#### Modul Driver (2 Modal)
+#### Modul Driver (4 Modal)
 
 #### 1. Modal Tambah Driver
 
@@ -2538,11 +2530,27 @@ Keterangan: Modal ini berisi form untuk menambahkan driver baru. Terdapat input 
 
 Keterangan: Modal ini muncul ketika admin mengklik tombol hapus pada data driver. Menampilkan peringatan konfirmasi dengan nama driver yang akan dihapus, tombol Batal dan tombol Hapus berwarna merah.
 
+#### 3. Modal Edit Driver
+
+![Modal Edit Driver](diagrams/8 UI Mockup/Modal_03_EditDriver.png)
+
+*Gambar 3.58 Modal Edit Driver*
+
+Keterangan: Modal ini menampilkan form untuk mengedit data driver yang sudah ada. Semua field dapat diubah kecuali kode driver yang digenerate otomatis oleh sistem.
+
+#### 4. Modal Nonaktifkan Driver
+
+![Modal Nonaktifkan Driver](diagrams/8 UI Mockup/Modal_04_NonaktifkanDriver.png)
+
+*Gambar 3.59 Modal Nonaktifkan Driver*
+
+Keterangan: Modal konfirmasi untuk menonaktifkan driver tanpa menghapus data. Driver yang dinonaktifkan tidak dapat ditugaskan untuk pengiriman sampai diaktifkan kembali.
+
 ---
 
 #### Modul Pengguna (4 Modal)
 
-#### 3. Modal Tambah Pengguna
+#### 5. Modal Tambah Pengguna
 
 ![Modal Tambah Pengguna](diagrams/8 UI Mockup/Modal_03_TambahPengguna.png)
 
@@ -2550,7 +2558,7 @@ Keterangan: Modal ini muncul ketika admin mengklik tombol hapus pada data driver
 
 Keterangan: Modal ini berisi form lengkap untuk membuat akun pengguna baru. Field meliputi nama, email, password, konfirmasi password, role (Admin/Operator), dan pangkalan terkait jika diperlukan.
 
-#### 4. Modal Edit Pengguna
+#### 6. Modal Edit Pengguna
 
 ![Modal Edit Pengguna](diagrams/8 UI Mockup/Modal_04_EditPengguna.png)
 
@@ -2558,7 +2566,7 @@ Keterangan: Modal ini berisi form lengkap untuk membuat akun pengguna baru. Fiel
 
 Keterangan: Modal ini menampilkan form edit data pengguna yang sudah ada. Field password dapat dikosongkan jika tidak ingin mengubah password. Perubahan role memerlukan konfirmasi tambahan.
 
-#### 5. Modal Nonaktifkan Pengguna
+#### 7. Modal Nonaktifkan Pengguna
 
 ![Modal Nonaktifkan Pengguna](diagrams/8 UI Mockup/Modal_05_NonaktifkanPengguna.png)
 
@@ -2566,7 +2574,7 @@ Keterangan: Modal ini menampilkan form edit data pengguna yang sudah ada. Field 
 
 Keterangan: Modal ini digunakan untuk menonaktifkan akun pengguna tanpa menghapus data. Pengguna yang dinonaktifkan tidak dapat login ke sistem sampai diaktifkan kembali oleh admin.
 
-#### 6. Modal Konfirmasi Hapus Pengguna
+#### 8. Modal Konfirmasi Hapus Pengguna
 
 ![Modal Hapus Pengguna](diagrams/8 UI Mockup/Modal_06_HapusPengguna.png)
 
@@ -2576,9 +2584,9 @@ Keterangan: Modal ini muncul untuk mengkonfirmasi penghapusan akun pengguna. Men
 
 ---
 
-#### Modul Pangkalan (3 Modal)
+#### Modul Pangkalan (4 Modal)
 
-#### 7. Modal Tambah Pangkalan
+#### 9. Modal Tambah Pangkalan
 
 ![Modal Tambah Pangkalan](diagrams/8 UI Mockup/Modal_07_TambahPangkalan.png)
 
@@ -2586,7 +2594,7 @@ Keterangan: Modal ini muncul untuk mengkonfirmasi penghapusan akun pengguna. Men
 
 Keterangan: Modal berisi form untuk menambahkan pangkalan baru. Field meliputi nama pangkalan, nama pemilik, alamat, nomor telepon, region, dan alokasi bulanan.
 
-#### 8. Modal Edit Pangkalan
+#### 10. Modal Edit Pangkalan
 
 ![Modal Edit Pangkalan](diagrams/8 UI Mockup/Modal_08_EditPangkalan.png)
 
@@ -2594,7 +2602,7 @@ Keterangan: Modal berisi form untuk menambahkan pangkalan baru. Field meliputi n
 
 Keterangan: Modal ini menampilkan form untuk mengedit data pangkalan yang sudah ada. Semua field dapat diubah kecuali kode pangkalan yang digenerate otomatis.
 
-#### 9. Modal Konfirmasi Hapus Pangkalan
+#### 11. Modal Konfirmasi Hapus Pangkalan
 
 ![Modal Hapus Pangkalan](diagrams/8 UI Mockup/Modal_09_HapusPangkalan.png)
 
@@ -2602,11 +2610,19 @@ Keterangan: Modal ini menampilkan form untuk mengedit data pangkalan yang sudah 
 
 Keterangan: Modal konfirmasi untuk menghapus data pangkalan. Menampilkan peringatan bahwa data pesanan dan riwayat terkait juga akan terhapus.
 
+#### 12. Modal Nonaktifkan Pangkalan
+
+![Modal Nonaktifkan Pangkalan](diagrams/8 UI Mockup/Modal_10_NonaktifkanPangkalan.png)
+
+*Gambar 3.65 Modal Nonaktifkan Pangkalan*
+
+Keterangan: Modal konfirmasi untuk menonaktifkan pangkalan tanpa menghapus data. Pangkalan yang dinonaktifkan tidak dapat melakukan pesanan sampai diaktifkan kembali oleh admin.
+
 ---
 
 #### Modul Pesanan (5 Modal)
 
-#### 10. Modal Update Status Pesanan
+#### 13. Modal Update Status Pesanan
 
 ![Modal Update Status](diagrams/8 UI Mockup/Modal_10_UpdateStatus.png)
 
@@ -2614,7 +2630,7 @@ Keterangan: Modal konfirmasi untuk menghapus data pangkalan. Menampilkan peringa
 
 Keterangan: Modal untuk mengubah status pesanan dari satu tahap ke tahap berikutnya. Menampilkan timeline status dan opsi untuk menambahkan catatan perubahan.
 
-#### 11. Modal Assign Driver
+#### 14. Modal Assign Driver
 
 ![Modal Assign Driver](diagrams/8 UI Mockup/Modal_11_AssignDriver.png)
 
@@ -2622,7 +2638,7 @@ Keterangan: Modal untuk mengubah status pesanan dari satu tahap ke tahap berikut
 
 Keterangan: Modal untuk menugaskan driver ke pesanan. Menampilkan dropdown daftar driver yang tersedia beserta informasi kendaraan masing-masing.
 
-#### 12. Modal Catat Pembayaran
+#### 15. Modal Catat Pembayaran
 
 ![Modal Catat Pembayaran](diagrams/8 UI Mockup/Modal_12_CatatPembayaran.png)
 
@@ -2630,7 +2646,7 @@ Keterangan: Modal untuk menugaskan driver ke pesanan. Menampilkan dropdown dafta
 
 Keterangan: Modal form untuk mencatat pembayaran. Field meliputi jumlah pembayaran, metode (Tunai/Transfer), dan upload bukti pembayaran.
 
-#### 13. Modal Konfirmasi Batalkan Pesanan
+#### 16. Modal Konfirmasi Batalkan Pesanan
 
 ![Modal Batalkan Pesanan](diagrams/8 UI Mockup/Modal_13_BatalkanPesanan.png)
 
@@ -2638,7 +2654,7 @@ Keterangan: Modal form untuk mencatat pembayaran. Field meliputi jumlah pembayar
 
 Keterangan: Modal konfirmasi untuk membatalkan pesanan. Wajib mengisi alasan pembatalan sebelum dapat melanjutkan aksi.
 
-#### 14. Modal Preview Invoice
+#### 17. Modal Preview Invoice
 
 ![Modal Preview Invoice](diagrams/8 UI Mockup/Modal_14_PreviewInvoice.png)
 
@@ -2648,9 +2664,9 @@ Keterangan: Modal menampilkan preview invoice/nota dalam format print-ready. Ter
 
 ---
 
-#### Modul Stok (4 Modal)
+#### Modul Stok (3 Modal)
 
-#### 15. Modal Kelola Jenis LPG
+#### 18. Modal Kelola Jenis LPG
 
 ![Modal Kelola Jenis LPG](diagrams/8 UI Mockup/Modal_15_KelolaJenisLPG.png)
 
@@ -2658,7 +2674,7 @@ Keterangan: Modal menampilkan preview invoice/nota dalam format print-ready. Ter
 
 Keterangan: Modal ini diakses dari halaman Ringkasan Stok untuk mengelola master produk LPG. Admin dapat menambah, edit, atau menonaktifkan jenis LPG beserta harga defaultnya.
 
-#### 16. Modal Tambah Penerimaan Stok
+#### 19. Modal Tambah Penerimaan Stok
 
 ![Modal Tambah Penerimaan](diagrams/8 UI Mockup/Modal_16_TambahPenerimaan.png)
 
@@ -2666,7 +2682,7 @@ Keterangan: Modal ini diakses dari halaman Ringkasan Stok untuk mengelola master
 
 Keterangan: Modal form untuk mencatat penerimaan tabung LPG dari SPBE. Field meliputi nomor SO, nomor LO, tanggal, jenis LPG, dan jumlah tabung.
 
-#### 17. Modal Tambah Penyaluran
+#### 20. Modal Tambah Penyaluran
 
 ![Modal Tambah Penyaluran](diagrams/8 UI Mockup/Modal_17_TambahPenyaluran.png)
 
@@ -2674,19 +2690,11 @@ Keterangan: Modal form untuk mencatat penerimaan tabung LPG dari SPBE. Field mel
 
 Keterangan: Modal form untuk mencatat penyaluran tabung ke pangkalan. Field meliputi pemilihan pangkalan, tanggal, jenis LPG, dan jumlah tabung.
 
-#### 18. Modal Konfirmasi Pemakaian Stok
-
-![Modal Pemakaian Stok](diagrams/8 UI Mockup/Modal_18_PemakaianStok.png)
-
-*Gambar 3.73 Modal Konfirmasi Pemakaian Stok*
-
-Keterangan: Modal untuk mencatat pemakaian stok internal seperti rusak atau penyesuaian inventory. Wajib mengisi alasan pemakaian.
-
 ---
 
 #### Modul Profil & Pengaturan (4 Modal)
 
-#### 19. Modal Edit Profil
+#### 21. Modal Edit Profil
 
 ![Modal Edit Profil](diagrams/8 UI Mockup/Modal_19_EditProfil.png)
 
@@ -2694,7 +2702,7 @@ Keterangan: Modal untuk mencatat pemakaian stok internal seperti rusak atau peny
 
 Keterangan: Modal ini menampilkan form untuk mengedit informasi profil pengguna yang sedang login. Field yang dapat diedit meliputi nama dan foto profil.
 
-#### 20. Modal Ubah Password
+#### 22. Modal Ubah Password
 
 ![Modal Ubah Password](diagrams/8 UI Mockup/Modal_20_UbahPassword.png)
 
@@ -2702,7 +2710,7 @@ Keterangan: Modal ini menampilkan form untuk mengedit informasi profil pengguna 
 
 Keterangan: Modal ini diakses dari halaman profil untuk mengubah password. Field meliputi password lama, password baru, dan konfirmasi password baru. Sistem memvalidasi kekuatan password minimum.
 
-#### 21. Modal Crop Foto Profil
+#### 23. Modal Crop Foto Profil
 
 ![Modal Crop Foto](diagrams/8 UI Mockup/Modal_21_CropFoto.png)
 
@@ -2710,7 +2718,7 @@ Keterangan: Modal ini diakses dari halaman profil untuk mengubah password. Field
 
 Keterangan: Modal ini muncul setelah pengguna memilih foto untuk profil. Pengguna dapat melakukan crop dan zoom pada gambar sebelum menyimpan. Aspect ratio dilock pada 1:1 (square).
 
-#### 22. Modal Konfirmasi Logout
+#### 24. Modal Konfirmasi Logout
 
 ![Modal Konfirmasi Logout](diagrams/8 UI Mockup/Modal_22_Logout.png)
 
@@ -2722,7 +2730,7 @@ Keterangan: Modal konfirmasi yang muncul ketika pengguna mengklik tombol logout.
 
 #### Modul Pangkalan SAAS (6 Modal)
 
-#### 23. Modal Tambah Konsumen
+#### 25. Modal Tambah Konsumen
 
 ![Modal Tambah Konsumen](diagrams/8 UI Mockup/Modal_23_TambahKonsumen.png)
 
@@ -2730,7 +2738,7 @@ Keterangan: Modal konfirmasi yang muncul ketika pengguna mengklik tombol logout.
 
 Keterangan: Modal form untuk menambahkan konsumen baru di portal pangkalan. Field meliputi nama, NIK, nomor KK, alamat, dan tipe konsumen (Rumah Tangga/Warung).
 
-#### 24. Modal Edit Konsumen
+#### 26. Modal Edit Konsumen
 
 ![Modal Edit Konsumen](diagrams/8 UI Mockup/Modal_24_EditKonsumen.png)
 
@@ -2738,7 +2746,7 @@ Keterangan: Modal form untuk menambahkan konsumen baru di portal pangkalan. Fiel
 
 Keterangan: Modal untuk mengedit data konsumen yang sudah ada. Semua field dapat diubah termasuk tipe konsumen.
 
-#### 25. Modal Konfirmasi Hapus Konsumen
+#### 27. Modal Konfirmasi Hapus Konsumen
 
 ![Modal Hapus Konsumen](diagrams/8 UI Mockup/Modal_25_HapusKonsumen.png)
 
@@ -2746,7 +2754,7 @@ Keterangan: Modal untuk mengedit data konsumen yang sudah ada. Semua field dapat
 
 Keterangan: Modal konfirmasi penghapusan data konsumen. Menampilkan peringatan bahwa riwayat pembelian konsumen juga akan terhapus.
 
-#### 26. Modal Tambah Pengeluaran
+#### 28. Modal Tambah Pengeluaran
 
 ![Modal Tambah Pengeluaran](diagrams/8 UI Mockup/Modal_26_TambahPengeluaran.png)
 
@@ -2754,7 +2762,7 @@ Keterangan: Modal konfirmasi penghapusan data konsumen. Menampilkan peringatan b
 
 Keterangan: Modal form untuk mencatat pengeluaran operasional pangkalan. Field meliputi tanggal, kategori (Operasional/Transport/Gaji/Lainnya), jumlah, dan keterangan.
 
-#### 27. Modal Edit Pengeluaran
+#### 29. Modal Edit Pengeluaran
 
 ![Modal Edit Pengeluaran](diagrams/8 UI Mockup/Modal_27_EditPengeluaran.png)
 
@@ -2762,7 +2770,7 @@ Keterangan: Modal form untuk mencatat pengeluaran operasional pangkalan. Field m
 
 Keterangan: Modal untuk mengedit data pengeluaran yang sudah dicatat. Dapat mengubah kategori, jumlah, dan keterangan.
 
-#### 28. Modal Konfirmasi Hapus Pengeluaran
+#### 30. Modal Konfirmasi Hapus Pengeluaran
 
 ![Modal Hapus Pengeluaran](diagrams/8 UI Mockup/Modal_28_HapusPengeluaran.png)
 
@@ -2774,7 +2782,7 @@ Keterangan: Modal konfirmasi untuk menghapus data pengeluaran dari sistem.
 
 #### Modal Umum (3 Modal)
 
-#### 29. Modal Notifikasi
+#### 31. Modal Notifikasi
 
 ![Modal Notifikasi](diagrams/8 UI Mockup/Modal_29_Notifikasi.png)
 
@@ -2782,7 +2790,7 @@ Keterangan: Modal konfirmasi untuk menghapus data pengeluaran dari sistem.
 
 Keterangan: Modal ini menampilkan daftar notifikasi sistem secara real-time. Notifikasi dikelompokkan berdasarkan prioritas (kritis, tinggi, normal) dengan ikon dan warna yang berbeda.
 
-#### 30. Modal Voice Order
+#### 32. Modal Voice Order
 
 ![Modal Voice Order](diagrams/8 UI Mockup/Modal_30_VoiceOrder.png)
 
@@ -2790,7 +2798,7 @@ Keterangan: Modal ini menampilkan daftar notifikasi sistem secara real-time. Not
 
 Keterangan: Modal ini muncul ketika pengguna mengaktifkan fitur Voice Order. Menampilkan visualisasi audio, transkrip real-time, dan preview pesanan yang berhasil diparsing oleh AI Gemini.
 
-#### 31. Modal Konfirmasi Umum
+#### 33. Modal Konfirmasi Umum
 
 ![Modal Konfirmasi Umum](diagrams/8 UI Mockup/Modal_31_KonfirmasiUmum.png)
 
@@ -2802,14 +2810,14 @@ Keterangan: Modal reusable untuk berbagai konfirmasi aksi seperti simpan perubah
 
 ### Ringkasan Perancangan Antarmuka
 
-Berdasarkan perancangan antarmuka di atas, total terdapat **74 wireframe** yang mencakup:
+Berdasarkan perancangan antarmuka di atas, total terdapat **68 wireframe** yang mencakup:
 
 | Modul | Jumlah | Deskripsi |
 |-------|--------|-----------|
-| **Portal Admin** | 34 halaman | Fitur lengkap manajemen distribusi LPG agen |
+| **Portal Admin** | 26 halaman | Fitur lengkap manajemen distribusi LPG agen |
 | **Portal Pangkalan** | 9 halaman | Fitur SAAS untuk pangkalan mitra |
-| **Komponen Modal** | 31 modal | Dialog interaktif untuk aksi spesifik |
-| **Total** | **74 wireframe** | |
+| **Komponen Modal** | 33 modal | Dialog interaktif untuk aksi spesifik |
+| **Total** | **68 wireframe** | |
 
 Semua wireframe dibuat menggunakan **Balsamiq Mockup** dan tersimpan di folder `diagrams/8 UI Mockup/`.
 
@@ -2828,8 +2836,8 @@ Perancangan sistem SIM4LON telah didokumentasikan secara komprehensif melalui be
 | **Sequence Diagram** | 19 | Interaksi komponen |
 | **State Machine** | 4 | Lifecycle objek |
 | **Deployment** | 1 | Arsitektur fisik |
-| **Wireframe** | 74 | Desain antarmuka (43 halaman + 31 modal) |
-| **Total** | **129** | |
+| **Wireframe** | 68 | Desain antarmuka (35 halaman + 33 modal) |
+| **Total** | **123** | |
 
 Semua diagram PlantUML tersimpan di folder `diagrams/` dan dapat di-render menggunakan PlantUML server atau VS Code extension.
 

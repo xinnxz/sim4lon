@@ -177,7 +177,7 @@ export default function ApplicationSettings() {
                                 className="h-10"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Contoh hasil: {settings.invoicePrefix}2024-0001
+                                Contoh hasil: {settings.invoicePrefix}2026-0001
                             </p>
                         </div>
                         <div className="space-y-2">
@@ -192,7 +192,7 @@ export default function ApplicationSettings() {
                                 className="h-10"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Contoh hasil: {settings.orderCodePrefix}2024-0001
+                                Contoh hasil: {settings.orderCodePrefix}2026-0001
                             </p>
                         </div>
                     </div>

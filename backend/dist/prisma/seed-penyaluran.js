@@ -163,7 +163,7 @@ async function main() {
     let orderCodeNum = 1;
     let agenOrderCodeNum = 1;
     const admin = await prisma.users.findFirst({ where: { role: 'ADMIN' } });
-    const PRICE_PER_UNIT = 16000;
+    const PRICE_PER_UNIT = 22000;
     const currentDate = new Date(START_DATE);
     while (currentDate <= END_DATE) {
         if (currentDate.getDay() === 0) {

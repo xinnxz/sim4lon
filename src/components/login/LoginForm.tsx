@@ -277,27 +277,41 @@ export default function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowDemoCredentials(!showDemoCredentials)}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors duration-200"
               >
                 <SafeIcon
-                  name={showDemoCredentials ? 'ChevronUp' : 'ChevronDown'}
-                  className="h-3 w-3"
+                  name={showDemoCredentials ? 'EyeOff' : 'Eye'}
+                  className="h-3.5 w-3.5"
                 />
-                <span>{showDemoCredentials ? 'Sembunyikan' : 'Lihat'} Akun Demo</span>
+                <span>{showDemoCredentials ? 'Sembunyikan' : 'Tampilkan'} Akun Demo</span>
               </button>
 
               {/* Collapsible Demo Info */}
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${showDemoCredentials ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0'
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${showDemoCredentials ? 'max-h-48 opacity-100 mt-2' : 'max-h-0 opacity-0'
                   }`}
               >
-                <div className="px-3 py-2 bg-gray-50/80 rounded-lg border border-gray-200/60">
-                  <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px]">
-                    <span><span className="text-emerald-600 font-medium">Admin</span> <span className="text-gray-400">admin@agen.com</span></span>
-                    <span><span className="text-blue-600 font-medium">Operator</span> <span className="text-gray-400">operator@demo.com</span></span>
-                    <span><span className="text-orange-600 font-medium">Pangkalan</span> <span className="text-gray-400">pkl001@demo.com</span></span>
+                <div className="px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
+                  {/* Daftar Akun Demo - Vertikal */}
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 font-semibold min-w-[70px]">Admin</span>
+                      <span className="text-gray-600">admin@agen.com</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-semibold min-w-[70px]">Operator</span>
+                      <span className="text-gray-600">operator@demo.com</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-orange-600 font-semibold min-w-[70px]">Pangkalan</span>
+                      <span className="text-gray-600">pk007@demo.com</span>
+                    </div>
                   </div>
-                  <p className="text-[9px] text-gray-400 text-center mt-1">Password: admin123 / operator123 / pangkalan123</p>
+
+                  {/* Password Info */}
+                  <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-200">
+                    <span className="font-medium">Password:</span> admin123 / operator123 / pangkalan123
+                  </p>
                 </div>
               </div>
             </div>

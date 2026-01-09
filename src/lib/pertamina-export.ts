@@ -40,7 +40,7 @@ export interface RekapRow {
 }
 
 export interface ExportPerencanaanOptions {
-    bulan: string // Format: "2025-12" 
+    bulan: string // Format: "2026-01" 
     data: RekapRow[]
     daysInMonth: number
     agenProfile: AgenProfile

@@ -43,7 +43,7 @@ export default function InvoiceFooter({ notes, terms }: InvoiceFooterProps) {
 
       {/* Copyright */}
       <div className="text-center pt-4 border-t text-xs text-muted-foreground">
-        <p>© 2024 SIM4LON - Sistem Informasi Distribusi LPG. Semua hak dilindungi.</p>
+        <p>© 2026 SIM4LON - Sistem Informasi Distribusi LPG. Semua hak dilindungi.</p>
       </div>
     </div>
   )

@@ -98,37 +98,37 @@ const MOCK_ORDER_2_ITEMS: OrderItemModel[] = [
 // MOCK DATA
 export const MOCK_ORDER_DATA: OrderDetailModel[] = [
   {
-    orderId: "ORD-20251203-001",
+    orderId: "ORD-20260108-001",
     pangkalan: getPangkalanSummary("P-001")!,
     items: MOCK_ORDER_1_ITEMS,
     totalAmount: MOCK_ORDER_1_ITEMS.reduce((sum, item) => sum + item.subTotal, 0), // 5,325,000
     currentStatus: 'SELESAI',
-    tanggalPesan: "2025-12-01T10:30:00Z",
+    tanggalPesan: "2026-01-01T10:30:00Z",
     timeline: [
-      { status: 'DIPROSES', deskripsi: 'Pesanan dibuat dan diverifikasi oleh Operator.', tanggal: "2025-12-01T10:35:00Z", iconName: "ClipboardCheck" },
-      { status: 'MENUNGGU_PEMBAYARAN', deskripsi: 'Menunggu konfirmasi pembayaran penuh.', tanggal: "2025-12-01T11:00:00Z", iconName: "Clock" },
-      { status: 'DIKIRIM', deskripsi: 'Pengiriman sedang dalam perjalanan oleh Driver U-003.', tanggal: "2025-12-02T13:00:00Z", iconName: "Truck" },
-      { status: 'SELESAI', deskripsi: 'Pesanan berhasil diterima dan diverifikasi di lokasi pangkalan.', tanggal: "2025-12-02T15:45:00Z", iconName: "CheckCircle" },
+      { status: 'DIPROSES', deskripsi: 'Pesanan dibuat dan diverifikasi oleh Operator.', tanggal: "2026-01-01T10:35:00Z", iconName: "ClipboardCheck" },
+      { status: 'MENUNGGU_PEMBAYARAN', deskripsi: 'Menunggu konfirmasi pembayaran penuh.', tanggal: "2026-01-01T11:00:00Z", iconName: "Clock" },
+      { status: 'DIKIRIM', deskripsi: 'Pengiriman sedang dalam perjalanan oleh Driver U-003.', tanggal: "2026-01-02T13:00:00Z", iconName: "Truck" },
+      { status: 'SELESAI', deskripsi: 'Pesanan berhasil diterima dan diverifikasi di lokasi pangkalan.', tanggal: "2026-01-02T15:45:00Z", iconName: "CheckCircle" },
     ],
     payment: {
       isPaid: true,
       paymentMethod: 'TRANSFER_BANK',
       amountPaid: 5325000,
-      paymentDate: "2025-12-01T11:30:00Z",
-      proofUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/736bcae2-0c68-4259-b162-db3a3188096c.png",
+      paymentDate: "2026-01-01T11:30:00Z",
+      proofUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/3/736bcae2-0c68-4259-b162-db3a3188096c.png",
     },
     isAssignedToDriver: true,
   },
   {
-    orderId: "ORD-20251203-002",
+    orderId: "ORD-20260108-002",
     pangkalan: getPangkalanSummary("P-002")!,
     items: MOCK_ORDER_2_ITEMS,
     totalAmount: MOCK_ORDER_2_ITEMS.reduce((sum, item) => sum + item.subTotal, 0), // 900,000
     currentStatus: 'MENUNGGU_PEMBAYARAN',
-    tanggalPesan: "2025-12-03T09:00:00Z",
+    tanggalPesan: "2026-01-03T09:00:00Z",
     timeline: [
-      { status: 'DRAFT', deskripsi: 'Pesanan baru dibuat oleh Operator U-002.', tanggal: "2025-12-03T08:55:00Z", iconName: "FileText" },
-      { status: 'DIPROSES', deskripsi: 'Pesanan diverifikasi dan siap untuk pembayaran.', tanggal: "2025-12-03T09:05:00Z", iconName: "ClipboardCheck" },
+      { status: 'DRAFT', deskripsi: 'Pesanan baru dibuat oleh Operator U-002.', tanggal: "2026-01-03T08:55:00Z", iconName: "FileText" },
+      { status: 'DIPROSES', deskripsi: 'Pesanan diverifikasi dan siap untuk pembayaran.', tanggal: "2026-01-03T09:05:00Z", iconName: "ClipboardCheck" },
     ],
     payment: {
       isPaid: false,
@@ -136,24 +136,24 @@ export const MOCK_ORDER_DATA: OrderDetailModel[] = [
     isAssignedToDriver: false,
   },
   {
-    orderId: "ORD-20251203-003",
+    orderId: "ORD-20260108-003",
     pangkalan: getPangkalanSummary("P-003")!,
     items: [createOrderItem('50kg', 10)], // 6,000,000
     totalAmount: 6000000,
     currentStatus: 'SIAP_KIRIM',
-    tanggalPesan: "2025-12-03T11:00:00Z",
+    tanggalPesan: "2026-01-03T11:00:00Z",
     timeline: [
-      { status: 'DIPROSES', deskripsi: 'Pesanan diverifikasi dan pembayaran telah dikonfirmasi (Tunai).', tanggal: "2025-12-03T11:15:00Z", iconName: "ClipboardCheck" },
-      { status: 'SIAP_KIRIM', deskripsi: 'Stok dialokasikan dan pesanan menanti penjadwalan pengiriman.', tanggal: "2025-12-03T11:45:00Z", iconName: "Package" },
+      { status: 'DIPROSES', deskripsi: 'Pesanan diverifikasi dan pembayaran telah dikonfirmasi (Tunai).', tanggal: "2026-01-03T11:15:00Z", iconName: "ClipboardCheck" },
+      { status: 'SIAP_KIRIM', deskripsi: 'Stok dialokasikan dan pesanan menanti penjadwalan pengiriman.', tanggal: "2026-01-03T11:45:00Z", iconName: "Package" },
     ],
     payment: {
       isPaid: true,
       paymentMethod: 'TUNAI',
       amountPaid: 6000000,
-      paymentDate: "2025-12-03T11:15:00Z",
+      paymentDate: "2026-01-03T11:15:00Z",
     },
     isAssignedToDriver: false,
-    notes: "Pengiriman harus dilakukan besok pagi, 4 Desember 2025.",
+    notes: "Pengiriman harus dilakukan besok pagi, 4 Januari 2026.",
   }
 ];
 

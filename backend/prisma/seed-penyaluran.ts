@@ -184,8 +184,8 @@ async function main() {
     let agenOrderCodeNum = 1;
     const admin = await prisma.users.findFirst({ where: { role: 'ADMIN' } });
 
-    // Price per unit LPG 3kg (subsidi)
-    const PRICE_PER_UNIT = 16000;
+    // Price per unit LPG 3kg (subsidi) - harus lebih tinggi dari cost_price (18500)
+    const PRICE_PER_UNIT = 22000;
 
     const currentDate = new Date(START_DATE);
 

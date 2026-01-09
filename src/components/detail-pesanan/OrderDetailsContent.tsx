@@ -18,8 +18,8 @@ import { formatCurrency } from '@/lib/currency'
 
 // Mock order data dengan interface yang benar
 const mockOrder = {
-  id: 'ORD-2024-001234',
-  createdDate: '15 Januari 2024',
+  id: 'ORD-2026-001234',
+  createdDate: '15 Januari 2026',
   createdTime: '10:30',
   status: 'processing',
   statusLabel: 'Sedang Diproses',
@@ -38,8 +38,8 @@ const mockOrder = {
   paymentStatus: 'pending' as const,
   paymentMethod: null as string | null,
   timeline: [
-    { status: 'created', label: 'Pesanan Dibuat', date: '2024-01-15 10:30', completed: true },
-    { status: 'confirmed', label: 'Pesanan Dikonfirmasi', date: '2024-01-15 11:00', completed: true },
+    { status: 'created', label: 'Pesanan Dibuat', date: '2026-01-15 10:30', completed: true },
+    { status: 'confirmed', label: 'Pesanan Dikonfirmasi', date: '2026-01-15 11:00', completed: true },
     { status: 'payment', label: 'Menunggu Pembayaran', date: null, completed: false },
     { status: 'in_delivery', label: 'Sedang Dikirim', date: null, completed: false },
     { status: 'completed', label: 'Pesanan Selesai', date: null, completed: false },

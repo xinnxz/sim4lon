@@ -138,10 +138,10 @@ export default function ProfitChart({ isVisible = true }: ProfitChartProps) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={340}>
       <BarChart
         data={data}
-        margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+        margin={{ top: 10, right: 30, left: 0, bottom: 30 }}
         className="drop-shadow-sm"
       >
         <defs>
@@ -169,10 +169,13 @@ export default function ProfitChart({ isVisible = true }: ProfitChartProps) {
         />
         <XAxis
           dataKey="day"
-          stroke="hsl(var(--muted-foreground))"
-          style={{ fontSize: '11px', fontWeight: 500 }}
-          axisLine={{ stroke: 'hsl(var(--border))' }}
+          stroke="hsl(var(--foreground))"
+          style={{ fontSize: '12px', fontWeight: 600 }}
+          axisLine={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
           tickLine={false}
+          interval={0}
+          tick={{ fill: 'hsl(var(--foreground))', dy: 8 }}
+          height={40}
         />
         <YAxis
           stroke="hsl(var(--muted-foreground))"

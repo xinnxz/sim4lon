@@ -83,7 +83,7 @@ return (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-2">
                  <p className="text-sm text-muted-foreground">Hari Penjualan Tertinggi</p>
-                 <p className="text-2xl font-bold text-primary">Senin, 15 Jan 2024</p>
+                 <p className="text-2xl font-bold text-primary">Senin, 15 Jan 2026</p>
                  <p className="text-sm text-muted-foreground">Rp 45.500.000</p>
                </div>
                <div className="space-y-2">

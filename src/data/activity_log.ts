@@ -98,5 +98,5 @@ const generateActivityLog = (orders: OrderDetailModel[]): FullActivityModel[] =>
 };
 
 
-export const MOCK_FULL_ACTIVITY_LOG: FullActivityModel[] = generateActivityLog(getOrderDetail("ORD-20251203-001") ? [getOrderDetail("ORD-20251203-001")!, getOrderDetail("ORD-20251203-002")!, getOrderDetail("ORD-20251203-003")!] : []);
+export const MOCK_FULL_ACTIVITY_LOG: FullActivityModel[] = generateActivityLog(getOrderDetail("ORD-20260108-001") ? [getOrderDetail("ORD-20260108-001")!, getOrderDetail("ORD-20260108-002")!, getOrderDetail("ORD-20260108-003")!] : []);
 

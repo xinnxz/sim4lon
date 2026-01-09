@@ -233,9 +233,9 @@ export default function AppearanceSettings() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (31/12/2024)</SelectItem>
-                                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (12/31/2024)</SelectItem>
-                                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (2024-12-31)</SelectItem>
+                                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (31/01/2026)</SelectItem>
+                                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (01/31/2026)</SelectItem>
+                                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (2026-01-31)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

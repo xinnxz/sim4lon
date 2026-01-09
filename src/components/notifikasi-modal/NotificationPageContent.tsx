@@ -57,7 +57,7 @@ const mockNotifications: Notification[] = [
   {
     id: 5,
     title: 'Driver Tidak Tersedia',
-    message: 'Driver Budi tidak tersedia untuk pengiriman pada tanggal 15 Januari 2025',
+    message: 'Driver Budi tidak tersedia untuk pengiriman pada tanggal 15 Januari 2026',
     time: '5 jam yang lalu',
     type: 'warning',
     icon: 'AlertCircle',
@@ -66,7 +66,7 @@ const mockNotifications: Notification[] = [
   {
     id: 6,
     title: 'Sistem Update',
-    message: 'Sistem akan melakukan pemeliharaan pada 20 Januari 2025 pukul 22:00 - 23:00',
+    message: 'Sistem akan melakukan pemeliharaan pada 20 Januari 2026 pukul 22:00 - 23:00',
     time: '1 hari yang lalu',
     type: 'info',
     icon: 'Info',
@@ -84,7 +84,7 @@ const mockNotifications: Notification[] = [
   {
     id: 8,
     title: 'Laporan Bulanan Siap',
-    message: 'Laporan penjualan bulan Desember 2024 telah siap untuk diunduh',
+    message: 'Laporan penjualan bulan Januari 2026 telah siap untuk diunduh',
     time: '3 hari yang lalu',
     type: 'info',
     icon: 'FileText',

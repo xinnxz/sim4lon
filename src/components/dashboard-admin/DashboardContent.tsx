@@ -127,7 +127,7 @@ export default function DashboardContent() {
                   <CardDescription className="text-xs sm:text-sm">Profit harian (Penjualan - Pembelian)</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-4">
-                  <div className="w-full h-64 sm:h-72">
+                  <div className="w-full h-80 sm:h-96">
                     <ProfitChart isVisible={isVisible} />
                   </div>
                 </CardContent>

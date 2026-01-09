@@ -46,5 +46,5 @@ const generateInvoice = (orderId: string): InvoiceModel | undefined => {
   };
 };
 
-export const MOCK_INVOICE_LUNAS: InvoiceModel = generateInvoice("ORD-20251203-001")!;
+export const MOCK_INVOICE_LUNAS: InvoiceModel = generateInvoice("ORD-20260108-001")!;
 
