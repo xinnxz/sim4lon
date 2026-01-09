@@ -60,11 +60,14 @@ export default function PangkalanHeader() {
 
                 {/* Logo & Title - Responsive */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                    <img
-                        src="/logo-pertamina-2.png"
-                        alt="Pertamina"
-                        className="h-7 sm:h-9 object-contain transition-all duration-300"
-                    />
+                    {/* Logo - clickable to go back to pangkalan dashboard */}
+                    <a href="/pangkalan" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
+                        <img
+                            src="/logo-pertamina-2.png"
+                            alt="Pertamina"
+                            className="h-7 sm:h-9 object-contain transition-all duration-300"
+                        />
+                    </a>
                     <div className="hidden xs:block">
                         <h1 className="text-sm sm:text-base font-bold leading-none">SIM4LON</h1>
                         <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-none">

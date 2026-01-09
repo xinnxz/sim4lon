@@ -211,18 +211,21 @@ export default function AdminHeader({
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Mobile Hamburger Menu - Premium animated button */}
             <MobileMenuButton />
-            {/* Light mode logo - smaller on mobile */}
-            <img
-              src="/logo-pertamina.png"
-              alt="Pertamina"
-              className="h-8 sm:h-10 object-contain dark:hidden transition-all duration-300"
-            />
-            {/* Dark mode logo */}
-            <img
-              src="/logo-pertamina-darkmode.png"
-              alt="Pertamina"
-              className="h-8 sm:h-10 object-contain hidden dark:block transition-all duration-300"
-            />
+            {/* Logo - clickable to go back to dashboard */}
+            <a href="/dashboard" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
+              {/* Light mode logo - smaller on mobile */}
+              <img
+                src="/logo-pertamina.png"
+                alt="Pertamina"
+                className="h-8 sm:h-10 object-contain dark:hidden transition-all duration-300"
+              />
+              {/* Dark mode logo */}
+              <img
+                src="/logo-pertamina-darkmode.png"
+                alt="Pertamina"
+                className="h-8 sm:h-10 object-contain hidden dark:block transition-all duration-300"
+              />
+            </a>
           </div>
 
           {/* Right Section: Notifications & User */}

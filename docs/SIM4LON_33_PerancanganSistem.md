@@ -2176,7 +2176,7 @@ Deployment Diagram menggambarkan arsitektur fisik sistem, meliputi node (server)
 
 ### Daftar Halaman dan Hak Akses Role
 
-Sistem SIM4LON memiliki 3 role pengguna dengan hak akses berbeda terhadap halaman-halaman dalam sistem. Berikut adalah daftar lengkap 35 halaman beserta hak aksesnya:
+Sistem SIM4LON memiliki 3 role pengguna dengan hak akses berbeda terhadap halaman-halaman dalam sistem. Berikut adalah daftar lengkap 34 halaman beserta hak aksesnya:
 
 | No | Nama Halaman | Admin | Operator | Pangkalan |
 |----|--------------|:-----:|:--------:|:---------:|
@@ -2186,39 +2186,38 @@ Sistem SIM4LON memiliki 3 role pengguna dengan hak akses berbeda terhadap halama
 | 4 | Buat Pesanan | v | v |  |
 | 5 | Detail Pesanan | v | v |  |
 | 6 | Catat Pembayaran | v | v |  |
-| 7 | Status Pembayaran | v | v |  |
-| 8 | Nota/Invoice | v | v |  |
-| 9 | Ringkasan Stok | v | v |  |
-| 10 | Penerimaan Stok | v |  |  |
-| 11 | Penyaluran | v |  |  |
-| 12 | In-Out Agen | v |  |  |
-| 13 | Pemakaian Stok | v | v |  |
-| 14 | Daftar Pangkalan | v |  |  |
-| 15 | Detail/Edit Pangkalan | v |  |  |
-| 16 | Daftar Driver | v |  |  |
-| 17 | Daftar Pengguna | v |  |  |
-| 18 | Tambah Pengguna | v |  |  |
-| 19 | Laporan | v |  |  |
-| 20 | Export Laporan | v |  |  |
-| 21 | Tren Penjualan | v |  |  |
-| 22 | Perencanaan | v |  |  |
-| 23 | Riwayat Aktivitas | v |  |  |
-| 24 | Pengaturan | v |  |  |
-| 25 | Profil Admin | v | v |  |
-| 26 | Edit Profil Admin | v | v |  |
-| 27 | Dashboard Pangkalan |  |  | v |
-| 28 | Stok Pangkalan |  |  | v |
-| 29 | Catat Penjualan |  |  | v |
-| 30 | Daftar Penjualan |  |  | v |
-| 31 | Daftar Konsumen |  |  | v |
-| 32 | Hutang Konsumen |  |  | v |
-| 33 | Pengeluaran |  |  | v |
-| 34 | Laporan Pangkalan |  |  | v |
-| 35 | Profil Pangkalan |  |  | v |
+| 7 | Nota/Invoice | v | v |  |
+| 8 | Ringkasan Stok | v | v |  |
+| 9 | Penerimaan Stok | v |  |  |
+| 10 | Penyaluran | v |  |  |
+| 11 | In-Out Agen | v |  |  |
+| 12 | Pemakaian Stok | v | v |  |
+| 13 | Daftar Pangkalan | v |  |  |
+| 14 | Detail/Edit Pangkalan | v |  |  |
+| 15 | Daftar Driver | v |  |  |
+| 16 | Daftar Pengguna | v |  |  |
+| 17 | Tambah Pengguna | v |  |  |
+| 18 | Laporan | v |  |  |
+| 19 | Export Laporan | v |  |  |
+| 20 | Tren Penjualan | v |  |  |
+| 21 | Perencanaan | v |  |  |
+| 22 | Riwayat Aktivitas | v |  |  |
+| 23 | Pengaturan | v |  |  |
+| 24 | Profil Admin | v | v |  |
+| 25 | Edit Profil Admin | v | v |  |
+| 26 | Dashboard Pangkalan |  |  | v |
+| 27 | Stok Pangkalan |  |  | v |
+| 28 | Catat Penjualan |  |  | v |
+| 29 | Daftar Penjualan |  |  | v |
+| 30 | Daftar Konsumen |  |  | v |
+| 31 | Hutang Konsumen |  |  | v |
+| 32 | Pengeluaran |  |  | v |
+| 33 | Laporan Pangkalan |  |  | v |
+| 34 | Profil Pangkalan |  |  | v |
 
 ---
 
-### A. Portal Admin (26 Halaman)
+### A. Portal Admin (25 Halaman)
 
 Berikut adalah wireframe halaman-halaman yang tersedia pada Portal Admin:
 
@@ -2270,127 +2269,119 @@ Keterangan: Halaman ini menampilkan informasi lengkap dari satu pesanan termasuk
 
 Keterangan: Halaman ini menampilkan form untuk mencatat pembayaran dari pangkalan. Form berisi input jumlah pembayaran, metode pembayaran (TUNAI/TRANSFER), dan upload bukti pembayaran. Sistem secara otomatis menghitung sisa tagihan dan mengupdate status pembayaran pesanan.
 
-#### 7. Tampilan Halaman Status Pembayaran
+#### 7. Tampilan Halaman Nota/Invoice
 
-![UI Halaman Status Pembayaran](diagrams/8 UI Mockup/UI_07_StatusPembayaran.png)
+![UI Halaman Nota Pembayaran](diagrams/8 UI Mockup/UI_07_NotaPembayaran.png)
 
-*Gambar 3.19 UI Halaman Status Pembayaran*
-
-Keterangan: Halaman ini menampilkan monitoring status pembayaran dari semua pesanan. Terdapat ringkasan total tagihan, total sudah dibayar, dan total piutang. Tabel menampilkan daftar pesanan dengan filter status pembayaran (LUNAS/BELUM LUNAS/DP).
-
-#### 8. Tampilan Halaman Nota/Invoice
-
-![UI Halaman Nota Pembayaran](diagrams/8 UI Mockup/UI_08_NotaPembayaran.png)
-
-*Gambar 3.20 UI Halaman Nota Pembayaran*
+*Gambar 3.19 UI Halaman Nota Pembayaran*
 
 Keterangan: Halaman ini menampilkan preview nota/invoice dalam format print-ready. Nota berisi header perusahaan, nomor invoice, tanggal, data pangkalan, daftar item pesanan, subtotal, pajak (jika ada), dan total. Terdapat tombol untuk mencetak atau mengunduh nota dalam format PDF.
 
-#### 9. Tampilan Halaman Ringkasan Stok
+#### 8. Tampilan Halaman Ringkasan Stok
 
-![UI Halaman Ringkasan Stok](diagrams/8 UI Mockup/UI_09_RingkasanStok.png)
+![UI Halaman Ringkasan Stok](diagrams/8 UI Mockup/UI_08_RingkasanStok.png)
 
-*Gambar 3.21 UI Halaman Ringkasan Stok*
+*Gambar 3.20 UI Halaman Ringkasan Stok*
 
 Keterangan: Halaman ini menampilkan dashboard stok LPG agen. Terdapat cards untuk setiap kategori produk (3kg Subsidi, 12kg, 50kg) yang menunjukkan jumlah stok isi, kosong, dan rusak. Halaman juga menampilkan alert untuk produk dengan stok di bawah batas minimum.
 
-#### 10. Tampilan Halaman Penerimaan Stok
+#### 9. Tampilan Halaman Penerimaan Stok
 
-![UI Halaman Penerimaan Stok](diagrams/8 UI Mockup/UI_10_PenerimaanStok.png)
+![UI Halaman Penerimaan Stok](diagrams/8 UI Mockup/UI_09_PenerimaanStok.png)
 
-*Gambar 3.22 UI Halaman Penerimaan Stok*
+*Gambar 3.21 UI Halaman Penerimaan Stok*
 
 Keterangan: Halaman ini menampilkan form untuk mencatat penerimaan tabung LPG dari SPBE (Stasiun Pengisian Bulk Elpiji). Form berisi input nomor SO, nomor LO, tanggal penerimaan, jenis LPG, dan jumlah tabung yang diterima. Data ini digunakan untuk tracking stok masuk agen.
 
-#### 11. Tampilan Halaman Penyaluran
+#### 10. Tampilan Halaman Penyaluran
 
-![UI Halaman Penyaluran](diagrams/8 UI Mockup/UI_11_Penyaluran.png)
+![UI Halaman Penyaluran](diagrams/8 UI Mockup/UI_10_Penyaluran.png)
 
-*Gambar 3.23 UI Halaman Penyaluran*
+*Gambar 3.22 UI Halaman Penyaluran*
 
 Keterangan: Halaman ini menampilkan grid penyaluran harian ke pangkalan dalam format calendar view. Baris menunjukkan daftar pangkalan, kolom menunjukkan tanggal. User dapat mengisi jumlah penyaluran untuk setiap sel. Terdapat filter bulan dan jenis LPG.
 
-#### 12. Tampilan Halaman In-Out Agen
+#### 11. Tampilan Halaman In-Out Agen
 
-![UI Halaman In-Out Agen](diagrams/8 UI Mockup/UI_12_InOutAgen.png)
+![UI Halaman In-Out Agen](diagrams/8 UI Mockup/UI_11_InOutAgen.png)
 
-*Gambar 3.24 UI Halaman In-Out Agen*
+*Gambar 3.23 UI Halaman In-Out Agen*
 
 Keterangan: Halaman ini menampilkan monitoring keluar masuk tabung LPG harian dalam bentuk tabel rekap. Kolom terdiri dari tanggal, stok awal, masuk (dari SPBE), keluar (ke pangkalan), dan saldo akhir. Data dapat diexport ke format Excel untuk keperluan laporan.
 
-#### 13. Tampilan Halaman Pemakaian Stok
+#### 12. Tampilan Halaman Pemakaian Stok
 
-![UI Halaman Pemakaian Stok](diagrams/8 UI Mockup/UI_13_PemakaianStok.png)
+![UI Halaman Pemakaian Stok](diagrams/8 UI Mockup/UI_12_PemakaianStok.png)
 
-*Gambar 3.25 UI Halaman Pemakaian Stok*
+*Gambar 3.24 UI Halaman Pemakaian Stok*
 
 Keterangan: Halaman ini menampilkan riwayat pemakaian stok internal agen. Mencakup stok yang digunakan untuk keperluan operasional, rusak, atau penyesuaian inventory. Setiap entri memiliki catatan alasan pemakaian.
 
-#### 14. Tampilan Halaman Daftar Pangkalan
+#### 13. Tampilan Halaman Daftar Pangkalan
 
-![UI Halaman Daftar Pangkalan](diagrams/8 UI Mockup/UI_14_DaftarPangkalan.png)
+![UI Halaman Daftar Pangkalan](diagrams/8 UI Mockup/UI_13_DaftarPangkalan.png)
 
-*Gambar 3.26 UI Halaman Daftar Pangkalan*
+*Gambar 3.25 UI Halaman Daftar Pangkalan*
 
 Keterangan: Halaman ini menampilkan tabel master data pangkalan mitra. Informasi yang ditampilkan meliputi kode pangkalan, nama, alamat, nomor telepon, status aktif, dan alokasi bulanan. Terdapat tombol untuk menambah, melihat detail, edit, dan menonaktifkan pangkalan.
 
-#### 15. Tampilan Halaman Detail/Edit Pangkalan
+#### 14. Tampilan Halaman Detail/Edit Pangkalan
 
-![UI Halaman Detail Edit Pangkalan](diagrams/8 UI Mockup/UI_15_DetailEditPangkalan.png)
+![UI Halaman Detail Edit Pangkalan](diagrams/8 UI Mockup/UI_14_DetailEditPangkalan.png)
 
-*Gambar 3.27 UI Halaman Detail/Edit Pangkalan*
+*Gambar 3.26 UI Halaman Detail/Edit Pangkalan*
 
 Keterangan: Halaman ini menampilkan informasi lengkap dari satu pangkalan termasuk profil, statistik pesanan, riwayat transaksi, dan akun user yang terkait. User dapat langsung mengedit informasi pangkalan pada halaman yang sama.
 
-#### 16. Tampilan Halaman Daftar Driver
+#### 15. Tampilan Halaman Daftar Driver
 
-![UI Halaman Daftar Driver](diagrams/8 UI Mockup/UI_16_DaftarDriver.png)
+![UI Halaman Daftar Driver](diagrams/8 UI Mockup/UI_15_DaftarDriver.png)
 
-*Gambar 3.28 UI Halaman Daftar Driver*
+*Gambar 3.27 UI Halaman Daftar Driver*
 
 Keterangan: Halaman ini menampilkan tabel master data sopir/driver pengiriman. Informasi yang ditampilkan meliputi kode driver, nama, nomor telepon, nomor kendaraan, dan status aktif. Terdapat aksi untuk menambah, edit, dan menonaktifkan driver melalui modal.
 
-#### 17. Tampilan Halaman Daftar Pengguna
+#### 16. Tampilan Halaman Daftar Pengguna
 
-![UI Halaman Daftar Pengguna](diagrams/8 UI Mockup/UI_17_DaftarPengguna.png)
+![UI Halaman Daftar Pengguna](diagrams/8 UI Mockup/UI_16_DaftarPengguna.png)
 
-*Gambar 3.29 UI Halaman Daftar Pengguna*
+*Gambar 3.28 UI Halaman Daftar Pengguna*
 
 Keterangan: Halaman ini menampilkan tabel manajemen user sistem. Informasi yang ditampilkan meliputi nama, email, role (ADMIN/OPERATOR/PANGKALAN), pangkalan terkait (untuk role PANGKALAN), dan status aktif. Hanya admin yang dapat mengakses halaman ini.
 
-#### 18. Tampilan Halaman Tambah Pengguna
+#### 17. Tampilan Halaman Tambah Pengguna
 
-![UI Halaman Tambah Pengguna](diagrams/8 UI Mockup/UI_18_TambahPengguna.png)
+![UI Halaman Tambah Pengguna](diagrams/8 UI Mockup/UI_17_TambahPengguna.png)
 
-*Gambar 3.30 UI Halaman Tambah Pengguna*
+*Gambar 3.29 UI Halaman Tambah Pengguna*
 
 Keterangan: Halaman ini menampilkan form untuk membuat akun user baru. Form berisi input nama, email, password, konfirmasi password, role, dan pangkalan (jika role PANGKALAN). Admin dapat mengatur akses pengguna melalui pemilihan role.
 
-#### 19. Tampilan Halaman Laporan
+#### 18. Tampilan Halaman Laporan
 
-![UI Halaman Laporan](diagrams/8 UI Mockup/UI_19_Laporan.png)
+![UI Halaman Laporan](diagrams/8 UI Mockup/UI_18_Laporan.png)
 
-*Gambar 3.31 UI Halaman Laporan*
+*Gambar 3.30 UI Halaman Laporan*
 
 Keterangan: Halaman ini menampilkan dashboard laporan dengan berbagai jenis laporan yang tersedia. User dapat memilih jenis laporan (penjualan, stok, pembayaran), periode waktu, dan filter pangkalan. Data laporan ditampilkan dalam bentuk tabel dan chart.
 
-#### 20. Tampilan Halaman Export Laporan
+#### 19. Tampilan Halaman Export Laporan
 
-![UI Halaman Export Laporan](diagrams/8 UI Mockup/UI_20_ExportLaporan.png)
+![UI Halaman Export Laporan](diagrams/8 UI Mockup/UI_19_ExportLaporan.png)
 
 *Gambar 3.32 UI Halaman Export Laporan*
 
 Keterangan: Halaman ini menampilkan opsi untuk mengexport laporan ke format Excel atau PDF. User dapat memilih jenis laporan, rentang tanggal, dan format output yang diinginkan. File akan didownload otomatis setelah diproses.
 
-#### 21. Tampilan Halaman Tren Penjualan
+#### 20. Tampilan Halaman Tren Penjualan
 
-![UI Halaman Tren Penjualan](diagrams/8 UI Mockup/UI_21_TrenPenjualan.png)
+![UI Halaman Tren Penjualan](diagrams/8 UI Mockup/UI_20_TrenPenjualan.png)
 
 *Gambar 3.33 UI Halaman Tren Penjualan*
 
 Keterangan: Halaman ini menampilkan visualisasi data penjualan dalam bentuk grafik. Terdapat line chart untuk tren harian/mingguan/bulanan, bar chart untuk perbandingan per pangkalan, dan pie chart untuk distribusi per kategori produk.
 
-#### 22. Tampilan Halaman Perencanaan
+#### 21. Tampilan Halaman Perencanaan
 
 ![UI Halaman Perencanaan](diagrams/8 UI Mockup/UI_22_Perencanaan.png)
 
@@ -2398,33 +2389,33 @@ Keterangan: Halaman ini menampilkan visualisasi data penjualan dalam bentuk graf
 
 Keterangan: Halaman ini menampilkan grid perencanaan distribusi harian dalam format spreadsheet. Baris menunjukkan daftar pangkalan, kolom menunjukkan tanggal dalam satu bulan. User dapat mengatur jumlah normal dan fakultatif untuk setiap sel.
 
-#### 23. Tampilan Halaman Riwayat Aktivitas
+#### 22. Tampilan Halaman Riwayat Aktivitas
 
-![UI Halaman Riwayat Aktivitas](diagrams/8 UI Mockup/UI_23_RiwayatAktivitas.png)
+![UI Halaman Riwayat Aktivitas](diagrams/8 UI Mockup/UI_22_RiwayatAktivitas.png)
 
 *Gambar 3.35 UI Halaman Riwayat Aktivitas*
 
 Keterangan: Halaman ini menampilkan audit log semua aktivitas dalam sistem. Setiap entri mencakup timestamp, nama user, jenis aktivitas, dan deskripsi. Fitur ini berguna untuk tracking dan monitoring keamanan sistem.
 
-#### 24. Tampilan Halaman Pengaturan
+#### 23. Tampilan Halaman Pengaturan
 
-![UI Halaman Pengaturan](diagrams/8 UI Mockup/UI_24_Pengaturan.png)
+![UI Halaman Pengaturan](diagrams/8 UI Mockup/UI_23_Pengaturan.png)
 
 *Gambar 3.36 UI Halaman Pengaturan*
 
 Keterangan: Halaman ini menampilkan konfigurasi sistem termasuk profil perusahaan (nama, alamat, logo), pengaturan notifikasi, batas stok kritis, tarif pajak, dan prefix invoice. Hanya admin yang dapat mengubah pengaturan ini.
 
-#### 25. Tampilan Halaman Profil Admin
+#### 24. Tampilan Halaman Profil Admin
 
-![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_25_ProfilAdmin.png)
+![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_24_ProfilAdmin.png)
 
 *Gambar 3.37 UI Halaman Profil Admin*
 
 Keterangan: Halaman ini menampilkan profil pengguna yang sedang login. Terdapat informasi nama, email, role, foto profil, dan opsi untuk mengedit profil atau mengubah password melalui modal.
 
-#### 26. Tampilan Halaman Edit Profil Admin
+#### 25. Tampilan Halaman Edit Profil Admin
 
-![UI Halaman Edit Profil Admin](diagrams/8 UI Mockup/UI_26_EditProfilAdmin.png)
+![UI Halaman Edit Profil Admin](diagrams/8 UI Mockup/UI_25_EditProfilAdmin.png)
 
 *Gambar 3.38 UI Halaman Edit Profil Admin*
 
@@ -2810,14 +2801,14 @@ Keterangan: Modal reusable untuk berbagai konfirmasi aksi seperti simpan perubah
 
 ### Ringkasan Perancangan Antarmuka
 
-Berdasarkan perancangan antarmuka di atas, total terdapat **68 wireframe** yang mencakup:
+Berdasarkan perancangan antarmuka di atas, total terdapat **67 wireframe** yang mencakup:
 
 | Modul | Jumlah | Deskripsi |
 |-------|--------|-----------|
-| **Portal Admin** | 26 halaman | Fitur lengkap manajemen distribusi LPG agen |
+| **Portal Admin** | 25 halaman | Fitur lengkap manajemen distribusi LPG agen |
 | **Portal Pangkalan** | 9 halaman | Fitur SAAS untuk pangkalan mitra |
 | **Komponen Modal** | 33 modal | Dialog interaktif untuk aksi spesifik |
-| **Total** | **68 wireframe** | |
+| **Total** | **67 wireframe** | |
 
 Semua wireframe dibuat menggunakan **Balsamiq Mockup** dan tersimpan di folder `diagrams/8 UI Mockup/`.
 
@@ -2836,8 +2827,8 @@ Perancangan sistem SIM4LON telah didokumentasikan secara komprehensif melalui be
 | **Sequence Diagram** | 19 | Interaksi komponen |
 | **State Machine** | 4 | Lifecycle objek |
 | **Deployment** | 1 | Arsitektur fisik |
-| **Wireframe** | 68 | Desain antarmuka (35 halaman + 33 modal) |
-| **Total** | **123** | |
+| **Wireframe** | 67 | Desain antarmuka (34 halaman + 33 modal) |
+| **Total** | **122** | |
 
 Semua diagram PlantUML tersimpan di folder `diagrams/` dan dapat di-render menggunakan PlantUML server atau VS Code extension.
 

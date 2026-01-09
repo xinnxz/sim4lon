@@ -104,11 +104,14 @@ export default function PangkalanHeaderSimple() {
 
                 {/* Logo & Title - Always visible */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                    <img
-                        src="/logo-pertamina-2.png"
-                        alt="Pertamina"
-                        className="h-8 sm:h-10 object-contain transition-all duration-300"
-                    />
+                    {/* Logo - clickable to go back to pangkalan dashboard */}
+                    <a href="/pangkalan" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
+                        <img
+                            src="/logo-pertamina-2.png"
+                            alt="Pertamina"
+                            className="h-8 sm:h-10 object-contain transition-all duration-300"
+                        />
+                    </a>
                     <div className="flex flex-col">
                         <h1 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">SIM4LON</h1>
                         <p className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium truncate max-w-[120px] sm:max-w-[200px]">
