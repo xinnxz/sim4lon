@@ -2309,13 +2309,13 @@ Keterangan: Halaman ini menampilkan grid penyaluran harian ke pangkalan dalam fo
 
 Keterangan: Halaman ini menampilkan monitoring keluar masuk tabung LPG harian dalam bentuk tabel rekap. Kolom terdiri dari tanggal, stok awal, masuk (dari SPBE), keluar (ke pangkalan), dan saldo akhir. Data dapat diexport ke format Excel untuk keperluan laporan.
 
-#### 12. Tampilan Halaman Pemakaian Stok
+#### 12. Tampilan Halaman Perencanaan
 
-![UI Halaman Pemakaian Stok](diagrams/8 UI Mockup/UI_12_PemakaianStok.png)
+![UI Halaman Perencanaan](diagrams/8 UI Mockup/UI_12_Perencanaan.png)
 
-*Gambar 3.24 UI Halaman Pemakaian Stok*
+*Gambar 3.24 UI Halaman Perencanaan*
 
-Keterangan: Halaman ini menampilkan riwayat pemakaian stok internal agen. Mencakup stok yang digunakan untuk keperluan operasional, rusak, atau penyesuaian inventory. Setiap entri memiliki catatan alasan pemakaian.
+Keterangan: Halaman ini menampilkan grid perencanaan distribusi harian dalam format spreadsheet. Baris menunjukkan daftar pangkalan, kolom menunjukkan tanggal dalam satu bulan. User dapat mengatur jumlah normal dan fakultatif untuk setiap sel.
 
 #### 13. Tampilan Halaman Daftar Pangkalan
 
