@@ -2349,7 +2349,7 @@ Keterangan: Halaman ini menampilkan tabel master data sopir/driver pengiriman. I
 
 Keterangan: Halaman ini menampilkan tabel manajemen user sistem. Informasi yang ditampilkan meliputi nama, email, role (ADMIN/OPERATOR/PANGKALAN), pangkalan terkait (untuk role PANGKALAN), dan status aktif. Hanya admin yang dapat mengakses halaman ini.
 
-#### 17. Tampilan Halaman Tambah Pengguna
+#### X 17. Tampilan Halaman Tambah Pengguna
 
 ![UI Halaman Tambah Pengguna](diagrams/8 UI Mockup/UI_17_TambahPengguna.png)
 

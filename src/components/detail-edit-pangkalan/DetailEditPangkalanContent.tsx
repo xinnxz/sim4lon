@@ -97,6 +97,7 @@ export default function DetailEditPangkalanContent() {
 
   /**
    * Handle save - call API to update pangkalan
+   * After update, re-fetch complete data to ensure users array is up-to-date
    */
   const handleSave = async (formData: Partial<Pangkalan>) => {
     if (!pangkalan) return
@@ -104,9 +105,14 @@ export default function DetailEditPangkalanContent() {
     setIsSaving(true)
     try {
       console.log('Updating pangkalan with data:', formData)
-      const updated = await pangkalanApi.update(pangkalan.id, formData)
-      console.log('Update response:', updated)
-      setPangkalan(updated)
+      await pangkalanApi.update(pangkalan.id, formData)
+
+      // Re-fetch complete pangkalan data to get updated users array
+      // This ensures the Reset Password modal shows the correct email
+      const refreshedData = await pangkalanApi.getById(pangkalan.id)
+      console.log('Refreshed pangkalan data:', refreshedData)
+      setPangkalan(refreshedData)
+
       setIsEditing(false)
       toast.success('Data pangkalan berhasil diperbarui')
     } catch (error: any) {
