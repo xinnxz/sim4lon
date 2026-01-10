@@ -2405,19 +2405,19 @@ Keterangan: Halaman ini menampilkan konfigurasi tampilan sistem termasuk tema, w
 
 Keterangan: Halaman ini menampilkan konfigurasi sistem termasuk pengaturan notifikasi, batas stok kritis, tarif pajak, dan prefix invoice. Hanya admin yang dapat mengubah pengaturan ini.
 
-#### 24. Tampilan Halaman Profil Admin
+#### 24. Tampilan Halaman Profil
 
-![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_26_ProfilAdmin.png)
+![UI Halaman Profil](diagrams/8 UI Mockup/UI_26_Profil.png)
 
-*Gambar 3.37 UI Halaman Profil Admin*
+*Gambar 3.37 UI Halaman Profil*
 
 Keterangan: Halaman ini menampilkan profil pengguna yang sedang login. Terdapat informasi nama, email, role, foto profil, dan opsi untuk mengedit profil atau mengubah password melalui modal.
 
-#### 25. Tampilan Halaman Edit Profil Admin
+#### 25. Tampilan Halaman Edit Profil
 
-![UI Halaman Edit Profil Admin](diagrams/8 UI Mockup/UI_25_EditProfilAdmin.png)
+![UI Halaman Edit Profil](diagrams/8 UI Mockup/UI_25_EditProfil.png)
 
-*Gambar 3.38 UI Halaman Edit Profil Admin*
+*Gambar 3.38 UI Halaman Edit Profil*
 
 Keterangan: Halaman ini menampilkan form untuk mengedit informasi profil pengguna yang sedang login, termasuk nama, foto profil, dan preferensi lainnya.
 
@@ -2427,7 +2427,7 @@ Keterangan: Halaman ini menampilkan form untuk mengedit informasi profil penggun
 
 *Gambar 3.39 UI Halaman 404 Not Found*
 
-Keterangan: Halaman ini menampilkan halaman error 404 Not Found.
+Keterangan: Halaman ini menampilkan halaman error 404 Not Found yang menampilkan pesan error dan tombol kembali ke halaman dashboard.
 ---
 
 ### B. Portal Pangkalan (9 Halaman)

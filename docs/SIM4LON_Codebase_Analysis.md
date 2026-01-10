@@ -463,7 +463,7 @@ async function bootstrap() {
 **Key Features**:
 ```astro
 <head>
-    <!-- Favicon: logo-sim4lon-nobg.png -->
+    <!-- Favicon: logo-sim4lon-transparant-v2.png -->
     <!-- Theme persistence script (prevents FOUC) -->
     <script is:inline>
         // Apply saved theme (dark/light) from localStorage

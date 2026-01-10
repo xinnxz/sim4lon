@@ -99,7 +99,7 @@ export default function LoginForm() {
       {/* Mobile Header - Only visible on mobile */}
       <div className="sm:hidden text-center mb-2">
         <img
-          src="/logo-sim4lon-nobg.png"
+          src="/logo-sim4lon-transparant-v2.png"
           alt="SIM4LON Logo"
           className="h-16 mx-auto mb-1 drop-shadow-lg"
         />
@@ -112,7 +112,7 @@ export default function LoginForm() {
         <CardHeader className="hidden sm:block space-y-2 text-center px-6 pt-8 pb-2">
           <div className="flex justify-center mb-2">
             <img
-              src="/logo-sim4lon-nobg.png"
+              src="/logo-sim4lon-transparant-v2.png"
               alt="SIM4LON Logo"
               className="h-16 object-contain transition-all duration-300"
             />
