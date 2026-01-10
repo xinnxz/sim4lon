@@ -114,6 +114,7 @@ export default function FloatingVoiceWidgetPangkalan() {
     const recognitionRef = useRef<any>(null)
     const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const lastSpeechTimeRef = useRef<number>(Date.now())
+    const isStoppingRef = useRef<boolean>(false)  // Prevent restart after intentional stop
 
     // Check browser support
     const isSupported = typeof window !== 'undefined' &&
@@ -187,7 +188,8 @@ export default function FloatingVoiceWidgetPangkalan() {
         }
 
         recognition.onend = () => {
-            if (status === 'listening') {
+            // Only restart if still listening AND not intentionally stopping
+            if (status === 'listening' && !isStoppingRef.current) {
                 try { recognition.start() } catch (e) { }
             }
         }
