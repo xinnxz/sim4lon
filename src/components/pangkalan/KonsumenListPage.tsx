@@ -13,7 +13,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -70,9 +70,15 @@ export default function KonsumenListPage() {
         withNik: 0,
     })
 
-    const fetchConsumers = async () => {
+    const fetchConsumers = async (silentRefresh = false) => {
+        // Save scroll position before fetch
+        const scrollPosition = window.scrollY
+
         try {
-            setIsLoading(true)
+            // Only show loading on initial load, not on refetch
+            if (!silentRefresh) {
+                setIsLoading(true)
+            }
             // Fetch consumers dan stats secara paralel
             const [response, statsData] = await Promise.all([
                 consumersApi.getAll(page, 10, search || undefined),
@@ -88,6 +94,13 @@ export default function KonsumenListPage() {
             setTotal(response.meta.total)
             // Set stats dari API
             setStats(statsData)
+
+            // Restore scroll position after data update (for silent refresh)
+            if (silentRefresh) {
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollPosition)
+                })
+            }
         } catch (error) {
             console.error('Failed to fetch consumers:', error)
             toast.error('Gagal memuat data konsumen')
@@ -163,7 +176,8 @@ export default function KonsumenListPage() {
                 toast.success('Konsumen berhasil ditambahkan')
             }
             setIsDialogOpen(false)
-            fetchConsumers()
+            // Silent refresh to preserve scroll position
+            fetchConsumers(true)
         } catch (error: any) {
             toast.error(error.message || 'Gagal menyimpan konsumen')
         } finally {
@@ -177,7 +191,8 @@ export default function KonsumenListPage() {
         try {
             await consumersApi.delete(consumer.id)
             toast.success('Konsumen berhasil dihapus')
-            fetchConsumers()
+            // Silent refresh to preserve scroll position
+            fetchConsumers(true)
         } catch (error: any) {
             toast.error(error.message || 'Gagal menghapus konsumen')
         }

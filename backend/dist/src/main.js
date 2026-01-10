@@ -32,19 +32,33 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const app_module_1 = require("./app.module");
 const bodyParser = __importStar(require("body-parser"));
+const compression_1 = __importDefault(require("compression"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.use((0, compression_1.default)({
+        filter: (req, res) => {
+            if (req.headers['x-no-compression']) {
+                return false;
+            }
+            return compression_1.default.filter(req, res);
+        },
+        threshold: 1024,
+    }));
     app.use(bodyParser.json({ limit: '5mb' }));
     app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
     app.enableCors({
         origin: process.env.CORS_ORIGIN || '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
+        maxAge: 86400,
     });
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new common_1.ValidationPipe({
@@ -58,6 +72,7 @@ async function bootstrap() {
     const port = process.env.PORT || 3000;
     await app.listen(port);
     console.log(`🚀 SIM4LON Backend is running on: http://localhost:${port}/api`);
+    console.log(`📦 Compression enabled for faster responses`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

@@ -20,6 +20,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import PangkalanSidebar from '@/components/pangkalan/PangkalanSidebar'
 import PangkalanHeaderSimple from '@/components/pangkalan/PangkalanHeaderSimple'
 import FloatingVoiceWidgetPangkalan from '@/components/pangkalan/FloatingVoiceWidgetPangkalan'
+import QueryProvider from '@/components/providers/QueryProvider'
 
 interface PangkalanSidebarLayoutProps {
     children: React.ReactNode
@@ -67,29 +68,31 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
     }, []);
 
     return (
-        <SidebarProvider
-            style={{ '--header-height': '64px' } as React.CSSProperties}
-        >
-            {/* Flex column: header on top, sidebar+content row below */}
-            <div className="pangkalan-scale flex flex-col min-h-screen w-full bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
-                {/* HEADER - Full width at top */}
-                <PangkalanHeaderSimple />
+        <QueryProvider>
+            <SidebarProvider
+                style={{ '--header-height': '64px' } as React.CSSProperties}
+            >
+                {/* Flex column: header on top, sidebar+content row below */}
+                <div className="pangkalan-scale flex flex-col min-h-screen w-full bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
+                    {/* HEADER - Full width at top */}
+                    <PangkalanHeaderSimple />
 
-                {/* SIDEBAR + CONTENT row */}
-                <div className="flex flex-1 w-full">
-                    <PangkalanSidebar />
-                    <SidebarInset className="flex flex-col flex-1">
-                        <main className="flex-1 p-2 lg:p-8">
-                            <div className="max-w-7xl mx-auto">
-                                {children}
-                            </div>
-                        </main>
-                    </SidebarInset>
+                    {/* SIDEBAR + CONTENT row */}
+                    <div className="flex flex-1 w-full">
+                        <PangkalanSidebar />
+                        <SidebarInset className="flex flex-col flex-1">
+                            <main className="flex-1 p-2 lg:p-8">
+                                <div className="max-w-7xl mx-auto">
+                                    {children}
+                                </div>
+                            </main>
+                        </SidebarInset>
+                    </div>
                 </div>
-            </div>
 
-            {/* Voice Assistant Widget */}
-            <FloatingVoiceWidgetPangkalan />
-        </SidebarProvider>
+                {/* Voice Assistant Widget */}
+                <FloatingVoiceWidgetPangkalan />
+            </SidebarProvider>
+        </QueryProvider>
     )
 }

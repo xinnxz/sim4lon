@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import AdminSidebar from '@/components/common/AdminSidebar'
 import AdminHeader from '@/components/common/AdminHeader'
 import FloatingVoiceWidget from '@/components/common/FloatingVoiceWidget'
+import QueryProvider from '@/components/providers/QueryProvider'
 
 interface AppSidebarLayoutProps {
   children: React.ReactNode
@@ -28,31 +29,34 @@ export default function AppSidebarLayout({
   headerHeight = '64px'
 }: AppSidebarLayoutProps) {
   return (
-    <SidebarProvider
-      style={{
-        '--header-height': headerHeight
-      } as React.CSSProperties}
-    >
-      {/* 
-        Flex column container wraps everything:
-        - Row 1: Header (full width)
-        - Row 2: Sidebar + Content (flex row)
-      */}
-      <div className="flex flex-col min-h-screen w-full">
-        {/* HEADER - Full width sticky at top */}
-        <AdminHeader />
+    <QueryProvider>
+      <SidebarProvider
+        style={{
+          '--header-height': headerHeight
+        } as React.CSSProperties}
+      >
+        {/* 
+          Flex column container wraps everything:
+          - Row 1: Header (full width)
+          - Row 2: Sidebar + Content (flex row)
+        */}
+        <div className="flex flex-col min-h-screen w-full">
+          {/* HEADER - Full width sticky at top */}
+          <AdminHeader />
 
-        {/* SIDEBAR + CONTENT row */}
-        <div className="flex flex-1 w-full">
-          <AdminSidebar />
-          <SidebarInset className="flex flex-col flex-1">
-            {children}
-          </SidebarInset>
+          {/* SIDEBAR + CONTENT row */}
+          <div className="flex flex-1 w-full">
+            <AdminSidebar />
+            <SidebarInset className="flex flex-col flex-1">
+              {children}
+            </SidebarInset>
+          </div>
         </div>
-      </div>
 
-      {/* FLOATING VOICE WIDGET - Voice Order Button */}
-      <FloatingVoiceWidget />
-    </SidebarProvider>
+        {/* FLOATING VOICE WIDGET - Voice Order Button */}
+        <FloatingVoiceWidget />
+      </SidebarProvider>
+    </QueryProvider>
   )
 }
+

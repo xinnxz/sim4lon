@@ -29,10 +29,10 @@ export declare class ConsumerOrderService {
             qty: number;
             total_amount: Decimal;
             price_per_unit: Decimal;
+            consumer_id: string | null;
             consumer_name: string | null;
             payment_status: import("@prisma/client").$Enums.consumer_payment_status;
             sale_date: Date;
-            consumer_id: string | null;
         })[];
         meta: {
             total: number;
@@ -68,10 +68,10 @@ export declare class ConsumerOrderService {
         qty: number;
         total_amount: Decimal;
         price_per_unit: Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     }>;
     create(pangkalanId: string, dto: CreateConsumerOrderDto): Promise<{
         consumers: {
@@ -91,10 +91,10 @@ export declare class ConsumerOrderService {
         qty: number;
         total_amount: Decimal;
         price_per_unit: Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     }>;
     update(id: string, pangkalanId: string, dto: UpdateConsumerOrderDto): Promise<{
         consumers: {
@@ -114,10 +114,10 @@ export declare class ConsumerOrderService {
         qty: number;
         total_amount: Decimal;
         price_per_unit: Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     }>;
     remove(id: string, pangkalanId: string): Promise<{
         message: string;
@@ -148,10 +148,10 @@ export declare class ConsumerOrderService {
         qty: number;
         total_amount: Decimal;
         price_per_unit: Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     })[]>;
     getChartData(pangkalanId: string): Promise<{
         day: string;

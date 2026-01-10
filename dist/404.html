@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Built with Astro">
+    <title>404 - Halaman Tidak Ditemukan | SIM4LON</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/logo-sim4lon-transparant-v2.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/logo-sim4lon-transparant-v2.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo-sim4lon-transparant-v2.png">
+    
+    <!-- Theme & Accent Color Persistence Script -->
+    <!-- Runs before render to prevent flash of unstyled content (FOUC) -->
+    <script>
+      (function() {
+        // Apply saved theme
+        const savedTheme = localStorage.getItem('theme');
+        const root = document.documentElement;
+        
+        if (savedTheme === 'dark') {
+          root.classList.add('dark');
+        } else if (savedTheme === 'light') {
+          root.classList.add('light');
+        } else {
+          // System preference
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            root.classList.add('dark');
+          } else {
+            root.classList.add('light');
+          }
+        }
+        
+        // Apply saved accent color
+        const savedAccent = localStorage.getItem('accentColor');
+        if (savedAccent) {
+          root.setAttribute('data-accent', savedAccent);
+        }
+      })();
+    </script>
+  <style>@keyframes float{0%,to{transform:translateY(0) rotate(0)}25%{transform:translateY(-8px) rotate(1deg)}50%{transform:translateY(-12px) rotate(0)}75%{transform:translateY(-8px) rotate(-1deg)}}
+</style>
+<link rel="stylesheet" href="/_astro/buat-pesanan.DelUS7XY.css"></head>
+  <body>
+    <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="2gXP5J" prefix="r0" component-url="/_astro/sonner.BIYIEuIP.js" component-export="Toaster" renderer-url="/_astro/client.D_bB9q83.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;Toaster&quot;,&quot;value&quot;:true}" await-children><section aria-label="Notifications alt+T" tabindex="-1" aria-live="polite" aria-relevant="additions text" aria-atomic="false"></section><!--astro:end--></astro-island>
+    
+  <div class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style="background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%, #ecfdf5 100%);" data-astro-cid-zetdm5md>
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-30" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);" data-astro-cid-zetdm5md></div>
+    <div class="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-25" style="background: radial-gradient(circle, rgba(20, 184, 166, 0.2) 0%, transparent 70%);" data-astro-cid-zetdm5md></div>
+    
+    <!-- Subtle pattern overlay -->
+    <div class="absolute inset-0 opacity-[0.015]" style="background-image: url('data:image/svg+xml,<svg width=" 60" height="&quot;60&quot;" viewBox="&quot;0" 0 60 60" xmlns="&quot;http://www.w3.org/2000/svg&quot;" data-astro-cid-zetdm5md><g fill="&quot;none&quot;" fill-rule="&quot;evenodd&quot;" data-astro-cid-zetdm5md><g fill="&quot;%23059669&quot;" fill-opacity="&quot;1&quot;" data-astro-cid-zetdm5md><path d="&quot;M36" 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z" data-astro-cid-zetdm5md></path></g></g></div>
+
+    <div class="relative z-10 text-center max-w-lg mx-auto" data-astro-cid-zetdm5md>
+      <!-- Custom Illustration with shadow -->
+      <div class="mb-8 relative" data-astro-cid-zetdm5md>
+        <div class="absolute inset-0 blur-3xl opacity-20 scale-75" style="background: radial-gradient(circle, #10b981 0%, transparent 70%);" data-astro-cid-zetdm5md></div>
+        <img src="/images/404-illustration.png" alt="Tabung LPG kebingungan" class="w-56 h-56 md:w-72 md:h-72 mx-auto object-contain relative z-10 drop-shadow-2xl" style="animation: float 4s ease-in-out infinite;" data-astro-cid-zetdm5md>
+      </div>
+
+      <!-- Error code badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 mb-6" data-astro-cid-zetdm5md>
+        <span class="text-sm font-semibold text-emerald-700" data-astro-cid-zetdm5md>Error 404</span>
+      </div>
+
+      <!-- Main heading -->
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-3" data-astro-cid-zetdm5md>
+        Halaman Tidak Ditemukan
+      </h1>
+
+      <!-- Description -->
+      <p class="text-slate-500 text-base md:text-lg mb-8 leading-relaxed max-w-md mx-auto" data-astro-cid-zetdm5md>
+        Waduh, sepertinya tabung LPG kita nyasar! 
+        Halaman yang kamu cari tidak ada atau sudah dipindahkan.
+      </p>
+
+      <!-- Action buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center mb-6" data-astro-cid-zetdm5md>
+        <a href="./dashboard-admin.html" class="group inline-flex items-center justify-center gap-2 px-6 py-3.5 text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-1" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.35);" data-astro-cid-zetdm5md>
+          <svg class="w-5 h-5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-cid-zetdm5md>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" data-astro-cid-zetdm5md></path>
+          </svg>
+          Kembali ke Dashboard
+        </a>
+        <button onclick="history.back()" class="group inline-flex items-center justify-center gap-2 px-6 py-3.5 text-slate-600 font-semibold bg-white border border-slate-200 rounded-xl transition-all duration-300 hover:border-emerald-300 hover:text-emerald-700 hover:-translate-y-1 hover:shadow-lg" data-astro-cid-zetdm5md>
+          <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-cid-zetdm5md>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" data-astro-cid-zetdm5md></path>
+          </svg>
+          Halaman Sebelumnya
+        </button>
+      </div>
+
+      <!-- Help section -->
+      <div class="pt-6 border-t border-slate-100" data-astro-cid-zetdm5md>
+        <p class="text-sm text-slate-400" data-astro-cid-zetdm5md>
+          Butuh bantuan? 
+          <a href="mailto:luthffahmi.alv@gmail.com" class="text-emerald-600 hover:text-emerald-700 font-medium hover:underline" data-astro-cid-zetdm5md>
+            Hubungi Administrator
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  </body></html>

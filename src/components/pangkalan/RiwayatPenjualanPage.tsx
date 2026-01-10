@@ -142,11 +142,20 @@ export default function RiwayatPenjualanPage() {
 
     const handleDelete = async (order: ConsumerOrder) => {
         if (!confirm('Hapus transaksi ini?')) return
+
+        // Save scroll position
+        const scrollPosition = window.scrollY
+
         try {
             await consumerOrdersApi.delete(order.id)
             toast.success('Transaksi dihapus')
-            fetchOrders(false)
+            await fetchOrders(false)
             fetchStats()
+
+            // Restore scroll position
+            requestAnimationFrame(() => {
+                window.scrollTo(0, scrollPosition)
+            })
         } catch (error: any) {
             toast.error(error.message || 'Gagal menghapus transaksi')
         }

@@ -22,10 +22,10 @@ export declare class ConsumerOrderController {
             qty: number;
             total_amount: import("@prisma/client/runtime/library").Decimal;
             price_per_unit: import("@prisma/client/runtime/library").Decimal;
+            consumer_id: string | null;
             consumer_name: string | null;
             payment_status: import("@prisma/client").$Enums.consumer_payment_status;
             sale_date: Date;
-            consumer_id: string | null;
         })[];
         meta: {
             total: number;
@@ -60,10 +60,10 @@ export declare class ConsumerOrderController {
         qty: number;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     })[]>;
     getChartData(req: any): Promise<{
         day: string;
@@ -100,10 +100,10 @@ export declare class ConsumerOrderController {
         qty: number;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     }>;
     create(dto: CreateConsumerOrderDto, req: any): Promise<{
         consumers: {
@@ -123,10 +123,10 @@ export declare class ConsumerOrderController {
         qty: number;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     }>;
     update(id: string, dto: UpdateConsumerOrderDto, req: any): Promise<{
         consumers: {
@@ -146,10 +146,10 @@ export declare class ConsumerOrderController {
         qty: number;
         total_amount: import("@prisma/client/runtime/library").Decimal;
         price_per_unit: import("@prisma/client/runtime/library").Decimal;
+        consumer_id: string | null;
         consumer_name: string | null;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
         sale_date: Date;
-        consumer_id: string | null;
     }>;
     remove(id: string, req: any): Promise<{
         message: string;
