@@ -29,6 +29,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import {
@@ -45,6 +52,10 @@ import { toast } from 'sonner'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
 import PageHeader from '@/components/common/PageHeader'
 
+// Page size options for pagination
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
+type PageSize = typeof PAGE_SIZE_OPTIONS[number]
+
 export default function PangkalanListPage() {
   // State untuk data
   const [pangkalanList, setPangkalanList] = useState<Pangkalan[]>([])
@@ -52,6 +63,7 @@ export default function PangkalanListPage() {
   const [totalItems, setTotalItems] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [pageSize, setPageSize] = useState<PageSize>(10) // Default 10 items per page
   // Stats counts (dari backend - selalu menampilkan total sebenarnya)
   const [aktivCount, setAktivCount] = useState(0)
   const [nonaktifCount, setNonaktifCount] = useState(0)
@@ -130,7 +142,7 @@ export default function PangkalanListPage() {
     try {
       setIsLoading(true)
       const isActive = statusFilter === 'semua' ? undefined : statusFilter === 'aktif'
-      const response = await pangkalanApi.getAll(currentPage, 10, searchTerm || undefined, isActive)
+      const response = await pangkalanApi.getAll(currentPage, pageSize, searchTerm || undefined, isActive)
 
       setPangkalanList(response.data)
       setTotalItems(response.meta.totalAll || response.meta.total)
@@ -146,10 +158,10 @@ export default function PangkalanListPage() {
     }
   }
 
-  // Fetch data saat component mount atau filter berubah
+  // Fetch data saat component mount atau filter/pageSize berubah
   useEffect(() => {
     fetchPangkalan()
-  }, [currentPage, statusFilter])
+  }, [currentPage, statusFilter, pageSize])
 
   // Debounce search
   useEffect(() => {
@@ -482,34 +494,73 @@ export default function PangkalanListPage() {
             )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-border/50">
-              <p className="text-sm text-muted-foreground">
-                Halaman {currentPage} dari {totalPages} • Total {totalItems} pangkalan
+          {/* Pagination - Best Practice with Page Size Selector */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border/50">
+            {/* Left: Info & Page Size Selector */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 text-sm">
+              <p className="text-muted-foreground">
+                Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalItems)} dari {totalItems}
               </p>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Tampilkan</span>
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(value) => {
+                    setPageSize(Number(value) as PageSize)
+                    setCurrentPage(1) // Reset to first page when changing page size
+                  }}
+                >
+                  <SelectTrigger className="w-[70px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground">per halaman</span>
+              </div>
+            </div>
+
+            {/* Right: Page Navigation */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="hidden sm:flex h-8 w-8 p-0"
+                  title="Halaman Pertama"
+                >
+                  <SafeIcon name="ChevronsLeft" className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => p - 1)}
-                  className="hover:bg-blue-50"
+                  className="h-8"
                 >
-                  <SafeIcon name="ChevronLeft" className="h-4 w-4 mr-1" />
-                  Prev
+                  <SafeIcon name="ChevronLeft" className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Prev</span>
                 </Button>
+
+                {/* Page Numbers */}
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum: number;
+                    let pageNum: number
                     if (totalPages <= 5) {
-                      pageNum = i + 1;
+                      pageNum = i + 1
                     } else if (currentPage <= 3) {
-                      pageNum = i + 1;
+                      pageNum = i + 1
                     } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
+                      pageNum = totalPages - 4 + i
                     } else {
-                      pageNum = currentPage - 2 + i;
+                      pageNum = currentPage - 2 + i
                     }
                     return (
                       <Button
@@ -517,26 +568,40 @@ export default function PangkalanListPage() {
                         variant={currentPage === pageNum ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
-                        className={currentPage === pageNum ? 'bg-blue-500 hover:bg-blue-600' : ''}
+                        className={`h-8 w-8 p-0 ${currentPage === pageNum
+                            ? 'bg-primary hover:bg-primary/90'
+                            : 'hover:bg-muted'
+                          }`}
                       >
                         {pageNum}
                       </Button>
-                    );
+                    )
                   })}
                 </div>
+
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => p + 1)}
-                  className="hover:bg-blue-50"
+                  className="h-8"
                 >
-                  Next
-                  <SafeIcon name="ChevronRight" className="h-4 w-4 ml-1" />
+                  <span className="hidden sm:inline">Next</span>
+                  <SafeIcon name="ChevronRight" className="h-4 w-4 sm:ml-1" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="hidden sm:flex h-8 w-8 p-0"
+                  title="Halaman Terakhir"
+                >
+                  <SafeIcon name="ChevronsRight" className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
 
