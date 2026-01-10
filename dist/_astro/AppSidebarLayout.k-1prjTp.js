@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { k as companyProfileApi, S as SafeIcon, B as Button } from "./AuthGuard.Cq_0lvUi.js";
 import { f as formatCurrency, A as AdminHeader } from "./currency._AzJKMQz.js";
 import { toast } from "sonner";
-import { Q as QueryProvider, C as ConfirmDialogProvider } from "./AdminFooter.DqQLkbS3.js";
+import { Q as QueryProvider, C as ConfirmDialogProvider } from "./AdminFooter.DVGEP8G7.js";
 const PROFILE_CACHE_KEY = "sim4lon_user_profile";
 const menuGroups = [
   {

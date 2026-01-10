@@ -1,5 +1,7 @@
 import { jsx, jsxs } from "react/jsx-runtime";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { createContext, useState, useCallback, useEffect } from "react";
 import { D as Dialog, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, k as DialogFooter } from "./ProtectedDashboard.DWDsm_1Q.js";
 import { S as SafeIcon, B as Button } from "./AuthGuard.Cq_0lvUi.js";
@@ -23,7 +25,34 @@ const queryClient = new QueryClient({
     }
   }
 });
+const persister = typeof window !== "undefined" ? createSyncStoragePersister({
+  storage: window.localStorage,
+  key: "sim4lon-cache",
+  // Serialize with compression (smaller storage)
+  serialize: (data) => JSON.stringify(data),
+  deserialize: (data) => JSON.parse(data)
+}) : null;
 function QueryProvider({ children }) {
+  if (persister) {
+    return /* @__PURE__ */ jsx(
+      PersistQueryClientProvider,
+      {
+        client: queryClient,
+        persistOptions: {
+          persister,
+          // Cache expires after 24 hours
+          maxAge: 24 * 60 * 60 * 1e3,
+          // Don't persist error states
+          dehydrateOptions: {
+            shouldDehydrateQuery: (query) => {
+              return query.state.status === "success";
+            }
+          }
+        },
+        children
+      }
+    );
+  }
   return /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children });
 }
 const ConfirmDialogContext = createContext(null);

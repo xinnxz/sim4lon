@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { n as Sidebar, o as SidebarContent, p as SidebarGroup, q as SidebarGroupLabel, r as SidebarGroupContent, s as SidebarMenu, t as SidebarMenuItem, u as SidebarFooter, e as DropdownMenu, f as DropdownMenuTrigger, A as Avatar, m as AvatarImage, l as AvatarFallback, g as DropdownMenuContent, v as DropdownMenuLabel, w as DropdownMenuSeparator, h as DropdownMenuItem, x as useSidebar, B as Badge, y as SidebarProvider, z as SidebarInset } from "./ProtectedDashboard.DWDsm_1Q.js";
 import { S as SafeIcon, B as Button, e as authApi, j as clearCachedProfile, t as consumersApi, m as consumerOrdersApi } from "./AuthGuard.Cq_0lvUi.js";
 import { toast } from "sonner";
-import { Q as QueryProvider, C as ConfirmDialogProvider } from "./AdminFooter.DqQLkbS3.js";
+import { Q as QueryProvider, C as ConfirmDialogProvider } from "./AdminFooter.DVGEP8G7.js";
 const menuItems = [
   {
     name: "Dashboard",
