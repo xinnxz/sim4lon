@@ -70,6 +70,23 @@ export default function KonsumenListPage() {
         withNik: 0,
     })
 
+    // Preserve scroll position when dialog opens/closes
+    const scrollPositionRef = useRef<number>(0)
+
+    // Handler for dialog open/close that preserves scroll
+    const handleDialogOpenChange = (open: boolean) => {
+        if (open) {
+            // Save scroll position when opening
+            scrollPositionRef.current = window.scrollY
+        } else {
+            // Restore scroll position when closing
+            requestAnimationFrame(() => {
+                window.scrollTo(0, scrollPositionRef.current)
+            })
+        }
+        setIsDialogOpen(open)
+    }
+
     const fetchConsumers = async (silentRefresh = false) => {
         // Save scroll position before fetch
         const scrollPosition = window.scrollY
@@ -230,7 +247,7 @@ export default function KonsumenListPage() {
                         </p>
                     </div>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
                     <DialogTrigger asChild>
                         <Button
                             onClick={() => handleOpenDialog()}
