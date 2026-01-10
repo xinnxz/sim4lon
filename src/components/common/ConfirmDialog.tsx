@@ -39,11 +39,25 @@ interface ConfirmDialogContextType {
 
 const ConfirmDialogContext = createContext<ConfirmDialogContextType | null>(null)
 
-export function useConfirmDialog() {
+/**
+ * useConfirmDialog - Hook untuk menampilkan custom confirmation dialog
+ * 
+ * Fallback ke browser confirm() jika dipanggil di luar ConfirmDialogProvider
+ * (misalnya saat SSR build atau halaman tanpa provider)
+ */
+export function useConfirmDialog(): ConfirmDialogContextType {
     const context = useContext(ConfirmDialogContext)
+
+    // Fallback: gunakan browser confirm() jika tidak ada provider
     if (!context) {
-        throw new Error('useConfirmDialog must be used within ConfirmDialogProvider')
+        return {
+            confirm: async (options: ConfirmDialogOptions) => {
+                // Fallback ke browser confirm
+                return window.confirm(`${options.title}\n\n${options.message}`)
+            }
+        }
     }
+
     return context
 }
 
@@ -103,14 +117,14 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDestructive
-                                    ? 'bg-red-100 dark:bg-red-900/30'
-                                    : 'bg-blue-100 dark:bg-blue-900/30'
+                                ? 'bg-red-100 dark:bg-red-900/30'
+                                : 'bg-blue-100 dark:bg-blue-900/30'
                                 }`}>
                                 <SafeIcon
                                     name={options?.icon || (isDestructive ? 'AlertTriangle' : 'HelpCircle')}
                                     className={`h-5 w-5 ${isDestructive
-                                            ? 'text-red-600 dark:text-red-400'
-                                            : 'text-blue-600 dark:text-blue-400'
+                                        ? 'text-red-600 dark:text-red-400'
+                                        : 'text-blue-600 dark:text-blue-400'
                                         }`}
                                 />
                             </div>
@@ -131,8 +145,8 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
                         <Button
                             onClick={handleConfirm}
                             className={`rounded-xl ${isDestructive
-                                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                                    : 'bg-blue-600 hover:bg-blue-700'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-blue-600 hover:bg-blue-700'
                                 }`}
                         >
                             {options?.confirmText || 'Ya'}

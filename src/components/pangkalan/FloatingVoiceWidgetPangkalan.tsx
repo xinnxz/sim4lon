@@ -105,6 +105,7 @@ export default function FloatingVoiceWidgetPangkalan() {
     const [isOpen, setIsOpen] = useState(false)
     const [status, setStatus] = useState<Status>('idle')
     const [transcript, setTranscript] = useState('')
+    const [interimTranscript, setInterimTranscript] = useState('')  // Live text saat berbicara
     const [parsedSale, setParsedSale] = useState<ParsedSale | null>(null)
     const [error, setError] = useState('')
     const [consumers, setConsumers] = useState<Consumer[]>([])
@@ -151,14 +152,23 @@ export default function FloatingVoiceWidgetPangkalan() {
 
         recognition.onresult = (event: any) => {
             let finalTranscript = ''
+            let interim = ''
+
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 const result = event.results[i]
                 if (result.isFinal) {
                     finalTranscript += result[0].transcript
+                } else {
+                    interim += result[0].transcript
                 }
             }
+
+            // Update interim transcript (live text)
+            setInterimTranscript(interim)
+
             if (finalTranscript) {
                 setTranscript(prev => prev + ' ' + finalTranscript)
+                setInterimTranscript('')  // Clear interim when we have final
                 // Reset silence timer on speech
                 lastSpeechTimeRef.current = Date.now()
             }
@@ -191,6 +201,7 @@ export default function FloatingVoiceWidgetPangkalan() {
     const startListening = useCallback(() => {
         setStatus('listening')
         setTranscript('')
+        setInterimTranscript('')
         setError('')
         setParsedSale(null)
         lastSpeechTimeRef.current = Date.now()
@@ -201,13 +212,13 @@ export default function FloatingVoiceWidgetPangkalan() {
             console.error('Failed to start recognition:', e)
         }
 
-        // Auto-stop after 4 seconds of silence
+        // Auto-stop after 2 seconds of silence (faster response)
         silenceTimeoutRef.current = setInterval(() => {
             const now = Date.now()
             const silenceDuration = now - lastSpeechTimeRef.current
 
-            // If we have some transcript and 4 seconds of silence, auto-stop
-            if (silenceDuration >= 4000) {
+            // If we have some transcript and 2 seconds of silence, auto-stop
+            if (silenceDuration >= 2000) {
                 if (silenceTimeoutRef.current) {
                     clearInterval(silenceTimeoutRef.current)
                     silenceTimeoutRef.current = null
@@ -401,13 +412,18 @@ export default function FloatingVoiceWidgetPangkalan() {
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Enter' && isOpen) {
+            if (!isOpen) return
+
+            if (e.key === 'Enter') {
                 e.preventDefault()
                 if (status === 'idle') startListening()
                 else if (status === 'listening') stopAndParse()
                 else if (status === 'confirming') confirmAndSave()
                 else if (status === 'error') startListening()
                 else if (status === 'success') handleClose()
+            } else if (e.key === 'Escape') {
+                e.preventDefault()
+                handleClose()
             }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -463,8 +479,9 @@ export default function FloatingVoiceWidgetPangkalan() {
                                 {status === 'error' && 'Gagal'}
                             </h2>
                             <p className="text-xs text-zinc-500">
-                                {status === 'listening' && '↵ Enter untuk selesai'}
-                                {status === 'confirming' && '↵ Enter untuk konfirmasi'}
+                                {status === 'listening' && '↵ Enter selesai • Esc batalkan'}
+                                {status === 'confirming' && '↵ Enter konfirmasi • Esc batalkan'}
+                                {status === 'error' && '↵ Enter coba lagi • Esc tutup'}
                                 {isLoadingConsumers && 'Memuat data konsumen...'}
                             </p>
                         </div>
@@ -493,11 +510,18 @@ export default function FloatingVoiceWidgetPangkalan() {
                                     </div>
                                 </div>
 
-                                {/* Transcript */}
+                                {/* Live Transcript - shows both final and interim */}
                                 <div className="min-h-[50px] px-4">
-                                    <p className={`text-lg ${transcript ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 italic'}`}>
-                                        {transcript || 'Bicara sekarang...'}
-                                    </p>
+                                    {(transcript || interimTranscript) ? (
+                                        <p className="text-lg text-zinc-900 dark:text-white">
+                                            {transcript}
+                                            {interimTranscript && (
+                                                <span className="text-blue-500 opacity-70">{interimTranscript}</span>
+                                            )}
+                                        </p>
+                                    ) : (
+                                        <p className="text-lg text-zinc-400 italic">Bicara sekarang...</p>
+                                    )}
                                 </div>
 
                                 {/* Tips */}
