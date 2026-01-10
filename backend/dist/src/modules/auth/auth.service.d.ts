@@ -43,7 +43,6 @@ export declare class AuthService {
         phone: string | null;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;
-        pangkalan_id: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -54,6 +53,7 @@ export declare class AuthService {
             phone: string | null;
             address: string;
         } | null;
+        pangkalan_id: string | null;
     }>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
         message: string;
@@ -68,6 +68,7 @@ export declare class AuthService {
             is_active: boolean;
             created_at: Date;
             updated_at: Date;
+            pangkalan_id: string | null;
         };
     }>;
     changePassword(userId: string, oldPassword: string, newPassword: string): Promise<{

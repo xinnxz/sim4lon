@@ -5,7 +5,7 @@
  * Halaman profil untuk melihat dan edit data user dan info pangkalan.
  * Termasuk fitur:
  * - Edit nama dan nomor telepon
- * - Upload foto profil
+ * - Upload foto profil dengan CROP
  * - Ubah password
  */
 
@@ -27,6 +27,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import SafeIcon from '@/components/common/SafeIcon'
+import AvatarCropperModal from '@/components/profil-admin/AvatarCropperModal'
 import { authApi, uploadApi, type UserProfile } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -43,6 +44,12 @@ export default function ProfilPangkalanPage() {
         phone: '',
     })
 
+    // Avatar crop state
+    const [cropperOpen, setCropperOpen] = useState(false)
+    const [selectedImage, setSelectedImage] = useState<string>('')
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
     // Change password modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false)
     const [passwordForm, setPasswordForm] = useState({
@@ -51,8 +58,6 @@ export default function ProfilPangkalanPage() {
         confirmPassword: '',
     })
     const [isChangingPassword, setIsChangingPassword] = useState(false)
-
-    const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         fetchProfile()
@@ -89,6 +94,7 @@ export default function ProfilPangkalanPage() {
             await fetchProfile()
 
             setIsEditing(false)
+            setAvatarPreview(null) // Clear local preview
             toast.success('Profil berhasil diperbarui')
         } catch (error: any) {
             toast.error(error.message || 'Gagal memperbarui profil')
@@ -97,7 +103,8 @@ export default function ProfilPangkalanPage() {
         }
     }
 
-    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Handle file selection - open cropper
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
 
@@ -113,10 +120,31 @@ export default function ProfilPangkalanPage() {
             return
         }
 
+        // Read file and open cropper
+        const reader = new FileReader()
+        reader.onload = () => {
+            setSelectedImage(reader.result as string)
+            setCropperOpen(true)
+        }
+        reader.readAsDataURL(file)
+
+        // Clear input to allow re-selecting same file
+        e.target.value = ''
+    }
+
+    // Handle cropped image - show preview then upload
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        // Create local preview URL immediately
+        const localPreviewUrl = URL.createObjectURL(croppedBlob)
+        setAvatarPreview(localPreviewUrl)
+
+        setIsUploading(true)
         try {
-            setIsUploading(true)
-            const uploadResult = await uploadApi.uploadAvatar(file)
-            await authApi.updateProfile({ avatar_url: uploadResult.url })
+            // Convert blob to File
+            const file = new File([croppedBlob], 'avatar.jpg', { type: 'image/jpeg' })
+
+            const result = await uploadApi.uploadAvatar(file)
+            await authApi.updateProfile({ avatar_url: result.url })
 
             // Re-fetch profile to get complete data
             await fetchProfile()
@@ -124,12 +152,10 @@ export default function ProfilPangkalanPage() {
             toast.success('Foto profil berhasil diperbarui')
         } catch (error: any) {
             toast.error(error.message || 'Gagal upload foto')
+            // Clear preview on error
+            setAvatarPreview(null)
         } finally {
             setIsUploading(false)
-            // Clear input to allow re-selecting same file
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''
-            }
         }
     }
 
@@ -176,10 +202,12 @@ export default function ProfilPangkalanPage() {
             .slice(0, 2)
     }
 
-    const getAvatarUrl = (url: string | null | undefined) => {
-        if (!url) return undefined
-        if (url.startsWith('http')) return url
-        return `${API_BASE_URL}/api${url}`
+    const getAvatarUrl = () => {
+        // Priority: local preview > profile avatar
+        if (avatarPreview) return avatarPreview
+        if (!profile?.avatar_url) return undefined
+        if (profile.avatar_url.startsWith('http')) return profile.avatar_url
+        return `${API_BASE_URL}/api${profile.avatar_url}`
     }
 
     if (isLoading) {
@@ -209,7 +237,7 @@ export default function ProfilPangkalanPage() {
                         <div className="flex items-center gap-4">
                             <div className="relative">
                                 <Avatar className="h-20 w-20">
-                                    <AvatarImage src={getAvatarUrl(profile?.avatar_url)} />
+                                    <AvatarImage src={getAvatarUrl()} />
                                     <AvatarFallback className="bg-blue-100 text-blue-700 text-xl">
                                         {profile ? getInitials(profile.name) : 'P'}
                                     </AvatarFallback>
@@ -227,7 +255,7 @@ export default function ProfilPangkalanPage() {
                                             ref={fileInputRef}
                                             type="file"
                                             accept="image/jpeg,image/png,image/webp"
-                                            onChange={handleAvatarChange}
+                                            onChange={handleFileSelect}
                                             className="hidden"
                                             disabled={isUploading}
                                         />
@@ -269,6 +297,7 @@ export default function ProfilPangkalanPage() {
                                     </Button>
                                     <Button variant="outline" onClick={() => {
                                         setIsEditing(false)
+                                        setAvatarPreview(null)
                                         // Reset form to original values
                                         setFormData({
                                             name: profile?.name || '',
@@ -335,6 +364,14 @@ export default function ProfilPangkalanPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Avatar Cropper Modal */}
+            <AvatarCropperModal
+                open={cropperOpen}
+                onOpenChange={setCropperOpen}
+                imageSrc={selectedImage}
+                onCropComplete={handleCropComplete}
+            />
 
             {/* Change Password Modal */}
             <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>

@@ -179,6 +179,12 @@ export class AuthService {
     }
 
     async updateProfile(userId: string, dto: UpdateProfileDto) {
+        // First get user to check role and pangkalan_id
+        const existingUser = await this.prisma.users.findUnique({
+            where: { id: userId },
+            select: { role: true, pangkalan_id: true },
+        });
+
         const user = await this.prisma.users.update({
             where: { id: userId },
             data: {
@@ -198,8 +204,23 @@ export class AuthService {
                 is_active: true,
                 created_at: true,
                 updated_at: true,
+                pangkalan_id: true,
             },
         });
+
+        // Auto-sync to pangkalans table if user is PANGKALAN
+        if (existingUser?.role === 'PANGKALAN' && existingUser?.pangkalan_id) {
+            const pangkalanUpdateData: any = {};
+            if (dto.name) pangkalanUpdateData.pic_name = dto.name;
+            if (dto.phone) pangkalanUpdateData.phone = dto.phone;
+
+            if (Object.keys(pangkalanUpdateData).length > 0) {
+                await this.prisma.pangkalans.update({
+                    where: { id: existingUser.pangkalan_id },
+                    data: pangkalanUpdateData,
+                });
+            }
+        }
 
         return {
             message: 'Profil berhasil diperbarui',

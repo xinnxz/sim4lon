@@ -183,6 +183,10 @@ let AuthService = class AuthService {
         return user;
     }
     async updateProfile(userId, dto) {
+        const existingUser = await this.prisma.users.findUnique({
+            where: { id: userId },
+            select: { role: true, pangkalan_id: true },
+        });
         const user = await this.prisma.users.update({
             where: { id: userId },
             data: {
@@ -202,8 +206,22 @@ let AuthService = class AuthService {
                 is_active: true,
                 created_at: true,
                 updated_at: true,
+                pangkalan_id: true,
             },
         });
+        if (existingUser?.role === 'PANGKALAN' && existingUser?.pangkalan_id) {
+            const pangkalanUpdateData = {};
+            if (dto.name)
+                pangkalanUpdateData.pic_name = dto.name;
+            if (dto.phone)
+                pangkalanUpdateData.phone = dto.phone;
+            if (Object.keys(pangkalanUpdateData).length > 0) {
+                await this.prisma.pangkalans.update({
+                    where: { id: existingUser.pangkalan_id },
+                    data: pangkalanUpdateData,
+                });
+            }
+        }
         return {
             message: 'Profil berhasil diperbarui',
             user,
