@@ -211,6 +211,7 @@ export default function FloatingVoiceWidgetPangkalan() {
         setError('')
         setParsedSale(null)
         lastSpeechTimeRef.current = Date.now()
+        isStoppingRef.current = false  // Reset stopping flag for new session
 
         try {
             recognitionRef.current?.start()
@@ -233,6 +234,7 @@ export default function FloatingVoiceWidgetPangkalan() {
                 setTranscript(prev => {
                     if (prev.trim()) {
                         // Trigger stop and parse
+                        isStoppingRef.current = true  // Prevent restart in onend
                         setTimeout(() => {
                             try { recognitionRef.current?.stop() } catch (e) { }
                             setStatus('processing')
@@ -251,6 +253,7 @@ export default function FloatingVoiceWidgetPangkalan() {
             silenceTimeoutRef.current = null
         }
 
+        isStoppingRef.current = true  // Prevent restart in onend
         try { recognitionRef.current?.stop() } catch (e) { }
         setStatus('processing')
 
@@ -398,6 +401,7 @@ export default function FloatingVoiceWidgetPangkalan() {
             silenceTimeoutRef.current = null
         }
 
+        isStoppingRef.current = true  // Prevent restart in onend
         try { recognitionRef.current?.stop() } catch (e) { }
         setStatus('idle')
         setTranscript('')
