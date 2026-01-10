@@ -52,6 +52,10 @@ export function useConfirmDialog(): ConfirmDialogContextType {
     if (!context) {
         return {
             confirm: async (options: ConfirmDialogOptions) => {
+                // SSR check - return false if no window
+                if (typeof window === 'undefined') {
+                    return false
+                }
                 // Fallback ke browser confirm
                 return window.confirm(`${options.title}\n\n${options.message}`)
             }

@@ -37,7 +37,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
-import { useConfirmDialog, createDeleteConfirmation } from '@/components/common/ConfirmDialog'
 import { consumersApi, type Consumer, type ConsumerType } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -70,9 +69,6 @@ export default function KonsumenListPage() {
         warung: 0,
         withNik: 0,
     })
-
-    // Custom confirm dialog
-    const { confirm } = useConfirmDialog()
 
     const fetchConsumers = async (silentRefresh = false) => {
         // Save scroll position before fetch
@@ -190,8 +186,7 @@ export default function KonsumenListPage() {
     }
 
     const handleDelete = async (consumer: Consumer) => {
-        const confirmed = await confirm(createDeleteConfirmation(consumer.name))
-        if (!confirmed) return
+        if (!confirm(`Hapus konsumen "${consumer.name}"?`)) return
 
         try {
             await consumersApi.delete(consumer.id)
