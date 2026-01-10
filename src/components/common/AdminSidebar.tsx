@@ -131,8 +131,7 @@ export default function AdminSidebar() {
   // Mapping sub-pages to their parent menu item
   // Key: parent menu path, Value: array of sub-page patterns
   const subPageMapping: Record<string, string[]> = {
-    'daftar-pesanan': ['buat-pesanan', 'detail-pesanan', 'catat-pembayaran', 'nota-pembayaran', 'status-pembayaran'],
-    'stok-lpg': ['pemakaian-stok'],
+    'daftar-pesanan': ['buat-pesanan', 'detail-pesanan', 'catat-pembayaran', 'nota-pembayaran'],
     'daftar-pangkalan': ['detail-edit-pangkalan'],
     'daftar-pengguna': ['tambah-pengguna'],
     'dashboard-admin': [],
