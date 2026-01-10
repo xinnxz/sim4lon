@@ -43,7 +43,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { name: 'Dashboard', href: './dashboard-admin.html', icon: 'LayoutDashboard' },
       { name: 'Pesanan', href: './daftar-pesanan.html', icon: 'ShoppingCart' },
-      { name: 'Stok LPG', href: './ringkasan-stok.html', icon: 'Package' },
+      { name: 'Stok LPG', href: './stok-lpg.html', icon: 'Package' },
       { name: 'Laporan', href: '/laporan', icon: 'BarChart3', adminOnly: true },
     ]
   },
@@ -132,7 +132,7 @@ export default function AdminSidebar() {
   // Key: parent menu path, Value: array of sub-page patterns
   const subPageMapping: Record<string, string[]> = {
     'daftar-pesanan': ['buat-pesanan', 'detail-pesanan', 'catat-pembayaran', 'nota-pembayaran', 'status-pembayaran'],
-    'ringkasan-stok': ['pemakaian-stok'],
+    'stok-lpg': ['pemakaian-stok'],
     'daftar-pangkalan': ['detail-edit-pangkalan'],
     'daftar-pengguna': ['tambah-pengguna'],
     'dashboard-admin': [],

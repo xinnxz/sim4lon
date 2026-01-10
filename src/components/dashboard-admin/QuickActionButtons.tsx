@@ -18,11 +18,11 @@ const quickActions = [
     href: './tambah-pangkalan.html',
     variant: 'outline' as const
   },
-{
+  {
     title: 'Update Stok',
     description: 'Perbarui stok',
     icon: 'Plus',
-    href: './ringkasan-stok.html',
+    href: './stok-lpg.html',
     variant: 'outline' as const
   },
   {

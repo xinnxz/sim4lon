@@ -1,0 +1,16 @@
+[2m07:17:19[22m [34m[vite][39m Forced re-optimization of dependencies
+[2m07:17:19[22m [34m[content][39m Syncing content
+[2m07:17:19[22m [34m[content][39m Synced content
+[2m07:17:19[22m [34m[types][39m Generated [2m174ms[22m
+[2m07:17:19[22m [34m[build][39m output: [34m"static"[39m
+[2m07:17:19[22m [34m[build][39m mode: [34m"static"[39m
+[2m07:17:19[22m [34m[build][39m directory: [34mE:\DATA\Ngoding\sim4lon\dist\[39m
+[2m07:17:19[22m [34m[build][39m Collecting build info...
+[2m07:17:19[22m [34m[build][39m [32mΓ£ô Completed in 270ms.[39m
+[2m07:17:19[22m [34m[build][39m Building static entrypoints...
+07:17:21 [ERROR] [vite] Γ£ù Build failed in 1.52s
+[vite:load-fallback] Could not load /src/components/pemakaian-stok/PemakaianStokContent.tsx (imported by src/pages/pemakaian-stok.astro): ENOENT: no such file or directory, open 'E:\src\components\pemakaian-stok\PemakaianStokContent.tsx'
+  Stack trace:
+    at async open (node:internal/fs/promises:642:25)
+    at async Object.handler (file:///E:/DATA/Ngoding/sim4lon/node_modules/astro/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:45872:27)
+    at async file:///E:/DATA/Ngoding/sim4lon/node_modules/rollup/dist/es/shared/node-entry.js:21333:33

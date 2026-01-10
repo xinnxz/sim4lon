@@ -161,7 +161,7 @@ export class NotificationService {
                     message: `${productName} HABIS! Segera lakukan restock.`,
                     icon: 'AlertOctagon',
                     priority: 'critical',
-                    link: '/ringkasan-stok',
+                    link: '/stok-lpg',
                     time: 'Sekarang',
                     created_at: new Date(),
                 });
@@ -173,7 +173,7 @@ export class NotificationService {
                     message: `${productName} tersisa ${currentStock} tabung`,
                     icon: 'AlertTriangle',
                     priority: 'high',
-                    link: '/ringkasan-stok',
+                    link: '/stok-lpg',
                     time: 'Sekarang',
                     created_at: new Date(),
                 });
@@ -185,7 +185,7 @@ export class NotificationService {
                     message: `${productName} tersisa ${currentStock} tabung`,
                     icon: 'AlertCircle',
                     priority: 'medium',
-                    link: '/ringkasan-stok',
+                    link: '/stok-lpg',
                     time: 'Sekarang',
                     created_at: new Date(),
                 });
