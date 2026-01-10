@@ -41,7 +41,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'Menu Utama',
     items: [
-      { name: 'Dashboard', href: './dashboard-admin.html', icon: 'LayoutDashboard' },
+      { name: 'Dashboard', href: './dashboard.html', icon: 'LayoutDashboard' },
       { name: 'Pesanan', href: './daftar-pesanan.html', icon: 'ShoppingCart' },
       { name: 'Stok LPG', href: './stok-lpg.html', icon: 'Package' },
       { name: 'Laporan', href: '/laporan', icon: 'BarChart3', adminOnly: true },
@@ -134,7 +134,7 @@ export default function AdminSidebar() {
     'daftar-pesanan': ['buat-pesanan', 'detail-pesanan', 'catat-pembayaran', 'nota-pembayaran'],
     'daftar-pangkalan': ['detail-edit-pangkalan'],
     'daftar-pengguna': ['tambah-pengguna'],
-    'dashboard-admin': [],
+    'dashboard': [],
   }
 
   // Check if current page should highlight a specific menu item

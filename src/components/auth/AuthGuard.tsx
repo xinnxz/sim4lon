@@ -44,11 +44,11 @@ interface AuthGuardProps {
  */
 function getDashboardByRole(role: string): string {
     const dashboardRoutes: Record<string, string> = {
-        'ADMIN': '/dashboard-admin',
-        'OPERATOR': '/dashboard-admin',
+        'ADMIN': '/dashboard',
+        'OPERATOR': '/dashboard',
         'PANGKALAN': '/pangkalan/dashboard',
     };
-    return dashboardRoutes[role] || '/dashboard-admin';
+    return dashboardRoutes[role] || '/dashboard';
 }
 
 /**

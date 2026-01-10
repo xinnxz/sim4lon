@@ -38,11 +38,11 @@ export default function LoginForm() {
 
           // Token valid, redirect ke dashboard berdasarkan role
           const dashboardRoutes: Record<string, string> = {
-            'ADMIN': '/dashboard-admin',
-            'OPERATOR': '/dashboard-admin',
+            'ADMIN': '/dashboard',
+            'OPERATOR': '/dashboard',
             'PANGKALAN': '/pangkalan/dashboard',
           };
-          const redirectUrl = dashboardRoutes[user.role] || '/dashboard-admin';
+          const redirectUrl = dashboardRoutes[user.role] || '/dashboard';
           window.location.href = redirectUrl;
         } catch (error) {
           // Token tidak valid, hapus dan biarkan user login ulang
@@ -81,11 +81,11 @@ export default function LoginForm() {
 
       // Redirect based on role
       const dashboardRoutes: Record<string, string> = {
-        'ADMIN': '/dashboard-admin',
-        'OPERATOR': '/dashboard-admin',
+        'ADMIN': '/dashboard',
+        'OPERATOR': '/dashboard',
         'PANGKALAN': '/pangkalan/dashboard',
       };
-      const redirectUrl = dashboardRoutes[response.user.role] || '/dashboard-admin';
+      const redirectUrl = dashboardRoutes[response.user.role] || '/dashboard';
 
       window.location.href = redirectUrl
     } catch (err: any) {

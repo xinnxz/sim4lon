@@ -2448,7 +2448,7 @@ Keterangan: Halaman ini menampilkan dashboard khusus untuk user role PANGKALAN. 
 
 Keterangan: Halaman ini menampilkan stok LPG yang tersedia di agen untuk dilihat oleh pangkalan. Pangkalan dapat melihat ketersediaan produk sebelum membuat pesanan ke agen. Informasi meliputi jenis LPG, stok tersedia, dan harga.
 
-#### 3. Tampilan Halaman Catat Penjualan
+#### 2. Tampilan Halaman Catat Penjualan
 
 ![UI Halaman Catat Penjualan](diagrams/8 UI Mockup/UI_P03_CatatPenjualan.png)
 
@@ -2456,7 +2456,7 @@ Keterangan: Halaman ini menampilkan stok LPG yang tersedia di agen untuk dilihat
 
 Keterangan: Halaman ini menampilkan form untuk mencatat penjualan LPG pangkalan ke konsumen akhir. Form berisi pemilihan konsumen, jenis LPG, jumlah, dan harga jual. Sistem otomatis mengurangi stok pangkalan dan mencatat transaksi.
 
-#### 4. Tampilan Halaman Daftar Penjualan
+#### 3. Tampilan Halaman Daftar Penjualan
 
 ![UI Halaman Daftar Penjualan](diagrams/8 UI Mockup/UI_P04_DaftarPenjualan.png)
 
