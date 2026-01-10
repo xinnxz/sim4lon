@@ -174,7 +174,7 @@ export default function EditProfilAdminForm() {
       toast.success('Profil berhasil diperbarui')
 
       setTimeout(() => {
-        window.location.href = '/profil-admin'
+        window.location.href = '/profil'
       }, 1000)
     } catch (error: any) {
       toast.error(error.message || 'Gagal memperbarui profil')
@@ -184,7 +184,7 @@ export default function EditProfilAdminForm() {
   }
 
   const handleCancel = () => {
-    window.location.href = '/profil-admin'
+    window.location.href = '/profil'
   }
 
   const formatDate = (dateString: string) => {

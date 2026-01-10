@@ -281,7 +281,7 @@ export default function AdminHeader({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-                  <a href="/profil-admin" className="flex items-center gap-2 px-2 py-2">
+                  <a href="/profil" className="flex items-center gap-2 px-2 py-2">
                     <SafeIcon name="User" className="h-4 w-4 text-muted-foreground" />
                     <span>Profil Saya</span>
                   </a>

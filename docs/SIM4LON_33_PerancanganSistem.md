@@ -2349,47 +2349,31 @@ Keterangan: Halaman ini menampilkan tabel master data sopir/driver pengiriman. I
 
 Keterangan: Halaman ini menampilkan tabel manajemen user sistem. Informasi yang ditampilkan meliputi nama, email, role (ADMIN/OPERATOR/PANGKALAN), pangkalan terkait (untuk role PANGKALAN), dan status aktif. Hanya admin yang dapat mengakses halaman ini.
 
-#### X 17. Tampilan Halaman Tambah Pengguna
-
-![UI Halaman Tambah Pengguna](diagrams/8 UI Mockup/UI_17_TambahPengguna.png)
-
-*Gambar 3.29 UI Halaman Tambah Pengguna*
-
-Keterangan: Halaman ini menampilkan form untuk membuat akun user baru. Form berisi input nama, email, password, konfirmasi password, role, dan pangkalan (jika role PANGKALAN). Admin dapat mengatur akses pengguna melalui pemilihan role.
-
-#### 18. Tampilan Halaman Laporan Penjualan
+#### 17. Tampilan Halaman Laporan Penjualan
 
 ![UI Halaman Laporan Penjualan](diagrams/8 UI Mockup/UI_18_LaporanPenjualan.png)
 
 *Gambar 3.30 UI Halaman Laporan Penjualan*
 
-Keterangan: Halaman ini menampilkan dashboard laporan penjualan
+Keterangan: Halaman laporan pada tab penjualan menampilkan dashboard laporan penjualan yang memiliki fitur pencarian, filter, dan export data. Halaman ini juga memiliki data ringkasan penjualan sesuai waktu yang dipilih, grafik penjualan, dan tabel detail penjualan.
 
-#### 19. Tampilan Halaman Laporan Pangkalan
+#### 18. Tampilan Halaman Laporan Pangkalan
 
 ![UI Halaman Laporan Pangkalan](diagrams/8 UI Mockup/UI_19_LaporanPangkalan.png)
 
 *Gambar 3.32 UI Halaman Laporan Pangkalan*
 
-Keterangan: Halaman ini menampilkan dashboard laporan pangkalan
+Keterangan: Halaman laporan pada tab pangkalan menampilkan dashboard laporan pangkalan yang memiliki fitur pencarian, filter, dan export data. pada tab pangkalan juga admin bisa melihat berbagai data pangkalan dan penjualan konsumen yang di beli melalui pangkalan.
 
-#### 20. Tampilan Halaman Laporan Stok
+#### 19. Tampilan Halaman Laporan Stok
 
 ![UI Halaman Laporan Stok](diagrams/8 UI Mockup/UI_20_LaporanStok.png)
 
 *Gambar 3.33 UI Halaman Laporan Stok*
 
-Keterangan: Halaman ini menampilkan dashboard laporan stok
+Keterangan: Halaman laporan pada tab stok menampilkan dashboard laporan stok yang memiliki fitur pencarian, filter, dan export data. pada tab stok admin bisa melihat berbagai data stok tabung LPG yang ada di agen.
 
-#### 21. Tampilan Halaman Perencanaan
-
-![UI Halaman Perencanaan](diagrams/8 UI Mockup/UI_22_Perencanaan.png)
-
-*Gambar 3.34 UI Halaman Perencanaan*
-
-Keterangan: Halaman ini menampilkan grid perencanaan distribusi harian dalam format spreadsheet. Baris menunjukkan daftar pangkalan, kolom menunjukkan tanggal dalam satu bulan. User dapat mengatur jumlah normal dan fakultatif untuk setiap sel.
-
-#### 22. Tampilan Halaman Riwayat Aktivitas
+#### 20. Tampilan Halaman Riwayat Aktivitas
 
 ![UI Halaman Riwayat Aktivitas](diagrams/8 UI Mockup/UI_22_RiwayatAktivitas.png)
 
@@ -2397,17 +2381,33 @@ Keterangan: Halaman ini menampilkan grid perencanaan distribusi harian dalam for
 
 Keterangan: Halaman ini menampilkan audit log semua aktivitas dalam sistem. Setiap entri mencakup timestamp, nama user, jenis aktivitas, dan deskripsi. Fitur ini berguna untuk tracking dan monitoring keamanan sistem.
 
-#### 23. Tampilan Halaman Pengaturan
+#### 21. Tampilan Halaman Pengaturan Profil Perusahaan
 
-![UI Halaman Pengaturan](diagrams/8 UI Mockup/UI_23_Pengaturan.png)
+![UI Halaman Pengaturan Profil Perusahaan](diagrams/8 UI Mockup/UI_23_Pengaturan.png)
 
-*Gambar 3.36 UI Halaman Pengaturan*
+*Gambar 3.36 UI Halaman Pengaturan Profil Perusahaan*
 
 Keterangan: Halaman ini menampilkan konfigurasi sistem termasuk profil perusahaan (nama, alamat, logo), pengaturan notifikasi, batas stok kritis, tarif pajak, dan prefix invoice. Hanya admin yang dapat mengubah pengaturan ini.
 
+#### 22. Tampilan Halaman Pengaturan Tampilan
+
+![UI Halaman Pengaturan Tampilan](diagrams/8 UI Mockup/UI_24_PengaturanTampilan.png)
+
+*Gambar 3.37 UI Halaman Pengaturan Tampilan*
+
+Keterangan: Halaman ini menampilkan konfigurasi tampilan sistem termasuk tema, warna aksen, regional, dan format tanggal. Hanya admin yang dapat mengubah pengaturan ini.
+
+#### 23. Tampilan Halaman Pengaturan Aplikasi
+
+![UI Halaman Pengaturan Aplikasi](diagrams/8 UI Mockup/UI_25_PengaturanAplikasi.png)
+
+*Gambar 3.38 UI Halaman Pengaturan Aplikasi*
+
+Keterangan: Halaman ini menampilkan konfigurasi sistem termasuk pengaturan notifikasi, batas stok kritis, tarif pajak, dan prefix invoice. Hanya admin yang dapat mengubah pengaturan ini.
+
 #### 24. Tampilan Halaman Profil Admin
 
-![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_24_ProfilAdmin.png)
+![UI Halaman Profil Admin](diagrams/8 UI Mockup/UI_26_ProfilAdmin.png)
 
 *Gambar 3.37 UI Halaman Profil Admin*
 
@@ -2421,6 +2421,13 @@ Keterangan: Halaman ini menampilkan profil pengguna yang sedang login. Terdapat 
 
 Keterangan: Halaman ini menampilkan form untuk mengedit informasi profil pengguna yang sedang login, termasuk nama, foto profil, dan preferensi lainnya.
 
+#### 26. Tampilan Halaman 404 Not Found
+
+![UI Halaman 404 Not Found](diagrams/8 UI Mockup/UI_26_404NotFound.png)
+
+*Gambar 3.39 UI Halaman 404 Not Found*
+
+Keterangan: Halaman ini menampilkan halaman error 404 Not Found.
 ---
 
 ### B. Portal Pangkalan (9 Halaman)
