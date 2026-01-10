@@ -53,6 +53,7 @@ import AnimatedNumber from '@/components/common/AnimatedNumber'
 import PageHeader from '@/components/common/PageHeader'
 
 // Page size options for pagination
+// hari ke 10
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
 type PageSize = typeof PAGE_SIZE_OPTIONS[number]
 
@@ -569,8 +570,8 @@ export default function PangkalanListPage() {
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
                         className={`h-8 w-8 p-0 ${currentPage === pageNum
-                            ? 'bg-primary hover:bg-primary/90'
-                            : 'hover:bg-muted'
+                          ? 'bg-primary hover:bg-primary/90'
+                          : 'hover:bg-muted'
                           }`}
                       >
                         {pageNum}
