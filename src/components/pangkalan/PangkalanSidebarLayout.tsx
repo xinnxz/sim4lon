@@ -19,6 +19,7 @@ import { useEffect } from 'react'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import PangkalanSidebar from '@/components/pangkalan/PangkalanSidebar'
 import PangkalanHeaderSimple from '@/components/pangkalan/PangkalanHeaderSimple'
+import FloatingVoiceWidgetPangkalan from '@/components/pangkalan/FloatingVoiceWidgetPangkalan'
 
 interface PangkalanSidebarLayoutProps {
     children: React.ReactNode
@@ -86,6 +87,9 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
                     </SidebarInset>
                 </div>
             </div>
+
+            {/* Voice Assistant Widget */}
+            <FloatingVoiceWidgetPangkalan />
         </SidebarProvider>
     )
 }
