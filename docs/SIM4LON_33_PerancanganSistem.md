@@ -2277,13 +2277,13 @@ Keterangan: Halaman ini menampilkan form untuk mencatat pembayaran dari pangkala
 
 Keterangan: Halaman ini menampilkan preview nota/invoice dalam format print-ready. Nota berisi header perusahaan, nomor invoice, tanggal, data pangkalan, daftar item pesanan, subtotal, pajak (jika ada), dan total. Terdapat tombol untuk mencetak atau mengunduh nota dalam format PDF.
 
-#### 8. Tampilan Halaman Ringkasan Stok
+#### 8. Tampilan Halaman Stok Lpg
 
-![UI Halaman Ringkasan Stok](diagrams/8 UI Mockup/UI_08_RingkasanStok.png)
+![UI Halaman Stok Lpg](diagrams/8 UI Mockup/UI_08_StokLpg.png)
 
-*Gambar 3.20 UI Halaman Ringkasan Stok*
+*Gambar 3.20 UI Halaman Stok Lpg*
 
-Keterangan: Halaman ini menampilkan dashboard stok LPG agen. Terdapat cards untuk setiap kategori produk (3kg Subsidi, 12kg, 50kg) yang menunjukkan jumlah stok isi, kosong, dan rusak. Halaman juga menampilkan alert untuk produk dengan stok di bawah batas minimum.
+Keterangan: Halaman ini menampilkan dashboard stok LPG agen. Terdapat cards untuk setiap kategori produk (220gr, 3kg Subsidi, 5kg, 12kg, 50kg) yang menunjukkan jumlah stok isi, kosong, dan rusak. Halaman juga menampilkan alert untuk produk dengan stok di bawah batas minimum.
 
 #### 9. Tampilan Halaman Penerimaan Stok
 
@@ -2357,29 +2357,29 @@ Keterangan: Halaman ini menampilkan tabel manajemen user sistem. Informasi yang 
 
 Keterangan: Halaman ini menampilkan form untuk membuat akun user baru. Form berisi input nama, email, password, konfirmasi password, role, dan pangkalan (jika role PANGKALAN). Admin dapat mengatur akses pengguna melalui pemilihan role.
 
-#### 18. Tampilan Halaman Laporan
+#### 18. Tampilan Halaman Laporan Penjualan
 
-![UI Halaman Laporan](diagrams/8 UI Mockup/UI_18_Laporan.png)
+![UI Halaman Laporan Penjualan](diagrams/8 UI Mockup/UI_18_LaporanPenjualan.png)
 
-*Gambar 3.30 UI Halaman Laporan*
+*Gambar 3.30 UI Halaman Laporan Penjualan*
 
-Keterangan: Halaman ini menampilkan dashboard laporan dengan berbagai jenis laporan yang tersedia. User dapat memilih jenis laporan (penjualan, stok, pembayaran), periode waktu, dan filter pangkalan. Data laporan ditampilkan dalam bentuk tabel dan chart.
+Keterangan: Halaman ini menampilkan dashboard laporan penjualan
 
-#### 19. Tampilan Halaman Export Laporan
+#### 19. Tampilan Halaman Laporan Pangkalan
 
-![UI Halaman Export Laporan](diagrams/8 UI Mockup/UI_19_ExportLaporan.png)
+![UI Halaman Laporan Pangkalan](diagrams/8 UI Mockup/UI_19_LaporanPangkalan.png)
 
-*Gambar 3.32 UI Halaman Export Laporan*
+*Gambar 3.32 UI Halaman Laporan Pangkalan*
 
-Keterangan: Halaman ini menampilkan opsi untuk mengexport laporan ke format Excel atau PDF. User dapat memilih jenis laporan, rentang tanggal, dan format output yang diinginkan. File akan didownload otomatis setelah diproses.
+Keterangan: Halaman ini menampilkan dashboard laporan pangkalan
 
-#### 20. Tampilan Halaman Tren Penjualan
+#### 20. Tampilan Halaman Laporan Stok
 
-![UI Halaman Tren Penjualan](diagrams/8 UI Mockup/UI_20_TrenPenjualan.png)
+![UI Halaman Laporan Stok](diagrams/8 UI Mockup/UI_20_LaporanStok.png)
 
-*Gambar 3.33 UI Halaman Tren Penjualan*
+*Gambar 3.33 UI Halaman Laporan Stok*
 
-Keterangan: Halaman ini menampilkan visualisasi data penjualan dalam bentuk grafik. Terdapat line chart untuk tren harian/mingguan/bulanan, bar chart untuk perbandingan per pangkalan, dan pie chart untuk distribusi per kategori produk.
+Keterangan: Halaman ini menampilkan dashboard laporan stok
 
 #### 21. Tampilan Halaman Perencanaan
 

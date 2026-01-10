@@ -12,10 +12,10 @@ const quickActions = [
     variant: 'default' as const
   },
   {
-    title: 'Tambah Pangkalan',
-    description: 'Pangkalan baru',
-    icon: 'Plus',
-    href: './tambah-pangkalan.html',
+    title: 'Kelola Pangkalan',
+    description: 'Lihat & tambah pangkalan',
+    icon: 'Building2',
+    href: './daftar-pangkalan.html',
     variant: 'outline' as const
   },
   {
