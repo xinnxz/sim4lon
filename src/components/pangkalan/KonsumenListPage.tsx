@@ -21,14 +21,12 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet'
 import {
     Select,
     SelectContent,
@@ -71,18 +69,12 @@ export default function KonsumenListPage() {
     })
 
     // Preserve scroll position when dialog opens/closes
+    // Note: modal={false} on Dialog prevents scroll lock, but we keep this as backup
     const scrollPositionRef = useRef<number>(0)
 
-    // Handler for dialog open/close that preserves scroll
     const handleDialogOpenChange = (open: boolean) => {
         if (open) {
-            // Save scroll position when opening
             scrollPositionRef.current = window.scrollY
-        } else {
-            // Restore scroll position when closing
-            requestAnimationFrame(() => {
-                window.scrollTo(0, scrollPositionRef.current)
-            })
         }
         setIsDialogOpen(open)
     }
@@ -154,7 +146,7 @@ export default function KonsumenListPage() {
                 note: '',
             })
         }
-        setIsDialogOpen(true)
+        handleDialogOpenChange(true)  // Use handler to save scroll position
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -247,33 +239,42 @@ export default function KonsumenListPage() {
                         </p>
                     </div>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-                    <DialogTrigger asChild>
-                        <Button
-                            onClick={() => handleOpenDialog()}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25"
-                        >
-                            <SafeIcon name="UserPlus" className="h-4 w-4 mr-2" />
-                            Tambah Konsumen
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <form onSubmit={handleSubmit}>
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                                        <SafeIcon name={editingConsumer ? 'UserCog' : 'UserPlus'} className="h-5 w-5 text-blue-600" />
+                <Sheet open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <SheetContent
+                        side="right"
+                        hideCloseButton
+                        className="w-full sm:max-w-[480px] overflow-y-auto p-0 border-l border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950"
+                    >
+                        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+                            {/* Enhanced Header with Gradient */}
+                            <div className="relative px-6 py-6 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white overflow-hidden">
+                                {/* Decorative orbs */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+                                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl" />
+
+                                <div className="relative z-10 flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-1 ring-white/30">
+                                        <SafeIcon name={editingConsumer ? 'UserCog' : 'UserPlus'} className="h-6 w-6 text-white" />
                                     </div>
-                                    {editingConsumer ? 'Edit Konsumen' : 'Tambah Konsumen Baru'}
-                                </DialogTitle>
-                                <DialogDescription>
-                                    {editingConsumer ? 'Perbarui data konsumen' : 'Isi data konsumen baru untuk pangkalan Anda'}
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                {/* Jenis Konsumen */}
-                                <div className="space-y-2">
-                                    <Label>Jenis Konsumen *</Label>
+                                    <div className="flex flex-col justify-center">
+                                        <h2 className="text-lg font-bold tracking-tight leading-tight">
+                                            {editingConsumer ? 'Edit Konsumen' : 'Tambah Konsumen'}
+                                        </h2>
+                                        <p className="text-blue-100 text-sm leading-tight">
+                                            {editingConsumer ? 'Perbarui data konsumen' : 'Isi data konsumen baru'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Form Content with Sections */}
+                            <div className="flex-1 px-6 py-6 space-y-6">
+                                {/* Jenis Konsumen - Enhanced Cards */}
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                        <SafeIcon name="Tag" className="h-4 w-4 text-blue-500" />
+                                        Jenis Konsumen
+                                    </Label>
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
                                             type="button"
@@ -386,22 +387,44 @@ export default function KonsumenListPage() {
                                     />
                                 </div>
                             </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                    Batal
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                                    {isSubmitting ? (
-                                        <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                        <SafeIcon name="Check" className="h-4 w-4 mr-2" />
-                                    )}
-                                    {editingConsumer ? 'Simpan Perubahan' : 'Tambah Konsumen'}
-                                </Button>
-                            </DialogFooter>
+
+                            {/* Enhanced Sticky Footer */}
+                            <div className="sticky bottom-0 px-6 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50">
+                                <div className="flex gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsDialogOpen(false)}
+                                        className="flex-1 h-12 rounded-xl border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all duration-200"
+                                    >
+                                        <SafeIcon name="X" className="h-4 w-4 mr-2 text-slate-500" />
+                                        Batal
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:-translate-y-0.5"
+                                    >
+                                        {isSubmitting ? (
+                                            <SafeIcon name="Loader2" className="h-5 w-5 mr-2 animate-spin" />
+                                        ) : (
+                                            <SafeIcon name="Check" className="h-5 w-5 mr-2" />
+                                        )}
+                                        {editingConsumer ? 'Simpan' : 'Tambah'}
+                                    </Button>
+                                </div>
+                            </div>
                         </form>
-                    </DialogContent>
-                </Dialog>
+                    </SheetContent>
+                </Sheet>
+                {/* Add Button - moved outside Sheet */}
+                <Button
+                    onClick={() => handleOpenDialog()}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25"
+                >
+                    <SafeIcon name="UserPlus" className="h-4 w-4 mr-2" />
+                    Tambah Konsumen
+                </Button>
             </div>
 
             {/* Stats Cards */}
