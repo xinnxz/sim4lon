@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
+import { useConfirmDialog } from '@/components/common/ConfirmDialog'
 import { consumerOrdersApi, type ConsumerOrder, type ConsumerOrderStats } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -42,6 +43,9 @@ export default function RiwayatPenjualanPage() {
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const [lpgTypeFilter, setLpgTypeFilter] = useState('')
+
+    // Custom confirm dialog
+    const { confirm } = useConfirmDialog()
 
     // Fetch stats only once on mount
     const fetchStats = async () => {
@@ -141,14 +145,22 @@ export default function RiwayatPenjualanPage() {
     }
 
     const handleDelete = async (order: ConsumerOrder) => {
-        if (!confirm('Hapus transaksi ini?')) return
+        const confirmed = await confirm({
+            title: 'Hapus Transaksi',
+            message: `Hapus transaksi ${order.code}? Tindakan ini tidak dapat dibatalkan.`,
+            confirmText: 'Hapus',
+            cancelText: 'Batal',
+            variant: 'destructive',
+            icon: 'Trash2'
+        })
+        if (!confirmed) return
 
         // Save scroll position
         const scrollPosition = window.scrollY
 
         try {
             await consumerOrdersApi.delete(order.id)
-            toast.success('Transaksi dihapus')
+            toast.success('Transaksi dihapus', { duration: 4000 })
             await fetchOrders(false)
             fetchStats()
 
@@ -157,7 +169,7 @@ export default function RiwayatPenjualanPage() {
                 window.scrollTo(0, scrollPosition)
             })
         } catch (error: any) {
-            toast.error(error.message || 'Gagal menghapus transaksi')
+            toast.error(error.message || 'Gagal menghapus transaksi', { duration: 5000 })
         }
     }
 

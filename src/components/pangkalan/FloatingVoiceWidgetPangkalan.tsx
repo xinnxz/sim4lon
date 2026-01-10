@@ -358,12 +358,15 @@ export default function FloatingVoiceWidgetPangkalan() {
             })
 
             setStatus('success')
-            toast.success(`Penjualan ${parsedSale.quantity} ${parsedSale.productLabel} ke ${parsedSale.consumerName} dicatat!`)
+            toast.success(`Penjualan ${parsedSale.quantity} ${parsedSale.productLabel} ke ${parsedSale.consumerName} dicatat!`, {
+                duration: 4000,
+            })
+
+            // Dispatch custom event to trigger data refresh in listening components
+            window.dispatchEvent(new CustomEvent('sim4lon:sale-created'))
 
             setTimeout(() => {
                 handleClose()
-                // Refresh the page to show new data
-                window.location.reload()
             }, 1500)
         } catch (err: any) {
             setError(err.message || 'Gagal menyimpan penjualan')

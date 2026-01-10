@@ -37,6 +37,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
+import { useConfirmDialog, createDeleteConfirmation } from '@/components/common/ConfirmDialog'
 import { consumersApi, type Consumer, type ConsumerType } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -69,6 +70,9 @@ export default function KonsumenListPage() {
         warung: 0,
         withNik: 0,
     })
+
+    // Custom confirm dialog
+    const { confirm } = useConfirmDialog()
 
     const fetchConsumers = async (silentRefresh = false) => {
         // Save scroll position before fetch
@@ -186,15 +190,16 @@ export default function KonsumenListPage() {
     }
 
     const handleDelete = async (consumer: Consumer) => {
-        if (!confirm(`Hapus konsumen "${consumer.name}"?`)) return
+        const confirmed = await confirm(createDeleteConfirmation(consumer.name))
+        if (!confirmed) return
 
         try {
             await consumersApi.delete(consumer.id)
-            toast.success('Konsumen berhasil dihapus')
+            toast.success('Konsumen berhasil dihapus', { duration: 4000 })
             // Silent refresh to preserve scroll position
             fetchConsumers(true)
         } catch (error: any) {
-            toast.error(error.message || 'Gagal menghapus konsumen')
+            toast.error(error.message || 'Gagal menghapus konsumen', { duration: 5000 })
         }
     }
 
