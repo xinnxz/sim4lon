@@ -166,11 +166,15 @@ export default function FloatingVoiceWidgetPangkalan() {
             // Update interim transcript (live text)
             setInterimTranscript(interim)
 
+            // Reset silence timer on ANY speech activity (interim or final)
+            // This prevents premature auto-stop while user is still speaking
+            if (finalTranscript || interim) {
+                lastSpeechTimeRef.current = Date.now()
+            }
+
             if (finalTranscript) {
                 setTranscript(prev => prev + ' ' + finalTranscript)
                 setInterimTranscript('')  // Clear interim when we have final
-                // Reset silence timer on speech
-                lastSpeechTimeRef.current = Date.now()
             }
         }
 
