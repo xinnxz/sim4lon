@@ -418,7 +418,7 @@ export default function RiwayatPenjualanPage() {
                         </div>
                     ) : (
                         <>
-                            {/* Table Header */}
+                            {/* Table Header - Desktop only */}
                             <div className="hidden lg:grid lg:grid-cols-6 gap-4 px-6 py-4 bg-slate-50 border-b border-slate-200 text-sm font-semibold text-slate-600">
                                 <div>Kode</div>
                                 <div>Pelanggan</div>
@@ -428,52 +428,84 @@ export default function RiwayatPenjualanPage() {
                                 <div className="text-right">Waktu</div>
                             </div>
 
-                            {/* Table Body */}
+                            {/* Table Body - Responsive cards */}
                             <div className="divide-y divide-slate-100">
                                 {orders.map((order, index) => (
                                     <div
                                         key={order.id}
-                                        className={`flex flex-col lg:grid lg:grid-cols-6 gap-2 lg:gap-4 p-4 lg:px-6 lg:py-4 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
+                                        className={`p-3 sm:p-4 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                     >
-                                        {/* Code */}
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center lg:hidden">
-                                                <SafeIcon name="Flame" className="h-5 w-5 text-blue-600" />
+                                        {/* Mobile Layout */}
+                                        <div className="lg:hidden">
+                                            <div className="flex items-start gap-3">
+                                                {/* Icon */}
+                                                <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+                                                    <SafeIcon name="Flame" className="h-5 w-5 text-blue-600" />
+                                                </div>
+
+                                                {/* Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    {/* Code & Date */}
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <p className="font-mono text-xs sm:text-sm font-semibold text-slate-700 truncate">{order.code}</p>
+                                                        <span className="text-[10px] sm:text-xs text-slate-400 shrink-0">{formatDate(order.sale_date)}</span>
+                                                    </div>
+
+                                                    {/* Customer name */}
+                                                    <p className="font-medium text-sm text-slate-900 mt-1 truncate">
+                                                        {order.consumers?.name || order.consumer_name || 'Walk-in'}
+                                                    </p>
+
+                                                    {/* LPG Type, Qty, Total - in a row */}
+                                                    <div className="flex items-center justify-between mt-2 gap-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] sm:text-xs px-1.5 py-0.5">
+                                                                {LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                            </Badge>
+                                                            <span className="text-xs sm:text-sm text-slate-600">
+                                                                <span className="font-bold">{order.qty}</span> tabung
+                                                            </span>
+                                                        </div>
+                                                        <span className="font-bold text-sm sm:text-base text-blue-600">{formatCurrency(order.total_amount)}</span>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
+
+                                        {/* Desktop Layout - Grid */}
+                                        <div className="hidden lg:grid lg:grid-cols-6 gap-4 items-center">
+                                            {/* Code */}
                                             <div>
                                                 <p className="font-mono text-sm font-semibold text-slate-700">{order.code}</p>
-                                                <p className="text-xs text-slate-400 lg:hidden">{formatDate(order.sale_date)}</p>
                                             </div>
-                                        </div>
 
-                                        {/* Customer */}
-                                        <div className="flex items-center">
-                                            <span className="font-medium text-slate-900">
-                                                {order.consumers?.name || order.consumer_name || 'Walk-in'}
-                                            </span>
-                                        </div>
-
-                                        {/* LPG Type */}
-                                        <div className="flex items-center justify-center">
-                                            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                                                {LPG_NAMES[order.lpg_type] || order.lpg_type}
-                                            </Badge>
-                                        </div>
-
-                                        {/* Qty */}
-                                        <div className="flex items-center justify-center">
-                                            <span className="font-bold text-slate-900">{order.qty}</span>
-                                            <span className="text-slate-400 text-sm ml-1">tabung</span>
-                                        </div>
-
-                                        {/* Total */}
-                                        <div className="flex items-center justify-end">
-                                            <span className="font-bold text-slate-900">{formatCurrency(order.total_amount)}</span>
-                                        </div>
-
-                                        {/* Time */}
-                                        <div className="hidden lg:flex items-center justify-end text-right">
+                                            {/* Customer */}
                                             <div>
+                                                <span className="font-medium text-slate-900">
+                                                    {order.consumers?.name || order.consumer_name || 'Walk-in'}
+                                                </span>
+                                            </div>
+
+                                            {/* LPG Type */}
+                                            <div className="flex justify-center">
+                                                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                                                    {LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                </Badge>
+                                            </div>
+
+                                            {/* Qty */}
+                                            <div className="text-center">
+                                                <span className="font-bold text-slate-900">{order.qty}</span>
+                                                <span className="text-slate-400 text-sm ml-1">tabung</span>
+                                            </div>
+
+                                            {/* Total */}
+                                            <div className="text-right">
+                                                <span className="font-bold text-slate-900">{formatCurrency(order.total_amount)}</span>
+                                            </div>
+
+                                            {/* Time */}
+                                            <div className="text-right">
                                                 <p className="text-sm text-slate-700">{formatDate(order.sale_date)}</p>
                                                 <p className="text-xs text-slate-400">{formatTime(order.sale_date)}</p>
                                             </div>

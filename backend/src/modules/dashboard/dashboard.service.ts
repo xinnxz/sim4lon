@@ -553,10 +553,11 @@ export class DashboardService {
      * - Payment overdue: > 7 hari sejak order dibuat
      */
     async getDSSAlerts() {
-        const LOW_STOCK_THRESHOLD = 50;
+        const LEAD_TIME_DAYS = 2; // Same as Reorder Point
+        const ANALYSIS_DAYS = 30; // Same as Reorder Point
         const OVERDUE_DAYS = 1;
 
-        // ========== 1. LOW STOCK ALERTS ==========
+        // ========== 1. LOW STOCK ALERTS (ROP-based) ==========
         const products = await this.prisma.lpg_products.findMany({
             where: {
                 is_active: true,
@@ -565,7 +566,23 @@ export class DashboardService {
             orderBy: { size_kg: 'asc' }
         });
 
-        // Get stock movements grouped by lpg_product_id
+        // Get start date for usage analysis (30 days ago)
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
+        startDate.setHours(0, 0, 0, 0);
+
+        // Get usage data (KELUAR movements in last 30 days)
+        const usageData = await this.prisma.client.stock_histories.groupBy({
+            by: ['lpg_product_id'],
+            where: {
+                lpg_product_id: { not: null },
+                movement_type: 'KELUAR',
+                timestamp: { gte: startDate }
+            },
+            _sum: { qty: true }
+        });
+
+        // Get current stock movements
         const stockData = await this.prisma.client.stock_histories.groupBy({
             by: ['lpg_product_id', 'movement_type'],
             where: {
@@ -576,7 +593,7 @@ export class DashboardService {
             }
         });
 
-        // Calculate current stock and identify low stock products
+        // Calculate current stock and identify low stock products using ROP logic
         const lowStockAlerts: {
             id: string;
             name: string;
@@ -592,17 +609,30 @@ export class DashboardService {
             const outQty = productStock.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
             const currentStock = inQty - outQty;
 
-            if (currentStock < LOW_STOCK_THRESHOLD) {
-                const severity = currentStock < (LOW_STOCK_THRESHOLD / 2) ? 'critical' : 'warning';
+            // Calculate ROP (same logic as getReorderPoint)
+            const usage = usageData.find(u => u.lpg_product_id === product.id);
+            const totalUsage = usage?._sum.qty || 0;
+            const avgDailyDemand = totalUsage / ANALYSIS_DAYS;
+            const safetyStock = Math.ceil(avgDailyDemand * LEAD_TIME_DAYS * 0.5);
+            const reorderPoint = Math.ceil((avgDailyDemand * LEAD_TIME_DAYS) + safetyStock);
+
+            // Use ROP-based threshold (only alert if stock <= ROP)
+            if (currentStock <= reorderPoint) {
+                const severity = currentStock <= reorderPoint * 0.5 ? 'critical' : 'warning';
+                const daysUntilStockout = avgDailyDemand > 0
+                    ? Math.floor(currentStock / avgDailyDemand)
+                    : 999;
+                const suggestedOrderQty = Math.ceil(avgDailyDemand * 14 + safetyStock);
+
                 lowStockAlerts.push({
                     id: product.id,
                     name: product.name,
                     currentStock,
-                    threshold: LOW_STOCK_THRESHOLD,
+                    threshold: reorderPoint,
                     severity,
                     recommendation: severity === 'critical'
-                        ? `Segera lakukan pengadaan ${product.name}. Stok sangat rendah!`
-                        : `Pertimbangkan untuk memesan ${product.name} dalam waktu dekat.`
+                        ? `SEGERA pesan ${product.name}! Stok akan habis dalam ${daysUntilStockout} hari. Disarankan pesan ${suggestedOrderQty} unit.`
+                        : `Pertimbangkan untuk memesan ${product.name} dalam 1-2 hari. Disarankan pesan ${suggestedOrderQty} unit.`
                 });
             }
         });
@@ -716,5 +746,323 @@ export class DashboardService {
         if (pendingCount > 20) score -= Math.min((pendingCount - 20) * 2, 30);
 
         return Math.max(score, 0);
+    }
+
+    /**
+     * Get Reorder Point Data for DSS
+     * 
+     * PENJELASAN:
+     * Menghitung titik pemesanan ulang (Reorder Point) untuk setiap produk LPG.
+     * Formula: ROP = (Average Daily Demand × Lead Time) + Safety Stock
+     * 
+     * - Average Daily Demand: Rata-rata penjualan per hari (30 hari terakhir)
+     * - Lead Time: Waktu tunggu pengiriman dari SPBE (default 2 hari)
+     * - Safety Stock: Stok pengaman (50% dari avg daily demand × lead time)
+     */
+    async getReorderPoint() {
+        const LEAD_TIME_DAYS = 2; // Waktu tunggu pengiriman dari SPBE
+        const ANALYSIS_DAYS = 30; // Periode analisis untuk rata-rata
+
+        // Get all active products
+        const products = await this.prisma.lpg_products.findMany({
+            where: {
+                is_active: true,
+                deleted_at: null
+            },
+            orderBy: { size_kg: 'asc' }
+        });
+
+        // Get start date (30 days ago)
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
+        startDate.setHours(0, 0, 0, 0);
+
+        // Get stock movements (KELUAR = usage/sales)
+        const usageData = await this.prisma.client.stock_histories.groupBy({
+            by: ['lpg_product_id'],
+            where: {
+                lpg_product_id: { not: null },
+                movement_type: 'KELUAR',
+                timestamp: { gte: startDate }
+            },
+            _sum: { qty: true }
+        });
+
+        // Get current stock for each product
+        const stockData = await this.prisma.client.stock_histories.groupBy({
+            by: ['lpg_product_id', 'movement_type'],
+            where: {
+                lpg_product_id: { not: null }
+            },
+            _sum: { qty: true }
+        });
+
+        const reorderData = products.map(product => {
+            // Calculate current stock
+            const productStock = stockData.filter(s => s.lpg_product_id === product.id);
+            const inQty = productStock.find(s => s.movement_type === 'MASUK')?._sum.qty || 0;
+            const outQty = productStock.find(s => s.movement_type === 'KELUAR')?._sum.qty || 0;
+            const currentStock = inQty - outQty;
+
+            // Calculate average daily demand
+            const usage = usageData.find(u => u.lpg_product_id === product.id);
+            const totalUsage = usage?._sum.qty || 0;
+            const avgDailyDemand = totalUsage / ANALYSIS_DAYS;
+
+            // Calculate Reorder Point
+            const safetyStock = Math.ceil(avgDailyDemand * LEAD_TIME_DAYS * 0.5);
+            const reorderPoint = Math.ceil((avgDailyDemand * LEAD_TIME_DAYS) + safetyStock);
+
+            // Calculate days until stockout
+            const daysUntilStockout = avgDailyDemand > 0
+                ? Math.floor(currentStock / avgDailyDemand)
+                : 999;
+
+            // Determine status
+            let status: 'critical' | 'warning' | 'safe' | 'overstocked';
+            if (currentStock <= 0) {
+                status = 'critical';
+            } else if (currentStock <= reorderPoint * 0.5) {
+                status = 'critical';
+            } else if (currentStock <= reorderPoint) {
+                status = 'warning';
+            } else if (currentStock > reorderPoint * 3) {
+                status = 'overstocked';
+            } else {
+                status = 'safe';
+            }
+
+            // Calculate suggested order quantity (EOQ simplified)
+            // Order enough for 14 days of demand + safety stock
+            const suggestedOrderQty = Math.ceil(avgDailyDemand * 14 + safetyStock);
+
+            return {
+                productId: product.id,
+                productName: product.name,
+                sizeKg: Number(product.size_kg),
+                color: product.color,
+                currentStock,
+                avgDailyDemand: Math.round(avgDailyDemand * 10) / 10,
+                reorderPoint,
+                safetyStock,
+                daysUntilStockout,
+                suggestedOrderQty: suggestedOrderQty > 0 ? suggestedOrderQty : 0,
+                status,
+                needsReorder: currentStock <= reorderPoint,
+                recommendation: this.getReorderRecommendation(status, product.name, daysUntilStockout, suggestedOrderQty)
+            };
+        });
+
+        // Sort by urgency (critical first, then warning)
+        reorderData.sort((a, b) => {
+            const statusOrder = { critical: 0, warning: 1, safe: 2, overstocked: 3 };
+            return statusOrder[a.status] - statusOrder[b.status];
+        });
+
+        return {
+            data: reorderData,
+            summary: {
+                totalProducts: reorderData.length,
+                needsReorderCount: reorderData.filter(r => r.needsReorder).length,
+                criticalCount: reorderData.filter(r => r.status === 'critical').length,
+                warningCount: reorderData.filter(r => r.status === 'warning').length,
+                analysisSettings: {
+                    leadTimeDays: LEAD_TIME_DAYS,
+                    analysisPeriodDays: ANALYSIS_DAYS
+                }
+            },
+            generatedAt: new Date().toISOString()
+        };
+    }
+
+    private getReorderRecommendation(
+        status: string,
+        productName: string,
+        daysUntilStockout: number,
+        suggestedQty: number
+    ): string {
+        switch (status) {
+            case 'critical':
+                return `SEGERA pesan ${productName}! Stok akan habis dalam ${daysUntilStockout} hari. Disarankan pesan ${suggestedQty} unit.`;
+            case 'warning':
+                return `Pertimbangkan untuk memesan ${productName} dalam 1-2 hari. Disarankan pesan ${suggestedQty} unit.`;
+            case 'overstocked':
+                return `Stok ${productName} berlebih. Hentikan sementara pemesanan untuk produk ini.`;
+            default:
+                return `Stok ${productName} aman. Estimasi bertahan ${daysUntilStockout} hari lagi.`;
+        }
+    }
+
+    /**
+     * Get Sales Trend Analysis for DSS
+     * 
+     * PENJELASAN:
+     * Menganalisis tren penjualan untuk mengidentifikasi:
+     * - Peak demand days (hari dengan permintaan tertinggi)
+     * - Growth rate (pertumbuhan penjualan)
+     * - Weekly patterns (pola mingguan)
+     * - Daily average sales
+     */
+    async getSalesTrend() {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const ANALYSIS_WEEKS = 4; // Analisis 4 minggu terakhir
+        const ANALYSIS_DAYS = ANALYSIS_WEEKS * 7;
+
+        // Get start date
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
+        startDate.setHours(0, 0, 0, 0);
+
+        // ========== 1. DAILY SALES DATA ==========
+        const dailySales: { date: Date; dayOfWeek: number; sales: number; orderCount: number }[] = [];
+
+        for (let i = ANALYSIS_DAYS - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            date.setHours(0, 0, 0, 0);
+
+            const nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            const salesData = await this.prisma.client.orders.aggregate({
+                where: {
+                    order_date: { gte: date, lt: nextDay },
+                    current_status: { not: 'BATAL' }
+                },
+                _sum: { total_amount: true },
+                _count: { id: true }
+            });
+
+            dailySales.push({
+                date,
+                dayOfWeek: date.getDay(),
+                sales: Number(salesData._sum.total_amount) || 0,
+                orderCount: salesData._count.id || 0
+            });
+        }
+
+        // ========== 2. CALCULATE WEEKLY PATTERN ==========
+        const weeklyPattern: {
+            day: string;
+            dayIndex: number;
+            avgSales: number;
+            avgOrders: number;
+            totalSales: number;
+            occurrences: number;
+        }[] = [];
+
+        for (let i = 0; i < 7; i++) {
+            const dayData = dailySales.filter(d => d.dayOfWeek === i);
+            const totalSales = dayData.reduce((sum, d) => sum + d.sales, 0);
+            const totalOrders = dayData.reduce((sum, d) => sum + d.orderCount, 0);
+            const occurrences = dayData.length;
+
+            weeklyPattern.push({
+                day: days[i],
+                dayIndex: i,
+                avgSales: occurrences > 0 ? Math.round(totalSales / occurrences) : 0,
+                avgOrders: occurrences > 0 ? Math.round((totalOrders / occurrences) * 10) / 10 : 0,
+                totalSales,
+                occurrences
+            });
+        }
+
+        // ========== 3. FIND PEAK DAYS ==========
+        const sortedByAvgSales = [...weeklyPattern].sort((a, b) => b.avgSales - a.avgSales);
+        const peakDays = sortedByAvgSales.slice(0, 3).map(d => ({
+            day: d.day,
+            avgSales: d.avgSales,
+            avgOrders: d.avgOrders
+        }));
+        const lowDays = sortedByAvgSales.slice(-2).map(d => ({
+            day: d.day,
+            avgSales: d.avgSales,
+            avgOrders: d.avgOrders
+        }));
+
+        // ========== 4. CALCULATE GROWTH RATE ==========
+        // Compare last 2 weeks vs previous 2 weeks
+        const midPoint = Math.floor(dailySales.length / 2);
+        const recentWeeks = dailySales.slice(midPoint);
+        const previousWeeks = dailySales.slice(0, midPoint);
+
+        const recentTotal = recentWeeks.reduce((sum, d) => sum + d.sales, 0);
+        const previousTotal = previousWeeks.reduce((sum, d) => sum + d.sales, 0);
+
+        let growthRate = 0;
+        if (previousTotal > 0) {
+            growthRate = Math.round(((recentTotal - previousTotal) / previousTotal) * 100 * 10) / 10;
+        }
+
+        // ========== 5. OVERALL STATISTICS ==========
+        const totalSalesAll = dailySales.reduce((sum, d) => sum + d.sales, 0);
+        const totalOrdersAll = dailySales.reduce((sum, d) => sum + d.orderCount, 0);
+        const avgDailySales = Math.round(totalSalesAll / ANALYSIS_DAYS);
+        const avgDailyOrders = Math.round((totalOrdersAll / ANALYSIS_DAYS) * 10) / 10;
+
+        // ========== 6. LAST 7 DAYS FOR CHART ==========
+        const last7Days = dailySales.slice(-7).map(d => ({
+            date: d.date.toISOString().split('T')[0],
+            day: days[d.dayOfWeek],
+            sales: d.sales,
+            orderCount: d.orderCount
+        }));
+
+        // ========== 7. WEEKLY SUMMARY (last 4 weeks) ==========
+        const weeklySummary: { week: string; sales: number; orders: number; avgDaily: number }[] = [];
+        for (let w = 0; w < ANALYSIS_WEEKS; w++) {
+            const weekStart = w * 7;
+            const weekEnd = weekStart + 7;
+            const weekData = dailySales.slice(weekStart, weekEnd);
+            const weekSales = weekData.reduce((sum, d) => sum + d.sales, 0);
+            const weekOrders = weekData.reduce((sum, d) => sum + d.orderCount, 0);
+
+            weeklySummary.push({
+                week: `Minggu ${ANALYSIS_WEEKS - w}`,
+                sales: weekSales,
+                orders: weekOrders,
+                avgDaily: Math.round(weekSales / 7)
+            });
+        }
+
+        // ========== 8. TREND INSIGHTS ==========
+        const insights: string[] = [];
+
+        // Growth insight
+        if (growthRate > 10) {
+            insights.push(`📈 Penjualan meningkat ${growthRate}% dibanding 2 minggu sebelumnya!`);
+        } else if (growthRate < -10) {
+            insights.push(`📉 Penjualan menurun ${Math.abs(growthRate)}% dibanding 2 minggu sebelumnya.`);
+        } else {
+            insights.push(`📊 Penjualan stabil (${growthRate > 0 ? '+' : ''}${growthRate}%) dibanding sebelumnya.`);
+        }
+
+        // Peak day insight
+        if (peakDays.length > 0) {
+            insights.push(`🔥 Hari tersibuk: ${peakDays[0].day} dengan rata-rata Rp ${peakDays[0].avgSales.toLocaleString('id-ID')}/hari.`);
+        }
+
+        // Low day insight
+        if (lowDays.length > 0) {
+            insights.push(`💤 Hari paling sepi: ${lowDays[0].day}.`);
+        }
+
+        return {
+            weeklyPattern,
+            peakDays,
+            lowDays,
+            last7Days,
+            weeklySummary: weeklySummary.reverse(), // Oldest first
+            statistics: {
+                totalSales: totalSalesAll,
+                totalOrders: totalOrdersAll,
+                avgDailySales,
+                avgDailyOrders,
+                growthRate,
+                analysisPeriodDays: ANALYSIS_DAYS
+            },
+            insights,
+            generatedAt: new Date().toISOString()
+        };
     }
 }

@@ -425,34 +425,46 @@ export default function PengeluaranPage() {
                             {expenses.map((expense, index) => (
                                 <div
                                     key={expense.id}
-                                    className={`flex items-center justify-between p-4 hover:bg-red-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
+                                    className={`p-3 sm:p-4 hover:bg-red-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getCategoryGradient(expense.category)} flex items-center justify-center`}>
-                                            <SafeIcon name={getCategoryIcon(expense.category)} className="h-6 w-6 text-white" />
+                                    <div className="flex items-start gap-3">
+                                        {/* Icon */}
+                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-gradient-to-br ${getCategoryGradient(expense.category)} flex items-center justify-center`}>
+                                            <SafeIcon name={getCategoryIcon(expense.category)} className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                                         </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-semibold text-slate-900">{getCategoryLabel(expense.category)}</p>
-                                                <Badge variant="outline" className="text-xs">
+
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                            {/* Category + Date */}
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <p className="font-semibold text-sm sm:text-base text-slate-900">{getCategoryLabel(expense.category)}</p>
+                                                <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">
                                                     {formatDate(expense.expense_date)}
                                                 </Badge>
                                             </div>
-                                            <p className="text-sm text-slate-500 mt-1">
+
+                                            {/* Description */}
+                                            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">
                                                 {expense.description || 'Tidak ada keterangan'}
                                             </p>
+
+                                            {/* Amount - visible on mobile below */}
+                                            <p className="font-bold text-red-600 text-sm sm:hidden mt-1">
+                                                {formatCurrency(expense.amount)}
+                                            </p>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <span className="font-bold text-red-600 text-lg">
-                                            -{formatCurrency(expense.amount)}
-                                        </span>
-                                        <div className="flex items-center gap-1">
+
+                                        {/* Actions + Amount on right */}
+                                        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                            {/* Amount - hidden on mobile, shown on larger screens */}
+                                            <span className="hidden sm:block font-bold text-red-600 text-base lg:text-lg mr-2">
+                                                {formatCurrency(expense.amount)}
+                                            </span>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleOpenDialog(expense)}
-                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 p-0"
                                             >
                                                 <SafeIcon name="Pencil" className="h-4 w-4" />
                                             </Button>
@@ -460,7 +472,7 @@ export default function PengeluaranPage() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleDelete(expense)}
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
                                             >
                                                 <SafeIcon name="Trash2" className="h-4 w-4" />
                                             </Button>

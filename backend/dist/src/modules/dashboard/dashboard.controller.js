@@ -42,6 +42,12 @@ let DashboardController = class DashboardController {
     async getDSSAlerts() {
         return this.dashboardService.getDSSAlerts();
     }
+    async getReorderPoint() {
+        return this.dashboardService.getReorderPoint();
+    }
+    async getSalesTrend() {
+        return this.dashboardService.getSalesTrend();
+    }
 };
 exports.DashboardController = DashboardController;
 __decorate([
@@ -92,6 +98,18 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DashboardController.prototype, "getDSSAlerts", null);
+__decorate([
+    (0, common_1.Get)('reorder-point'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "getReorderPoint", null);
+__decorate([
+    (0, common_1.Get)('sales-trend'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "getSalesTrend", null);
 exports.DashboardController = DashboardController = __decorate([
     (0, common_1.Controller)('dashboard'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

@@ -139,6 +139,27 @@ function buildTimeline(apiOrder: ApiOrder) {
     })
   }
 
+  // FIX: Mark all previous steps as completed if a later step is completed
+  // This handles cases where steps are skipped (e.g., voice order goes directly to DIPROSES)
+  let highestCompletedIndex = -1
+  for (let i = baseTimeline.length - 1; i >= 0; i--) {
+    if (baseTimeline[i].completed) {
+      highestCompletedIndex = i
+      break
+    }
+  }
+
+  // Mark all steps before the highest completed one as completed too
+  if (highestCompletedIndex > 0) {
+    for (let i = 0; i < highestCompletedIndex; i++) {
+      if (!baseTimeline[i].completed) {
+        baseTimeline[i].completed = true
+        // Use the created_at date for skipped steps (approximate)
+        baseTimeline[i].date = new Date(apiOrder.created_at).toLocaleString('id-ID')
+      }
+    }
+  }
+
   return baseTimeline
 }
 
@@ -331,25 +352,26 @@ export default function OrderDetailContent() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Header with Back Button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => window.location.href = '/daftar-pesanan'}
+            className="h-8 w-8 sm:h-10 sm:w-10"
           >
-            <SafeIcon name="ArrowLeft" className="h-5 w-5" />
+            <SafeIcon name="ArrowLeft" className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Detail Pesanan</h1>
-            <p className="text-muted-foreground font-mono">ID: {order.id}</p>
+            <h1 className="text-xl sm:text-3xl font-bold">Detail Pesanan</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground font-mono">ID: {order.id}</p>
           </div>
         </div>
         <Badge
           variant="status"
-          className={`text-base px-4 py-2 ${order.status === 'pending_payment' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' :
+          className={`self-start sm:self-auto text-xs sm:text-base px-2 sm:px-4 py-1 sm:py-2 ${order.status === 'pending_payment' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' :
             order.status === 'payment_confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' :
               order.status === 'in_delivery' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300' :
                 order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
@@ -361,12 +383,12 @@ export default function OrderDetailContent() {
         </Badge>
       </div>
 
-      <Separator />
+      <Separator className="hidden sm:block" />
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column - Order Details */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-2 lg:order-1">
           {/* Order Summary */}
           <OrderSummaryCard order={order} />
 
@@ -374,8 +396,8 @@ export default function OrderDetailContent() {
           <OrderTimelineStatus timeline={order.timeline} />
         </div>
 
-        {/* Right Column - Info Cards & Actions */}
-        <div className="space-y-6">
+        {/* Right Column - Info Cards & Actions - Shows first on mobile */}
+        <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
           {/* Customer Info */}
           <CustomerInfoCard customer={order.customer} />
 

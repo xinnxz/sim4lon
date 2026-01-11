@@ -29,6 +29,14 @@ const LPG_DISPLAY = [
     { value: '50kg', dbType: 'kg50', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
 ]
 
+// LPG product images mapping
+const LPG_IMAGES: Record<string, string> = {
+    '3kg': '/images/products/lpg-3kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+}
+
 export default function CatatPenjualanPage() {
     const [lpgType, setLpgType] = useState('3kg')
     const [qty, setQty] = useState(1)
@@ -186,17 +194,17 @@ export default function CatatPenjualanPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-slate-900">Catat Penjualan</h1>
-                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => window.location.href = '/pangkalan/penjualan'}>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Catat Penjualan</h1>
+                <Button variant="outline" size="sm" className="rounded-xl text-xs sm:text-sm" onClick={() => window.location.href = '/pangkalan/penjualan'}>
                     <SafeIcon name="History" className="h-4 w-4 mr-1" /> Riwayat
                 </Button>
             </div>
 
             <form onSubmit={handleSubmit}>
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
 
                     {/* Left: Product & Quantity */}
                     <Card className="shadow-lg border-0 rounded-2xl">
@@ -216,11 +224,18 @@ export default function CatatPenjualanPage() {
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${lpgType === lpg.value ? 'bg-white/20' : ''}`}
-                                                    style={{ backgroundColor: lpgType !== lpg.value ? lpg.color + '20' : undefined }}
+                                                    className={`w-11 h-11 rounded-lg flex items-center justify-center overflow-hidden ${lpgType === lpg.value ? 'bg-white/20 p-1' : 'bg-white border p-1'}`}
                                                 >
-                                                    <SafeIcon name="Cylinder" className={`h-5 w-5 ${lpgType === lpg.value ? 'text-white' : ''}`}
-                                                        style={{ color: lpgType !== lpg.value ? lpg.color : undefined }} />
+                                                    {LPG_IMAGES[lpg.value] ? (
+                                                        <img
+                                                            src={LPG_IMAGES[lpg.value]}
+                                                            alt={lpg.display}
+                                                            className="w-full h-full object-contain"
+                                                        />
+                                                    ) : (
+                                                        <SafeIcon name="Cylinder" className={`h-5 w-5 ${lpgType === lpg.value ? 'text-white' : ''}`}
+                                                            style={{ color: lpgType !== lpg.value ? lpg.color : undefined }} />
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <span className={`font-bold block ${lpgType === lpg.value ? 'text-white' : 'text-slate-900'}`}>{lpg.display}</span>
@@ -236,11 +251,11 @@ export default function CatatPenjualanPage() {
                             {/* Quantity */}
                             <div>
                                 <Label className="text-sm font-semibold text-slate-700 mb-3 block">Jumlah</Label>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="h-12 w-12 text-lg font-bold rounded-xl"
+                                        className="h-14 w-14 sm:h-12 sm:w-12 text-xl sm:text-lg font-bold rounded-xl touch-target"
                                         onClick={() => setQty(Math.max(0, qty - 1))}
                                         onMouseDown={() => startHold('dec')}
                                         onMouseUp={stopHold}
@@ -258,12 +273,12 @@ export default function CatatPenjualanPage() {
                                             setQty(val === '' ? 0 : parseInt(val))
                                         }}
                                         placeholder="0"
-                                        className="h-12 text-center font-bold text-xl flex-1 rounded-xl"
+                                        className="h-14 sm:h-12 text-center font-bold text-xl flex-1 rounded-xl"
                                     />
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="h-12 w-12 text-lg font-bold rounded-xl"
+                                        className="h-14 w-14 sm:h-12 sm:w-12 text-xl sm:text-lg font-bold rounded-xl touch-target"
                                         onClick={() => setQty(qty + 1)}
                                         onMouseDown={() => startHold('inc')}
                                         onMouseUp={stopHold}

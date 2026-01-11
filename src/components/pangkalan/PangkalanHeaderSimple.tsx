@@ -99,8 +99,10 @@ export default function PangkalanHeaderSimple() {
     return (
         <header className="sticky top-0 z-50 w-full h-14 sm:h-16 border-b bg-white dark:bg-slate-950 shadow-sm backdrop-blur-lg">
             <div className="flex h-full items-center px-3 sm:px-4 gap-2 sm:gap-4">
-                {/* Mobile Hamburger Menu - Premium animated button */}
-                <MobileMenuButton />
+                {/* Hamburger Menu - Hidden on mobile (uses bottom nav), shown on desktop for sidebar toggle */}
+                <div className="hidden md:block">
+                    <MobileMenuButton />
+                </div>
 
                 {/* Logo & Title - Always visible */}
                 <div className="flex items-center gap-2 sm:gap-3">

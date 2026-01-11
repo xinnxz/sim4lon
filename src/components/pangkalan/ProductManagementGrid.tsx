@@ -9,6 +9,19 @@ const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID').format(value)
 }
 
+// LPG product images mapping
+const LPG_IMAGES: Record<string, string> = {
+    'gr220': '/images/products/bright-gas-220gr.png',
+    'kg3': '/images/products/lpg-3kg.png',
+    '3kg': '/images/products/lpg-3kg.png',
+    'kg5': '/images/products/lpg-5kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    'kg12': '/images/products/lpg-12kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    'kg50': '/images/products/lpg-50kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+}
+
 interface ProductDisplayItem {
     id: string
     name: string
@@ -79,6 +92,7 @@ export const ProductManagementGrid: React.FC<ProductManagementGridProps> = ({
                             const margin = (edited?.sell || 0) - (edited?.cost || 0)
                             const currentStock = stocks.find(s => s.lpg_type === lpgType)
                             const productColor = product.color || '#3B82F6'
+                            const productImage = LPG_IMAGES[lpgType]
 
                             return (
                                 <div
@@ -95,14 +109,24 @@ export const ProductManagementGrid: React.FC<ProductManagementGridProps> = ({
                                         {/* Header row */}
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-4">
-                                                <div
-                                                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-                                                    style={{
-                                                        background: `linear-gradient(135deg, ${productColor}, ${productColor}CC)`,
-                                                    }}
-                                                >
-                                                    <SafeIcon name="Flame" className="h-7 w-7 text-white" />
-                                                </div>
+                                                {productImage ? (
+                                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg bg-white border overflow-hidden p-1">
+                                                        <img
+                                                            src={productImage}
+                                                            alt={product.name}
+                                                            className="w-full h-full object-contain"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div
+                                                        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, ${productColor}, ${productColor}CC)`,
+                                                        }}
+                                                    >
+                                                        <SafeIcon name="Flame" className="h-7 w-7 text-white" />
+                                                    </div>
+                                                )}
                                                 <div>
                                                     <h4 className="font-bold text-lg text-slate-900">{product.name}</h4>
                                                     <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -191,6 +215,7 @@ export const ProductManagementGrid: React.FC<ProductManagementGridProps> = ({
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {inactiveProducts.map((product) => {
                             const productColor = product.color || '#3B82F6'
+                            const productImage = LPG_IMAGES[product.lpgType]
 
                             return (
                                 <button
@@ -205,14 +230,24 @@ export const ProductManagementGrid: React.FC<ProductManagementGridProps> = ({
                                     disabled={isSaving}
                                     className="group flex items-center gap-4 p-4 bg-white border-2 border-dashed border-slate-200 rounded-xl hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-md transition-all duration-200 text-left disabled:opacity-50"
                                 >
-                                    <div
-                                        className="w-12 h-12 rounded-xl flex items-center justify-center opacity-50 group-hover:opacity-100 transition-all group-hover:shadow-lg"
-                                        style={{
-                                            background: `linear-gradient(135deg, ${productColor}40, ${productColor}20)`,
-                                        }}
-                                    >
-                                        <SafeIcon name="Flame" className="h-6 w-6" style={{ color: productColor }} />
-                                    </div>
+                                    {productImage ? (
+                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white border overflow-hidden p-1 opacity-50 group-hover:opacity-100 transition-all group-hover:shadow-lg">
+                                            <img
+                                                src={productImage}
+                                                alt={product.name}
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center opacity-50 group-hover:opacity-100 transition-all group-hover:shadow-lg"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${productColor}40, ${productColor}20)`,
+                                            }}
+                                        >
+                                            <SafeIcon name="Flame" className="h-6 w-6" style={{ color: productColor }} />
+                                        </div>
+                                    )}
                                     <div className="flex-1 min-w-0">
                                         <h4 className="font-semibold text-slate-600 group-hover:text-blue-600 transition-colors truncate">
                                             {product.name}

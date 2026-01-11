@@ -557,73 +557,84 @@ export default function KonsumenListPage() {
                             {consumers.map((consumer, index) => (
                                 <div
                                     key={consumer.id}
-                                    className={`flex items-center justify-between p-4 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
+                                    className={`p-3 sm:p-4 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${consumer.consumer_type === 'WARUNG'
+                                    {/* Mobile-first: Stack vertically on small screens */}
+                                    <div className="flex items-start gap-3">
+                                        {/* Avatar */}
+                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl flex items-center justify-center ${consumer.consumer_type === 'WARUNG'
                                             ? 'bg-gradient-to-br from-amber-400 to-orange-500'
                                             : 'bg-gradient-to-br from-blue-400 to-blue-600'
                                             }`}>
                                             <SafeIcon
                                                 name={consumer.consumer_type === 'WARUNG' ? 'Store' : 'User'}
-                                                className="h-6 w-6 text-white"
+                                                className="h-5 w-5 sm:h-6 sm:w-6 text-white"
                                             />
                                         </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-semibold text-slate-900">{consumer.name}</p>
-                                                <Badge variant="outline" className={
-                                                    consumer.consumer_type === 'WARUNG'
+
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                            {/* Name + Badge row */}
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <p className="font-semibold text-slate-900 text-sm sm:text-base truncate max-w-[140px] sm:max-w-none">{consumer.name}</p>
+                                                <Badge variant="outline" className={`text-[10px] sm:text-xs shrink-0 ${consumer.consumer_type === 'WARUNG'
                                                         ? 'bg-amber-50 text-amber-700 border-amber-200'
                                                         : 'bg-blue-50 text-blue-700 border-blue-200'
-                                                }>
+                                                    }`}>
                                                     {consumer.consumer_type === 'WARUNG' ? 'Warung' : 'RT'}
                                                 </Badge>
                                             </div>
-                                            <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+
+                                            {/* Contact info - column layout on mobile */}
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 text-xs sm:text-sm text-slate-500 mt-1">
                                                 {consumer.phone && (
-                                                    <span className="flex items-center gap-1">
-                                                        <SafeIcon name="Phone" className="h-3 w-3" />
-                                                        {consumer.phone}
+                                                    <span className="flex items-center gap-1 truncate">
+                                                        <SafeIcon name="Phone" className="h-3 w-3 shrink-0" />
+                                                        <span className="truncate">{consumer.phone}</span>
                                                     </span>
                                                 )}
                                                 {consumer.nik && (
                                                     <span className="flex items-center gap-1">
-                                                        <SafeIcon name="CreditCard" className="h-3 w-3" />
+                                                        <SafeIcon name="CreditCard" className="h-3 w-3 shrink-0" />
                                                         NIK: ***{consumer.nik.slice(-4)}
                                                     </span>
                                                 )}
                                             </div>
+
+                                            {/* Address */}
                                             {consumer.address && (
-                                                <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                                                    <SafeIcon name="MapPin" className="h-3 w-3" />
-                                                    {consumer.address.substring(0, 50)}{consumer.address.length > 50 ? '...' : ''}
+                                                <p className="text-[10px] sm:text-xs text-slate-400 mt-1 flex items-center gap-1 truncate">
+                                                    <SafeIcon name="MapPin" className="h-3 w-3 shrink-0" />
+                                                    <span className="truncate">{consumer.address.substring(0, 40)}{consumer.address.length > 40 ? '...' : ''}</span>
                                                 </p>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        {consumer._count?.consumer_orders && consumer._count.consumer_orders > 0 && (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-700">
-                                                {consumer._count.consumer_orders} order
-                                            </Badge>
-                                        )}
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleOpenDialog(consumer)}
-                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                        >
-                                            <SafeIcon name="Pencil" className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleDelete(consumer)}
-                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                        >
-                                            <SafeIcon name="Trash2" className="h-4 w-4" />
-                                        </Button>
+
+                                        {/* Actions - always visible on right */}
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            {consumer._count?.consumer_orders && consumer._count.consumer_orders > 0 && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-700 text-[10px] sm:text-xs px-1.5 sm:px-2">
+                                                    {consumer._count.consumer_orders}
+                                                    <span className="hidden sm:inline ml-1">order</span>
+                                                </Badge>
+                                            )}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleOpenDialog(consumer)}
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 p-0"
+                                            >
+                                                <SafeIcon name="Pencil" className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDelete(consumer)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                                            >
+                                                <SafeIcon name="Trash2" className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

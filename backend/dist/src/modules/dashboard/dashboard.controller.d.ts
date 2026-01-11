@@ -99,4 +99,74 @@ export declare class DashboardController {
         };
         generatedAt: string;
     }>;
+    getReorderPoint(): Promise<{
+        data: {
+            productId: string;
+            productName: string;
+            sizeKg: number;
+            color: string | null;
+            currentStock: number;
+            avgDailyDemand: number;
+            reorderPoint: number;
+            safetyStock: number;
+            daysUntilStockout: number;
+            suggestedOrderQty: number;
+            status: "critical" | "warning" | "safe" | "overstocked";
+            needsReorder: boolean;
+            recommendation: string;
+        }[];
+        summary: {
+            totalProducts: number;
+            needsReorderCount: number;
+            criticalCount: number;
+            warningCount: number;
+            analysisSettings: {
+                leadTimeDays: number;
+                analysisPeriodDays: number;
+            };
+        };
+        generatedAt: string;
+    }>;
+    getSalesTrend(): Promise<{
+        weeklyPattern: {
+            day: string;
+            dayIndex: number;
+            avgSales: number;
+            avgOrders: number;
+            totalSales: number;
+            occurrences: number;
+        }[];
+        peakDays: {
+            day: string;
+            avgSales: number;
+            avgOrders: number;
+        }[];
+        lowDays: {
+            day: string;
+            avgSales: number;
+            avgOrders: number;
+        }[];
+        last7Days: {
+            date: string;
+            day: string;
+            sales: number;
+            orderCount: number;
+        }[];
+        weeklySummary: {
+            week: string;
+            sales: number;
+            orders: number;
+            avgDaily: number;
+        }[];
+        statistics: {
+            totalSales: number;
+            totalOrders: number;
+            avgDailySales: number;
+            avgDailyOrders: number;
+            growthRate: number;
+            analysisPeriodDays: number;
+        };
+        insights: string[];
+        generatedAt: string;
+    }>;
 }

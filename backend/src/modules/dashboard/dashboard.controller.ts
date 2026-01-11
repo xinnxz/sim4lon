@@ -110,4 +110,26 @@ export class DashboardController {
     async getDSSAlerts() {
         return this.dashboardService.getDSSAlerts();
     }
+
+    /**
+     * GET /api/dashboard/reorder-point
+     * 
+     * DSS Feature: Reorder Point Calculator
+     * Menghitung kapan dan berapa jumlah yang harus dipesan ulang
+     */
+    @Get('reorder-point')
+    async getReorderPoint() {
+        return this.dashboardService.getReorderPoint();
+    }
+
+    /**
+     * GET /api/dashboard/sales-trend
+     * 
+     * DSS Feature: Sales Trend Analysis
+     * Menganalisis pola penjualan dan mengidentifikasi peak days
+     */
+    @Get('sales-trend')
+    async getSalesTrend() {
+        return this.dashboardService.getSalesTrend();
+    }
 }

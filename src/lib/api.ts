@@ -1226,6 +1226,90 @@ export interface DSSAlertsData {
 }
 
 /**
+ * Reorder Point Data Types
+ */
+export interface ReorderPointItem {
+    productId: string;
+    productName: string;
+    sizeKg: number;
+    color: string | null;
+    currentStock: number;
+    avgDailyDemand: number;
+    reorderPoint: number;
+    safetyStock: number;
+    daysUntilStockout: number;
+    suggestedOrderQty: number;
+    status: 'critical' | 'warning' | 'safe' | 'overstocked';
+    needsReorder: boolean;
+    recommendation: string;
+}
+
+export interface ReorderPointData {
+    data: ReorderPointItem[];
+    summary: {
+        totalProducts: number;
+        needsReorderCount: number;
+        criticalCount: number;
+        warningCount: number;
+        analysisSettings: {
+            leadTimeDays: number;
+            analysisPeriodDays: number;
+        };
+    };
+    generatedAt: string;
+}
+
+/**
+ * Sales Trend Data Types
+ */
+export interface WeeklyPatternItem {
+    day: string;
+    dayIndex: number;
+    avgSales: number;
+    avgOrders: number;
+    totalSales: number;
+    occurrences: number;
+}
+
+export interface PeakDayItem {
+    day: string;
+    avgSales: number;
+    avgOrders: number;
+}
+
+export interface Last7DaysItem {
+    date: string;
+    day: string;
+    sales: number;
+    orderCount: number;
+}
+
+export interface WeeklySummaryItem {
+    week: string;
+    sales: number;
+    orders: number;
+    avgDaily: number;
+}
+
+export interface SalesTrendData {
+    weeklyPattern: WeeklyPatternItem[];
+    peakDays: PeakDayItem[];
+    lowDays: PeakDayItem[];
+    last7Days: Last7DaysItem[];
+    weeklySummary: WeeklySummaryItem[];
+    statistics: {
+        totalSales: number;
+        totalOrders: number;
+        avgDailySales: number;
+        avgDailyOrders: number;
+        growthRate: number;
+        analysisPeriodDays: number;
+    };
+    insights: string[];
+    generatedAt: string;
+}
+
+/**
  * Dashboard API
  * 
  * PENJELASAN:
@@ -1233,6 +1317,7 @@ export interface DSSAlertsData {
  * - Statistik KPI (orders hari ini, pending, completed, stock)
  * - Data chart (sales, stock, profit, top pangkalan)
  * - Aktivitas terbaru
+ * - DSS Features (alerts, reorder point, sales trend)
  */
 export const dashboardApi = {
     /**
@@ -1289,6 +1374,22 @@ export const dashboardApi = {
      */
     async getDSSAlerts(): Promise<DSSAlertsData> {
         return apiRequest('/dashboard/dss-alerts');
+    },
+
+    /**
+     * Get Reorder Point Calculator Data
+     * DSS Feature: Menghitung kapan dan berapa jumlah yang harus dipesan ulang
+     */
+    async getReorderPoint(): Promise<ReorderPointData> {
+        return apiRequest('/dashboard/reorder-point');
+    },
+
+    /**
+     * Get Sales Trend Analysis Data
+     * DSS Feature: Menganalisis pola penjualan dan mengidentifikasi peak days
+     */
+    async getSalesTrend(): Promise<SalesTrendData> {
+        return apiRequest('/dashboard/sales-trend');
     },
 };
 

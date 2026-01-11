@@ -20,6 +20,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import PangkalanSidebar from '@/components/pangkalan/PangkalanSidebar'
 import PangkalanHeaderSimple from '@/components/pangkalan/PangkalanHeaderSimple'
 import FloatingVoiceWidgetPangkalan from '@/components/pangkalan/FloatingVoiceWidgetPangkalan'
+import PangkalanMobileNav from '@/components/pangkalan/PangkalanMobileNav'
 import QueryProvider from '@/components/providers/QueryProvider'
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog'
 
@@ -81,9 +82,13 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
 
                         {/* SIDEBAR + CONTENT row */}
                         <div className="flex flex-1 w-full">
-                            <PangkalanSidebar />
+                            {/* Sidebar hidden on mobile, shown on md+ */}
+                            <div className="hidden md:block">
+                                <PangkalanSidebar />
+                            </div>
                             <SidebarInset className="flex flex-col flex-1">
-                                <main className="flex-1 p-2 lg:p-8">
+                                {/* Extra bottom padding on mobile for nav bar */}
+                                <main className="flex-1 p-3 md:p-6 lg:p-8 pb-24 md:pb-6">
                                     <div className="max-w-7xl mx-auto">
                                         {children}
                                     </div>
@@ -91,6 +96,9 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
                             </SidebarInset>
                         </div>
                     </div>
+
+                    {/* Mobile Bottom Navigation - Only visible on mobile */}
+                    <PangkalanMobileNav />
 
                     {/* Voice Assistant Widget */}
                     <FloatingVoiceWidgetPangkalan />

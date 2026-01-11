@@ -606,18 +606,26 @@
 
 /* ============================================
    PANGKALAN PAGES - LARGER UI (10% ZOOM)
-   Untuk membuat tampilan pangkalan lebih besar
+   Only on medium screens and above - mobile stays normal
    ============================================ */
 .pangkalan-scale {
-  zoom: 1.1;  /* 110% zoom - same as Chrome browser 110% */
+  zoom: 1;  /* Normal on mobile */
+}
+
+@media (min-width: 768px) {
+  .pangkalan-scale {
+    zoom: 1.1;  /* 110% zoom on desktop */
+  }
 }
 
 /* Safari fallback using transform (Safari doesn't support zoom well) */
 @supports not (zoom: 1.1) {
-  .pangkalan-scale {
-    transform: scale(1.1);
-    transform-origin: top left;
-    width: 90.91%;  /* 100% / 1.1 to compensate for scale */
+  @media (min-width: 768px) {
+    .pangkalan-scale {
+      transform: scale(1.1);
+      transform-origin: top left;
+      width: 90.91%;  /* 100% / 1.1 to compensate for scale */
+    }
   }
 }
 
@@ -1773,3 +1781,44 @@
 .dark .scrollbar-thin-auto:hover::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--muted-foreground) / 0.6);
 }
+
+/* ============================================
+   MOBILE UTILITIES
+   ============================================ */
+
+/* Safe area for iOS notch devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Slide in from bottom animation */
+@keyframes slideInBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInBottom {
+  animation: slideInBottom 0.25s ease-out forwards;
+}
+
+/* Mobile tap highlight removal */
+@media (max-width: 768px) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Mobile touch-friendly button sizes */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+

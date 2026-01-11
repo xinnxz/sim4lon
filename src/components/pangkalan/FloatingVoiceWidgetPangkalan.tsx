@@ -4,13 +4,15 @@
  * FITUR:
  * - Speech-to-text untuk input penjualan cepat
  * - SMART MATCHING: Cocokkan nama yang diucapkan dengan konsumen existing
+ * - CEK STOK: Voice command untuk cek stok tabung
+ * - PENGELUARAN: Voice command untuk catat pengeluaran
  * - Support "Konsumen Umum/Random" untuk pembeli tidak terdaftar
- * - Auto-save ke API consumer-orders
+ * - Auto-save ke API consumer-orders dan expenses
  * 
  * CONTOH PERINTAH:
  * - "Jual 10 tabung 3kg ke Warung Berkah"
- * - "Jual 5 tabung ke Pak Budi" 
- * - "Jual 3 tabung ke orang random"
+ * - "Cek stok 3 kilo" atau "Berapa sisa tabung?"
+ * - "Catat pengeluaran transport 50 ribu"
  */
 
 'use client'
@@ -20,20 +22,54 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
-import { consumersApi, consumerOrdersApi, type Consumer, type LpgType } from '@/lib/api'
+import { consumersApi, consumerOrdersApi, expensesApi, type Consumer, type LpgType, type ExpenseCategory } from '@/lib/api'
 
-type Status = 'idle' | 'listening' | 'processing' | 'confirming' | 'saving' | 'success' | 'error'
+// ============= MULTI-COMMAND TYPES =============
+type CommandType = 'JUAL' | 'CEK_STOK' | 'PENGELUARAN'
 
+type Status =
+    | 'idle'
+    | 'listening'
+    | 'processing'
+    | 'confirming'          // Confirming JUAL
+    | 'confirming_stock'    // Showing stock info
+    | 'confirming_expense'  // Confirming expense
+    | 'saving'
+    | 'success'
+    | 'error'
+
+// Parsed Sale (existing, for JUAL command)
 interface ParsedSale {
     consumerId: string | null
     consumerName: string
-    consumerMatch: Consumer | null  // Matched consumer from DB
-    isNewConsumer: boolean          // True if consumer not found in DB
+    consumerMatch: Consumer | null
+    isNewConsumer: boolean
     quantity: number
     lpgType: LpgType
     productLabel: string
     pricePerUnit: number
 }
+
+// Parsed Stock Check (for CEK_STOK command)
+interface ParsedStockCheck {
+    lpgType: LpgType | 'all'
+    question: string
+}
+
+// Parsed Expense (for PENGELUARAN command)
+interface ParsedExpense {
+    category: ExpenseCategory
+    amount: number
+    description: string
+}
+
+// Unified parsed command result
+type ParsedCommand =
+    | { type: 'JUAL'; data: ParsedSale }
+    | { type: 'CEK_STOK'; data: ParsedStockCheck }
+    | { type: 'PENGELUARAN'; data: ParsedExpense }
+
+// ============= CONSTANTS =============
 
 // Default prices per LPG type
 const LPG_PRICES: Record<LpgType, number> = {
@@ -48,6 +84,173 @@ const LPG_LABELS: Record<LpgType, string> = {
     '5kg': 'LPG 5 kg',
     '12kg': 'LPG 12 kg',
     '50kg': 'LPG 50 kg',
+}
+
+// LPG product images mapping
+const LPG_IMAGES: Record<LpgType, string> = {
+    '3kg': '/images/products/lpg-3kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+}
+
+// Expense category mapping (keyword -> category)
+const EXPENSE_KEYWORDS: Record<ExpenseCategory, string[]> = {
+    'TRANSPORT': ['transport', 'bensin', 'bbm', 'ongkos', 'antar', 'kirim', 'delivery', 'solar'],
+    'OPERASIONAL': ['operasional', 'maintenance', 'perbaikan', 'servis', 'service'],
+    'LISTRIK': ['listrik', 'air', 'pln', 'pdam', 'token'],
+    'SEWA': ['sewa', 'kontrakan', 'rent', 'kos'],
+    'GAJI': ['gaji', 'upah', 'honor', 'honorarium', 'salary'],
+    'LAINNYA': ['lainnya', 'lain', 'other'],
+}
+
+// Category icons for display
+const EXPENSE_ICONS: Record<ExpenseCategory, string> = {
+    'TRANSPORT': 'Truck',
+    'OPERASIONAL': 'Settings',
+    'LISTRIK': 'Zap',
+    'SEWA': 'Home',
+    'GAJI': 'Users',
+    'LAINNYA': 'MoreHorizontal',
+}
+
+// ============= INTENT DETECTION =============
+const INTENT_PATTERNS: Record<CommandType, { keywords: string[]; weight: number }> = {
+    // More specific patterns first
+    'PENGELUARAN': {
+        keywords: ['pengeluaran', 'catat keluar', 'catat biaya', 'biaya', 'bayar', 'belanja', 'beli bensin'],
+        weight: 1.0
+    },
+    'CEK_STOK': {
+        keywords: ['cek stok', 'berapa stok', 'sisa stok', 'stok berapa', 'cek tabung', 'sisa tabung', 'ada berapa'],
+        weight: 0.9
+    },
+    'JUAL': {
+        keywords: ['jual', 'beli tabung', 'order', 'catat penjualan', 'tabung ke'],
+        weight: 0.8
+    },
+}
+
+function detectIntent(text: string): { type: CommandType; confidence: number } {
+    const lower = text.toLowerCase()
+    let bestMatch: CommandType = 'JUAL'
+    let bestScore = 0
+
+    for (const [type, config] of Object.entries(INTENT_PATTERNS)) {
+        for (const keyword of config.keywords) {
+            if (lower.includes(keyword)) {
+                const score = keyword.length * config.weight
+                if (score > bestScore) {
+                    bestScore = score
+                    bestMatch = type as CommandType
+                }
+            }
+        }
+    }
+
+    return { type: bestMatch, confidence: bestScore > 0 ? 0.9 : 0.5 }
+}
+
+// ============= INDONESIAN NUMBER PARSER =============
+function parseIndonesianAmount(text: string): number {
+    const lower = text.toLowerCase()
+    let amount = 0
+
+    // Pattern: "lima puluh ribu" -> word-based
+    const wordNumbers: Record<string, number> = {
+        'satu': 1, 'dua': 2, 'tiga': 3, 'empat': 4, 'lima': 5,
+        'enam': 6, 'tujuh': 7, 'delapan': 8, 'sembilan': 9, 'sepuluh': 10,
+        'sebelas': 11, 'duabelas': 12, 'dua belas': 12,
+        'seratus': 100, 'seribu': 1000, 'sejuta': 1000000,
+    }
+
+    // Try digit-based patterns first (more reliable)
+    const patterns = [
+        { regex: /(\d+)\s*(juta|jt)/i, multiplier: 1000000 },
+        { regex: /(\d+)\s*(ribu|rb)/i, multiplier: 1000 },
+        { regex: /(\d+)[.,](\d{3})/i, multiplier: 1 }, // 50.000 or 50,000
+        { regex: /(\d+)/i, multiplier: 1 }, // plain number
+    ]
+
+    for (const { regex, multiplier } of patterns) {
+        const match = lower.match(regex)
+        if (match) {
+            if (multiplier === 1 && match[2]) {
+                // Handle 50.000 format
+                amount = parseInt(match[1] + match[2])
+            } else {
+                amount = parseInt(match[1]) * multiplier
+            }
+            if (amount > 0) break
+        }
+    }
+
+    // If no digit found, try word-based (basic)
+    if (amount === 0) {
+        for (const [word, value] of Object.entries(wordNumbers)) {
+            if (lower.includes(word)) {
+                amount = value
+                // Check for "ribu" or "juta" multiplier
+                if (lower.includes('ribu') || lower.includes('rb')) {
+                    amount *= 1000
+                } else if (lower.includes('juta') || lower.includes('jt')) {
+                    amount *= 1000000
+                }
+                break
+            }
+        }
+    }
+
+    return amount
+}
+
+// ============= EXPENSE PARSER =============
+function parseExpense(text: string): ParsedExpense | null {
+    const lower = text.toLowerCase()
+
+    // Extract amount
+    const amount = parseIndonesianAmount(text)
+    if (amount <= 0) return null
+
+    // Detect category from keywords
+    let category: ExpenseCategory = 'LAINNYA'
+    for (const [cat, keywords] of Object.entries(EXPENSE_KEYWORDS)) {
+        if (keywords.some(kw => lower.includes(kw))) {
+            category = cat as ExpenseCategory
+            break
+        }
+    }
+
+    // Build description from cleaned text
+    let description = text
+        .replace(/\d+\s*(ribu|rb|juta|jt)?/gi, '')
+        .replace(/(pengeluaran|catat|biaya)/gi, '')
+        .trim()
+
+    if (!description || description.length < 2) {
+        description = `${category.charAt(0) + category.slice(1).toLowerCase()}`
+    }
+
+    return { category, amount, description }
+}
+
+// ============= STOCK CHECK PARSER =============
+function parseStockCheck(text: string): ParsedStockCheck {
+    const lower = text.toLowerCase()
+    let lpgType: LpgType | 'all' = 'all'
+
+    // Detect specific LPG type
+    if (lower.includes('3 kg') || lower.includes('3kg') || lower.includes('3 kilo') || lower.includes('tiga kilo')) {
+        lpgType = '3kg'
+    } else if (lower.includes('5 kg') || lower.includes('5kg') || lower.includes('5 kilo') || lower.includes('lima kilo')) {
+        lpgType = '5kg'
+    } else if (lower.includes('12') || lower.includes('dua belas') || lower.includes('duabelas')) {
+        lpgType = '12kg'
+    } else if (lower.includes('50') || lower.includes('lima puluh')) {
+        lpgType = '50kg'
+    }
+
+    return { lpgType, question: text }
 }
 
 // Simple fuzzy matching function
@@ -106,7 +309,20 @@ export default function FloatingVoiceWidgetPangkalan() {
     const [status, setStatus] = useState<Status>('idle')
     const [transcript, setTranscript] = useState('')
     const [interimTranscript, setInterimTranscript] = useState('')  // Live text saat berbicara
+
+    // Command-specific state
     const [parsedSale, setParsedSale] = useState<ParsedSale | null>(null)
+    const [parsedExpense, setParsedExpense] = useState<ParsedExpense | null>(null)
+    const [parsedStock, setParsedStock] = useState<ParsedStockCheck | null>(null)
+
+    // Mock stock data (in real app, fetch from API)
+    const [stockData] = useState<Record<LpgType, number>>({
+        '3kg': 45,
+        '5kg': 12,
+        '12kg': 8,
+        '50kg': 3,
+    })
+
     const [error, setError] = useState('')
     const [consumers, setConsumers] = useState<Consumer[]>([])
     const [isLoadingConsumers, setIsLoadingConsumers] = useState(false)
@@ -219,31 +435,8 @@ export default function FloatingVoiceWidgetPangkalan() {
             console.error('Failed to start recognition:', e)
         }
 
-        // Auto-stop after 2 seconds of silence (faster response)
-        silenceTimeoutRef.current = setInterval(() => {
-            const now = Date.now()
-            const silenceDuration = now - lastSpeechTimeRef.current
-
-            // If we have some transcript and 2 seconds of silence, auto-stop
-            if (silenceDuration >= 2000) {
-                if (silenceTimeoutRef.current) {
-                    clearInterval(silenceTimeoutRef.current)
-                    silenceTimeoutRef.current = null
-                }
-                // Only auto-stop if we have transcript
-                setTranscript(prev => {
-                    if (prev.trim()) {
-                        // Trigger stop and parse
-                        isStoppingRef.current = true  // Prevent restart in onend
-                        setTimeout(() => {
-                            try { recognitionRef.current?.stop() } catch (e) { }
-                            setStatus('processing')
-                        }, 100)
-                    }
-                    return prev
-                })
-            }
-        }, 500)
+        // Auto-stop disabled - user must manually press stop button
+        // (Previous: auto-stop after 2 seconds of silence)
     }, [])
 
     const stopAndParse = useCallback(() => {
@@ -258,38 +451,126 @@ export default function FloatingVoiceWidgetPangkalan() {
         setStatus('processing')
 
         setTimeout(() => {
-            const result = parseTranscript(transcript.trim())
-            if (result) {
-                setParsedSale(result)
-                setStatus('confirming')
-            } else {
-                setError('Tidak bisa memahami. Coba: "Jual 10 tabung ke Warung Berkah"')
+            const text = transcript.trim()
+            if (!text) {
+                setError('Tidak ada yang terdengar. Coba lagi.')
                 setStatus('error')
+                return
+            }
+
+            // ============= MULTI-COMMAND ROUTING =============
+            const intent = detectIntent(text)
+            console.log('🎯 Detected Intent:', intent)
+
+            switch (intent.type) {
+                case 'CEK_STOK': {
+                    const stockCheck = parseStockCheck(text)
+                    setParsedStock(stockCheck)
+                    setStatus('confirming_stock')
+                    break
+                }
+                case 'PENGELUARAN': {
+                    const expense = parseExpense(text)
+                    if (expense) {
+                        setParsedExpense(expense)
+                        setStatus('confirming_expense')
+                    } else {
+                        setError('Tidak bisa memahami jumlah. Coba: "Catat pengeluaran transport 50 ribu"')
+                        setStatus('error')
+                    }
+                    break
+                }
+                case 'JUAL':
+                default: {
+                    const sale = parseSaleTranscript(text)
+                    if (sale) {
+                        setParsedSale(sale)
+                        setStatus('confirming')
+                    } else {
+                        setError('Tidak bisa memahami. Coba: "Jual 10 tabung ke Warung Berkah"')
+                        setStatus('error')
+                    }
+                    break
+                }
             }
         }, 500)
     }, [transcript, consumers])
 
-    const parseTranscript = (text: string): ParsedSale | null => {
+    // ============= SALE PARSER (for JUAL command) =============
+    const parseSaleTranscript = (text: string): ParsedSale | null => {
         if (!text) return null
 
         const lower = text.toLowerCase()
 
-        // Extract quantity
-        const qtyMatch = lower.match(/(\d+)\s*(tabung|unit|buah)?/)
-        const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 0
+        // STEP 1: Extract LPG type FIRST (before quantity to avoid confusion)
+        // Use comprehensive regex patterns for all LPG types
+        let lpgType: LpgType = '3kg' // default
+
+        // LPG Type patterns - check in order of specificity (larger numbers first)
+        const lpgTypePatterns: { regex: RegExp; type: LpgType }[] = [
+            // 50kg patterns
+            { regex: /50\s*(?:kg|kilo|kilogram)/i, type: '50kg' },
+            { regex: /lima\s*puluh\s*(?:kg|kilo|kilogram)?/i, type: '50kg' },
+
+            // 12kg patterns
+            { regex: /12\s*(?:kg|kilo|kilogram)/i, type: '12kg' },
+            { regex: /dua\s*belas\s*(?:kg|kilo|kilogram)?/i, type: '12kg' },
+
+            // 5kg patterns - must check before generic "5" match
+            { regex: /5\s*(?:kg|kilo|kilogram)/i, type: '5kg' },
+            { regex: /lima\s*(?:kg|kilo|kilogram)/i, type: '5kg' },
+
+            // 3kg patterns (default anyway, but explicit check)
+            { regex: /3\s*(?:kg|kilo|kilogram)/i, type: '3kg' },
+            { regex: /tiga\s*(?:kg|kilo|kilogram)/i, type: '3kg' },
+        ]
+
+        for (const pattern of lpgTypePatterns) {
+            if (pattern.regex.test(lower)) {
+                lpgType = pattern.type
+                break
+            }
+        }
+
+        // STEP 2: Extract quantity - look for number followed by "tabung/unit/buah"
+        // This avoids confusion with the LPG size number (e.g., "5 kilo 10 tabung")
+        let quantity = 0
+
+        // Try specific patterns first
+        const qtyPatterns = [
+            /(\d+)\s*(?:tabung|unit|buah)/i,  // "10 tabung"
+            /(?:jual|beli|order)\s+(\d+)/i,    // "jual 10"
+        ]
+
+        for (const pattern of qtyPatterns) {
+            const match = lower.match(pattern)
+            if (match && match[1]) {
+                quantity = parseInt(match[1])
+                break
+            }
+        }
+
+        // If no specific pattern matched, try to extract last number that's > lpg size
+        if (quantity <= 0) {
+            const allNumbers = lower.match(/\d+/g)
+            if (allNumbers) {
+                // Find the quantity (not the LPG size)
+                for (const numStr of allNumbers) {
+                    const num = parseInt(numStr)
+                    // Skip if it's clearly an LPG size indicator (3, 5, 12, 50)
+                    if (num !== 3 && num !== 5 && num !== 12 && num !== 50) {
+                        quantity = num
+                        break
+                    }
+                }
+                // If all numbers are potential LPG sizes, use the first one as quantity
+                if (quantity <= 0 && allNumbers.length > 0) {
+                    quantity = parseInt(allNumbers[0])
+                }
+            }
+        }
 
         if (quantity <= 0) return null
-
-        // Extract LPG type (default to 3kg)
-        let lpgType: LpgType = '3kg'
-
-        if (lower.includes('12') || lower.includes('dua belas')) {
-            lpgType = '12kg'
-        } else if (lower.includes('50') || lower.includes('lima puluh')) {
-            lpgType = '50kg'
-        } else if (lower.includes('5 kg') || lower.includes('lima kilo')) {
-            lpgType = '5kg'
-        }
 
         // Extract consumer name - look for patterns
         let rawName = ''
@@ -320,12 +601,22 @@ export default function FloatingVoiceWidgetPangkalan() {
             consumerName = 'Konsumen Umum'
             isNewConsumer = false
         } else if (rawName) {
+            // Strip honorifics from rawName for better matching
+            // e.g., "ibu ratna" -> "ratna"
+            const cleanedName = stripHonorifics(rawName)
+
             // Try to match with existing consumers
             let bestMatch: Consumer | null = null
             let bestScore = 0
 
             for (const consumer of consumers) {
-                const score = fuzzyMatch(rawName, consumer.name)
+                // Match against both the cleaned name and the original consumer name
+                const score1 = fuzzyMatch(cleanedName, consumer.name)
+                // Also try matching just the first word of consumer name
+                const consumerFirstName = consumer.name.split(' ')[0]
+                const score2 = fuzzyMatch(cleanedName, consumerFirstName)
+                const score = Math.max(score1, score2)
+
                 if (score > bestScore && score >= 0.5) {
                     bestScore = score
                     bestMatch = consumer
@@ -338,8 +629,8 @@ export default function FloatingVoiceWidgetPangkalan() {
                 consumerId = bestMatch.id
                 isNewConsumer = false
             } else {
-                // No match found - strip honorifics and use as new consumer name
-                consumerName = stripHonorifics(rawName)
+                // No match found - use cleaned name as new consumer name
+                consumerName = cleanedName
                 if (!consumerName || consumerName.length < 2) {
                     consumerName = 'Konsumen Umum'
                     isNewConsumer = false
@@ -394,6 +685,37 @@ export default function FloatingVoiceWidgetPangkalan() {
         }
     }, [parsedSale])
 
+    // ============= CONFIRM EXPENSE =============
+    const confirmExpense = useCallback(async () => {
+        if (!parsedExpense) return
+
+        setStatus('saving')
+
+        try {
+            await expensesApi.create({
+                category: parsedExpense.category,
+                amount: parsedExpense.amount,
+                description: parsedExpense.description,
+                expense_date: new Date().toISOString().split('T')[0],
+            })
+
+            setStatus('success')
+            toast.success(`Pengeluaran ${formatCurrency(parsedExpense.amount)} (${parsedExpense.category}) dicatat!`, {
+                duration: 4000,
+            })
+
+            // Dispatch event for data refresh
+            window.dispatchEvent(new CustomEvent('sim4lon:expense-created'))
+
+            setTimeout(() => {
+                handleClose()
+            }, 1500)
+        } catch (err: any) {
+            setError(err.message || 'Gagal menyimpan pengeluaran')
+            setStatus('error')
+        }
+    }, [parsedExpense])
+
     const cancel = useCallback(() => {
         // Clear silence timer
         if (silenceTimeoutRef.current) {
@@ -406,6 +728,8 @@ export default function FloatingVoiceWidgetPangkalan() {
         setStatus('idle')
         setTranscript('')
         setParsedSale(null)
+        setParsedExpense(null)
+        setParsedStock(null)
         setError('')
     }, [])
 
@@ -457,10 +781,10 @@ export default function FloatingVoiceWidgetPangkalan() {
         return (
             <button
                 onClick={handleFloatingClick}
-                className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
                 title="Catat Penjualan dengan Suara"
             >
-                <SafeIcon name="Mic" className="h-6 w-6 text-white" />
+                <SafeIcon name="Mic" className="h-5 w-5 md:h-6 md:w-6 text-white" />
             </button>
         )
     }
@@ -534,11 +858,12 @@ export default function FloatingVoiceWidgetPangkalan() {
                                     )}
                                 </div>
 
-                                {/* Tips */}
+                                {/* Tips - now shows all commands */}
                                 <div className="mt-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
-                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">💡 Contoh:</p>
-                                    <p className="text-xs text-zinc-500">"Jual 10 tabung ke Warung Berkah"</p>
-                                    <p className="text-xs text-zinc-400 mt-1">"Jual 3 tabung ke orang random"</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-2">💡 Contoh perintah:</p>
+                                    <p className="text-xs text-zinc-600 dark:text-zinc-400">"<span className="font-medium text-blue-600">Jual</span> 10 tabung ke Warung Berkah"</p>
+                                    <p className="text-xs text-zinc-500 mt-1">"<span className="font-medium text-blue-600">Cek stok</span>" atau "Berapa sisa 3kg?"</p>
+                                    <p className="text-xs text-zinc-500 mt-1">"<span className="font-medium text-orange-600">Pengeluaran</span> transport 50 ribu"</p>
                                 </div>
                             </div>
                         )}
@@ -564,9 +889,18 @@ export default function FloatingVoiceWidgetPangkalan() {
                                 )}
 
                                 {/* Consumer - with smart match indicator */}
-                                <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
-                                        <SafeIcon name={parsedSale.consumerMatch ? "UserCheck" : "User"} className="h-5 w-5 text-white" />
+                                <div className={`flex items-center gap-3 p-3 rounded-xl ${parsedSale.consumerMatch?.consumer_type === 'WARUNG'
+                                    ? 'bg-amber-50 dark:bg-amber-900/20'
+                                    : 'bg-blue-50 dark:bg-blue-900/20'
+                                    }`}>
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${parsedSale.consumerMatch?.consumer_type === 'WARUNG'
+                                        ? 'bg-gradient-to-br from-amber-400 to-orange-500'
+                                        : 'bg-blue-500'
+                                        }`}>
+                                        <SafeIcon
+                                            name={parsedSale.consumerMatch?.consumer_type === 'WARUNG' ? 'Store' : (parsedSale.consumerMatch ? 'UserCheck' : 'User')}
+                                            className="h-5 w-5 text-white"
+                                        />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs text-zinc-500">Konsumen</p>
@@ -590,12 +924,22 @@ export default function FloatingVoiceWidgetPangkalan() {
                                 {/* Product & Quantity */}
                                 <div className="flex items-center justify-between py-3 border-b border-zinc-100 dark:border-zinc-800">
                                     <div className="flex items-center gap-3">
-                                        <span className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-lg font-bold text-emerald-600">
-                                            {parsedSale.quantity}
-                                        </span>
+                                        <div className="w-12 h-12 rounded-lg bg-white border overflow-hidden p-1 flex items-center justify-center shadow">
+                                            {LPG_IMAGES[parsedSale.lpgType] ? (
+                                                <img
+                                                    src={LPG_IMAGES[parsedSale.lpgType]}
+                                                    alt={parsedSale.productLabel}
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            ) : (
+                                                <span className="text-lg font-bold text-emerald-600">
+                                                    {parsedSale.quantity}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div>
-                                            <span className="text-zinc-900 dark:text-white">{parsedSale.productLabel}</span>
-                                            <p className="text-xs text-zinc-500">@ {formatCurrency(parsedSale.pricePerUnit)}</p>
+                                            <span className="font-semibold text-zinc-900 dark:text-white">{parsedSale.productLabel}</span>
+                                            <p className="text-xs text-zinc-500">{parsedSale.quantity} x @ {formatCurrency(parsedSale.pricePerUnit)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -604,6 +948,90 @@ export default function FloatingVoiceWidgetPangkalan() {
                                 <div className="flex items-center justify-between pt-2">
                                     <span className="font-medium text-zinc-600 dark:text-zinc-400">Total</span>
                                     <span className="text-xl font-bold text-blue-600">{formatCurrency(totalAmount)}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============= STOCK CHECK VIEW ============= */}
+                        {parsedStock && status === 'confirming_stock' && (
+                            <div className="space-y-4">
+                                <div className="text-center">
+                                    <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                        <SafeIcon name="Package" className="h-7 w-7 text-blue-600" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                                        {parsedStock.lpgType === 'all' ? 'Stok Semua LPG' : `Stok ${LPG_LABELS[parsedStock.lpgType]}`}
+                                    </h3>
+                                </div>
+
+                                {/* Stock Grid */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    {(parsedStock.lpgType === 'all'
+                                        ? (['3kg', '5kg', '12kg', '50kg'] as LpgType[])
+                                        : [parsedStock.lpgType]
+                                    ).map(type => {
+                                        const stock = stockData[type]
+                                        const isLow = stock < 10
+                                        const isCritical = stock < 5
+                                        return (
+                                            <div key={type} className={`p-4 rounded-xl border-2 ${isCritical ? 'border-red-200 bg-red-50' :
+                                                isLow ? 'border-yellow-200 bg-yellow-50' :
+                                                    'border-green-200 bg-green-50'
+                                                }`}>
+                                                <p className="text-xs text-zinc-500 mb-1">{LPG_LABELS[type]}</p>
+                                                <p className={`text-2xl font-bold ${isCritical ? 'text-red-600' :
+                                                    isLow ? 'text-yellow-600' :
+                                                        'text-green-600'
+                                                    }`}>
+                                                    {stock} <span className="text-sm font-normal">tabung</span>
+                                                </p>
+                                                {isCritical && <p className="text-xs text-red-500 mt-1">⚠️ Segera restock!</p>}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ============= EXPENSE CONFIRMATION VIEW ============= */}
+                        {parsedExpense && status === 'confirming_expense' && (
+                            <div className="space-y-4">
+                                {transcript && (
+                                    <p className="text-sm text-zinc-500 italic">"{transcript.trim()}"</p>
+                                )}
+
+                                {/* Category with Icon */}
+                                <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                                        <SafeIcon name={EXPENSE_ICONS[parsedExpense.category]} className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-zinc-500">Kategori</p>
+                                        <p className="font-semibold text-zinc-900 dark:text-white">{parsedExpense.category}</p>
+                                    </div>
+                                    <Badge className="bg-orange-100 text-orange-700 border-0">
+                                        <SafeIcon name="Receipt" className="h-3 w-3 mr-1" />
+                                        Pengeluaran
+                                    </Badge>
+                                </div>
+
+                                {/* Amount */}
+                                <div className="flex items-center justify-between py-3 border-b border-zinc-100 dark:border-zinc-800">
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                            <SafeIcon name="Wallet" className="h-5 w-5 text-red-600" />
+                                        </span>
+                                        <div>
+                                            <p className="text-xs text-zinc-500">Jumlah</p>
+                                            <p className="text-xl font-bold text-red-600">{formatCurrency(parsedExpense.amount)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
+                                    <p className="text-xs text-zinc-500 mb-1">Keterangan</p>
+                                    <p className="text-sm text-zinc-700 dark:text-zinc-300">{parsedExpense.description}</p>
                                 </div>
                             </div>
                         )}
@@ -621,7 +1049,7 @@ export default function FloatingVoiceWidgetPangkalan() {
                                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500 flex items-center justify-center">
                                     <SafeIcon name="Check" className="h-8 w-8 text-white" />
                                 </div>
-                                <p className="font-semibold text-green-600">Penjualan Dicatat!</p>
+                                <p className="font-semibold text-green-600">Berhasil Dicatat!</p>
                             </div>
                         )}
                     </div>
@@ -659,6 +1087,34 @@ export default function FloatingVoiceWidgetPangkalan() {
                                     Ulangi
                                 </Button>
                                 <Button onClick={confirmAndSave} className="flex-1 rounded-xl h-11 gap-2 bg-blue-500 hover:bg-blue-600">
+                                    <SafeIcon name="Check" className="h-4 w-4" />
+                                    Simpan
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Stock check - just close button */}
+                        {status === 'confirming_stock' && (
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => { cancel(); startListening(); }} className="flex-1 rounded-xl h-11 gap-2">
+                                    <SafeIcon name="Mic" className="h-4 w-4" />
+                                    Perintah Lain
+                                </Button>
+                                <Button onClick={handleClose} className="flex-1 rounded-xl h-11 gap-2 bg-blue-500 hover:bg-blue-600">
+                                    <SafeIcon name="Check" className="h-4 w-4" />
+                                    Oke
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Expense confirmation - save or retry */}
+                        {status === 'confirming_expense' && (
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => { cancel(); startListening(); }} className="flex-1 rounded-xl h-11 gap-2">
+                                    <SafeIcon name="RotateCcw" className="h-4 w-4" />
+                                    Ulangi
+                                </Button>
+                                <Button onClick={confirmExpense} className="flex-1 rounded-xl h-11 gap-2 bg-orange-500 hover:bg-orange-600">
                                     <SafeIcon name="Check" className="h-4 w-4" />
                                     Simpan
                                 </Button>

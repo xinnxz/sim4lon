@@ -753,11 +753,11 @@ export default function LaporanPangkalanPage() {
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
                     <div className="flex items-center gap-3">
-                        <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500 animate-lineGrow" />
+                        <div className="h-10 sm:h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-500 animate-lineGrow" />
                         <div>
-                            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Laporan Penjualan</h1>
-                            <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
-                                <SafeIcon name="Calculator" className="h-4 w-4 animate-pulse" />
+                            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Laporan Penjualan</h1>
+                            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 flex items-center gap-1 sm:gap-2">
+                                <SafeIcon name="Calculator" className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse" />
                                 Perhitungan: Qty × (Harga Jual - Modal)
                             </p>
                         </div>
@@ -787,36 +787,38 @@ export default function LaporanPangkalanPage() {
                     </DropdownMenu>
                 </div>
 
-                {/* Date Filter Buttons */}
+                {/* Date Filter Buttons - Horizontal scroll on mobile */}
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+                    <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1 overflow-x-auto max-w-full">
                         {[
-                            { value: 'hariini', label: 'Hari Ini', icon: 'Calendar' },
-                            { value: '7hari', label: '7 Hari', icon: 'CalendarClock' },
-                            { value: 'mingguini', label: 'Minggu Ini', icon: 'CalendarDays' },
-                            { value: 'bulanini', label: 'Bulan Ini', icon: 'CalendarRange' },
+                            { value: 'hariini', label: 'Hari Ini', shortLabel: 'Hari Ini', icon: 'Calendar' },
+                            { value: '7hari', label: '7 Hari', shortLabel: '7 Hari', icon: 'CalendarClock' },
+                            { value: 'mingguini', label: 'Minggu Ini', shortLabel: 'Minggu', icon: 'CalendarDays' },
+                            { value: 'bulanini', label: 'Bulan Ini', shortLabel: 'Bulan', icon: 'CalendarRange' },
                         ].map((period) => (
                             <button
                                 key={period.value}
                                 onClick={() => { setSelectedPeriod(period.value); setShowCustom(false) }}
-                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedPeriod === period.value && !showCustom
+                                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${selectedPeriod === period.value && !showCustom
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-slate-600 hover:text-slate-900'
                                     }`}
                             >
-                                <SafeIcon name={period.icon as any} className="h-4 w-4" />
-                                {period.label}
+                                <SafeIcon name={period.icon as any} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">{period.label}</span>
+                                <span className="sm:hidden">{period.shortLabel}</span>
                             </button>
                         ))}
                         <button
                             onClick={() => setShowCustom(!showCustom)}
-                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${showCustom
+                            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${showCustom
                                 ? 'bg-white shadow-sm text-blue-600'
                                 : 'text-slate-600 hover:text-slate-900'
                                 }`}
                         >
-                            <SafeIcon name="Settings2" className="h-4 w-4" />
-                            Custom
+                            <SafeIcon name="Settings2" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Custom</span>
+                            <span className="sm:hidden">Cust</span>
                         </button>
                     </div>
 
@@ -852,19 +854,19 @@ export default function LaporanPangkalanPage() {
                 </div>
             </div>
 
-            {/* Calculation Info Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl border border-slate-200 p-4 shadow-sm">
-                <div className="flex flex-wrap items-center gap-4 text-sm">
+            {/* Calculation Info Banner - Hidden on mobile, shown on desktop */}
+            <div className="hidden sm:block relative overflow-hidden bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                     <div className="flex items-center gap-2 text-slate-600">
                         <SafeIcon name="Calculator" className="h-4 w-4" />
                         <span className="font-medium">Perhitungan:</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-white">Modal = Qty × Harga Beli</Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="outline" className="bg-white text-[10px] sm:text-xs">Modal = Qty × Harga Beli</Badge>
                         <span className="text-slate-400">→</span>
-                        <Badge variant="outline" className="bg-white">Penjualan = Qty × Harga Jual</Badge>
+                        <Badge variant="outline" className="bg-white text-[10px] sm:text-xs">Penjualan = Qty × Harga Jual</Badge>
                         <span className="text-slate-400">→</span>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Laba = Penjualan - Modal</Badge>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] sm:text-xs">Laba = Penjualan - Modal</Badge>
                     </div>
                 </div>
             </div>
@@ -887,18 +889,18 @@ export default function LaporanPangkalanPage() {
                         <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
                             <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
-                            <CardHeader className="pb-2 relative">
-                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
+                            <CardHeader className="pb-1 sm:pb-2 relative">
+                                <CardTitle className="text-xs sm:text-sm font-medium opacity-90 flex items-center gap-1.5 sm:gap-2">
                                     <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
                                         <SafeIcon name="Banknote" className="h-4 w-4" />
                                     </div>
                                     Total Penjualan
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="relative">
-                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
-                                <p className="text-blue-100 text-sm mt-2 flex items-center gap-1">
-                                    <SafeIcon name="Flame" className="h-3.5 w-3.5" />
+                            <CardContent className="relative pt-0 sm:pt-2">
+                                <p className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.penjualan)}</p>
+                                <p className="text-blue-100 text-xs sm:text-sm mt-1 sm:mt-2 flex items-center gap-1">
+                                    <SafeIcon name="Flame" className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                     {totals.qty} tabung terjual
                                 </p>
                             </CardContent>
@@ -909,17 +911,17 @@ export default function LaporanPangkalanPage() {
                     <div className="animate-slideInBlur stagger-2" style={{ opacity: 0 }}>
                         <Card className="relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
-                            <CardHeader className="pb-2 relative">
-                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
-                                        <SafeIcon name="Wallet" className="h-4 w-4" />
+                            <CardHeader className="pb-1 sm:pb-2 relative">
+                                <CardTitle className="text-xs sm:text-sm font-medium opacity-90 flex items-center gap-1.5 sm:gap-2">
+                                    <div className="p-1 sm:p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="Wallet" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                     Total Beli
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="relative">
-                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
-                                <p className="text-slate-300 text-sm mt-2">Biaya pembelian LPG</p>
+                            <CardContent className="relative pt-0 sm:pt-2">
+                                <p className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.modal)}</p>
+                                <p className="text-slate-300 text-xs sm:text-sm mt-1 sm:mt-2">Biaya pembelian LPG</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -928,17 +930,17 @@ export default function LaporanPangkalanPage() {
                     <div className="animate-slideInBlur stagger-3" style={{ opacity: 0 }}>
                         <Card className="relative overflow-hidden bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
-                            <CardHeader className="pb-2 relative">
-                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
-                                        <SafeIcon name="ArrowUpRight" className="h-4 w-4" />
+                            <CardHeader className="pb-1 sm:pb-2 relative">
+                                <CardTitle className="text-xs sm:text-sm font-medium opacity-90 flex items-center gap-1.5 sm:gap-2">
+                                    <div className="p-1 sm:p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="ArrowUpRight" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                     Margin Kotor
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="relative">
-                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
-                                <p className="text-cyan-100 text-sm mt-2">Sebelum pengeluaran</p>
+                            <CardContent className="relative pt-0 sm:pt-2">
+                                <p className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(marginKotor)}</p>
+                                <p className="text-cyan-100 text-xs sm:text-sm mt-1 sm:mt-2">Sebelum pengeluaran</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -948,17 +950,17 @@ export default function LaporanPangkalanPage() {
                         <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
                             <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
-                            <CardHeader className="pb-2 relative">
-                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
-                                        <SafeIcon name="MinusCircle" className="h-4 w-4" />
+                            <CardHeader className="pb-1 sm:pb-2 relative">
+                                <CardTitle className="text-xs sm:text-sm font-medium opacity-90 flex items-center gap-1.5 sm:gap-2">
+                                    <div className="p-1 sm:p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="MinusCircle" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                     Pengeluaran
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="relative">
-                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
-                                <p className="text-orange-100 text-sm mt-2">Biaya operasional</p>
+                            <CardContent className="relative pt-0 sm:pt-2">
+                                <p className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.pengeluaran)}</p>
+                                <p className="text-orange-100 text-xs sm:text-sm mt-1 sm:mt-2">Biaya operasional</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -968,18 +970,18 @@ export default function LaporanPangkalanPage() {
                         <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] group h-full">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/15 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
                             <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed" />
-                            <CardHeader className="pb-2 relative">
-                                <CardTitle className="text-sm font-medium opacity-90 flex items-center gap-2">
-                                    <div className="p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
-                                        <SafeIcon name="BadgeDollarSign" className="h-4 w-4" />
+                            <CardHeader className="pb-1 sm:pb-2 relative">
+                                <CardTitle className="text-xs sm:text-sm font-medium opacity-90 flex items-center gap-1.5 sm:gap-2">
+                                    <div className="p-1 sm:p-1.5 rounded-lg bg-white/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                        <SafeIcon name="BadgeDollarSign" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                     Laba Bersih
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="relative">
-                                <p className="text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <Badge className="bg-white/20 text-white hover:bg-white/30 text-xs">
+                            <CardContent className="relative pt-0 sm:pt-2">
+                                <p className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight">{formatCurrency(totals.laba)}</p>
+                                <div className="flex items-center gap-2 mt-1 sm:mt-2">
+                                    <Badge className="bg-white/20 text-white hover:bg-white/30 text-[10px] sm:text-xs">
                                         {marginPercentage}% margin
                                     </Badge>
                                 </div>

@@ -335,7 +335,7 @@ export default function DSSAlertSection() {
                     <div className="h-10 w-1.5 rounded-full bg-gradient-to-b from-primary via-primary/70 to-accent" />
                     <div>
                         <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                            Decision Support System
+                            Perlu Tindakan!
                             {hasAlerts && (
                                 <Badge variant="destructive" className="animate-pulse text-xs">
                                     {data.lowStockAlerts.length + data.paymentOverdueAlerts.length} alerts

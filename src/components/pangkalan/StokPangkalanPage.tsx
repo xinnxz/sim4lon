@@ -64,6 +64,19 @@ const LPG_CONFIG: Record<string, { name: string; color: string; gradient: string
     'kg50': { name: 'LPG 50 kg', color: '#8B5CF6', gradient: 'from-violet-500 to-purple-600' },
 }
 
+// LPG product images mapping
+const LPG_IMAGES: Record<string, string> = {
+    'gr220': '/images/products/bright-gas-220gr.png',
+    'kg3': '/images/products/lpg-3kg.png',
+    '3kg': '/images/products/lpg-3kg.png',
+    'kg5': '/images/products/lpg-5kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    'kg12': '/images/products/lpg-12kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    'kg50': '/images/products/lpg-50kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+}
+
 // Normalize lpg_type format: kg3 <-> 3kg for proper matching
 const normalizeType = (type: string) => {
     if (type.startsWith('kg')) return type; // already kg3 format
@@ -1241,33 +1254,54 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                             .map((stock) => {
                                 const config = LPG_CONFIG[stock.lpg_type] || { name: stock.lpg_type, gradient: 'from-slate-500 to-slate-600' }
                                 const status = getStockStatus(stock)
+                                const productImage = LPG_IMAGES[stock.lpg_type]
                                 return (
-                                    <Card key={stock.id} className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-                                        <div className="absolute top-0 right-0 w-16 h-16 bg-slate-100 rounded-full -translate-y-1/2 translate-x-1/2" />
-                                        <CardHeader className="pb-2 relative">
-                                            <div className="flex items-center justify-between">
-                                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg`}>
-                                                    <SafeIcon name="Flame" className="h-6 w-6 text-white" />
-                                                </div>
-                                                <Badge variant="outline" className={status.color}>
-                                                    {status.label}
-                                                </Badge>
+                                    <Card key={stock.id} className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                                        {/* Decorative gradient background */}
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-5 group-hover:opacity-10 transition-opacity`} />
+
+                                        {/* Status Badge - Top Right */}
+                                        <div className="absolute top-3 right-3 z-10">
+                                            <Badge variant="outline" className={`${status.color} text-xs`}>
+                                                {status.label}
+                                            </Badge>
+                                        </div>
+
+                                        <CardContent className="p-4 relative">
+                                            {/* Product Image - Large & Centered */}
+                                            <div className="flex justify-center mb-3">
+                                                {productImage ? (
+                                                    <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-md border overflow-hidden p-2 group-hover:scale-105 transition-transform">
+                                                        <img
+                                                            src={productImage}
+                                                            alt={config.name}
+                                                            className="w-full h-full object-contain"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform`}>
+                                                        <SafeIcon name="Flame" className="h-10 w-10 text-white" />
+                                                    </div>
+                                                )}
                                             </div>
-                                        </CardHeader>
-                                        <CardContent className="relative">
-                                            <p className="text-sm text-slate-500 mb-1">{config.name}</p>
-                                            <p className="text-3xl font-bold text-slate-900">
-                                                {stock.qty}
+
+                                            {/* Product Name */}
+                                            <p className="text-center text-sm font-medium text-slate-600 mb-2">{config.name}</p>
+
+                                            {/* Stock Count - Big & Bold */}
+                                            <div className="text-center mb-3">
+                                                <span className="text-4xl font-bold text-slate-900">{stock.qty}</span>
                                                 <span className="text-sm font-normal text-slate-400 ml-1">tabung</span>
-                                            </p>
+                                            </div>
+
                                             {/* Stock level indicator */}
-                                            <div className="mt-3">
-                                                <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between text-[10px] text-slate-400">
                                                     <span>0</span>
                                                     <span>Kritis: {stock.critical_level}</span>
                                                     <span>Peringatan: {stock.warning_level}</span>
                                                 </div>
-                                                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                     <div
                                                         className={`h-full rounded-full transition-all ${stock.status === 'KRITIS' ? 'bg-red-500' :
                                                             stock.status === 'RENDAH' ? 'bg-orange-500' : 'bg-green-500'

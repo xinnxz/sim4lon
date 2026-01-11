@@ -265,81 +265,81 @@ export default function OrderListPage() {
       </div>
 
       {/* Summary Stats - Hari Ini with Tilt3D + Premium Styling */}
-      <div className="grid gap-4 sm:grid-cols-5">
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow">
-          <div className="p-5 relative">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow">
+          <div className="p-3 sm:p-5 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Hari Ini</p>
-                <p className="text-3xl font-bold mt-2"><AnimatedNumber value={stats?.total || 0} delay={100} /></p>
-                <p className="text-xs text-muted-foreground mt-1">pesanan</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total</p>
+                <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2"><AnimatedNumber value={stats?.total || 0} delay={100} /></p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
-                <SafeIcon name="ShoppingCart" className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
+                <SafeIcon name="ShoppingCart" className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
               </div>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700" />
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
-          <div className="p-5 relative">
+        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
+          <div className="p-3 sm:p-5 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menunggu Bayar</p>
-                <p className="text-3xl font-bold mt-2 text-amber-600 dark:text-amber-400"><AnimatedNumber value={stats?.menunggu_pembayaran || 0} delay={200} /></p>
-                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menunggu</p>
+                <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2 text-amber-600 dark:text-amber-400"><AnimatedNumber value={stats?.menunggu_pembayaran || 0} delay={200} /></p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">bayar</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/50 dark:to-amber-800/50">
-                <SafeIcon name="Clock" className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/50 dark:to-amber-800/50">
+                <SafeIcon name="Clock" className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
               </div>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300 dark:from-amber-700 dark:via-amber-500 dark:to-amber-700" />
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
-          <div className="p-5 relative">
+        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
+          <div className="p-3 sm:p-5 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Diproses</p>
-                <p className="text-3xl font-bold mt-2 text-blue-600 dark:text-blue-400"><AnimatedNumber value={stats?.diproses || 0} delay={300} /></p>
-                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Diproses</p>
+                <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2 text-blue-600 dark:text-blue-400"><AnimatedNumber value={stats?.diproses || 0} delay={300} /></p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50">
-                <SafeIcon name="RefreshCw" className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50">
+                <SafeIcon name="RefreshCw" className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300 dark:from-blue-700 dark:via-blue-500 dark:to-blue-700" />
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
-          <div className="p-5 relative">
+        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
+          <div className="p-3 sm:p-5 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dikirim</p>
-                <p className="text-3xl font-bold mt-2 text-indigo-600 dark:text-indigo-400"><AnimatedNumber value={stats?.dikirim || 0} delay={400} /></p>
-                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dikirim</p>
+                <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2 text-indigo-600 dark:text-indigo-400"><AnimatedNumber value={stats?.dikirim || 0} delay={400} /></p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/50 dark:to-indigo-800/50">
-                <SafeIcon name="Truck" className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/50 dark:to-indigo-800/50">
+                <SafeIcon name="Truck" className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-300 dark:from-indigo-700 dark:via-indigo-500 dark:to-indigo-700" />
           </div>
         </Tilt3DCard>
 
-        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-5 card-hover-glow">
-          <div className="p-5 relative">
+        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-5 card-hover-glow col-span-2 sm:col-span-1">
+          <div className="p-3 sm:p-5 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Selesai</p>
-                <p className="text-3xl font-bold mt-2 text-green-600 dark:text-green-400"><AnimatedNumber value={stats?.selesai || 0} delay={500} /></p>
-                <p className="text-xs text-muted-foreground mt-1">hari ini</p>
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Selesai</p>
+                <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2 text-green-600 dark:text-green-400"><AnimatedNumber value={stats?.selesai || 0} delay={500} /></p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">hari ini</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50">
-                <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50">
+                <SafeIcon name="CheckCircle" className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300 dark:from-green-700 dark:via-green-500 dark:to-green-700" />
@@ -425,115 +425,170 @@ export default function OrderListPage() {
               <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead
-                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
-                      onClick={() => handleSort('code')}
+            <>
+              {/* Mobile Card View - Visible only on small screens */}
+              <div className="lg:hidden space-y-3">
+                {filteredOrders.length > 0 ? (
+                  filteredOrders.map((order, index) => (
+                    <a
+                      key={order.id}
+                      href={`/detail-pesanan?id=${order.id}`}
+                      className={`block p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}`}
                     >
-                      <span className="flex items-center gap-1">
-                        ID Pesanan
-                        <SafeIcon name={getSortIcon('code')} className="h-3.5 w-3.5" />
-                      </span>
-                    </TableHead>
-                    <TableHead
-                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
-                      onClick={() => handleSort('pangkalan_name')}
-                    >
-                      <span className="flex items-center gap-1">
-                        Pangkalan
-                        <SafeIcon name={getSortIcon('pangkalan_name')} className="h-3.5 w-3.5" />
-                      </span>
-                    </TableHead>
-                    <TableHead className="font-semibold">Item</TableHead>
-                    <TableHead className="text-right font-semibold">Qty</TableHead>
-                    <TableHead
-                      className="text-right font-semibold cursor-pointer hover:bg-muted/50 select-none"
-                      onClick={() => handleSort('total_amount')}
-                    >
-                      <span className="flex items-center justify-end gap-1">
-                        Total
-                        <SafeIcon name={getSortIcon('total_amount')} className="h-3.5 w-3.5" />
-                      </span>
-                    </TableHead>
-                    <TableHead
-                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
-                      onClick={() => handleSort('current_status')}
-                    >
-                      <span className="flex items-center gap-1">
-                        Status
-                        <SafeIcon name={getSortIcon('current_status')} className="h-3.5 w-3.5" />
-                      </span>
-                    </TableHead>
-                    <TableHead
-                      className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
-                      onClick={() => handleSort('created_at')}
-                    >
-                      <span className="flex items-center gap-1">
-                        Tanggal
-                        <SafeIcon name={getSortIcon('created_at')} className="h-3.5 w-3.5" />
-                      </span>
-                    </TableHead>
-                    <TableHead className="text-right font-semibold">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.length > 0 ? (
-                    filteredOrders.map((order) => (
-                      <TableRow key={order.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium text-primary font-mono">
+                      {/* Header: Code + Status */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-mono font-semibold text-primary text-sm">
                           {formatOrderCode(order)}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {order.pangkalans?.name || '-'}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {getItemsSummary(order)}
-                        </TableCell>
-                        <TableCell className="text-right text-sm">
-                          {getTotalQty(order)} unit
-                        </TableCell>
-                        <TableCell className="text-right text-sm font-medium">
-                          {formatCurrency(order.total_amount)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="status" className={statusColors[order.current_status]}>
-                            {statusLabels[order.current_status]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatDate(order.created_at)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-primary hover:text-primary-foreground"
-                          >
-                            <a href={`/detail-pesanan?id=${order.id}`} className="flex items-center justify-center gap-2">
-                              <SafeIcon name="Eye" className="h-4 w-4" />
-                              Lihat
-                            </a>
-                          </Button>
+                        </span>
+                        <Badge variant="status" className={`${statusColors[order.current_status]} text-[10px]`}>
+                          {statusLabels[order.current_status]}
+                        </Badge>
+                      </div>
+
+                      {/* Pangkalan Name */}
+                      <p className="text-sm font-medium text-foreground truncate mb-1">
+                        {order.pangkalans?.name || '-'}
+                      </p>
+
+                      {/* Items Summary */}
+                      <p className="text-xs text-muted-foreground truncate mb-2">
+                        {getItemsSummary(order)}
+                      </p>
+
+                      {/* Footer: Total + Date */}
+                      <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total</p>
+                          <p className="text-sm font-semibold">{formatCurrency(order.total_amount)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">{getTotalQty(order)} unit</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-8">
+                    <SafeIcon name="Inbox" className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-muted-foreground">Tidak ada pesanan</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop Table View - Hidden on mobile */}
+              <div className="hidden lg:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead
+                        className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('code')}
+                      >
+                        <span className="flex items-center gap-1">
+                          ID Pesanan
+                          <SafeIcon name={getSortIcon('code')} className="h-3.5 w-3.5" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('pangkalan_name')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Pangkalan
+                          <SafeIcon name={getSortIcon('pangkalan_name')} className="h-3.5 w-3.5" />
+                        </span>
+                      </TableHead>
+                      <TableHead className="font-semibold">Item</TableHead>
+                      <TableHead className="text-right font-semibold">Qty</TableHead>
+                      <TableHead
+                        className="text-right font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('total_amount')}
+                      >
+                        <span className="flex items-center justify-end gap-1">
+                          Total
+                          <SafeIcon name={getSortIcon('total_amount')} className="h-3.5 w-3.5" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('current_status')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Status
+                          <SafeIcon name={getSortIcon('current_status')} className="h-3.5 w-3.5" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('created_at')}
+                      >
+                        <span className="flex items-center gap-1">
+                          Tanggal
+                          <SafeIcon name={getSortIcon('created_at')} className="h-3.5 w-3.5" />
+                        </span>
+                      </TableHead>
+                      <TableHead className="text-right font-semibold">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders.length > 0 ? (
+                      filteredOrders.map((order) => (
+                        <TableRow key={order.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium text-primary font-mono">
+                            {formatOrderCode(order)}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {order.pangkalans?.name || '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {getItemsSummary(order)}
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            {getTotalQty(order)} unit
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-medium">
+                            {formatCurrency(order.total_amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="status" className={statusColors[order.current_status]}>
+                              {statusLabels[order.current_status]}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {formatDate(order.created_at)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <a href={`/detail-pesanan?id=${order.id}`} className="flex items-center justify-center gap-2">
+                                <SafeIcon name="Eye" className="h-4 w-4" />
+                                Lihat
+                              </a>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <SafeIcon name="Inbox" className="h-8 w-8 text-muted-foreground" />
+                            <p className="text-muted-foreground">Tidak ada pesanan yang ditemukan</p>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <SafeIcon name="Inbox" className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">Tidak ada pesanan yang ditemukan</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
 
           {/* Professional Pagination */}

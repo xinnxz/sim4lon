@@ -298,19 +298,20 @@ export default function PangkalanDashboard() {
     return (
         <div className="space-y-8 pb-8">
             {/* Header - Animated */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fadeInDown">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fadeInDown">
                 <div className="flex items-center gap-3">
-                    <div className="h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-blue-400 to-emerald-500 animate-lineGrow" />
+                    <div className="h-10 sm:h-12 w-1.5 rounded-full bg-gradient-to-b from-blue-500 via-blue-400 to-emerald-500 animate-lineGrow" />
                     <div>
-                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
-                        <p className="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
-                            <SafeIcon name="Sparkles" className="h-4 w-4 text-amber-500 animate-pulse" />
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+                        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                            <SafeIcon name="Sparkles" className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 animate-pulse" />
                             Selamat datang, {profile?.name?.split(' ')[0] || 'Pak'}
                         </p>
                     </div>
                 </div>
+                {/* Hidden on mobile - use bottom nav instead */}
                 <Button
-                    className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all active:scale-95"
+                    className="hidden sm:flex group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all active:scale-95"
                     onClick={() => window.location.href = '/pangkalan/penjualan/catat'}
                 >
                     <SafeIcon name="Plus" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
@@ -409,7 +410,7 @@ export default function PangkalanDashboard() {
             </div>
 
             {/* Charts Row */}
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
                 {/* Area Chart - Trend 7 Hari */}
                 <Card className="lg:col-span-2 bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
                     <CardHeader className="border-b border-slate-100 bg-slate-50/50">
@@ -555,7 +556,7 @@ export default function PangkalanDashboard() {
             </div>
 
             {/* Pengeluaran Summary Card */}
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                 {/* Pengeluaran Breakdown */}
                 <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
                     <CardHeader className="border-b border-slate-100 bg-slate-50/50">

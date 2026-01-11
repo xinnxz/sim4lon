@@ -37,14 +37,14 @@ interface OrderSummaryCardProps {
 export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Ringkasan Pesanan</CardTitle>
+      <CardHeader className="pb-2 sm:pb-4">
+        <CardTitle className="text-base sm:text-lg">Ringkasan Pesanan</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         {/* Order Date */}
         <div>
-          <p className="text-sm text-muted-foreground">Tanggal Pesanan</p>
-          <p className="font-medium">{order.createdDate} {order.createdTime}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Tanggal Pesanan</p>
+          <p className="font-medium text-sm sm:text-base">{order.createdDate} {order.createdTime}</p>
         </div>
 
         <Separator />
@@ -55,19 +55,19 @@ export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
         <Separator />
 
         {/* Price Breakdown - Enhanced Visual Hierarchy */}
-        <div className="space-y-3 px-1">
+        <div className="space-y-2 sm:space-y-3 px-1">
           {/* Subtotal */}
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs sm:text-sm">
             <span className="text-muted-foreground">Subtotal</span>
             <span className="font-medium">{formatCurrency(order.subtotal)}</span>
           </div>
 
           {/* PPN 12% - highlighted with orange accent */}
           {order.tax > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
+            <div className="flex justify-between text-xs sm:text-sm">
+              <span className="text-muted-foreground flex items-center gap-1 sm:gap-2">
                 PPN 12%
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-orange-50 text-orange-600 border-orange-200">
+                <Badge variant="outline" className="text-[8px] sm:text-[10px] px-1 sm:px-1.5 py-0 bg-orange-50 text-orange-600 border-orange-200">
                   Non-Subsidi
                 </Badge>
               </span>
@@ -77,9 +77,9 @@ export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
         </div>
 
         {/* Total - Prominent styling */}
-        <div className="flex justify-between items-center bg-primary/10 p-4 rounded-lg border border-primary/20">
-          <span className="font-bold text-base">Total</span>
-          <span className="text-xl font-bold text-primary">{formatCurrency(order.total)}</span>
+        <div className="flex justify-between items-center bg-primary/10 p-3 sm:p-4 rounded-lg border border-primary/20">
+          <span className="font-bold text-sm sm:text-base">Total</span>
+          <span className="text-lg sm:text-xl font-bold text-primary">{formatCurrency(order.total)}</span>
         </div>
       </CardContent>
     </Card>

@@ -6,6 +6,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import CreateOrderButton from './CreateOrderButton'
 import DashboardKPICards from './DashboardKPICards'
 import DSSAlertSection from './DSSAlertSection'
+import DSSAdvancedSection from './DSSAdvancedSection'
 import SalesChart from './charts/SalesChart'
 import StockChart from './charts/StockChart'
 import ProfitChart from './charts/ProfitChart'
@@ -67,6 +68,11 @@ export default function DashboardContent() {
       {/* DSS Alert Section - Decision Support System */}
       <div className="relative z-10">
         <DSSAlertSection />
+      </div>
+
+      {/* DSS Advanced Section - Reorder Point & Sales Trend */}
+      <div className="relative z-10">
+        <DSSAdvancedSection />
       </div>
 
       {/* Sales Chart */}
