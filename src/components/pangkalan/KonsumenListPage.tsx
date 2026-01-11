@@ -246,21 +246,21 @@ export default function KonsumenListPage() {
                         className="w-full sm:max-w-[480px] overflow-y-auto p-0 border-l border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950"
                     >
                         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-                            {/* Enhanced Header with Gradient */}
-                            <div className="relative px-6 py-6 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white overflow-hidden">
+                            {/* Enhanced Header with Gradient - Fixed height, no shrink */}
+                            <div className="relative shrink-0 min-h-[70px] px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white overflow-hidden">
                                 {/* Decorative orbs */}
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
                                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl" />
 
                                 <div className="relative z-10 flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-1 ring-white/30">
-                                        <SafeIcon name={editingConsumer ? 'UserCog' : 'UserPlus'} className="h-6 w-6 text-white" />
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg ring-1 ring-white/30">
+                                        <SafeIcon name={editingConsumer ? 'UserCog' : 'UserPlus'} className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                                     </div>
-                                    <div className="flex flex-col justify-center">
-                                        <h2 className="text-lg font-bold tracking-tight leading-tight">
+                                    <div className="flex flex-col justify-center min-w-0">
+                                        <h2 className="text-base sm:text-lg font-bold tracking-tight leading-tight truncate">
                                             {editingConsumer ? 'Edit Konsumen' : 'Tambah Konsumen'}
                                         </h2>
-                                        <p className="text-blue-100 text-sm leading-tight">
+                                        <p className="text-blue-100 text-xs sm:text-sm leading-tight truncate">
                                             {editingConsumer ? 'Perbarui data konsumen' : 'Isi data konsumen baru'}
                                         </p>
                                     </div>
@@ -268,7 +268,7 @@ export default function KonsumenListPage() {
                             </div>
 
                             {/* Form Content with Sections */}
-                            <div className="flex-1 px-6 py-6 space-y-6">
+                            <div className="flex-1 px-4 sm:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6">
                                 {/* Jenis Konsumen - Enhanced Cards */}
                                 <div className="space-y-3">
                                     <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -327,8 +327,8 @@ export default function KonsumenListPage() {
                                     />
                                 </div>
 
-                                {/* NIK & KK */}
-                                <div className="grid grid-cols-2 gap-4">
+                                {/* NIK & KK - Stacked on mobile, side-by-side on tablet+ */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="nik">NIK (16 digit) (Opsional)</Label>
                                         <Input
@@ -389,7 +389,7 @@ export default function KonsumenListPage() {
                             </div>
 
                             {/* Enhanced Sticky Footer */}
-                            <div className="sticky bottom-0 px-6 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50">
+                            <div className="sticky bottom-0 px-4 sm:px-6 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50">
                                 <div className="flex gap-3">
                                     <Button
                                         type="button"
