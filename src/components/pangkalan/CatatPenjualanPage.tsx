@@ -375,10 +375,10 @@ export default function CatatPenjualanPage() {
                     {/* Right: Payment & Summary */}
                     <Card className="shadow-lg border-0 rounded-2xl">
                         <CardContent className="p-5 space-y-5">
-                            {/* Payment Status - Always LUNAS (no debt feature) */}
-                            <div className="p-4 rounded-xl border-2 border-green-500 bg-green-50 flex items-center justify-center gap-2">
-                                <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600" />
-                                <span className="font-semibold text-green-700">Pembayaran Lunas</span>
+                            {/* Payment Method - Cash only */}
+                            <div className="p-4 rounded-xl border-2 border-blue-500 bg-blue-50 flex items-center justify-center gap-2">
+                                <SafeIcon name="Banknote" className="h-5 w-5 text-blue-600" />
+                                <span className="font-semibold text-blue-700">Bayar Tunai</span>
                             </div>
 
                             {/* Total */}

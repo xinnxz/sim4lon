@@ -2472,37 +2472,29 @@ Keterangan: Halaman ini menampilkan riwayat semua penjualan ke konsumen. Tabel m
 
 Keterangan: Halaman ini menampilkan master data konsumen/pelanggan tetap pangkalan. Informasi yang ditampilkan meliputi nama, NIK, nomor KK, tipe (RUMAH_TANGGA/WARUNG), alamat, dan status aktif. NIK dan KK diperlukan untuk verifikasi subsidi.
 
-#### 6. Tampilan Halaman Tambah Konsumen
+#### 6. Tampilan Halaman Pengeluaran
 
-![UI Halaman Tambah Konsumen](diagrams/8 UI Mockup/UI_P06_TambahKonsumen.png)
+![UI Halaman Pengeluaran](diagrams/8 UI Mockup/UI_P06_Pengeluaran.png)
 
-*Gambar 3.52 UI Halaman Tambah Konsumen*
-
-Keterangan: Halaman ini menampilkan form untuk menambahkan konsumen baru. Form berisi input nama, NIK (16 digit), nomor KK, nomor telepon, alamat, dan tipe konsumen. Data ini digunakan untuk verifikasi kelayakan subsidi LPG 3kg.
-
-#### 7. Tampilan Halaman Hutang
-
-![UI Halaman Hutang](diagrams/8 UI Mockup/UI_P07_Hutang.png)
-
-*Gambar 3.53 UI Halaman Hutang*
-
-Keterangan: Halaman ini menampilkan status piutang pangkalan terhadap agen. Terdapat ringkasan total hutang, saldo jatuh tempo, dan rincian per pesanan yang belum lunas. Pangkalan dapat melihat detail tagihan dan riwayat pembayaran.
-
-#### 8. Tampilan Halaman Pengeluaran
-
-![UI Halaman Pengeluaran](diagrams/8 UI Mockup/UI_P08_Pengeluaran.png)
-
-*Gambar 3.54 UI Halaman Pengeluaran*
+*Gambar 3.52 UI Halaman Pengeluaran*
 
 Keterangan: Halaman ini menampilkan form dan daftar pengeluaran operasional pangkalan. Kategori pengeluaran meliputi Operasional, Transport, Gaji, dan Lainnya. Fitur ini membantu pangkalan menghitung profit bersih dari usaha.
 
-#### 9. Tampilan Halaman Laporan Pangkalan
+#### 7. Tampilan Halaman Laporan Pangkalan
 
-![UI Halaman Laporan Pangkalan](diagrams/8 UI Mockup/UI_P09_LaporanPangkalan.png)
+![UI Halaman Laporan Pangkalan](diagrams/8 UI Mockup/UI_P07_LaporanPangkalan.png)
 
-*Gambar 3.55 UI Halaman Laporan Pangkalan*
+*Gambar 3.53 UI Halaman Laporan Pangkalan*
 
 Keterangan: Halaman ini menampilkan laporan khusus untuk pangkalan. Terdapat laporan penjualan, laporan pengeluaran, dan laporan profit. Data dapat difilter berdasarkan periode dan diexport ke format Excel.
+
+#### 8. Tampilan Halaman Profil Pangkalan
+
+![UI Halaman Profil Pangkalan](diagrams/8 UI Mockup/UI_P08_ProfilPangkalan.png)
+
+*Gambar 3.54 UI Halaman Profil Pangkalan*
+
+Keterangan: Halaman ini menampilkan profil pangkalan yang sedang login. Terdapat informasi nama, email, no telepon, alamat, foto profil, dan opsi untuk mengedit profil atau mengubah password melalui modal.
 
 ---
 
