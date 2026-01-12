@@ -16,9 +16,23 @@ export class ReportsService {
     constructor(private prisma: PrismaService) { }
 
     /**
-     * Laporan Penjualan
-     */
+ * Laporan Penjualan dengan Profit Calculation
+ */
     async getSalesReport(startDate: Date, endDate: Date) {
+        // Get LPG products for cost calculation
+        const lpgProducts = await this.prisma.lpg_products.findMany({
+            select: { id: true, name: true, size_kg: true, cost_price: true, selling_price: true }
+        });
+
+        // Create lookup map for cost prices by lpg_type (kg3, kg5, etc.)
+        const costByType: Record<string, number> = {};
+        const sellingByType: Record<string, number> = {};
+        lpgProducts.forEach(p => {
+            const key = `kg${p.size_kg}`;
+            costByType[key] = Number(p.cost_price) || 0;
+            sellingByType[key] = Number(p.selling_price) || 0;
+        });
+
         // Get orders within date range
         const orders = await this.prisma.orders.findMany({
             where: {
@@ -32,19 +46,30 @@ export class ReportsService {
                 pangkalans: {
                     select: { name: true, code: true },
                 },
-                order_items: {
-                    include: {
-                        // No direct relation to lpg_products in order_items
-                    },
-                },
+                order_items: true,
             },
             orderBy: { created_at: 'desc' },
         });
 
-        // Calculate summary
+        // Calculate summary with profit
         const totalOrders = orders.length;
         const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
         const averageOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+        // Calculate total cost and profit
+        let totalCost = 0;
+        let totalQty = 0;
+        orders.forEach(order => {
+            order.order_items.forEach(item => {
+                const costPrice = costByType[item.lpg_type] || 16000; // Default cost LPG 3kg
+                totalCost += item.qty * costPrice;
+                totalQty += item.qty;
+            });
+        });
+
+        const totalProfit = totalRevenue - totalCost;
+        const profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+        const profitPerUnit = totalQty > 0 ? totalProfit / totalQty : 0;
 
         // Count orders by status
         const statusCounts = orders.reduce((acc, o) => {
@@ -52,30 +77,47 @@ export class ReportsService {
             return acc;
         }, {} as Record<string, number>);
 
-        // Format data for table
-        const data = orders.map(order => ({
-            id: order.id,
-            date: order.created_at,
-            code: order.code,
-            pangkalan: order.pangkalans?.name || '-',
-            pangkalan_code: order.pangkalans?.code || '-',
-            subtotal: Number(order.subtotal),
-            tax: Number(order.tax_amount),
-            total: Number(order.total_amount),
-            status: order.current_status,
-            items: order.order_items.map(item => ({
-                type: item.lpg_type,
-                label: item.label,
-                qty: item.qty,
-                price: Number(item.price_per_unit),
-                subtotal: Number(item.sub_total),
-            })),
-        }));
+        // Format data for table with profit per order
+        const data = orders.map(order => {
+            // Calculate cost and profit per order
+            let orderCost = 0;
+            order.order_items.forEach(item => {
+                const costPrice = costByType[item.lpg_type] || 16000;
+                orderCost += item.qty * costPrice;
+            });
+            const orderProfit = Number(order.total_amount) - orderCost;
+
+            return {
+                id: order.id,
+                date: order.created_at,
+                code: order.code,
+                pangkalan: order.pangkalans?.name || '-',
+                pangkalan_code: order.pangkalans?.code || '-',
+                subtotal: Number(order.subtotal),
+                tax: Number(order.tax_amount),
+                total: Number(order.total_amount),
+                cost: orderCost,
+                profit: orderProfit,
+                status: order.current_status,
+                items: order.order_items.map(item => ({
+                    type: item.lpg_type,
+                    label: item.label,
+                    qty: item.qty,
+                    price: Number(item.price_per_unit),
+                    subtotal: Number(item.sub_total),
+                })),
+            };
+        });
 
         return {
             summary: {
                 total_orders: totalOrders,
                 total_revenue: totalRevenue,
+                total_cost: totalCost,
+                total_profit: totalProfit,
+                profit_margin: profitMargin,
+                profit_per_unit: profitPerUnit,
+                total_qty: totalQty,
                 average_order: averageOrder,
                 status_breakdown: statusCounts,
             },

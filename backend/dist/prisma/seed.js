@@ -41,307 +41,346 @@ const bcrypt = __importStar(require("bcrypt"));
 const pool = new pg_1.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
+const jan = (day) => new Date(2026, 0, day, 7, 0, 0);
+const inOutAgen = [
+    { day: 1, stokAwal: 0, penerimaan: 560, penyaluran: 0, stokAkhir: 560 },
+    { day: 2, stokAwal: 560, penerimaan: 560, penyaluran: 562, stokAkhir: 558 },
+    { day: 3, stokAwal: 558, penerimaan: 560, penyaluran: 334, stokAkhir: 784 },
+    { day: 4, stokAwal: 784, penerimaan: 0, penyaluran: 0, stokAkhir: 784 },
+    { day: 5, stokAwal: 784, penerimaan: 0, penyaluran: 0, stokAkhir: 784 },
+    { day: 6, stokAwal: 784, penerimaan: 1120, penyaluran: 0, stokAkhir: 1904 },
+    { day: 7, stokAwal: 1904, penerimaan: 560, penyaluran: 1050, stokAkhir: 1414 },
+    { day: 8, stokAwal: 1414, penerimaan: 560, penyaluran: 927, stokAkhir: 1047 },
+    { day: 9, stokAwal: 1047, penerimaan: 560, penyaluran: 1071, stokAkhir: 536 },
+    { day: 10, stokAwal: 536, penerimaan: 1120, penyaluran: 802, stokAkhir: 854 },
+    { day: 11, stokAwal: 854, penerimaan: 0, penyaluran: 0, stokAkhir: 854 },
+];
+const penerimaanData = [
+    { tanggal: jan(1), no_so: '0002544788', no_lo: '8182906106', qty: 560 },
+    { tanggal: jan(2), no_so: '0002595522', no_lo: '8182902188', qty: 560 },
+    { tanggal: jan(3), no_so: '0002595522', no_lo: '8183107411', qty: 560 },
+    { tanggal: jan(6), no_so: '0002595522', no_lo: '8183106129', qty: 560 },
+    { tanggal: jan(6), no_so: '0002595522', no_lo: '8183106130', qty: 560 },
+    { tanggal: jan(7), no_so: '0002595522', no_lo: '8183187016', qty: 560 },
+    { tanggal: jan(8), no_so: '0002595522', no_lo: '8183802171', qty: 560 },
+    { tanggal: jan(9), no_so: '0002595522', no_lo: '8183802172', qty: 560 },
+    { tanggal: jan(10), no_so: '0002595522', no_lo: '8183404851', qty: 560 },
+    { tanggal: jan(10), no_so: '0002595522', no_lo: '8183404852', qty: 560 },
+];
+const penyaluranPerPangkalan = [
+    { code: '343269997904002', name: 'AGUS', days: { 2: 100, 3: 100, 8: 150, 9: 150, 10: 102 } },
+    { code: '343262997904008', name: 'ASEP', days: { 2: 100, 3: 100, 8: 150, 9: 150, 10: 150 } },
+    { code: '343262997904002', name: 'DANG DANG', days: { 2: 100, 3: 134, 8: 150, 9: 150, 10: 150 } },
+    { code: '343262997904006', name: 'HERMAWAN SUTISNA', days: { 2: 112, 7: 350, 8: 150, 9: 150, 10: 100 } },
+    { code: '343269997904001', name: 'M. DIAN SUTISNA', days: { 2: 100, 7: 350, 8: 127, 9: 161, 10: 100 } },
+    { code: '343291199904001', name: 'MIMAH SITI ROHMAH', days: { 2: 50, 7: 350, 8: 100, 9: 160, 10: 100 } },
+    { code: '343262997904009', name: 'NAZRIL MUHAMMAD ILHAM', days: { 8: 100, 9: 150, 10: 100 } },
+];
+function getTotalPenyaluranHari(day) {
+    return penyaluranPerPangkalan.reduce((sum, p) => sum + (p.days[day] || 0), 0);
+}
 async function main() {
-    console.log('🌱 Starting seed...');
-    const hashedAdminPassword = await bcrypt.hash('admin123', 12);
-    const hashedOperatorPassword = await bcrypt.hash('operator123', 12);
-    const adminUser = await prisma.users.upsert({
-        where: { email: 'admin@sim4lon.co.id' },
-        update: {
-            password: hashedAdminPassword,
-            name: 'Administrator',
-        },
+    console.log('🌱 Starting ACCURATE seed...');
+    console.log('');
+    console.log('🗑️ Deleting existing data (preserving users)...');
+    await prisma.activity_logs.deleteMany({});
+    await prisma.timeline_tracks.deleteMany({});
+    await prisma.payment_records.deleteMany({});
+    await prisma.order_payment_details.deleteMany({});
+    await prisma.order_items.deleteMany({});
+    await prisma.invoices.deleteMany({});
+    await prisma.orders.deleteMany({});
+    await prisma.stock_histories.deleteMany({});
+    await prisma.consumer_orders.deleteMany({});
+    await prisma.consumers.deleteMany({});
+    await prisma.pangkalan_stock_movements.deleteMany({});
+    await prisma.pangkalan_stocks.deleteMany({});
+    await prisma.lpg_prices.deleteMany({});
+    await prisma.expenses.deleteMany({});
+    await prisma.penyaluran_harian.deleteMany({});
+    await prisma.perencanaan_harian.deleteMany({});
+    await prisma.penerimaan_stok.deleteMany({});
+    await prisma.agen_orders.deleteMany({});
+    await prisma.pangkalans.deleteMany({});
+    await prisma.drivers.deleteMany({});
+    await prisma.agen.deleteMany({});
+    await prisma.lpg_products.deleteMany({});
+    await prisma.company_profile.deleteMany({});
+    console.log('✅ Existing data deleted');
+    const hashedAdmin = await bcrypt.hash('admin123', 12);
+    const hashedOperator = await bcrypt.hash('operator123', 12);
+    const hashedPangkalan = await bcrypt.hash('pangkalan123', 12);
+    const admin = await prisma.users.upsert({
+        where: { email: 'admin@agen.com' },
+        update: { password: hashedAdmin },
         create: {
             code: 'USR-001',
-            email: 'admin@sim4lon.co.id',
-            password: hashedAdminPassword,
+            email: 'admin@agen.com',
+            password: hashedAdmin,
             role: 'ADMIN',
             name: 'Administrator',
             phone: '081234567890',
             is_active: true,
         },
     });
-    console.log('✅ Created/Updated Admin:', adminUser.email);
-    const operatorUser = await prisma.users.upsert({
-        where: { email: 'operator@sim4lon.co.id' },
-        update: {
-            password: hashedOperatorPassword,
-            name: 'Siti Rahmawati',
-        },
+    console.log('✅ User Admin:', admin.email);
+    await prisma.users.upsert({
+        where: { email: 'operator@demo.com' },
+        update: { password: hashedOperator },
         create: {
             code: 'USR-002',
-            email: 'operator@sim4lon.co.id',
-            password: hashedOperatorPassword,
+            email: 'operator@demo.com',
+            password: hashedOperator,
             role: 'OPERATOR',
-            name: 'Siti Rahmawati',
+            name: 'Operator Demo',
             phone: '082211445566',
             is_active: true,
         },
     });
-    console.log('✅ Created/Updated Operator:', operatorUser.email);
-    const driver1 = await prisma.drivers.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000001' },
-        update: {},
+    console.log('✅ User Operator');
+    await prisma.users.upsert({
+        where: { email: 'pkl001@demo.com' },
+        update: { password: hashedPangkalan },
         create: {
-            id: '00000000-0000-0000-0000-000000000001',
-            code: 'DRV-001',
-            name: 'Bambang Sugiharto',
-            phone: '083399887766',
-            vehicle_id: 'B 1234 ABC',
-            is_active: true,
-            note: 'Supir senior, sudah 5 tahun',
-        },
-    });
-    console.log('✅ Created Driver:', driver1.name);
-    const driver2 = await prisma.drivers.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000002' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000002',
-            code: 'DRV-002',
-            name: 'Dedi Iskandar',
-            phone: '089812312312',
-            vehicle_id: 'B 5678 XYZ',
-            is_active: true,
-            note: 'Supir baru',
-        },
-    });
-    console.log('✅ Created Driver:', driver2.name);
-    const pangkalan1 = await prisma.pangkalans.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000011' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000011',
-            code: 'PKL-001',
-            name: 'Pangkalan Maju Jaya',
-            address: 'Jl. Sudirman No. 12, Kel. Menteng, Jakarta Pusat',
-            region: 'Jakarta Pusat',
-            pic_name: 'Pak Ahmad',
-            phone: '081234567890',
-            capacity: 500,
-            note: 'Pangkalan besar, pesanan sering di atas 100 unit',
+            code: 'USR-003',
+            email: 'pkl001@demo.com',
+            password: hashedPangkalan,
+            role: 'PANGKALAN',
+            name: 'Pangkalan Demo',
+            phone: '085678901234',
             is_active: true,
         },
     });
-    console.log('✅ Created Pangkalan:', pangkalan1.name);
-    const pangkalan2 = await prisma.pangkalans.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000012' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000012',
-            code: 'PKL-002',
-            name: 'Pangkalan Berkah Sejahtera',
-            address: 'Jalan Gajah Mada Blok C5 No. 4, Semarang',
-            region: 'Semarang',
-            pic_name: 'Bu Siti',
-            phone: '087765432109',
-            capacity: 200,
-            note: 'Butuh LPG 3kg dan 12kg',
-            is_active: true,
-        },
-    });
-    console.log('✅ Created Pangkalan:', pangkalan2.name);
-    const pangkalan3 = await prisma.pangkalans.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000013' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000013',
-            code: 'PKL-003',
-            name: 'Pangkalan Sumber Rezeki',
-            address: 'Perumahan Indah Blok R No. 10, Bandung',
-            region: 'Bandung',
-            pic_name: 'Pak Joko',
-            phone: '085611223344',
-            capacity: 100,
-            note: 'Pembayaran selalu tepat waktu',
-            is_active: true,
-        },
-    });
-    console.log('✅ Created Pangkalan:', pangkalan3.name);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const twoDaysAgo = new Date(today);
-    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    const order1 = await prisma.orders.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000101' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000101',
-            code: 'ORD-0001',
-            pangkalan_id: pangkalan1.id,
-            driver_id: driver1.id,
-            current_status: client_1.status_pesanan.SELESAI,
-            total_amount: 2500000,
-            note: 'Pesanan rutin mingguan',
-            order_date: today,
-        },
-    });
-    console.log('✅ Created Order 1 (SELESAI)');
-    const order2 = await prisma.orders.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000102' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000102',
-            code: 'ORD-0002',
-            pangkalan_id: pangkalan2.id,
-            driver_id: driver2.id,
-            current_status: client_1.status_pesanan.DIPROSES,
-            total_amount: 1800000,
-            note: 'Urgent delivery',
-            order_date: today,
-        },
-    });
-    console.log('✅ Created Order 2 (DIPROSES)');
-    const order3 = await prisma.orders.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000103' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000103',
-            code: 'ORD-0003',
-            pangkalan_id: pangkalan3.id,
-            current_status: client_1.status_pesanan.DRAFT,
-            total_amount: 900000,
-            note: 'Menunggu konfirmasi',
-            order_date: today,
-        },
-    });
-    console.log('✅ Created Order 3 (DRAFT)');
-    const order4 = await prisma.orders.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000104' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000104',
-            code: 'ORD-0004',
-            pangkalan_id: pangkalan1.id,
-            current_status: client_1.status_pesanan.MENUNGGU_PEMBAYARAN,
-            total_amount: 3200000,
-            note: 'Perlu DP dulu',
-            order_date: today,
-        },
-    });
-    console.log('✅ Created Order 4 (MENUNGGU_PEMBAYARAN)');
-    const order5 = await prisma.orders.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000105' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000105',
-            code: 'ORD-0005',
-            pangkalan_id: pangkalan2.id,
-            driver_id: driver1.id,
-            current_status: client_1.status_pesanan.SELESAI,
-            total_amount: 1500000,
-            note: 'Delivered on time',
-            order_date: yesterday,
-        },
-    });
-    console.log('✅ Created Order 5 (SELESAI - kemarin)');
-    await prisma.order_items.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000201' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000201',
-            order_id: order1.id,
-            lpg_type: client_1.lpg_type.kg3,
-            label: 'LPG 3kg',
-            price_per_unit: 18000,
-            qty: 100,
-            sub_total: 1800000,
-        },
-    });
-    await prisma.order_items.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000202' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000202',
-            order_id: order1.id,
-            lpg_type: client_1.lpg_type.kg12,
-            label: 'LPG 12kg',
-            price_per_unit: 140000,
-            qty: 5,
-            sub_total: 700000,
-        },
-    });
-    await prisma.order_items.upsert({
-        where: { id: '00000000-0000-0000-0000-000000000203' },
-        update: {},
-        create: {
-            id: '00000000-0000-0000-0000-000000000203',
-            order_id: order2.id,
-            lpg_type: client_1.lpg_type.kg3,
-            label: 'LPG 3kg',
-            price_per_unit: 18000,
-            qty: 100,
-            sub_total: 1800000,
-        },
-    });
-    console.log('✅ Created Order Items');
-    try {
-        await prisma.stock_histories.createMany({
-            data: [
-                {
-                    id: '00000000-0000-0000-0000-000000000301',
-                    lpg_type: client_1.lpg_type.kg3,
-                    movement_type: client_1.stock_movement_type.MASUK,
-                    qty: 500,
-                    note: 'Stok awal',
-                    timestamp: twoDaysAgo,
-                    recorded_by_user_id: adminUser.id,
-                },
-                {
-                    id: '00000000-0000-0000-0000-000000000302',
-                    lpg_type: client_1.lpg_type.kg12,
-                    movement_type: client_1.stock_movement_type.MASUK,
-                    qty: 200,
-                    note: 'Stok awal',
-                    timestamp: twoDaysAgo,
-                    recorded_by_user_id: adminUser.id,
-                },
-                {
-                    id: '00000000-0000-0000-0000-000000000303',
-                    lpg_type: client_1.lpg_type.kg50,
-                    movement_type: client_1.stock_movement_type.MASUK,
-                    qty: 50,
-                    note: 'Stok awal',
-                    timestamp: twoDaysAgo,
-                    recorded_by_user_id: adminUser.id,
-                },
-                {
-                    id: '00000000-0000-0000-0000-000000000304',
-                    lpg_type: client_1.lpg_type.kg3,
-                    movement_type: client_1.stock_movement_type.KELUAR,
-                    qty: 100,
-                    note: 'Pengiriman ke Pangkalan Maju Jaya',
-                    timestamp: yesterday,
-                    recorded_by_user_id: adminUser.id,
-                },
-                {
-                    id: '00000000-0000-0000-0000-000000000305',
-                    lpg_type: client_1.lpg_type.kg12,
-                    movement_type: client_1.stock_movement_type.KELUAR,
-                    qty: 5,
-                    note: 'Pengiriman ke Pangkalan Maju Jaya',
-                    timestamp: yesterday,
-                    recorded_by_user_id: adminUser.id,
-                },
-            ],
-            skipDuplicates: true,
+    console.log('✅ User Pangkalan');
+    const driverList = [
+        'Asep Sunandar', 'Dadang Hermawan', 'Ujang Suryana', 'Cecep Sudrajat',
+        'Edi Junaedi', 'Oman Suparman', 'Dede Kurniawan', 'Agus Rahmat',
+        'Iwan Setiawan', 'Yayan Rusmana'
+    ];
+    const driverIds = [];
+    for (let i = 0; i < driverList.length; i++) {
+        const driver = await prisma.drivers.create({
+            data: {
+                code: `DRV-${String(i + 1).padStart(3, '0')}`,
+                name: driverList[i],
+                phone: `08123456700${i + 1}`,
+                vehicle_id: `D ${1000 + i} AB`,
+                is_active: true,
+            },
         });
-        console.log('✅ Created Stock Histories');
+        driverIds.push(driver.id);
     }
-    catch (e) {
-        console.log('⚠️ Stock histories already exist, skipping...');
+    console.log('✅ 10 Drivers created');
+    const pangkalansData = [
+        { code: '343262997904001', name: 'CECE SUKANDI', alokasi: 1000 },
+        { code: '343262997904002', name: 'DANG DANG', alokasi: 1000 },
+        { code: '343262997904003', name: 'DEDE DILALUDIN', alokasi: 1000 },
+        { code: '343262997904004', name: 'HJ. IIS SUAIBAH', alokasi: 1000 },
+        { code: '343262997904005', name: 'UNANG JUNAEDI', alokasi: 1000 },
+        { code: '343262997904006', name: 'HERMAWAN SUTISNA', alokasi: 1000 },
+        { code: '343262997904007', name: 'POPONG JUBAEDAH', alokasi: 1000 },
+        { code: '343262997904008', name: 'ASEP', alokasi: 1200 },
+        { code: '343262997904009', name: 'NAZRIL MUHAMMAD ILHAM', alokasi: 1000 },
+        { code: '343265997904001', name: 'RAS 96', alokasi: 1000 },
+        { code: '343269997904001', name: 'M. DIAN SUTISNA', alokasi: 1000 },
+        { code: '343269997904002', name: 'AGUS', alokasi: 1000 },
+        { code: '343285997904001', name: 'TOTOH ABDUL FATAH', alokasi: 1000 },
+        { code: '343291199904001', name: 'MIMAH SITI ROHMAH', alokasi: 1000 },
+    ];
+    const pangkalanMap = {};
+    for (const p of pangkalansData) {
+        const pangkalan = await prisma.pangkalans.create({
+            data: {
+                code: p.code,
+                name: p.name,
+                address: 'Kabupaten Cianjur, Jawa Barat',
+                region: 'KABUPATEN CIANJUR',
+                alokasi_bulanan: p.alokasi,
+                is_active: true,
+            },
+        });
+        pangkalanMap[p.code] = { id: pangkalan.id, name: p.name };
     }
+    console.log('✅ 14 Pangkalans created');
+    await prisma.company_profile.create({
+        data: {
+            id: '997904',
+            company_name: 'PT. MITRA SURYA NATASYA',
+            address: 'Kabupaten Cianjur, Jawa Barat',
+            phone: '0263-123456',
+            email: 'admin@agen.com',
+            pic_name: 'Administrator',
+            region: 'Cianjur',
+        },
+    });
+    console.log('✅ Company Profile');
+    const lpgProduct = await prisma.lpg_products.create({
+        data: {
+            name: 'LPG 3kg Subsidi',
+            size_kg: 3,
+            category: 'SUBSIDI',
+            color: 'hijau',
+            brand: 'Elpiji',
+            selling_price: 18000,
+            cost_price: 16000,
+            is_active: true,
+        },
+    });
+    console.log('✅ LPG Product 3kg (id:', lpgProduct.id, ')');
+    for (const p of penerimaanData) {
+        await prisma.penerimaan_stok.create({
+            data: {
+                no_so: p.no_so,
+                no_lo: p.no_lo,
+                nama_material: 'REFILL/ISI LPG @3KG (NET)',
+                qty_pcs: p.qty,
+                qty_kg: p.qty * 3,
+                tanggal: p.tanggal,
+                sumber: 'PT. RENATA PUTRA SENTOSA',
+            },
+        });
+    }
+    console.log('✅ 10 Penerimaan Stok created');
+    for (const io of inOutAgen) {
+        if (io.penerimaan > 0) {
+            await prisma.stock_histories.create({
+                data: {
+                    lpg_type: client_1.lpg_type.kg3,
+                    lpg_product_id: lpgProduct.id,
+                    movement_type: client_1.stock_movement_type.MASUK,
+                    qty: io.penerimaan,
+                    note: `Penerimaan tanggal ${io.day} Januari 2026`,
+                    timestamp: jan(io.day),
+                    created_at: jan(io.day),
+                    recorded_by_user_id: admin.id,
+                },
+            });
+        }
+    }
+    console.log('✅ Stock Histories (MASUK)');
+    let orderNum = 1;
+    const pricePerUnit = 18000;
+    for (const p of penyaluranPerPangkalan) {
+        const pangkalan = pangkalanMap[p.code];
+        if (!pangkalan)
+            continue;
+        for (const [dayStr, qty] of Object.entries(p.days)) {
+            const day = parseInt(dayStr);
+            if (qty > 0) {
+                const orderCode = `ORD-${String(orderNum).padStart(4, '0')}`;
+                const totalAmount = qty * pricePerUnit;
+                const driverId = driverIds[orderNum % driverIds.length];
+                const order = await prisma.orders.create({
+                    data: {
+                        code: orderCode,
+                        pangkalan_id: pangkalan.id,
+                        driver_id: driverId,
+                        order_date: jan(day),
+                        created_at: jan(day),
+                        current_status: client_1.status_pesanan.SELESAI,
+                        subtotal: totalAmount,
+                        tax_amount: 0,
+                        total_amount: totalAmount,
+                        note: `Penyaluran ke ${pangkalan.name} - ${qty} tabung`,
+                    },
+                });
+                await prisma.order_items.create({
+                    data: {
+                        order_id: order.id,
+                        lpg_type: client_1.lpg_type.kg3,
+                        label: 'LPG 3kg Subsidi',
+                        price_per_unit: pricePerUnit,
+                        qty: qty,
+                        sub_total: totalAmount,
+                        is_taxable: false,
+                        tax_amount: 0,
+                    },
+                });
+                await prisma.order_payment_details.create({
+                    data: {
+                        order_id: order.id,
+                        is_paid: true,
+                        is_dp: false,
+                        payment_method: client_1.payment_method.TRANSFER,
+                        amount_paid: totalAmount,
+                        payment_date: jan(day),
+                    },
+                });
+                await prisma.stock_histories.create({
+                    data: {
+                        lpg_type: client_1.lpg_type.kg3,
+                        lpg_product_id: lpgProduct.id,
+                        movement_type: client_1.stock_movement_type.KELUAR,
+                        qty: qty,
+                        note: `${orderCode} - ${pangkalan.name} (${qty} tabung)`,
+                        timestamp: jan(day),
+                        created_at: jan(day),
+                        recorded_by_user_id: admin.id,
+                    },
+                });
+                orderNum++;
+            }
+        }
+    }
+    console.log(`✅ ${orderNum - 1} Orders created (1 per pangkalan per hari)`);
+    for (const p of penyaluranPerPangkalan) {
+        const pangkalan = pangkalanMap[p.code];
+        if (!pangkalan)
+            continue;
+        for (const [dayStr, qty] of Object.entries(p.days)) {
+            const day = parseInt(dayStr);
+            if (qty > 0) {
+                await prisma.penyaluran_harian.create({
+                    data: {
+                        pangkalan_id: pangkalan.id,
+                        tanggal: jan(day),
+                        lpg_type: client_1.lpg_type.kg3,
+                        jumlah_normal: qty,
+                        jumlah_fakultatif: 0,
+                        tipe_pembayaran: 'CASHLESS',
+                    },
+                });
+            }
+        }
+    }
+    console.log('✅ Penyaluran Harian per Pangkalan');
+    for (const p of penyaluranPerPangkalan) {
+        const pangkalan = pangkalanMap[p.code];
+        if (!pangkalan)
+            continue;
+        for (const [dayStr, qty] of Object.entries(p.days)) {
+            const day = parseInt(dayStr);
+            if (qty > 0) {
+                await prisma.perencanaan_harian.create({
+                    data: {
+                        pangkalan_id: pangkalan.id,
+                        tanggal: jan(day),
+                        lpg_type: client_1.lpg_type.kg3,
+                        jumlah_normal: qty,
+                        jumlah_fakultatif: 0,
+                        alokasi_bulan: 1000,
+                    },
+                });
+            }
+        }
+    }
+    console.log('✅ Perencanaan Harian');
     console.log('');
-    console.log('🎉 Seed completed!');
+    console.log('📊 VERIFIKASI DATA:');
+    const stockIn = inOutAgen.reduce((sum, io) => sum + io.penerimaan, 0);
+    const stockOut = inOutAgen.reduce((sum, io) => sum + io.penyaluran, 0);
+    const stockAkhir = inOutAgen[inOutAgen.length - 1].stokAkhir;
+    console.log(`   Penerimaan  : ${stockIn} tabung`);
+    console.log(`   Penyaluran  : ${stockOut} tabung`);
+    console.log(`   Stok Akhir  : ${stockAkhir} tabung`);
+    console.log(`   Check       : ${stockIn} - ${stockOut} = ${stockIn - stockOut} (should be ${stockAkhir})`);
     console.log('');
-    console.log('📋 Login credentials:');
-    console.log('   Admin    : admin@sim4lon.co.id / admin123');
-    console.log('   Operator : operator@sim4lon.co.id / operator123');
+    console.log('🎉 SEED COMPLETED!');
     console.log('');
-    console.log('📊 Sample data:');
-    console.log('   - 5 Orders (various statuses)');
-    console.log('   - Stock: 400 x 3kg, 195 x 12kg, 50 x 50kg');
+    console.log('📋 Login:');
+    console.log('   Admin     : admin@agen.com / admin123');
+    console.log('   Operator  : operator@demo.com / operator123');
+    console.log('   Pangkalan : pkl001@demo.com / pangkalan123');
 }
 main()
     .catch((e) => {
@@ -350,5 +389,6 @@ main()
 })
     .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
 });
 //# sourceMappingURL=seed.js.map

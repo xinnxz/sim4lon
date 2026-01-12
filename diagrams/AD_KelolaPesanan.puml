@@ -1,0 +1,97 @@
+@startuml AD_KelolaPesanan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD: Kelola Pesanan**\nSistem SIM4LON
+
+|Admin|
+start
+
+:Buka menu Pesanan;
+
+|Sistem|
+
+:Load daftar pesanan\ndari database;
+
+:Tampilkan halaman\nKelola Pesanan;
+
+|Admin|
+
+:Pilih aksi yang\nakan dilakukan;
+
+note right
+  Aksi yang tersedia:
+  • Buat Pesanan Baru
+  • Lihat Detail
+  • Update Status
+  • Catat Pembayaran
+  • Assign Driver
+  • Batalkan Pesanan
+end note
+
+if (Buat Pesanan?) then (ya)
+    :Input data pesanan;
+    note right: **→ AD-02** Buat Pesanan
+    |Sistem|
+    :Simpan pesanan baru;
+else (tidak)
+endif
+
+if (Lihat Detail?) then (ya)
+    :Klik baris pesanan;
+    note right: **→ AD-15** Lihat Detail
+    |Sistem|
+    :Tampilkan detail pesanan;
+else (tidak)
+endif
+
+if (Update Status?) then (ya)
+    :Pilih status baru;
+    note right: **→ AD-03** Update Status
+    |Sistem|
+    :Update status pesanan;
+else (tidak)
+endif
+
+if (Catat Pembayaran?) then (ya)
+    :Input data pembayaran;
+    note right: **→ AD-04** Catat Pembayaran
+    |Sistem|
+    :Simpan record pembayaran;
+else (tidak)
+endif
+
+if (Assign Driver?) then (ya)
+    :Pilih driver;
+    note right: **→ AD-14** Assign Driver
+    |Sistem|
+    :Assign driver ke pesanan;
+else (tidak)
+endif
+
+if (Batalkan Pesanan?) then (ya)
+    :Konfirmasi pembatalan;
+    |Sistem|
+    :Update status = BATAL;
+else (tidak)
+endif
+
+|Sistem|
+
+:Refresh tampilan\ndaftar pesanan;
+
+|Admin|
+
+if (Lanjutkan aksi lain?) then (ya)
+    :Kembali pilih aksi;
+    backward:Pilih aksi yang\nakan dilakukan;
+else (tidak)
+endif
+
+stop
+
+@enduml

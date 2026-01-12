@@ -40,22 +40,22 @@ model users {
 
 /// LPG Distributor / Agen (Supplier to Pangkalan)
 model agen {
-  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   /// Display code: AGN-001
-  code       String       @unique @db.VarChar(20)
-  name       String       @db.VarChar(255)
-  address    String?
+  code        String        @unique @db.VarChar(20)
+  name        String        @db.VarChar(255)
+  address     String?
   /// Contact person name
-  pic_name   String?      @db.VarChar(255)
-  phone      String?      @db.VarChar(20)
-  email      String?      @db.VarChar(255)
-  note       String?
-  is_active  Boolean      @default(true)
-  created_at DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at DateTime     @default(now()) @db.Timestamptz(6)
-  deleted_at DateTime?    @db.Timestamptz(6)
-  pangkalans pangkalans[]
+  pic_name    String?       @db.VarChar(255)
+  phone       String?       @db.VarChar(20)
+  email       String?       @db.VarChar(255)
+  note        String?
+  is_active   Boolean       @default(true)
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime      @default(now()) @db.Timestamptz(6)
+  deleted_at  DateTime?     @db.Timestamptz(6)
   agen_orders agen_orders[]
+  pangkalans  pangkalans[]
 
   @@index([is_active], map: "idx_agen_active")
 }
@@ -84,6 +84,7 @@ model pangkalans {
   agen_id                   String?                     @db.Uuid
   /// Monthly allocation quota (from Pertamina)
   alokasi_bulanan           Int                         @default(1000)
+  agen_orders               agen_orders[]
   consumer_orders           consumer_orders[]
   consumers                 consumers[]
   expenses                  expenses[]
@@ -95,7 +96,6 @@ model pangkalans {
   penyaluran_harian         penyaluran_harian[]
   perencanaan_harian        perencanaan_harian[]
   users                     users[]
-  agen_orders               agen_orders[]
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
@@ -404,23 +404,23 @@ model activity_logs {
 
 /// Consumer/customer of a pangkalan (warung, ibu-ibu, etc.)
 model consumers {
-  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pangkalan_id     String             @db.Uuid
-  name             String             @db.VarChar(255)
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id    String            @db.Uuid
+  name            String            @db.VarChar(255)
   /// NIK for subsidy verification
-  nik              String?            @db.VarChar(16)
+  nik             String?           @db.VarChar(16)
   /// Nomor KK for household identification
-  kk               String?            @db.VarChar(16)
-  phone            String?            @db.VarChar(20)
-  address          String?
-  note             String?
-  is_active        Boolean            @default(true)
-  created_at       DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  kk              String?           @db.VarChar(16)
+  phone           String?           @db.VarChar(20)
+  address         String?
+  note            String?
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
   /// Consumer type: RUMAH_TANGGA or WARUNG
-  consumer_type    consumer_type      @default(RUMAH_TANGGA)
-  consumer_orders  consumer_orders[]
-  pangkalans       pangkalans         @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumers_pangkalan")
+  consumer_type   consumer_type     @default(RUMAH_TANGGA)
+  consumer_orders consumer_orders[]
+  pangkalans      pangkalans        @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_consumers_pangkalan")
 
   @@index([pangkalan_id], map: "idx_consumers_pangkalan")
   @@index([is_active], map: "idx_consumers_active")
@@ -525,6 +525,64 @@ model penerimaan_stok {
   @@index([no_so], map: "idx_penerimaan_no_so")
 }
 
+/// Company profile for reports and invoices (singleton - only one record)
+model company_profile {
+  /// 6-digit kode agen (primary key, auto-generated)
+  id                   String   @id @db.VarChar(6)
+  /// Nama agen/distributor
+  company_name         String   @db.VarChar(255)
+  /// Alamat lengkap
+  address              String
+  /// Nomor telepon
+  phone                String?  @db.VarChar(50)
+  /// Email perusahaan
+  email                String?  @db.VarChar(255)
+  /// Person In Charge
+  pic_name             String?  @db.VarChar(255)
+  /// Nomor SPPBE/SIID
+  sppbe_number         String?  @db.VarChar(50)
+  /// Wilayah/Region
+  region               String?  @db.VarChar(255)
+  /// Logo URL atau base64
+  logo_url             String?
+  /// PPN rate in percentage (e.g., 12 for 12%)
+  ppn_rate             Decimal  @default(12) @db.Decimal(5, 2)
+  /// Critical stock limit for alerts
+  critical_stock_limit Int      @default(10)
+  /// Invoice number prefix
+  invoice_prefix       String   @default("INV-") @db.VarChar(20)
+  /// Order code prefix
+  order_code_prefix    String   @default("ORD-") @db.VarChar(20)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// LPG Order from Pangkalan to Agen
+model agen_orders {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Display code: AO-001
+  code          String            @unique @db.VarChar(20)
+  pangkalan_id  String            @db.Uuid
+  agen_id       String?           @db.Uuid
+  lpg_type      lpg_type
+  /// Quantity ordered
+  qty_ordered   Int
+  /// Quantity actually received
+  qty_received  Int               @default(0)
+  status        agen_order_status @default(PENDING)
+  order_date    DateTime          @default(now()) @db.Timestamptz(6)
+  received_date DateTime?         @db.Timestamptz(6)
+  note          String?
+  created_at    DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime          @default(now()) @db.Timestamptz(6)
+  agen          agen?             @relation(fields: [agen_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agen_orders_agen")
+  pangkalans    pangkalans        @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agen_orders_pangkalan")
+
+  @@index([pangkalan_id], map: "idx_agen_orders_pangkalan")
+  @@index([status], map: "idx_agen_orders_status")
+  @@index([order_date(sort: Desc)], map: "idx_agen_orders_date")
+}
+
 /// Consumer type enum - Rumah Tangga or Warung
 enum consumer_type {
   /// Konsumen rumah tangga (perorangan)
@@ -600,41 +658,6 @@ enum consumer_payment_status {
   LUNAS
 }
 
-/// Company profile for reports and invoices (singleton - only one record)
-model company_profile {
-  /// 6-digit kode agen (primary key, auto-generated)
-  id                   String   @id @db.VarChar(6)
-  /// Nama agen/distributor
-  company_name         String   @db.VarChar(255)
-  /// Alamat lengkap
-  address              String
-  /// Nomor telepon
-  phone                String?  @db.VarChar(50)
-  /// Email perusahaan
-  email                String?  @db.VarChar(255)
-  /// Person In Charge
-  pic_name             String?  @db.VarChar(255)
-  /// Nomor SPPBE/SIID
-  sppbe_number         String?  @db.VarChar(50)
-  /// Wilayah/Region
-  region               String?  @db.VarChar(255)
-  /// Logo URL atau base64
-  logo_url             String?
-  
-  // === APP SETTINGS ===
-  /// PPN rate in percentage (e.g., 12 for 12%)
-  ppn_rate             Decimal  @default(12) @db.Decimal(5, 2)
-  /// Critical stock limit for alerts
-  critical_stock_limit Int      @default(10)
-  /// Invoice number prefix
-  invoice_prefix       String   @default("INV-") @db.VarChar(20)
-  /// Order code prefix
-  order_code_prefix    String   @default("ORD-") @db.VarChar(20)
-  
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime @default(now()) @db.Timestamptz(6)
-}
-
 /// Status for agen orders
 enum agen_order_status {
   /// New order, waiting for agen
@@ -645,31 +668,4 @@ enum agen_order_status {
   DITERIMA
   /// Order cancelled
   BATAL
-}
-
-/// LPG Order from Pangkalan to Agen
-model agen_orders {
-  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  /// Display code: AO-001
-  code           String            @unique @db.VarChar(20)
-  pangkalan_id   String            @db.Uuid
-  agen_id        String?           @db.Uuid
-  lpg_type       lpg_type
-  /// Quantity ordered
-  qty_ordered    Int
-  /// Quantity actually received
-  qty_received   Int               @default(0)
-  status         agen_order_status @default(PENDING)
-  order_date     DateTime          @default(now()) @db.Timestamptz(6)
-  received_date  DateTime?         @db.Timestamptz(6)
-  note           String?
-  created_at     DateTime          @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime          @default(now()) @db.Timestamptz(6)
-  
-  pangkalans     pangkalans        @relation(fields: [pangkalan_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agen_orders_pangkalan")
-  agen           agen?             @relation(fields: [agen_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agen_orders_agen")
-
-  @@index([pangkalan_id], map: "idx_agen_orders_pangkalan")
-  @@index([status], map: "idx_agen_orders_status")
-  @@index([order_date(sort: Desc)], map: "idx_agen_orders_date")
 }

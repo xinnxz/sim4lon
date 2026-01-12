@@ -6,6 +6,11 @@ export declare class ReportsController {
         summary: {
             total_orders: number;
             total_revenue: number;
+            total_cost: number;
+            total_profit: number;
+            profit_margin: number;
+            profit_per_unit: number;
+            total_qty: number;
             average_order: number;
             status_breakdown: Record<string, number>;
         };
@@ -18,6 +23,8 @@ export declare class ReportsController {
             subtotal: number;
             tax: number;
             total: number;
+            cost: number;
+            profit: number;
             status: import("@prisma/client").$Enums.status_pesanan;
             items: {
                 type: import("@prisma/client").$Enums.lpg_type;

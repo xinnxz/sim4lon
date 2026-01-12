@@ -294,17 +294,18 @@ export default function ReportsPage() {
     }
     const PIE_COLORS = ['#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#06b6d4']
 
-    // Prepare chart data - Sales trend by date with target line
+    // Prepare chart data - Sales trend by date with target line and profit
     const salesChartData = useMemo(() => {
         if (!salesData?.data) return []
-        const groupedByDate: Record<string, { date: string; total: number; count: number; target: number }> = {}
+        const groupedByDate: Record<string, { date: string; total: number; profit: number; count: number; target: number }> = {}
 
-        salesData.data.forEach(item => {
+        salesData.data.forEach((item: any) => {
             const dateKey = new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
             if (!groupedByDate[dateKey]) {
-                groupedByDate[dateKey] = { date: dateKey, total: 0, count: 0, target: dailySalesTarget }
+                groupedByDate[dateKey] = { date: dateKey, total: 0, profit: 0, count: 0, target: dailySalesTarget }
             }
             groupedByDate[dateKey].total += item.total
+            groupedByDate[dateKey].profit += item.profit || 0
             groupedByDate[dateKey].count += 1
         })
 
@@ -390,31 +391,39 @@ export default function ReportsPage() {
 
             if (activeTab === 'sales' && salesData) {
                 const columns = [
-                    { header: 'Tanggal', key: 'date', width: 15 },
-                    { header: 'Kode', key: 'code', width: 12 },
-                    { header: 'Pangkalan', key: 'pangkalan', width: 25 },
-                    { header: 'Pendapatan', key: 'total', width: 18, align: 'right' as const },
-                    { header: 'Status', key: 'status', width: 15 },
+                    { header: 'Tanggal', key: 'date', width: 13 },
+                    { header: 'Kode', key: 'code', width: 11 },
+                    { header: 'Pangkalan', key: 'pangkalan', width: 20 },
+                    { header: 'Pendapatan', key: 'total', width: 14, align: 'right' as const },
+                    { header: 'Modal', key: 'cost', width: 14, align: 'right' as const },
+                    { header: 'Profit', key: 'profit', width: 14, align: 'right' as const },
+                    { header: 'Status', key: 'status', width: 12 },
                 ]
-                const data = salesData.data.map(item => ({
+                const data = salesData.data.map((item: any) => ({
                     ...item,
                     date: formatDateExport(item.date),
                     total: formatCurrencyExport(item.total),
+                    cost: formatCurrencyExport(item.cost || 0),
+                    profit: formatCurrencyExport(item.profit || 0),
                     status: statusLabels[item.status] || item.status,
                 }))
+                const summaryData = salesData.summary as any
                 const summary = [
-                    { label: 'Total Pesanan', value: salesData.summary.total_orders },
-                    { label: 'Total Pendapatan', value: formatCurrencyExport(salesData.summary.total_revenue) },
-                    { label: 'Rata-rata Pesanan', value: formatCurrencyExport(salesData.summary.average_order) },
-                    { label: 'Pesanan Selesai', value: salesData.summary.status_breakdown?.SELESAI || 0 },
+                    { label: 'Total Pesanan', value: summaryData.total_orders },
+                    { label: 'Total Pendapatan', value: formatCurrencyExport(summaryData.total_revenue) },
+                    { label: 'Total Modal', value: formatCurrencyExport(summaryData.total_cost || 0) },
+                    { label: 'Profit Bersih', value: formatCurrencyExport(summaryData.total_profit || 0) },
+                    { label: 'Profit Margin', value: `${(summaryData.profit_margin || 0).toFixed(1)}%` },
                 ]
-                // Satu baris TOTAL di paling bawah
+                // Footer row dengan total
                 const footerRows = [
                     createFooterRow('TOTAL', {
                         code: '',
                         pangkalan: '',
-                        total: formatCurrencyExport(salesData.summary.total_revenue),
-                        status: ''
+                        total: formatCurrencyExport(summaryData.total_revenue),
+                        cost: formatCurrencyExport(summaryData.total_cost || 0),
+                        profit: formatCurrencyExport(summaryData.total_profit || 0),
+                        status: `(${(summaryData.profit_margin || 0).toFixed(1)}%)`
                     }, 'date'),
                 ]
                 await exportToPDF(data, columns, summary, { title, period, filename }, footerRows)
@@ -466,32 +475,37 @@ export default function ReportsPage() {
             if (activeTab === 'sales' && salesData) {
                 const columns = [
                     { header: 'Tanggal', key: 'date', width: 12 },
-                    { header: 'Kode', key: 'code', width: 15 },
-                    { header: 'Pangkalan', key: 'pangkalan', width: 25 },
-                    { header: 'Subtotal', key: 'subtotal', width: 15 },
-                    { header: 'Pajak', key: 'tax', width: 12 },
+                    { header: 'Kode', key: 'code', width: 13 },
+                    { header: 'Pangkalan', key: 'pangkalan', width: 22 },
                     { header: 'Pendapatan', key: 'total', width: 15 },
-                    { header: 'Status', key: 'status', width: 15 },
+                    { header: 'Modal', key: 'cost', width: 15 },
+                    { header: 'Profit', key: 'profit', width: 15 },
+                    { header: 'Status', key: 'status', width: 13 },
                 ]
-                const data = salesData.data.map(item => ({
+                const data = salesData.data.map((item: any) => ({
                     ...item,
                     date: formatDateExport(item.date),
+                    cost: item.cost || 0,
+                    profit: item.profit || 0,
                     status: statusLabels[item.status] || item.status,
                 }))
+                const summaryData = salesData.summary as any
                 const summary = [
-                    { label: 'Total Pesanan', value: salesData.summary.total_orders },
-                    { label: 'Total Pendapatan', value: salesData.summary.total_revenue },
-                    { label: 'Rata-rata Pesanan', value: salesData.summary.average_order },
+                    { label: 'Total Pesanan', value: summaryData.total_orders },
+                    { label: 'Total Pendapatan', value: summaryData.total_revenue },
+                    { label: 'Total Modal', value: summaryData.total_cost || 0 },
+                    { label: 'Profit Bersih', value: summaryData.total_profit || 0 },
+                    { label: 'Profit Margin', value: `${(summaryData.profit_margin || 0).toFixed(1)}%` },
                 ]
-                // Satu baris TOTAL di paling bawah
+                // Footer row dengan total
                 const footerRows = [
                     createFooterRow('TOTAL', {
                         code: '',
                         pangkalan: '',
-                        subtotal: salesData.summary.total_revenue,
-                        tax: '',
-                        total: salesData.summary.total_revenue,
-                        status: ''
+                        total: summaryData.total_revenue,
+                        cost: summaryData.total_cost || 0,
+                        profit: summaryData.total_profit || 0,
+                        status: `Margin: ${(summaryData.profit_margin || 0).toFixed(1)}%`
                     }, 'date'),
                 ]
                 exportToExcel(data, columns, summary, { title, period, filename }, footerRows)
@@ -695,71 +709,91 @@ export default function ReportsPage() {
 
                 {/* Sales Tab */}
                 <TabsContent value="sales" className="space-y-4">
-                    {/* Summary Cards */}
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow">
-                            <div className="p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pesanan</p>
-                                        <p className="text-3xl font-bold text-primary mt-2">
+                    {/* Summary Cards - 5 columns with fixed height */}
+                    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow h-[120px]">
+                            <div className="p-4 relative h-full flex flex-col justify-between">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total Pesanan</p>
+                                        <p className="text-2xl lg:text-3xl font-bold text-primary mt-1">
                                             {isLoading ? '...' : <AnimatedNumber value={salesData?.summary.total_orders || 0} delay={100} />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Pesanan dalam periode</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">Pesanan periode ini</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-emerald-200/50 dark:from-primary/30 dark:to-emerald-800/30 shadow-lg">
-                                        <SafeIcon name="ShoppingCart" className="h-5 w-5 text-primary" />
+                                    <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-emerald-200/50 dark:from-primary/30 dark:to-emerald-800/30 shadow-lg flex-shrink-0">
+                                        <SafeIcon name="ShoppingCart" className="h-4 w-4 text-primary" />
                                     </div>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
-                            <div className="p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
-                                        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow h-[120px]">
+                            <div className="p-4 relative h-full flex flex-col justify-between">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
                                             {isLoading ? '...' : <AnimatedNumber value={salesData?.summary.total_revenue || 0} delay={200} isCurrency />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Revenue keseluruhan</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">Revenue bruto</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30 shadow-lg">
-                                        <SafeIcon name="TrendingUp" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                    <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30 shadow-lg flex-shrink-0">
+                                        <SafeIcon name="TrendingUp" className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
-                            <div className="p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rata-rata Pesanan</p>
-                                        <p className="text-3xl font-bold text-teal-600 dark:text-teal-400 mt-2">
+                        {/* Profit Bersih Card */}
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow h-[120px]">
+                            <div className="p-4 relative h-full flex flex-col justify-between">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Profit Bersih</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+                                            {isLoading ? '...' : <AnimatedNumber value={(salesData?.summary as any)?.total_profit || 0} delay={250} isCurrency />}
+                                        </p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                            Margin: {isLoading ? '...' : `${((salesData?.summary as any)?.profit_margin || 0).toFixed(1)}%`}
+                                        </p>
+                                    </div>
+                                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 shadow-lg flex-shrink-0">
+                                        <SafeIcon name="Coins" className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                            </div>
+                        </Tilt3DCard>
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow h-[120px]">
+                            <div className="p-4 relative h-full flex flex-col justify-between">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Rata-rata Pesanan</p>
+                                        <p className="text-xl lg:text-2xl font-bold text-teal-600 dark:text-teal-400 mt-1">
                                             {isLoading ? '...' : <AnimatedNumber value={salesData?.summary.average_order || 0} delay={300} isCurrency />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Per transaksi</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">Per transaksi</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30 shadow-lg">
-                                        <SafeIcon name="Calculator" className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                                    <div className="p-2 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30 shadow-lg flex-shrink-0">
+                                        <SafeIcon name="Calculator" className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                                     </div>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
-                            <div className="p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pertumbuhan</p>
-                                        <p className={`text-3xl font-bold mt-2 ${growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-5 card-hover-glow col-span-2 md:col-span-1 h-[120px]">
+                            <div className="p-4 relative h-full flex flex-col justify-between">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Pertumbuhan</p>
+                                        <p className={`text-2xl lg:text-3xl font-bold mt-1 ${growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                             {isLoading ? '...' : `${growthPercentage >= 0 ? '+' : ''}${growthPercentage.toFixed(1)}%`}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Vs target harian</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">Vs target harian</p>
                                     </div>
-                                    <div className={`p-3 rounded-xl shadow-lg bg-gradient-to-br ${growthPercentage >= 0 ? 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30' : 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30'}`}>
-                                        <SafeIcon name={growthPercentage >= 0 ? "TrendingUp" : "TrendingDown"} className={`h-5 w-5 ${growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} />
+                                    <div className={`p-2 rounded-xl shadow-lg flex-shrink-0 bg-gradient-to-br ${growthPercentage >= 0 ? 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30' : 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30'}`}>
+                                        <SafeIcon name={growthPercentage >= 0 ? "TrendingUp" : "TrendingDown"} className={`h-4 w-4 ${growthPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} />
                                     </div>
                                 </div>
                                 <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${growthPercentage >= 0 ? 'from-green-300 via-green-500 to-green-300' : 'from-red-300 via-red-500 to-red-300'}`} />
@@ -887,6 +921,15 @@ export default function ReportsPage() {
                                                 strokeWidth={3}
                                                 dot={{ fill: '#22c55e', strokeWidth: 2, r: 4, stroke: '#fff' }}
                                                 activeDot={{ r: 6, fill: '#22c55e', stroke: '#fff', strokeWidth: 3, filter: 'url(#salesGlow)' }}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="profit"
+                                                name="Profit"
+                                                stroke="#3b82f6"
+                                                strokeWidth={2}
+                                                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3, stroke: '#fff' }}
+                                                activeDot={{ r: 5, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
                                             />
                                             <Line
                                                 type="monotone"
