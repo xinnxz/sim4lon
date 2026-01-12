@@ -259,18 +259,29 @@ export default function ManageLPGTypesModal({ open, onOpenChange, onProductUpdat
                         }`}
                       style={{ borderLeftWidth: '4px', borderLeftColor: isActive ? getColorHex(product.color) : '#9ca3af' }}
                     >
-                      {/* Product Icon */}
+                      {/* Product Image */}
                       <div
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl overflow-hidden"
                         style={{
                           background: isActive
                             ? `linear-gradient(135deg, ${getColorHex(product.color)}30, ${getColorHex(product.color)}10)`
                             : 'rgba(156,163,175,0.1)',
                         }}
                       >
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="h-12 w-12 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
                         <SafeIcon
                           name="Cylinder"
-                          className="h-6 w-6"
+                          className={`h-6 w-6 ${product.image_url ? 'hidden' : ''}`}
                           style={{ color: isActive ? getColorHex(product.color) : '#9ca3af' }}
                         />
                       </div>
@@ -473,18 +484,26 @@ export default function ManageLPGTypesModal({ open, onOpenChange, onProductUpdat
                 <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Preview</p>
                 <div className="flex items-center gap-3">
                   <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl"
+                    className="flex h-14 w-14 items-center justify-center rounded-xl overflow-hidden"
                     style={{
                       background: formData.is_active
                         ? `linear-gradient(135deg, ${getColorHex(formData.color)}30, ${getColorHex(formData.color)}10)`
                         : 'rgba(156,163,175,0.1)',
                     }}
                   >
-                    <SafeIcon
-                      name="Cylinder"
-                      className="h-6 w-6"
-                      style={{ color: formData.is_active ? getColorHex(formData.color) : '#9ca3af' }}
-                    />
+                    {editingProduct?.image_url ? (
+                      <img
+                        src={editingProduct.image_url}
+                        alt={formData.name}
+                        className="h-12 w-12 object-contain"
+                      />
+                    ) : (
+                      <SafeIcon
+                        name="Cylinder"
+                        className="h-6 w-6"
+                        style={{ color: formData.is_active ? getColorHex(formData.color) : '#9ca3af' }}
+                      />
+                    )}
                   </div>
                   <div className={formData.is_active ? '' : 'opacity-50'}>
                     <p className="font-bold">{formData.name || 'Nama Produk'}</p>
