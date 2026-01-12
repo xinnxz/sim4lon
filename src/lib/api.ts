@@ -842,6 +842,7 @@ export interface LpgProduct {
     color: string | null;
     brand: string | null;
     description: string | null;
+    image_url: string | null;       // Product image URL
     selling_price: number;          // Harga jual default
     cost_price?: number | null;     // Harga beli (untuk profit)
     is_active: boolean;
