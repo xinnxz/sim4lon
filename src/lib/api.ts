@@ -6,7 +6,8 @@
  */
 
 // Base URL backend - sesuaikan dengan environment
-const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api';
+// Untuk Vercel Serverless: menggunakan relative path /api
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || '/api';
 
 // Token storage key
 const TOKEN_KEY = 'sim4lon_token';
