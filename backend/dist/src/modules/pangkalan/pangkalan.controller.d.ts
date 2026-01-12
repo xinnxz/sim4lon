@@ -24,9 +24,9 @@ export declare class PangkalanController {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            note: string | null;
             address: string;
             pic_name: string | null;
-            note: string | null;
             region: string | null;
             capacity: number | null;
             agen_id: string | null;
@@ -62,9 +62,9 @@ export declare class PangkalanController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        note: string | null;
         address: string;
         pic_name: string | null;
-        note: string | null;
         region: string | null;
         capacity: number | null;
         agen_id: string | null;
@@ -90,9 +90,9 @@ export declare class PangkalanController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        note: string | null;
         address: string;
         pic_name: string | null;
-        note: string | null;
         region: string | null;
         capacity: number | null;
         agen_id: string | null;
@@ -108,9 +108,9 @@ export declare class PangkalanController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        note: string | null;
         address: string;
         pic_name: string | null;
-        note: string | null;
         region: string | null;
         capacity: number | null;
         agen_id: string | null;

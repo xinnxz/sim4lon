@@ -23,10 +23,10 @@ export declare class PangkalanStockController {
         id: string;
         pangkalan_id: string;
         created_at: Date;
-        note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
         movement_type: string;
+        qty: number;
+        note: string | null;
         source: string | null;
         reference_id: string | null;
         movement_date: Date;

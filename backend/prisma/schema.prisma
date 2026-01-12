@@ -204,6 +204,8 @@ model lpg_products {
   /// hijau, biru, pink
   color           String?           @db.VarChar(50)
   description     String?
+  /// Product image URL
+  image_url       String?
   /// Harga jual
   selling_price   Decimal           @default(0) @db.Decimal(15, 2)
   /// Harga beli (untuk profit margin)

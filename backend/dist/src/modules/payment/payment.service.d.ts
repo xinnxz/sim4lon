@@ -25,8 +25,8 @@ export declare class PaymentService {
             created_at: Date;
             order_id: string | null;
             note: string | null;
-            proof_url: string | null;
             recorded_by_user_id: string;
+            proof_url: string | null;
             invoice_id: string | null;
             method: import("@prisma/client").$Enums.payment_method;
             amount: import("@prisma/client/runtime/library").Decimal;
@@ -56,9 +56,9 @@ export declare class PaymentService {
                 created_at: Date;
                 updated_at: Date;
                 deleted_at: Date | null;
+                note: string | null;
                 address: string;
                 pic_name: string | null;
-                note: string | null;
                 region: string | null;
                 capacity: number | null;
                 agen_id: string | null;
@@ -114,8 +114,8 @@ export declare class PaymentService {
         created_at: Date;
         order_id: string | null;
         note: string | null;
-        proof_url: string | null;
         recorded_by_user_id: string;
+        proof_url: string | null;
         invoice_id: string | null;
         method: import("@prisma/client").$Enums.payment_method;
         amount: import("@prisma/client/runtime/library").Decimal;
@@ -163,8 +163,8 @@ export declare class PaymentService {
         created_at: Date;
         order_id: string | null;
         note: string | null;
-        proof_url: string | null;
         recorded_by_user_id: string;
+        proof_url: string | null;
         invoice_id: string | null;
         method: import("@prisma/client").$Enums.payment_method;
         amount: import("@prisma/client/runtime/library").Decimal;

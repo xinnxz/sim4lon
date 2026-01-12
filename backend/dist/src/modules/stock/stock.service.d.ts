@@ -14,10 +14,10 @@ export declare class StockService {
             id: string;
             created_at: Date;
             timestamp: Date;
-            note: string | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type | null;
-            qty: number;
             movement_type: import("@prisma/client").$Enums.stock_movement_type;
+            qty: number;
+            note: string | null;
             lpg_product_id: string | null;
             recorded_by_user_id: string | null;
         })[];
@@ -37,10 +37,10 @@ export declare class StockService {
         id: string;
         created_at: Date;
         timestamp: Date;
-        note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type | null;
-        qty: number;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
+        note: string | null;
         lpg_product_id: string | null;
         recorded_by_user_id: string | null;
     }>;
@@ -58,10 +58,10 @@ export declare class StockService {
         id: string;
         created_at: Date;
         timestamp: Date;
-        note: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type | null;
-        qty: number;
         movement_type: import("@prisma/client").$Enums.stock_movement_type;
+        qty: number;
+        note: string | null;
         lpg_product_id: string | null;
         recorded_by_user_id: string | null;
     })[]>;

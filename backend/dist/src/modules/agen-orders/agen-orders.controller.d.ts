@@ -18,9 +18,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;
@@ -40,9 +40,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;
@@ -56,9 +56,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;
@@ -76,9 +76,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;
@@ -103,9 +103,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;
@@ -123,9 +123,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;
@@ -139,9 +139,9 @@ export declare class AgenOrdersController {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
         agen_id: string | null;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty_ordered: number;
         qty_received: number;
         status: import("@prisma/client").$Enums.agen_order_status;

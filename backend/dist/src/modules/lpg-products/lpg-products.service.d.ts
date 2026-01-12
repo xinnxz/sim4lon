@@ -14,6 +14,7 @@ export declare class LpgProductsService {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
+        image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
@@ -29,6 +30,7 @@ export declare class LpgProductsService {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
+        image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
@@ -49,6 +51,7 @@ export declare class LpgProductsService {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
+        image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
@@ -64,6 +67,7 @@ export declare class LpgProductsService {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
+        image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
@@ -79,6 +83,7 @@ export declare class LpgProductsService {
         size_kg: import("@prisma/client/runtime/library").Decimal;
         category: import("@prisma/client").$Enums.lpg_category;
         color: string | null;
+        image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
         cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;

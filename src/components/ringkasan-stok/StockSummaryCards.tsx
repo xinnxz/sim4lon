@@ -211,13 +211,29 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                       </div>
                     </div>
                     <div
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl overflow-hidden"
                       style={{
                         background: `linear-gradient(135deg, ${getColorHex(product.color)}30, ${getColorHex(product.color)}10)`,
                         boxShadow: `0 4px 12px -2px ${getColorHex(product.color)}40`,
                       }}
                     >
-                      <SafeIcon name="Cylinder" className="h-6 w-6" style={{ color: getColorHex(product.color) }} />
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="h-10 w-10 object-contain"
+                          onError={(e) => {
+                            // Fallback to icon if image fails to load
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <SafeIcon
+                        name="Cylinder"
+                        className={`h-6 w-6 ${product.image_url ? 'hidden' : ''}`}
+                        style={{ color: getColorHex(product.color) }}
+                      />
                     </div>
                   </div>
                 </CardHeader>
