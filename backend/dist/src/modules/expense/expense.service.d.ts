@@ -8,8 +8,8 @@ export declare class ExpenseService {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
-        description: string | null;
         category: string;
+        description: string | null;
         amount: import("@prisma/client/runtime/library").Decimal;
         expense_date: Date;
     }[]>;
@@ -18,8 +18,8 @@ export declare class ExpenseService {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
-        description: string | null;
         category: string;
+        description: string | null;
         amount: import("@prisma/client/runtime/library").Decimal;
         expense_date: Date;
     } | null>;
@@ -28,8 +28,8 @@ export declare class ExpenseService {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
-        description: string | null;
         category: string;
+        description: string | null;
         amount: import("@prisma/client/runtime/library").Decimal;
         expense_date: Date;
     }>;
@@ -38,8 +38,8 @@ export declare class ExpenseService {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
-        description: string | null;
         category: string;
+        description: string | null;
         amount: import("@prisma/client/runtime/library").Decimal;
         expense_date: Date;
     }>;
@@ -48,8 +48,8 @@ export declare class ExpenseService {
         pangkalan_id: string;
         created_at: Date;
         updated_at: Date;
-        description: string | null;
         category: string;
+        description: string | null;
         amount: import("@prisma/client/runtime/library").Decimal;
         expense_date: Date;
     }>;

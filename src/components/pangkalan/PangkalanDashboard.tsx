@@ -130,14 +130,24 @@ const PieTooltip = ({ active, payload }: any) => {
 }
 
 
-// Expense categories config
+// Expense categories config - Vibrant color palette for chart
+// Includes multiple case variations for legacy data compatibility
 const EXPENSE_CATEGORIES: Record<string, { label: string; color: string }> = {
-    'OPERASIONAL': { label: 'Operasional', color: '#64748B' },
-    'TRANSPORT': { label: 'Transport', color: '#F97316' },
-    'SEWA': { label: 'Sewa', color: '#A855F7' },
-    'LISTRIK': { label: 'Listrik/Air', color: '#EAB308' },
-    'GAJI': { label: 'Gaji', color: '#3B82F6' },
-    'LAINNYA': { label: 'Lainnya', color: '#6B7280' },
+    // Standard categories (uppercase)
+    'OPERASIONAL': { label: 'Operasional', color: '#8B5CF6' },   // Purple
+    'TRANSPORT': { label: 'Transport', color: '#F97316' },       // Orange
+    'SEWA': { label: 'Sewa', color: '#EC4899' },                  // Pink
+    'LISTRIK': { label: 'Listrik/Air', color: '#EAB308' },        // Yellow
+    'GAJI': { label: 'Gaji', color: '#3B82F6' },                  // Blue
+    'LAINNYA': { label: 'Lainnya', color: '#10B981' },            // Emerald
+    // Legacy/alternative formats
+    'MAINTENANCE': { label: 'Maintenance', color: '#06B6D4' },    // Cyan
+    'Maintenance': { label: 'Maintenance', color: '#06B6D4' },
+    'maintenance': { label: 'Maintenance', color: '#06B6D4' },
+    'PERAWATAN': { label: 'Perawatan', color: '#14B8A6' },        // Teal
+    'LAIN-LAIN': { label: 'Lain-lain', color: '#6366F1' },        // Indigo
+    'Lain-lain': { label: 'Lain-lain', color: '#6366F1' },
+    'lain-lain': { label: 'Lain-lain', color: '#6366F1' },
 }
 
 export default function PangkalanDashboard() {

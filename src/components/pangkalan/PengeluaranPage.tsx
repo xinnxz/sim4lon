@@ -32,14 +32,14 @@ import SafeIcon from '@/components/common/SafeIcon'
 import { expensesApi, type Expense, type ExpenseCategory } from '@/lib/api'
 import { toast } from 'sonner'
 
-// Kategori dengan label, icon, dan color
+// Kategori dengan label, icon, dan color - Vibrant colors matching dashboard
 const CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string; gradient: string }[] = [
-    { value: 'OPERASIONAL', label: 'Operasional', icon: 'Settings', color: 'bg-slate-500', gradient: 'from-slate-500 to-slate-600' },
+    { value: 'OPERASIONAL', label: 'Operasional', icon: 'Settings', color: 'bg-violet-500', gradient: 'from-violet-500 to-violet-600' },
     { value: 'TRANSPORT', label: 'Transport', icon: 'Truck', color: 'bg-orange-500', gradient: 'from-orange-500 to-orange-600' },
-    { value: 'SEWA', label: 'Sewa', icon: 'Home', color: 'bg-purple-500', gradient: 'from-purple-500 to-purple-600' },
+    { value: 'SEWA', label: 'Sewa', icon: 'Home', color: 'bg-pink-500', gradient: 'from-pink-500 to-pink-600' },
     { value: 'LISTRIK', label: 'Listrik/Air', icon: 'Zap', color: 'bg-yellow-500', gradient: 'from-yellow-500 to-amber-600' },
     { value: 'GAJI', label: 'Gaji', icon: 'Users', color: 'bg-blue-500', gradient: 'from-blue-500 to-blue-600' },
-    { value: 'LAINNYA', label: 'Lainnya', icon: 'MoreHorizontal', color: 'bg-gray-500', gradient: 'from-gray-500 to-gray-600' },
+    { value: 'LAINNYA', label: 'Lainnya', icon: 'MoreHorizontal', color: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600' },
 ]
 
 export default function PengeluaranPage() {

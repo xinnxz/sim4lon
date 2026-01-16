@@ -61,8 +61,8 @@ interface OrderCreationResult {
 export type MissingInfoType = 'pangkalan' | 'items' | 'quantity'
 
 export interface UseVoiceOrderResult {
-    /** Status: idle, listening, parsing, needsInfo, confirming, creating, success, error */
-    status: 'idle' | 'listening' | 'parsing' | 'needsInfo' | 'confirming' | 'creating' | 'success' | 'error'
+    /** Status: idle, listening, parsing, needsInfo, confirming, creating, selectingDriver, success, error */
+    status: 'idle' | 'listening' | 'parsing' | 'needsInfo' | 'confirming' | 'creating' | 'selectingDriver' | 'success' | 'error'
     /** Apakah sedang dalam proses */
     isProcessing: boolean
     /** Transcript dari speech */
@@ -87,6 +87,14 @@ export interface UseVoiceOrderResult {
     confirmAndCreate: () => Promise<OrderCreationResult>
     /** Lanjutkan dengan info tambahan (untuk follow-up) */
     continueWithInfo: () => void
+    /** Last created order ID for driver assignment */
+    lastCreatedOrderId: string | null
+    /** Last created order code */
+    lastCreatedOrderCode: string | null
+    /** Assign driver to the last created order */
+    assignDriver: (driverId: string) => Promise<boolean>
+    /** Skip driver selection and close */
+    skipDriverSelection: () => void
 }
 
 /**
@@ -160,6 +168,8 @@ export function useVoiceOrder(): UseVoiceOrderResult {
     const [parseResult, setParseResult] = useState<GeminiParseResult | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [missingInfo, setMissingInfo] = useState<MissingInfoType | null>(null)
+    const [lastCreatedOrderId, setLastCreatedOrderId] = useState<string | null>(null)
+    const [lastCreatedOrderCode, setLastCreatedOrderCode] = useState<string | null>(null)
     const [missingInfoPrompt, setMissingInfoPrompt] = useState<string | null>(null)
 
     // Auto-parse when speech ends (after 2 seconds of silence)
@@ -356,13 +366,13 @@ export function useVoiceOrder(): UseVoiceOrderResult {
 
             const result = await createOrder(orderData)
 
-            setStatus('success')
-            toast.success(`Pesanan ${result.code} berhasil dibuat!`, { id: 'voice-create' })
+            // Save order ID for driver assignment
+            setLastCreatedOrderId(result.id)
+            setLastCreatedOrderCode(result.code)
 
-            // Redirect to order list after 1 second
-            setTimeout(() => {
-                window.location.href = '/daftar-pesanan'
-            }, 1000)
+            // Go to driver selection instead of closing
+            setStatus('selectingDriver')
+            toast.success(`Pesanan ${result.code} berhasil! Pilih supir untuk pengiriman.`, { id: 'voice-create' })
 
             return { success: true, orderId: result.id, orderCode: result.code }
         } catch (err: any) {
@@ -373,6 +383,63 @@ export function useVoiceOrder(): UseVoiceOrderResult {
         }
     }, [parseResult])
 
+    // Assign driver to the order
+    const assignDriver = useCallback(async (driverId: string): Promise<boolean> => {
+        if (!lastCreatedOrderId) return false
+
+        try {
+            const token = getToken()
+            if (!token) throw new Error('Tidak terautentikasi')
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+
+            // Run both API calls in parallel for faster response
+            await Promise.all([
+                // 1. Update order with driver
+                fetch(`${API_BASE_URL}/orders/${lastCreatedOrderId}`, {
+                    method: 'PUT',
+                    headers,
+                    body: JSON.stringify({ driver_id: driverId })
+                }),
+                // 2. Update status to DIKIRIM
+                fetch(`${API_BASE_URL}/orders/${lastCreatedOrderId}/status`, {
+                    method: 'PATCH',
+                    headers,
+                    body: JSON.stringify({
+                        status: 'DIKIRIM',
+                        note: 'Supir ditugaskan via voice order'
+                    })
+                })
+            ])
+
+            setStatus('success')
+            toast.success('Supir berhasil ditugaskan!')
+
+            // Redirect after short delay
+            setTimeout(() => {
+                window.location.href = `/detail-pesanan?code=${lastCreatedOrderCode}`
+            }, 1000)
+
+            return true
+        } catch (err: any) {
+            toast.error(err.message || 'Gagal menugaskan supir')
+            return false
+        }
+    }, [lastCreatedOrderId, lastCreatedOrderCode])
+
+    // Skip driver selection
+    const skipDriverSelection = useCallback(() => {
+        setStatus('success')
+        toast.info('Pesanan dibuat tanpa supir. Assign supir di halaman detail.')
+
+        setTimeout(() => {
+            window.location.href = `/detail-pesanan?code=${lastCreatedOrderCode}`
+        }, 1000)
+    }, [lastCreatedOrderCode])
+
     // Check for speech errors
     if (speechError && status === 'listening') {
         setError(speechError)
@@ -382,7 +449,7 @@ export function useVoiceOrder(): UseVoiceOrderResult {
     return {
         status,
         isProcessing: ['listening', 'parsing', 'creating'].includes(status),
-        transcript: liveTranscript,  // Use liveTranscript for real-time display
+        transcript: liveTranscript,
         parseResult,
         error,
         missingInfo,
@@ -392,7 +459,11 @@ export function useVoiceOrder(): UseVoiceOrderResult {
         stopAndParse,
         cancel,
         confirmAndCreate,
-        continueWithInfo
+        continueWithInfo,
+        lastCreatedOrderId,
+        lastCreatedOrderCode,
+        assignDriver,
+        skipDriverSelection
     }
 }
 

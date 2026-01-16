@@ -66,9 +66,12 @@ let OrderService = class OrderService {
             },
         };
     }
-    async findOne(id) {
+    async findOne(idOrCode) {
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrCode);
         const order = await this.prisma.orders.findFirst({
-            where: { id, deleted_at: null },
+            where: isUUID
+                ? { id: idOrCode, deleted_at: null }
+                : { code: idOrCode, deleted_at: null },
             include: {
                 pangkalans: true,
                 drivers: true,

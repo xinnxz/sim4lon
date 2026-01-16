@@ -172,17 +172,19 @@ export default function OrderDetailContent() {
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null)
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
 
-  // Get order ID from URL
-  const getOrderId = () => {
+  // Get order ID or code from URL
+  // Supports both ?id=UUID and ?code=ORD-XXXX formats
+  const getOrderIdOrCode = () => {
     if (typeof window === 'undefined') return null
     const params = new URLSearchParams(window.location.search)
-    return params.get('id')
+    // Prefer code over id for better UX
+    return params.get('code') || params.get('id')
   }
 
   // Fetch order and drivers on mount
   useEffect(() => {
     const fetchData = async () => {
-      const orderId = getOrderId()
+      const orderId = getOrderIdOrCode()
       if (!orderId) {
         toast.error('ID pesanan tidak ditemukan')
         setIsLoading(false)
@@ -283,14 +285,17 @@ export default function OrderDetailContent() {
 
     try {
       setIsUpdating(true)
-      // First, update driver assignment
-      await ordersApi.update(order.apiId, { driver_id: driverId })
 
-      // Then, update status to DIKIRIM (driver assigned = being delivered)
-      const updated = await ordersApi.updateStatus(order.apiId, {
-        status: 'DIKIRIM',
-        note: 'Driver ditugaskan, pesanan sedang dikirim'
-      })
+      // Run both API calls in parallel for faster response
+      const [, updated] = await Promise.all([
+        // 1. Update driver assignment
+        ordersApi.update(order.apiId, { driver_id: driverId }),
+        // 2. Update status to DIKIRIM
+        ordersApi.updateStatus(order.apiId, {
+          status: 'DIKIRIM',
+          note: 'Driver ditugaskan, pesanan sedang dikirim'
+        })
+      ])
 
       setOrder(mapApiToUI(updated))
       setIsDriverModalOpen(false)

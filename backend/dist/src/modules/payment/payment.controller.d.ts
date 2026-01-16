@@ -24,9 +24,9 @@ export declare class PaymentController {
             id: string;
             note: string | null;
             created_at: Date;
-            order_id: string | null;
             recorded_by_user_id: string;
             amount: import("@prisma/client/runtime/library").Decimal;
+            order_id: string | null;
             method: import("@prisma/client").$Enums.payment_method;
             payment_time: Date;
             proof_url: string | null;
@@ -71,8 +71,8 @@ export declare class PaymentController {
                 price_per_unit: import("@prisma/client/runtime/library").Decimal;
                 created_at: Date;
                 updated_at: Date;
-                order_id: string;
                 tax_amount: import("@prisma/client/runtime/library").Decimal;
+                order_id: string;
                 sub_total: import("@prisma/client/runtime/library").Decimal | null;
                 label: string | null;
                 is_taxable: boolean;
@@ -98,8 +98,8 @@ export declare class PaymentController {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
+            order_id: string;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
@@ -113,9 +113,9 @@ export declare class PaymentController {
         id: string;
         note: string | null;
         created_at: Date;
-        order_id: string | null;
         recorded_by_user_id: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        order_id: string | null;
         method: import("@prisma/client").$Enums.payment_method;
         payment_time: Date;
         proof_url: string | null;
@@ -147,8 +147,8 @@ export declare class PaymentController {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
+            order_id: string;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
@@ -162,9 +162,9 @@ export declare class PaymentController {
         id: string;
         note: string | null;
         created_at: Date;
-        order_id: string | null;
         recorded_by_user_id: string;
         amount: import("@prisma/client/runtime/library").Decimal;
+        order_id: string | null;
         method: import("@prisma/client").$Enums.payment_method;
         payment_time: Date;
         proof_url: string | null;

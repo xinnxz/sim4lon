@@ -10,12 +10,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import SafeIcon from '@/components/common/SafeIcon'
 import { useVoiceOrder } from '@/hooks/useVoiceOrder'
 import { formatCurrency } from '@/lib/currency'
+import { driversApi, type Driver } from '@/lib/api'
 
 export default function FloatingVoiceWidget() {
     const [isOpen, setIsOpen] = useState(false)
+    const [drivers, setDrivers] = useState<Driver[]>([])
+    const [isLoadingDrivers, setIsLoadingDrivers] = useState(false)
+    const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null)
 
     const {
         status,
@@ -28,8 +33,23 @@ export default function FloatingVoiceWidget() {
         stopAndParse,
         cancel,
         confirmAndCreate,
-        continueWithInfo
+        continueWithInfo,
+        lastCreatedOrderCode,
+        assignDriver,
+        skipDriverSelection
     } = useVoiceOrder()
+
+    // Preload drivers during confirming status (before order creation)
+    // This way drivers are already loaded when we reach selectingDriver
+    useEffect(() => {
+        if ((status === 'confirming' || status === 'selectingDriver') && drivers.length === 0) {
+            setIsLoadingDrivers(true)
+            driversApi.getAll(1, 100, undefined, true)
+                .then(res => setDrivers(res.data))
+                .catch(console.error)
+                .finally(() => setIsLoadingDrivers(false))
+        }
+    }, [status])
 
     if (!isSupported) return null
 
@@ -106,6 +126,7 @@ export default function FloatingVoiceWidget() {
                                 {status === 'needsInfo' && 'Info Diperlukan'}
                                 {status === 'confirming' && 'Konfirmasi Pesanan'}
                                 {status === 'creating' && 'Membuat Pesanan...'}
+                                {status === 'selectingDriver' && 'Pilih Supir'}
                                 {status === 'success' && 'Berhasil!'}
                                 {status === 'error' && 'Gagal'}
                             </h2>
@@ -243,13 +264,68 @@ export default function FloatingVoiceWidget() {
                             </div>
                         )}
 
+                        {/* Selecting Driver */}
+                        {status === 'selectingDriver' && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2 p-3 rounded-xl bg-green-50 dark:bg-green-900/20">
+                                    <SafeIcon name="CheckCircle" className="h-5 w-5 text-green-600" />
+                                    <div>
+                                        <p className="text-sm font-medium text-green-600">Pesanan {lastCreatedOrderCode} dibuat!</p>
+                                        <p className="text-xs text-zinc-500">Pilih supir untuk pengiriman</p>
+                                    </div>
+                                </div>
+
+                                {isLoadingDrivers ? (
+                                    <div className="py-4 text-center">
+                                        <SafeIcon name="Loader2" className="h-6 w-6 animate-spin mx-auto text-blue-500" />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                        {drivers.map((driver) => {
+                                            const isBusy = driver.is_busy || false
+                                            return (
+                                                <button
+                                                    key={driver.id}
+                                                    onClick={() => !isBusy && setSelectedDriverId(driver.id)}
+                                                    disabled={isBusy}
+                                                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left
+                                                        ${selectedDriverId === driver.id
+                                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                            : isBusy
+                                                                ? 'opacity-50 cursor-not-allowed border-dashed'
+                                                                : 'border-zinc-200 dark:border-zinc-700 hover:border-blue-300'
+                                                        }`}
+                                                >
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarFallback className={isBusy ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}>
+                                                            {driver.name.charAt(0)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-medium text-sm truncate">{driver.name}</p>
+                                                        <p className="text-xs text-zinc-500">
+                                                            {isBusy ? 'Sedang mengantar' : driver.vehicle_id || 'Tersedia'}
+                                                        </p>
+                                                    </div>
+                                                    {selectedDriverId === driver.id && (
+                                                        <SafeIcon name="Check" className="h-4 w-4 text-blue-500" />
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Success */}
                         {status === 'success' && (
                             <div className="py-8 text-center">
                                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500 flex items-center justify-center">
                                     <SafeIcon name="Check" className="h-8 w-8 text-white" />
                                 </div>
-                                <p className="font-semibold text-green-600">Pesanan Dibuat!</p>
+                                <p className="font-semibold text-green-600">Pesanan Berhasil!</p>
+                                <p className="text-sm text-zinc-500 mt-1">Mengalihkan...</p>
                             </div>
                         )}
                     </div>
@@ -299,6 +375,22 @@ export default function FloatingVoiceWidget() {
                                 <Button onClick={handleConfirm} className="flex-1 rounded-xl h-11 gap-2 bg-blue-500 hover:bg-blue-600">
                                     <SafeIcon name="Check" className="h-4 w-4" />
                                     Konfirmasi
+                                </Button>
+                            </div>
+                        )}
+
+                        {status === 'selectingDriver' && (
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={skipDriverSelection} className="flex-1 rounded-xl h-11">
+                                    Lewati
+                                </Button>
+                                <Button
+                                    onClick={() => selectedDriverId && assignDriver(selectedDriverId)}
+                                    disabled={!selectedDriverId}
+                                    className="flex-1 rounded-xl h-11 gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
+                                >
+                                    <SafeIcon name="Truck" className="h-4 w-4" />
+                                    Tugaskan
                                 </Button>
                             </div>
                         )}

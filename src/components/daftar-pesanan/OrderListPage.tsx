@@ -432,7 +432,7 @@ export default function OrderListPage() {
                   filteredOrders.map((order, index) => (
                     <a
                       key={order.id}
-                      href={`/detail-pesanan?id=${order.id}`}
+                      href={`/detail-pesanan?code=${formatOrderCode(order)}`}
                       className={`block p-4 rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}`}
                     >
                       {/* Header: Code + Status */}
@@ -567,7 +567,7 @@ export default function OrderListPage() {
                               size="sm"
                               className="hover:bg-primary hover:text-primary-foreground"
                             >
-                              <a href={`/detail-pesanan?id=${order.id}`} className="flex items-center justify-center gap-2">
+                              <a href={`/detail-pesanan?code=${formatOrderCode(order)}`} className="flex items-center justify-center gap-2">
                                 <SafeIcon name="Eye" className="h-4 w-4" />
                                 Lihat
                               </a>

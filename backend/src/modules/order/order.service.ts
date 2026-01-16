@@ -67,9 +67,18 @@ export class OrderService {
         };
     }
 
-    async findOne(id: string) {
+    /**
+ * Find order by ID or code
+ * Supports both UUID format and order code (ORD-XXXX)
+ */
+    async findOne(idOrCode: string) {
+        // Determine if it's a UUID or an order code
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrCode);
+
         const order = await this.prisma.orders.findFirst({
-            where: { id, deleted_at: null },
+            where: isUUID
+                ? { id: idOrCode, deleted_at: null }
+                : { code: idOrCode, deleted_at: null },
             include: {
                 pangkalans: true,
                 drivers: true,

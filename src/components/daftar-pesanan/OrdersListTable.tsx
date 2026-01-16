@@ -154,7 +154,7 @@ export default function OrdersListTable({ orders }: OrdersListTableProps) {
                       asChild
                       className="gap-1"
                     >
-                      <a href={`/detail-pesanan?id=${order.apiId || order.id}`}>
+                      <a href={`/detail-pesanan?code=${order.id}`}>
                         <SafeIcon name="Eye" className="h-4 w-4" />
                         <span className="hidden sm:inline">Lihat</span>
                       </a>
