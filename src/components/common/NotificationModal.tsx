@@ -261,9 +261,9 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
             className="w-full gap-2 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
             asChild
           >
-            <a href="/riwayat-aktivitas">
-              <SafeIcon name="History" className="h-4 w-4" />
-              Lihat Semua Aktivitas
+            <a href="/notifikasi">
+              <SafeIcon name="Bell" className="h-4 w-4" />
+              Lihat Semua Notifikasi
               <SafeIcon name="ArrowRight" className="h-4 w-4 ml-auto" />
             </a>
           </Button>

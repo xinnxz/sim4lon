@@ -21,17 +21,20 @@ let NotificationController = class NotificationController {
     constructor(notificationService) {
         this.notificationService = notificationService;
     }
-    async getNotifications(limit) {
+    async getNotifications(page, limit, type) {
+        const parsedPage = page ? parseInt(page, 10) : 1;
         const parsedLimit = limit ? parseInt(limit, 10) : 10;
-        return this.notificationService.getNotifications(parsedLimit);
+        return this.notificationService.getNotifications(parsedPage, parsedLimit, type);
     }
 };
 exports.NotificationController = NotificationController;
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('limit')),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "getNotifications", null);
 exports.NotificationController = NotificationController = __decorate([

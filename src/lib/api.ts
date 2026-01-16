@@ -225,14 +225,42 @@ export interface NotificationItem {
 }
 
 export interface NotificationResponse {
+    data: NotificationItem[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        pendingCount: number;
+        stockAlertCount: number;
+    };
+}
+
+// Legacy response for dropdown (backwards compatibility)
+export interface NotificationDropdownResponse {
     notifications: NotificationItem[];
     unread_count: number;
 }
 
 export const notificationApi = {
-    async getNotifications(limit = 10): Promise<NotificationResponse> {
+    /**
+     * Get notifications with pagination
+     */
+    async getNotifications(page = 1, limit = 10, type?: string): Promise<NotificationResponse> {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('limit', limit.toString());
+        if (type && type !== 'all') params.append('type', type);
+        return apiRequest<NotificationResponse>(`/notifications?${params.toString()}`);
+    },
+
+    /**
+     * Get notifications for dropdown (small limit)
+     */
+    async getDropdownNotifications(limit = 10): Promise<NotificationResponse> {
         return apiRequest<NotificationResponse>(`/notifications?limit=${limit}`);
     },
+
     async markAllAsRead(): Promise<void> {
         return apiRequest('/notifications/mark-all-read', { method: 'POST' });
     },

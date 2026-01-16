@@ -4,9 +4,10 @@
  * PENJELASAN:
  * Menggabungkan notifikasi dari:
  * 1. Activity logs (pesanan baru)
- * 2. Stock alerts (calculated - stok menipis/habis)
+ * 2. Pending agen orders (dari pangkalan)
+ * 3. Stock alerts (calculated - stok menipis/habis)
  * 
- * Support both legacy lpg_type and new lpg_product_id
+ * Mendukung pagination untuk performa dengan banyak data
  */
 
 import { Injectable } from '@nestjs/common';
@@ -29,19 +30,35 @@ export interface Notification {
     orderId?: string; // For agen_order type - reference to agen_orders.id
 }
 
+export interface PaginatedNotificationResponse {
+    data: Notification[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        pendingCount: number;
+        stockAlertCount: number;
+    };
+}
+
 @Injectable()
 export class NotificationService {
     constructor(private prisma: PrismaService) { }
 
-    async getNotifications(limit = 10): Promise<{ notifications: Notification[]; unread_count: number }> {
-        const notifications: Notification[] = [];
+    async getNotifications(
+        page = 1,
+        limit = 10,
+        type?: string
+    ): Promise<PaginatedNotificationResponse> {
+        const allNotifications: Notification[] = [];
 
         // 1. Get recent order activities
         const recentOrders = await this.prisma.activity_logs.findMany({
             where: {
                 type: 'order_created',
             },
-            take: limit,
+            take: 100, // Get more for filtering
             orderBy: { created_at: 'desc' },
             include: {
                 orders: {
@@ -51,7 +68,7 @@ export class NotificationService {
         });
 
         for (const activity of recentOrders) {
-            notifications.push({
+            allNotifications.push({
                 id: activity.id,
                 type: 'order_new',
                 title: 'Pesanan Baru',
@@ -69,7 +86,7 @@ export class NotificationService {
             where: {
                 status: 'PENDING',
             },
-            take: limit,
+            take: 100,
             orderBy: { order_date: 'desc' },
             include: {
                 pangkalans: { select: { code: true, name: true } },
@@ -77,26 +94,26 @@ export class NotificationService {
         });
 
         for (const order of pendingAgenOrders) {
-            notifications.push({
+            allNotifications.push({
                 id: `agen-order-${order.id}`,
                 type: 'agen_order',
                 title: `Pesanan Baru dari ${order.pangkalans?.name || 'Pangkalan'}`,
-                message: `${order.pangkalans?.code || 'PKL'} memesan ${order.qty_ordered} tabung LPG`,
+                message: `${order.pangkalans?.code || 'PKL'} memesan ${order.qty_ordered} tabung ${order.lpg_type || 'LPG'}`,
                 icon: 'ShoppingCart',
                 priority: 'high',
                 link: '/pesanan-pangkalan',
                 time: this.formatTimeAgo(order.order_date),
                 created_at: order.order_date,
-                orderId: order.id, // Include order ID for actions
+                orderId: order.id,
             });
         }
 
         // 3. Calculate stock alerts
         const stockAlerts = await this.calculateStockAlerts();
-        notifications.push(...stockAlerts);
+        allNotifications.push(...stockAlerts);
 
         // Sort by priority and created_at
-        notifications.sort((a, b) => {
+        allNotifications.sort((a, b) => {
             const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
             if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
                 return priorityOrder[a.priority] - priorityOrder[b.priority];
@@ -104,9 +121,41 @@ export class NotificationService {
             return b.created_at.getTime() - a.created_at.getTime();
         });
 
+        // Filter by type if specified
+        let filteredNotifications = allNotifications;
+        if (type && type !== 'all') {
+            if (type === 'pending') {
+                filteredNotifications = allNotifications.filter(n => n.type === 'agen_order');
+            } else if (type === 'stock') {
+                filteredNotifications = allNotifications.filter(n => n.type.startsWith('stock_'));
+            } else if (type === 'order') {
+                filteredNotifications = allNotifications.filter(n => n.type === 'order_new');
+            } else {
+                filteredNotifications = allNotifications.filter(n => n.type === type);
+            }
+        }
+
+        // Calculate counts for stats
+        const pendingCount = allNotifications.filter(n => n.type === 'agen_order').length;
+        const stockAlertCount = allNotifications.filter(n => n.type.startsWith('stock_')).length;
+
+        // Pagination
+        const total = filteredNotifications.length;
+        const totalPages = Math.ceil(total / limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedData = filteredNotifications.slice(startIndex, endIndex);
+
         return {
-            notifications: notifications.slice(0, limit),
-            unread_count: notifications.length,
+            data: paginatedData,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+                pendingCount,
+                stockAlertCount,
+            },
         };
     }
 

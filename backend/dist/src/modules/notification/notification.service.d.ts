@@ -11,13 +11,21 @@ export interface Notification {
     created_at: Date;
     orderId?: string;
 }
+export interface PaginatedNotificationResponse {
+    data: Notification[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        pendingCount: number;
+        stockAlertCount: number;
+    };
+}
 export declare class NotificationService {
     private prisma;
     constructor(prisma: PrismaService);
-    getNotifications(limit?: number): Promise<{
-        notifications: Notification[];
-        unread_count: number;
-    }>;
+    getNotifications(page?: number, limit?: number, type?: string): Promise<PaginatedNotificationResponse>;
     private calculateStockAlerts;
     private formatTimeAgo;
 }
