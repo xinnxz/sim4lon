@@ -338,6 +338,10 @@ PENTING:
                 return 'kg50';
             return 'kg3';
         };
+        const availableProductsList = products.map(p => p.name).join(', ');
+        const errorMessage = matchedProduct
+            ? undefined
+            : `📦 Produk tidak terdeteksi. Coba sebutkan ukuran LPG dengan jelas.\n\n💡 Produk tersedia: ${availableProductsList}\n\nContoh: "pesan 50 unit 3 kilo ke pangkalan [nama]"`;
         return {
             success: !!matchedProduct,
             pangkalanId: matchedPangkalan?.id || null,
@@ -352,7 +356,7 @@ PENTING:
             note: null,
             confidence: (matchedProduct && matchedPangkalan) ? 0.75 : (matchedProduct ? 0.5 : 0.2),
             rawText: text,
-            error: matchedProduct ? undefined : 'Tidak dapat mendeteksi produk dari perintah'
+            error: errorMessage
         };
     }
     async validateParsedOrder(parsedData) {
