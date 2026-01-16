@@ -70,20 +70,33 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null
 }
 
-// Custom pie chart tooltip - with core stock info
+// Custom pie chart tooltip - handles both stock and expense data
 const PieTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0]
-        const total = payload[0]?.payload?.total || 0
-        const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : '0'
+        const value = data.value
 
-        // Determine stock status
-        const qty = data.value
+        // Detect if this is expense data (values are typically > 10000) or stock data (< 1000)
+        const isExpenseData = value >= 1000
+
+        // Calculate percentage from all payload items
+        const allValues = payload.map((p: any) => p.value)
+        const total = allValues.reduce((a: number, b: number) => a + b, 0) || data.payload?.total || 0
+        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0'
+
+        // Format value based on type
+        const formattedValue = isExpenseData
+            ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)
+            : `${value} tabung`
+
+        // Stock status (only for non-expense)
         let status = { text: 'Aman', color: 'text-green-600', bg: 'bg-green-100' }
-        if (qty <= 10) {
-            status = { text: 'Kritis!', color: 'text-red-600', bg: 'bg-red-100' }
-        } else if (qty <= 30) {
-            status = { text: 'Menipis', color: 'text-orange-600', bg: 'bg-orange-100' }
+        if (!isExpenseData) {
+            if (value <= 10) {
+                status = { text: 'Kritis!', color: 'text-red-600', bg: 'bg-red-100' }
+            } else if (value <= 30) {
+                status = { text: 'Menipis', color: 'text-orange-600', bg: 'bg-orange-100' }
+            }
         }
 
         return (
@@ -94,24 +107,28 @@ const PieTooltip = ({ active, payload }: any) => {
                 </div>
                 <div className="space-y-1">
                     <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-slate-800">{data.value} tabung</span>
+                        <span className="text-lg font-bold text-slate-800">{formattedValue}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-slate-500 text-sm">Proporsi:</span>
                         <span className="font-semibold text-slate-700">{percentage}%</span>
                     </div>
-                    <div className="flex justify-between items-center pt-1 border-t border-slate-100 mt-2">
-                        <span className="text-slate-500 text-sm">Status:</span>
-                        <span className={`text-sm font-semibold px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
-                            {status.text}
-                        </span>
-                    </div>
+                    {/* Only show status for stock data */}
+                    {!isExpenseData && (
+                        <div className="flex justify-between items-center pt-1 border-t border-slate-100 mt-2">
+                            <span className="text-slate-500 text-sm">Status:</span>
+                            <span className={`text-sm font-semibold px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+                                {status.text}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         )
     }
     return null
 }
+
 
 // Expense categories config
 const EXPENSE_CATEGORIES: Record<string, { label: string; color: string }> = {
