@@ -161,7 +161,7 @@ export default function DashboardKPICards() {
   const totalStock = stats?.dynamicProducts?.reduce((sum, p) => sum + p.stock.current, 0) || 0
   const productCount = stats?.dynamicProducts?.length || 0
 
-  // KPI Card data
+  // KPI Card data with navigation links
   const kpiCards = [
     {
       title: 'Total Pesanan',
@@ -172,7 +172,8 @@ export default function DashboardKPICards() {
       gradient: 'from-cyan-500 to-blue-600',
       shadowColor: 'shadow-blue-500/25 hover:shadow-blue-500/40',
       textAccent: 'text-blue-100',
-      delay: 100
+      delay: 100,
+      href: '/daftar-pesanan'
     },
     {
       title: 'Penjualan Hari Ini',
@@ -184,7 +185,8 @@ export default function DashboardKPICards() {
       shadowColor: 'shadow-rose-500/25 hover:shadow-rose-500/40',
       textAccent: 'text-rose-100',
       delay: 200,
-      isCurrency: true
+      isCurrency: true,
+      href: '/laporan'
     },
     {
       title: 'Pesanan Selesai',
@@ -195,7 +197,8 @@ export default function DashboardKPICards() {
       gradient: 'from-green-500 to-emerald-600',
       shadowColor: 'shadow-green-500/25 hover:shadow-green-500/40',
       textAccent: 'text-green-100',
-      delay: 300
+      delay: 300,
+      href: '/daftar-pesanan?status=selesai'
     }
   ]
 
@@ -203,13 +206,14 @@ export default function DashboardKPICards() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-2">
       {/* Colored KPI Cards */}
       {kpiCards.map((card, index) => (
-        <div
+        <a
           key={card.title}
-          className="animate-slideInBlur"
+          href={card.href}
+          className="animate-slideInBlur block cursor-pointer"
           style={{ animationDelay: `${card.delay}ms`, opacity: 0 }}
         >
           <Card
-            className={`group relative overflow-hidden h-[140px] bg-gradient-to-br ${card.gradient} text-white shadow-lg ${card.shadowColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0`}
+            className={`group relative overflow-hidden h-[140px] bg-gradient-to-br ${card.gradient} text-white shadow-lg ${card.shadowColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] rounded-2xl border-0`}
           >
             {/* Floating Orbs Decoration */}
             <FloatingOrb className="w-24 h-24 top-0 right-0 -translate-y-1/2 translate-x-1/2" delay={index * 0.5} />
@@ -231,7 +235,7 @@ export default function DashboardKPICards() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </a>
       ))}
 
       {/* Total Stok - White Card with Purple accent */}
@@ -239,31 +243,33 @@ export default function DashboardKPICards() {
         className="animate-slideInBlur"
         style={{ animationDelay: '400ms', opacity: 0 }}
       >
-        <Card
-          className="group relative overflow-hidden h-[140px] bg-card dark:bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl border-0"
-        >
-          {/* Floating Orbs Decoration - Theme-aware dengan visibility lebih jelas */}
-          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 dark:bg-primary/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed opacity-80" />
+        <a href="/stok-lpg" className="block cursor-pointer">
+          <Card
+            className="group relative overflow-hidden h-[140px] bg-card dark:bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] rounded-2xl border-0"
+          >
+            {/* Floating Orbs Decoration - Theme-aware dengan visibility lebih jelas */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 dark:bg-primary/30 rounded-full -translate-y-1/2 translate-x-1/2 animate-floatOrb" />
+            <div className="absolute bottom-0 left-0 w-12 h-12 bg-primary/15 dark:bg-primary/25 rounded-full translate-y-1/2 -translate-x-1/2 animate-floatOrb-delayed opacity-80" />
 
-          <CardHeader className="pb-2 relative z-10">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors duration-300">
-                <SafeIcon name="Package" className="h-4 w-4 text-primary icon-bounce-target icon-rotate-hover" />
-              </div>
-              Total Stok LPG
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <p className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
-              <AnimatedNumber value={totalStock} delay={600} />
-            </p>
-            <p className="text-muted-foreground text-sm mt-2 flex items-center gap-1">
-              <SafeIcon name="Layers" className="h-3.5 w-3.5" />
-              {productCount > 0 ? `${productCount} jenis produk` : 'Belum ada produk'}
-            </p>
-          </CardContent>
-        </Card>
+            <CardHeader className="pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors duration-300">
+                  <SafeIcon name="Package" className="h-4 w-4 text-primary icon-bounce-target icon-rotate-hover" />
+                </div>
+                Total Stok LPG
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <p className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+                <AnimatedNumber value={totalStock} delay={600} />
+              </p>
+              <p className="text-muted-foreground text-sm mt-2 flex items-center gap-1">
+                <SafeIcon name="Layers" className="h-3.5 w-3.5" />
+                {productCount > 0 ? `${productCount} jenis produk` : 'Belum ada produk'}
+              </p>
+            </CardContent>
+          </Card>
+        </a>
       </div>
     </div>
   )

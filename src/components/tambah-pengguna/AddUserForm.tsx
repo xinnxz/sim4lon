@@ -175,7 +175,7 @@ export default function AddUserForm({ onClose }: AddUserFormProps) {
     if (onClose) {
       onClose()
     } else {
-      window.location.href = './daftar-pengguna.html'
+      window.location.href = '/daftar-pengguna'
     }
   }
 

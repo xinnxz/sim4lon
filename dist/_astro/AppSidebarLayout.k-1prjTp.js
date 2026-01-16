@@ -42,7 +42,7 @@ const menuGroups = [
     adminOnly: true,
     // Entire group is admin-only
     items: [
-      { name: "Log Riwayat", href: "/riwayat-aktivitas", icon: "History" },
+      { name: "Log Aktivitas", href: "/riwayat-aktivitas", icon: "History" },
       { name: "Pengaturan", href: "./pengaturan.html", icon: "Settings" }
     ]
   }
@@ -171,7 +171,7 @@ function AdminSidebar() {
             ] }, group.label)),
             /* @__PURE__ */ jsxs("div", { className: "mt-auto pt-2 px-3", children: [
               /* @__PURE__ */ jsx("div", { className: "h-px bg-gradient-to-r from-transparent via-border to-transparent" }),
-              /* @__PURE__ */ jsx("p", { className: "text-[14px] text-center text-muted-foreground/40 mt-2 font-medium", children: "SIM4LON v1.4" }),
+              /* @__PURE__ */ jsx("p", { className: "text-[14px] text-center text-muted-foreground/40 mt-2 font-medium", children: "SIM4LON v1.5" }),
               /* @__PURE__ */ jsx("p", { className: "text-[12px] text-center text-muted-foreground/40 font-normal", children: "by Luthfi" })
             ] })
           ]

@@ -141,8 +141,22 @@ let PangkalanService = class PangkalanService {
                 throw new common_1.BadRequestException('Email login sudah digunakan');
             }
         }
-        const pangkalanCount = await this.prisma.pangkalans.count();
-        const pangkalanCode = `PKL-${String(pangkalanCount + 1).padStart(3, '0')}`;
+        const allPangkalans = await this.prisma.pangkalans.findMany({
+            where: {
+                code: { startsWith: '3432' }
+            },
+            select: { code: true },
+            orderBy: { code: 'desc' }
+        });
+        let nextNumber = 1;
+        if (allPangkalans.length > 0) {
+            const maxNumber = Math.max(...allPangkalans.map(p => {
+                const lastFour = p.code.slice(-4);
+                return parseInt(lastFour, 10) || 0;
+            }));
+            nextNumber = maxNumber + 1;
+        }
+        const pangkalanCode = `343262997904${String(nextNumber).padStart(4, '0')}`;
         const pangkalan = await this.prisma.pangkalans.create({
             data: {
                 code: pangkalanCode,
@@ -158,8 +172,17 @@ let PangkalanService = class PangkalanService {
             },
         });
         if (dto.login_email && dto.login_password) {
-            const userCount = await this.prisma.users.count();
-            const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
+            const lastUser = await this.prisma.users.findFirst({
+                where: { code: { startsWith: 'USR-' } },
+                orderBy: { code: 'desc' },
+                select: { code: true }
+            });
+            let nextUserNum = 1;
+            if (lastUser?.code) {
+                const lastNum = parseInt(lastUser.code.replace('USR-', ''), 10);
+                nextUserNum = (lastNum || 0) + 1;
+            }
+            const userCode = `USR-${String(nextUserNum).padStart(3, '0')}`;
             const hashedPassword = await bcrypt.hash(dto.login_password, 10);
             await this.prisma.users.create({
                 data: {
@@ -188,11 +211,36 @@ let PangkalanService = class PangkalanService {
                 updated_at: new Date(),
             },
         });
+        if (existing.users && existing.users.length > 0) {
+            const userId = existing.users[0].id;
+            const userUpdateData = { updated_at: new Date() };
+            if (dto.email && dto.email !== existing.email) {
+                userUpdateData.email = dto.email;
+            }
+            if (dto.phone && dto.phone !== existing.phone) {
+                userUpdateData.phone = dto.phone;
+            }
+            if (dto.pic_name && dto.pic_name !== existing.pic_name) {
+                userUpdateData.name = dto.pic_name;
+            }
+            else if (dto.name && dto.name !== existing.name && !existing.pic_name) {
+                userUpdateData.name = dto.name;
+            }
+            if (dto.is_active !== undefined && dto.is_active !== existing.is_active) {
+                userUpdateData.is_active = dto.is_active;
+            }
+            if (Object.keys(userUpdateData).length > 1) {
+                await this.prisma.users.update({
+                    where: { id: userId },
+                    data: userUpdateData,
+                });
+            }
+        }
         await this.activityService.logActivity('system_update', 'Data Pangkalan Diperbarui', {
             description: `Data ${existing.name} berhasil diperbarui`,
             pangkalanName: existing.name,
         });
-        return pangkalan;
+        return this.findOne(id);
     }
     async remove(id) {
         const existing = await this.findOne(id);
@@ -200,6 +248,15 @@ let PangkalanService = class PangkalanService {
             where: { id },
             data: { deleted_at: new Date() },
         });
+        if (existing.users && existing.users.length > 0) {
+            await this.prisma.users.updateMany({
+                where: { pangkalan_id: id },
+                data: {
+                    deleted_at: new Date(),
+                    is_active: false,
+                },
+            });
+        }
         await this.activityService.logActivity('system_delete', 'Pangkalan Dihapus', {
             description: `Pangkalan ${existing.name} berhasil dihapus`,
             pangkalanName: existing.name,

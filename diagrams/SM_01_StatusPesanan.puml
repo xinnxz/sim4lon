@@ -61,8 +61,7 @@ state BATAL <<danger>> {
 }
 
 DRAFT --> MENUNGGU_PEMBAYARAN : Submit pesanan
-MENUNGGU_PEMBAYARAN --> DIPROSES : Pembayaran diterima\n[is_paid = true]
-MENUNGGU_PEMBAYARAN --> DIPROSES : DP diterima\n[is_dp = true]
+MENUNGGU_PEMBAYARAN --> DIPROSES : Pembayaran lunas\n[is_paid = true]
 DIPROSES --> SIAP_KIRIM : Barang siap
 SIAP_KIRIM --> DIKIRIM : Driver berangkat\n[driver_id != null]
 DIKIRIM --> SELESAI : Barang diterima\npangkalan konfirmasi

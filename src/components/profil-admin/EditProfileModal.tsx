@@ -179,7 +179,7 @@ export default function EditProfileModal({ open, onOpenChange }: EditProfileModa
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <SafeIcon name="Edit2" className="h-5 w-5 text-primary" />
-            Edit Profil Admin
+            Edit Profil Akun
           </DialogTitle>
           <DialogDescription>
             Perbarui informasi profil pribadi Anda

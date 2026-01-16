@@ -10,41 +10,76 @@ title **AD-08: Buat Order ke Agen (Pangkalan)**\nSistem SIM4LON
 
 |Pangkalan|
 start
-:Buka menu "Order ke Agen";
-:Klik "Buat Order Baru";
+
+:Buka halaman "Stok LPG";
 
 |Sistem|
-:Tampilkan form order;
-:Load data agen terkait;
-:Tampilkan stok saat ini;
+
+:Load data stok pangkalan;
+:Load data Company Profile\n(info Agen);
 
 |Pangkalan|
-:Pilih jenis LPG;
-:Masukkan jumlah order;
-:Tambah catatan (opsional);
-:Klik "Kirim Order";
+
+:Klik tombol "Pesan ke Agen";
 
 |Sistem|
+
+:Tampilkan modal order;
+:Load daftar tipe LPG aktif;
+:Tampilkan info Agen\n(nama & nomor telepon);
+
+|Pangkalan|
+
+:Pilih Tipe LPG;
+:Masukkan Jumlah (tabung);
+:Tambahkan Catatan (opsional);
+:Klik "Buat Pesanan";
+
+|Sistem|
+
 :Validasi input;
 
-if (Input valid?) then (ya)
-    :Generate kode order\n(AGN-XXXX);
-    :Simpan agen_order\ndengan status PENDING;
-    :Set order_date = now;
+if (Jumlah > 0?) then (ya)
     
-    |Pangkalan|
-    :Tampilkan pesan sukses\n"Order dikirim ke Agen";
-    :Tampilkan daftar order;
+    if (Nomor telepon Agen ada?) then (ya)
+        
+        :Format nomor WhatsApp\n(0xxx → 62xxx);
+        
+        :Generate pesan pesanan:\n• Nama Pangkalan\n• Tipe LPG\n• Jumlah tabung\n• Catatan;
+        
+        :Buka WhatsApp Web\ndengan pesan otomatis;
+        
+        note right
+        wa.me/62xxx?text=...
+        Pesan dikirim ke Agen
+        via WhatsApp
+        end note
+        
+        :Simpan pesanan ke database\n(status: PENDING);
+        
+        |Pangkalan|
+        
+        :Tampilkan notifikasi sukses;
+        :WhatsApp terbuka\ndi tab baru;
+        
+        :Kirim pesan ke Agen;
+        
+        note right
+        Alur Status:
+        PENDING → DIKIRIM → DITERIMA
+        end note
+        
+        stop
+        
+    else (tidak)
+        |Pangkalan|
+        :Tampilkan error:\n"Nomor telepon Agen\nbelum terdaftar";
+        stop
+    endif
     
-    note right
-    Tunggu konfirmasi dari Agen
-    Status: PENDING → DIKIRIM → DITERIMA
-    end note
-    
-    stop
 else (tidak)
     |Pangkalan|
-    :Tampilkan pesan error;
+    :Tampilkan error:\n"Jumlah harus > 0";
     stop
 endif
 

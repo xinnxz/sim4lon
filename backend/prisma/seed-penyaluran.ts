@@ -33,7 +33,7 @@ const PANGKALAN_DATA = [
         region: 'Menteng, Jakarta Pusat',
         pic_name: 'Pak Ahmad',
         phone: '081234567890',
-        email: 'pkl001@demo.com',
+        email: 'tes2@demo.com',
         password: 'pangkalan123',
         capacity: 300,
         alokasi_bulanan: 500,

@@ -14,7 +14,7 @@ export default function CreateOrderButton() {
   return (
     <div className="w-full">
       <a
-        href="./buat-pesanan.html"
+        href="/buat-pesanan"
         className="group inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 bg-white border border-border/50 rounded-xl shadow-sm hover:shadow-md hover:border-border active:scale-95 transition-all duration-300 ease-out font-semibold text-sm sm:text-base text-foreground"
         id="icez9"
       >

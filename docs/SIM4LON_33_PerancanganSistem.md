@@ -1,4 +1,4 @@
-# 3.3 Perancangan Sistem
+﻿# 3.3 Perancangan Sistem
 
 > **Catatan**: Dokumen ini berisi perancangan sistem lengkap meliputi diagram UML, struktur database, dan desain antarmuka aplikasi SIM4LON.
 
@@ -657,10 +657,10 @@ SIM4LON memiliki **3 aktor utama** dengan hak akses berbeda:
 
 | Kode | Use Case | Deskripsi | Admin | Operator | Pangkalan |
 |------|----------|-----------|:-----:|:--------:|:---------:|
-| UC-01 | Login | Masuk ke sistem dengan autentikasi | âœ… | âœ… | âœ… |
-| UC-02 | Logout | Keluar dari sistem | âœ… | âœ… | âœ… |
-| UC-03 | Kelola Profil | Melihat dan mengubah data profil | âœ… | âœ… | âœ… |
-| UC-04 | Ubah Password | Mengubah password akun | âœ… | âœ… | âœ… |
+| UC-01 | Login | Masuk ke sistem dengan autentikasi | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-02 | Logout | Keluar dari sistem | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-03 | Kelola Profil | Melihat dan mengubah data profil | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-04 | Ubah Password | Mengubah password akun | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
 
 #### B. Use Case Admin Only
 
@@ -677,16 +677,16 @@ SIM4LON memiliki **3 aktor utama** dengan hak akses berbeda:
 
 | Kode | Use Case | Deskripsi | Admin | Operator |
 |------|----------|-----------|:-----:|:--------:|
-| UC-11 | Lihat Dashboard | Ringkasan stok, pesanan, KPI | âœ… | âœ… |
-| UC-12 | Buat Pesanan | Membuat pesanan baru | âœ… | âœ… |
-| UC-13 | Buat Pesanan (Voice Order) | Membuat pesanan dengan suara | âœ… | âœ… |
-| UC-14 | Lihat Daftar Pesanan | Melihat semua pesanan | âœ… | âœ… |
-| UC-15 | Update Status Pesanan | Mengubah status pesanan | âœ… | âœ… |
-| UC-16 | Assign Driver | Menugaskan driver ke pesanan | âœ… | âœ… |
-| UC-17 | Catat Pembayaran | Mencatat pembayaran pesanan | âœ… | âœ… |
-| UC-18 | Cetak Nota | Mencetak invoice/nota | âœ… | âœ… |
-| UC-19 | Kelola Stok | Monitoring dan pencatatan stok | âœ… | âœ… |
-| UC-20 | Generate Laporan | Membuat laporan penjualan/stok | âœ… | âœ… |
+| UC-11 | Lihat Dashboard | Ringkasan stok, pesanan, KPI | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-12 | Buat Pesanan | Membuat pesanan baru | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-13 | Buat Pesanan (Voice Order) | Membuat pesanan dengan suara | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-14 | Lihat Daftar Pesanan | Melihat semua pesanan | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-15 | Update Status Pesanan | Mengubah status pesanan | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-16 | Assign Driver | Menugaskan driver ke pesanan | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-17 | Catat Pembayaran | Mencatat pembayaran pesanan | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-18 | Cetak Nota | Mencetak invoice/nota | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-19 | Kelola Stok | Monitoring dan pencatatan stok | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| UC-20 | Generate Laporan | Membuat laporan penjualan/stok | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
 
 #### D. Use Case Pangkalan Only
 
@@ -719,29 +719,29 @@ SIM4LON memiliki **3 aktor utama** dengan hak akses berbeda:
 
 | Use Case | Admin | Operator | Pangkalan |
 |----------|:-----:|:--------:|:---------:|
-| Login | âœ… | âœ… | âœ… |
-| Logout | âœ… | âœ… | âœ… |
-| Kelola Profil | âœ… | âœ… | âœ… |
-| Ubah Password | âœ… | âœ… | âœ… |
-| Kelola Pengguna | âœ… | âŒ | âŒ |
-| Kelola Pangkalan | âœ… | âŒ | âŒ |
-| Kelola Driver | âœ… | âŒ | âŒ |
-| Kelola Produk LPG | âœ… | âŒ | âŒ |
-| Lihat Log Aktivitas | âœ… | âŒ | âŒ |
-| Kelola Pengaturan | âœ… | âŒ | âŒ |
-| Lihat Dashboard | âœ… | âœ… | âœ…* |
-| Buat Pesanan | âœ… | âœ… | âŒ |
-| Voice Order | âœ… | âœ… | âŒ |
-| Lihat Daftar Pesanan | âœ… | âœ… | âœ…* |
-| Update Status | âœ… | âœ… | âŒ |
-| Assign Driver | âœ… | âœ… | âŒ |
-| Catat Pembayaran | âœ… | âœ… | âŒ |
-| Cetak Nota | âœ… | âœ… | âŒ |
-| Kelola Stok | âœ… | âœ… | âŒ |
-| Generate Laporan | âœ… | âœ… | âœ…* |
-| Kelola Penjualan | âŒ | âŒ | âœ… |
-| Kelola Konsumen | âŒ | âŒ | âœ… |
-| Lihat Stok Agen | âŒ | âŒ | âœ… |
+| Login | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| Logout | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| Kelola Profil | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| Ubah Password | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦ |
+| Kelola Pengguna | Ã¢Å“â€¦ | Ã¢ÂÅ’ | Ã¢ÂÅ’ |
+| Kelola Pangkalan | Ã¢Å“â€¦ | Ã¢ÂÅ’ | Ã¢ÂÅ’ |
+| Kelola Driver | Ã¢Å“â€¦ | Ã¢ÂÅ’ | Ã¢ÂÅ’ |
+| Kelola Produk LPG | Ã¢Å“â€¦ | Ã¢ÂÅ’ | Ã¢ÂÅ’ |
+| Lihat Log Aktivitas | Ã¢Å“â€¦ | Ã¢ÂÅ’ | Ã¢ÂÅ’ |
+| Kelola Pengaturan | Ã¢Å“â€¦ | Ã¢ÂÅ’ | Ã¢ÂÅ’ |
+| Lihat Dashboard | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦* |
+| Buat Pesanan | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Voice Order | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Lihat Daftar Pesanan | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦* |
+| Update Status | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Assign Driver | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Catat Pembayaran | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Cetak Nota | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Kelola Stok | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢ÂÅ’ |
+| Generate Laporan | Ã¢Å“â€¦ | Ã¢Å“â€¦ | Ã¢Å“â€¦* |
+| Kelola Penjualan | Ã¢ÂÅ’ | Ã¢ÂÅ’ | Ã¢Å“â€¦ |
+| Kelola Konsumen | Ã¢ÂÅ’ | Ã¢ÂÅ’ | Ã¢Å“â€¦ |
+| Lihat Stok Agen | Ã¢ÂÅ’ | Ã¢ÂÅ’ | Ã¢Å“â€¦ |
 
 > *\* Pangkalan hanya dapat mengakses data milik sendiri (multi-tenant)*
 
@@ -819,36 +819,36 @@ Berikut adalah 25 relasi antar class dalam sistem SIM4LON:
 
 | No | Kategori | Class A | Relasi | Class B | Cardinality | Deskripsi |
 |----|----------|---------|:------:|---------|:-----------:|-----------|
-| 1 | Master Data | `users` | ○── | `pangkalans` | 0..* : 0..1 | User dapat terkait dengan satu pangkalan |
-| 2 | Master Data | `agen` | ○── | `pangkalans` | 1 : 0..* | Satu agen memiliki banyak pangkalan |
-| 3 | Order | `orders` | ○── | `pangkalans` | 0..* : 1 | Order dikirim ke satu pangkalan |
-| 4 | Order | `orders` | ○── | `drivers` | 0..* : 0..1 | Order dapat di-assign ke driver |
-| 5 | Order | `orders` | ◆── | `order_items` | 1 : 1..* | Order memiliki item (composition) |
-| 6 | Order | `orders` | ◆── | `timeline_tracks` | 1 : 0..* | Order memiliki timeline (composition) |
-| 7 | Order | `orders` | ◆── | `order_payment_details` | 1 : 0..1 | Order memiliki detail pembayaran |
-| 8 | Order | `orders` | ○── | `invoices` | 1 : 0..* | Order dapat memiliki invoice |
-| 9 | Order | `orders` | ○── | `payment_records` | 1 : 0..* | Order memiliki riwayat pembayaran |
-| 10 | Order | `orders` | ○── | `activity_logs` | 1 : 0..* | Order tercatat di activity log |
-| 11 | Payment | `payment_records` | ○── | `users` | 0..* : 1 | Pembayaran dicatat oleh user |
-| 12 | Payment | `payment_records` | ○── | `invoices` | 0..* : 0..1 | Pembayaran terkait invoice |
-| 13 | Stock | `stock_histories` | ○── | `lpg_products` | 0..* : 0..1 | Stok terkait produk LPG |
-| 14 | Stock | `stock_histories` | ○── | `users` | 0..* : 0..1 | Stok dicatat oleh user |
-| 15 | Stock | `penyaluran_harian` | ○── | `pangkalans` | 0..* : 1 | Penyaluran ke pangkalan |
-| 16 | Stock | `perencanaan_harian` | ○── | `pangkalans` | 0..* : 1 | Perencanaan untuk pangkalan |
-| 17 | Pangkalan SAAS | `consumers` | ○── | `pangkalans` | 0..* : 1 | Konsumen milik pangkalan |
-| 18 | Pangkalan SAAS | `consumer_orders` | ○── | `pangkalans` | 0..* : 1 | Penjualan milik pangkalan |
-| 19 | Pangkalan SAAS | `consumer_orders` | ○── | `consumers` | 0..* : 0..1 | Penjualan ke konsumen |
-| 20 | Pangkalan SAAS | `pangkalan_stocks` | ○── | `pangkalans` | 0..* : 1 | Stok milik pangkalan |
-| 21 | Pangkalan SAAS | `lpg_prices` | ○── | `pangkalans` | 0..* : 1 | Harga custom per pangkalan |
-| 22 | Pangkalan SAAS | `expenses` | ○── | `pangkalans` | 0..* : 1 | Pengeluaran milik pangkalan |
-| 23 | Pangkalan SAAS | `agen_orders` | ○── | `pangkalans` | 0..* : 1 | Order dari pangkalan |
-| 24 | Pangkalan SAAS | `agen_orders` | ○── | `agen` | 0..* : 0..1 | Order ke agen |
-| 25 | Audit | `activity_logs` | ○── | `users` | 0..* : 0..1 | Log aktivitas oleh user |
+| 1 | Master Data | `users` | â—‹â”€â”€ | `pangkalans` | 0..* : 0..1 | User dapat terkait dengan satu pangkalan |
+| 2 | Master Data | `agen` | â—‹â”€â”€ | `pangkalans` | 1 : 0..* | Satu agen memiliki banyak pangkalan |
+| 3 | Order | `orders` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Order dikirim ke satu pangkalan |
+| 4 | Order | `orders` | â—‹â”€â”€ | `drivers` | 0..* : 0..1 | Order dapat di-assign ke driver |
+| 5 | Order | `orders` | â—†â”€â”€ | `order_items` | 1 : 1..* | Order memiliki item (composition) |
+| 6 | Order | `orders` | â—†â”€â”€ | `timeline_tracks` | 1 : 0..* | Order memiliki timeline (composition) |
+| 7 | Order | `orders` | â—†â”€â”€ | `order_payment_details` | 1 : 0..1 | Order memiliki detail pembayaran |
+| 8 | Order | `orders` | â—‹â”€â”€ | `invoices` | 1 : 0..* | Order dapat memiliki invoice |
+| 9 | Order | `orders` | â—‹â”€â”€ | `payment_records` | 1 : 0..* | Order memiliki riwayat pembayaran |
+| 10 | Order | `orders` | â—‹â”€â”€ | `activity_logs` | 1 : 0..* | Order tercatat di activity log |
+| 11 | Payment | `payment_records` | â—‹â”€â”€ | `users` | 0..* : 1 | Pembayaran dicatat oleh user |
+| 12 | Payment | `payment_records` | â—‹â”€â”€ | `invoices` | 0..* : 0..1 | Pembayaran terkait invoice |
+| 13 | Stock | `stock_histories` | â—‹â”€â”€ | `lpg_products` | 0..* : 0..1 | Stok terkait produk LPG |
+| 14 | Stock | `stock_histories` | â—‹â”€â”€ | `users` | 0..* : 0..1 | Stok dicatat oleh user |
+| 15 | Stock | `penyaluran_harian` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Penyaluran ke pangkalan |
+| 16 | Stock | `perencanaan_harian` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Perencanaan untuk pangkalan |
+| 17 | Pangkalan SAAS | `consumers` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Konsumen milik pangkalan |
+| 18 | Pangkalan SAAS | `consumer_orders` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Penjualan milik pangkalan |
+| 19 | Pangkalan SAAS | `consumer_orders` | â—‹â”€â”€ | `consumers` | 0..* : 0..1 | Penjualan ke konsumen |
+| 20 | Pangkalan SAAS | `pangkalan_stocks` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Stok milik pangkalan |
+| 21 | Pangkalan SAAS | `lpg_prices` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Harga custom per pangkalan |
+| 22 | Pangkalan SAAS | `expenses` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Pengeluaran milik pangkalan |
+| 23 | Pangkalan SAAS | `agen_orders` | â—‹â”€â”€ | `pangkalans` | 0..* : 1 | Order dari pangkalan |
+| 24 | Pangkalan SAAS | `agen_orders` | â—‹â”€â”€ | `agen` | 0..* : 0..1 | Order ke agen |
+| 25 | Audit | `activity_logs` | â—‹â”€â”€ | `users` | 0..* : 0..1 | Log aktivitas oleh user |
 
 **Keterangan Notasi:**
-- `◆──` : Composition (class B tidak dapat exist tanpa class A)
-- `○──` : Aggregation (class B dapat exist independen)
-- `──` : Association biasa
+- `â—†â”€â”€` : Composition (class B tidak dapat exist tanpa class A)
+- `â—‹â”€â”€` : Aggregation (class B dapat exist independen)
+- `â”€â”€` : Association biasa
 
 **File Diagram:** `diagrams/SIM4LON_ClassDiagram.puml`
 
@@ -1009,7 +1009,7 @@ Class `company_profile` merupakan singleton class yang menyimpan profil perusaha
 
 #### 7. orders
 
-Class `orders` merupakan class utama dalam modul Order Management. Setiap pesanan memiliki `current_status` yang mengikuti workflow (DRAFT → SELESAI/BATAL), relasi ke `pangkalans` sebagai tujuan pengiriman, dan opsional relasi ke `drivers` untuk penugasan sopir. Class ini juga menghitung `subtotal`, `tax_amount`, dan `total_amount`.
+Class `orders` merupakan class utama dalam modul Order Management. Setiap pesanan memiliki `current_status` yang mengikuti workflow (DRAFT â†’ SELESAI/BATAL), relasi ke `pangkalans` sebagai tujuan pengiriman, dan opsional relasi ke `drivers` untuk penugasan sopir. Class ini juga menghitung `subtotal`, `tax_amount`, dan `total_amount`.
 
 #### 8. order_items
 
@@ -1069,7 +1069,7 @@ Class `expenses` mencatat pengeluaran operasional pangkalan seperti transportasi
 
 #### 22. agen_orders
 
-Class `agen_orders` mencatat order pengisian stok dari pangkalan ke agen. Status order mengikuti workflow: PENDING → DIKIRIM → DITERIMA/DITOLAK. Atribut `qty_ordered` dan `qty_received` memungkinkan partial delivery.
+Class `agen_orders` mencatat order pengisian stok dari pangkalan ke agen. Status order mengikuti workflow: PENDING â†’ DIKIRIM â†’ DITERIMA/DITOLAK. Atribut `qty_ordered` dan `qty_received` memungkinkan partial delivery.
 
 #### 23. activity_logs
 
@@ -1088,11 +1088,11 @@ Berikut ini merupakan *activity diagram* dari Aplikasi SIM4LON berbasis web di P
 
 | Komponen | Simbol | Deskripsi |
 |----------|--------|-----------|
-| **Initial Node** | â— | Titik awal proses |
-| **Final Node** | â—‰ | Titik akhir proses |
-| **Action** | â–­ | Aktivitas/langkah |
-| **Decision** | â—‡ | Percabangan kondisi |
-| **Fork/Join** | â–¬ | Parallel execution |
+| **Initial Node** | Ã¢â€”Â | Titik awal proses |
+| **Final Node** | Ã¢â€”â€° | Titik akhir proses |
+| **Action** | Ã¢â€“Â­ | Aktivitas/langkah |
+| **Decision** | Ã¢â€”â€¡ | Percabangan kondisi |
+| **Fork/Join** | Ã¢â€“Â¬ | Parallel execution |
 | **Swimlane** | Kolom vertikal | Pembagian tanggung jawab per aktor |
 
 ---
@@ -1168,7 +1168,7 @@ Pada gambar 3.x menunjukkan aktivitas membuat pesanan baru untuk aktor Admin dan
 Setelah user menekan tombol simpan, **Sistem** akan melakukan validasi input secara berurutan:
 1. Jika pangkalan belum dipilih, sistem menampilkan error "Pilih pangkalan"
 2. Jika tidak ada item LPG yang ditambahkan, sistem menampilkan error "Tambahkan minimal 1 item"
-3. Jika quantity tidak valid (â‰¤ 0), sistem menampilkan error "Jumlah harus > 0"
+3. Jika quantity tidak valid (Ã¢â€°Â¤ 0), sistem menampilkan error "Jumlah harus > 0"
 
 Jika semua validasi berhasil, sistem akan melakukan proses berikut:
 - Generate kode pesanan dengan format ORD-XXXX
@@ -1190,7 +1190,7 @@ Terakhir, sistem menampilkan pesan sukses dan user diarahkan ke halaman detail p
 
 Pada gambar 3.x menunjukkan aktivitas mengubah status pesanan untuk aktor Admin dan Operator. Dimulai dengan **User** membuka detail pesanan, memilih status baru dari dropdown, kemudian mengklik tombol "Update Status".
 
-**Sistem** mengambil status saat ini dan memvalidasi transisi status. Jika transisi tidak valid, sistem menampilkan error "Transisi status tidak valid" beserta informasi alur status yang diperbolehkan (DRAFT â†’ MENUNGGU_PEMBAYARAN â†’ DIPROSES â†’ SIAP_KIRIM â†’ DIKIRIM â†’ SELESAI, atau status manapun dapat berpindah ke BATAL).
+**Sistem** mengambil status saat ini dan memvalidasi transisi status. Jika transisi tidak valid, sistem menampilkan error "Transisi status tidak valid" beserta informasi alur status yang diperbolehkan (DRAFT Ã¢â€ â€™ MENUNGGU_PEMBAYARAN Ã¢â€ â€™ DIPROSES Ã¢â€ â€™ SIAP_KIRIM Ã¢â€ â€™ DIKIRIM Ã¢â€ â€™ SELESAI, atau status manapun dapat berpindah ke BATAL).
 
 Jika transisi valid, terdapat beberapa kondisi khusus:
 - Jika status baru adalah **SIAP_KIRIM**, user dapat memilih driver untuk ditugaskan ke pesanan (opsional).
@@ -1210,7 +1210,7 @@ Pada gambar 3.x menunjukkan aktivitas mencatat pembayaran pesanan untuk aktor Ad
 **User** memilih metode pembayaran (TUNAI atau TRANSFER), memasukkan jumlah yang dibayar, upload bukti transfer (jika metode transfer), menambahkan catatan (opsional), lalu mengklik "Simpan".
 
 **Sistem** melakukan validasi input. Jika input valid, sistem mengecek apakah jumlah pembayaran mencukupi:
-- Jika jumlah **â‰¥ sisa tagihan**, maka sistem set is_paid = true dan payment_status = "PAID" (lunas)
+- Jika jumlah **Ã¢â€°Â¥ sisa tagihan**, maka sistem set is_paid = true dan payment_status = "PAID" (lunas)
 - Jika jumlah **< sisa tagihan**, maka sistem set is_paid = false, is_dp = true, dan payment_status = "PARTIAL" (pembayaran sebagian/DP)
 
 Selanjutnya sistem menyimpan payment record, mengupdate order_payment_details, dan mencatat log aktivitas "payment_recorded". Jika pembayaran lunas dan status pesanan masih MENUNGGU_PEMBAYARAN, sistem secara otomatis mengupdate status ke DIPROSES dan membuat timeline track. Terakhir, sistem menampilkan pesan sukses dan halaman direfresh.
@@ -1268,7 +1268,7 @@ Selanjutnya pangkalan memilih jenis LPG dan memasukkan jumlah yang dibeli.
 
 **Sistem** mengecek ketersediaan stok. Jika stok tidak mencukupi, sistem menampilkan error "Stok tidak mencukupi" beserta informasi stok saat ini dan jumlah yang diminta.
 
-Jika stok mencukupi, sistem menghitung total harga (qty Ã— selling_price) dan menampilkan total kepada pangkalan. Pangkalan mengkonfirmasi penjualan dan mengklik "Simpan".
+Jika stok mencukupi, sistem menghitung total harga (qty Ãƒâ€” selling_price) dan menampilkan total kepada pangkalan. Pangkalan mengkonfirmasi penjualan dan mengklik "Simpan".
 
 **Sistem** kemudian generate kode penjualan dengan format PORD-XXXX, menyimpan data ke tabel consumer_order, mengurangi pangkalan_stocks, dan membuat pangkalan_stock_movement dengan tipe KELUAR. Terakhir, sistem menampilkan pesan sukses dan dashboard direfresh.
 
@@ -1279,11 +1279,11 @@ Jika stok mencukupi, sistem menghitung total harga (qty Ã— selling_price) dan
 ![AD-08 Buat Order ke Agen](diagrams/3 AD/AD_08_BuatOrderKeAgen.png)
 *Gambar 3.x Activity Diagram Buat Order ke Agen*
 
-Pada gambar 3.x menunjukkan aktivitas pangkalan membuat order LPG ke agen. Dimulai dengan **Pangkalan** membuka menu "Order ke Agen" kemudian mengklik "Buat Order Baru". **Sistem** menampilkan form order, melakukan load data agen terkait, dan menampilkan informasi stok saat ini.
+Pada gambar 3.x menunjukkan aktivitas pangkalan membuat pesanan LPG ke agen via WhatsApp. Dimulai dengan **Pangkalan** membuka halaman "Stok LPG" kemudian mengklik tombol "Pesan ke Agen". **Sistem** menampilkan modal order, melakukan load daftar tipe LPG aktif, dan menampilkan informasi agen terkait (nama perusahaan dan nomor telepon).
 
-**Pangkalan** memilih jenis LPG, memasukkan jumlah order, menambahkan catatan (opsional), lalu mengklik "Kirim Order".
+**Pangkalan** memilih tipe LPG dari dropdown, memasukkan jumlah tabung yang dipesan, menambahkan catatan (opsional), lalu mengklik "Buat Pesanan".
 
-**Sistem** memvalidasi input. Jika valid, sistem generate kode order dengan format AGN-XXXX, menyimpan data ke tabel agen_order dengan status PENDING, dan set order_date = now. Terakhir, sistem menampilkan pesan sukses "Order dikirim ke Agen" dan menampilkan daftar order. Pangkalan kemudian menunggu konfirmasi dari agen dengan alur status: PENDING â†’ DIKIRIM â†’ DITERIMA.
+**Sistem** melakukan validasi input. Jika jumlah tidak valid (â‰¤ 0), sistem menampilkan error "Jumlah harus lebih dari 0". Jika nomor telepon agen belum terdaftar, sistem menampilkan error "Nomor telepon Agen belum terdaftar". Jika validasi berhasil, sistem memformat nomor telepon untuk WhatsApp (konversi 0xxx menjadi 62xxx), generate pesan pesanan otomatis berisi nama pangkalan, tipe LPG, jumlah tabung, dan catatan (jika ada), kemudian membuka WhatsApp Web dengan pesan yang sudah terformat (wa.me/62xxx?text=...). **Pangkalan** kemudian dapat mengirim pesan ke agen melalui WhatsApp yang sudah terbuka di tab baru.
 
 ---
 
@@ -1434,7 +1434,7 @@ Pada gambar 3.x menunjukkan aktivitas menampilkan invoice atau nota pembayaran u
 
 Pada gambar 3.x menunjukkan aktivitas mengelola perencanaan distribusi untuk aktor Admin dan Operator. Dimulai dengan **User** membuka halaman Perencanaan kemudian memilih bulan dan tipe LPG.
 
-**Sistem** melakukan load data perencanaan bulan tersebut, load daftar pangkalan aktif, dan menampilkan grid (pangkalan Ã— tanggal).
+**Sistem** melakukan load data perencanaan bulan tersebut, load daftar pangkalan aktif, dan menampilkan grid (pangkalan Ãƒâ€” tanggal).
 
 Jika data sudah ada, **User** dapat mengklik cell untuk mengedit dan mengubah jumlah normal/fakultatif. Jika data belum ada, user dapat mengklik "Auto Generate" dan sistem akan membuat perencanaan untuk semua pangkalan berdasarkan alokasi_bulanan masing-masing pangkalan. User dapat edit manual jika perlu.
 
@@ -1596,19 +1596,19 @@ Berikut ini merupakan *sequence diagram* dari Aplikasi SIM4LON berbasis web di P
 
 | Stereotype | Simbol | Deskripsi | Contoh |
 |------------|--------|-----------|--------|
-| `<<actor>>` | ðŸ§‘ | Pengguna sistem | User, Admin |
-| `<<boundary>>` | â—» | Antarmuka pengguna | LoginPage, OrderForm |
-| `<<control>>` | â—Ž | Business logic | AuthService, OrderService |
-| `<<entity>>` | â¬¡ | Data/Database | users, orders |
+| `<<actor>>` | Ã°Å¸Â§â€˜ | Pengguna sistem | User, Admin |
+| `<<boundary>>` | Ã¢â€”Â» | Antarmuka pengguna | LoginPage, OrderForm |
+| `<<control>>` | Ã¢â€”Å½ | Business logic | AuthService, OrderService |
+| `<<entity>>` | Ã¢Â¬Â¡ | Data/Database | users, orders |
 
 ### Message Types
 
 | Tipe | Simbol | Deskripsi |
 |------|--------|-----------|
-| Synchronous | â”€â”€â–¶ | Request blocking (menunggu response) |
+| Synchronous | Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Â¶ | Request blocking (menunggu response) |
 | Return | ---> | Response dari request |
-| Self-call | â†© | Memanggil method sendiri |
-| Create | â”€â”€â–¶â–· | Membuat instance baru |
+| Self-call | Ã¢â€ Â© | Memanggil method sendiri |
+| Create | Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Â¶Ã¢â€“Â· | Membuat instance baru |
 
 ---
 
@@ -1709,7 +1709,7 @@ Terakhir, sistem menampilkan pesan sukses dan mengarahkan Admin ke halaman detai
 
 Pada gambar 3.x menunjukkan proses alur *sequence diagram* update status pesanan. Proses diawali ketika **Admin** membuka detail pesanan yang memicu **OrderDetailPage** untuk memanggil `getOrderDetail(orderId)` dari **OrderService**.
 
-Admin memilih status baru dan menekan tombol "Update Status". **OrderService** melakukan validasi transisi status (misalnya DRAFT → DIPROSES valid, tapi SELESAI → DRAFT tidak valid). Jika valid, service:
+Admin memilih status baru dan menekan tombol "Update Status". **OrderService** melakukan validasi transisi status (misalnya DRAFT â†’ DIPROSES valid, tapi SELESAI â†’ DRAFT tidak valid). Jika valid, service:
 1. Update `driver_id` jika status = SIAP_KIRIM
 2. Update `current_status` di tabel **orders**
 3. Insert timeline track ke **timeline_tracks**
@@ -1800,7 +1800,7 @@ Admin mengklik "Tambah Penerimaan" dan mengisi form: No. SO, No. LO, nama materi
 
 Pada gambar 3.x menunjukkan proses alur *sequence diagram* pencatatan penyaluran. Proses diawali ketika **Admin** membuka halaman Penyaluran dan memilih bulan serta tipe LPG.
 
-**PenyaluranService** membangun grid penyaluran (pangkalan × tanggal) dari data **pangkalans** dan **penyaluran_harian**. Admin mengklik cell untuk input jumlah_normal, jumlah_fakultatif, dan tipe_pembayaran. Service melakukan bulk update ke **penyaluran_harian** (insert jika belum ada, update jika sudah ada) dan mencatat ke **stock_histories** dengan movement_type = 'KELUAR'.
+**PenyaluranService** membangun grid penyaluran (pangkalan Ã— tanggal) dari data **pangkalans** dan **penyaluran_harian**. Admin mengklik cell untuk input jumlah_normal, jumlah_fakultatif, dan tipe_pembayaran. Service melakukan bulk update ke **penyaluran_harian** (insert jika belum ada, update jika sudah ada) dan mencatat ke **stock_histories** dengan movement_type = 'KELUAR'.
 
 ---
 
@@ -1840,7 +1840,7 @@ Sistem menerapkan prinsip multi-tenant dimana pangkalan_id diambil dari JWT toke
 
 Pada gambar 3.x menunjukkan proses alur *sequence diagram* pembuatan order ke agen oleh pangkalan. Proses diawali ketika **Pangkalan** membuka menu "Order ke Agen" yang memuat info agen terkait.
 
-Pangkalan memilih jenis LPG, input qty, tambah catatan (opsional), lalu menekan "Kirim Order". **AgenOrderService** generate kode order (AGN-XXXX) dan menyimpan ke **agen_orders** dengan status = 'PENDING'. Status flow: PENDING → DIKIRIM → DITERIMA.
+Pangkalan memilih jenis LPG, input qty, tambah catatan (opsional), lalu menekan "Kirim Order". **AgenOrderService** generate kode order (AGN-XXXX) dan menyimpan ke **agen_orders** dengan status = 'PENDING'. Status flow: PENDING â†’ DIKIRIM â†’ DITERIMA.
 
 ---
 
@@ -1896,9 +1896,9 @@ Pada gambar 3.x menunjukkan template *sequence diagram* untuk operasi CRUD gener
 
 Operasi yang didukung:
 - **READ**: List dengan pagination dan filter
-- **CREATE**: Form kosong → validasi → generate code → insert
-- **UPDATE**: Load data existing → edit → validasi → update
-- **DELETE**: Konfirmasi → soft delete (set deleted_at)
+- **CREATE**: Form kosong â†’ validasi â†’ generate code â†’ insert
+- **UPDATE**: Load data existing â†’ edit â†’ validasi â†’ update
+- **DELETE**: Konfirmasi â†’ soft delete (set deleted_at)
 
 ---
 
@@ -1936,7 +1936,7 @@ Pangkalan dapat export ke Excel (dengan 3 sheet: Ringkasan, Detail Penjualan, De
 ![SD-20 Voice Order AI](diagrams/4 SD/SD_Voice_CreateOrder.png)
 *Gambar 3.x Sequence Diagram Voice Order AI*
 
-Pada gambar 3.x menunjukkan proses alur *sequence diagram* pembuatan pesanan menggunakan perintah suara dengan integrasi Gemini AI. Proses diawali ketika **Admin** mengklik tombol FAB (🎤) yang mengaktifkan **FloatingVoiceWidget**.
+Pada gambar 3.x menunjukkan proses alur *sequence diagram* pembuatan pesanan menggunakan perintah suara dengan integrasi Gemini AI. Proses diawali ketika **Admin** mengklik tombol FAB (ðŸŽ¤) yang mengaktifkan **FloatingVoiceWidget**.
 
 Alur lengkap:
 1. **Aktivasi**: Request izin mikrofon, aktifkan Web Speech API, tampilkan UI "Mendengarkan..."
@@ -1961,10 +1961,10 @@ Berikut ini merupakan *state machine diagram* dari Aplikasi SIM4LON berbasis web
 
 | Komponen | Simbol | Deskripsi |
 |----------|--------|-----------|
-| **Initial State** | â— | State awal |
-| **Final State** | â—‰ | State akhir |
-| **State** | â–­ | Kondisi objek |
-| **Transition** | â†’ | Perpindahan state |
+| **Initial State** | Ã¢â€”Â | State awal |
+| **Final State** | Ã¢â€”â€° | State akhir |
+| **State** | Ã¢â€“Â­ | Kondisi objek |
+| **Transition** | Ã¢â€ â€™ | Perpindahan state |
 | **Guard** | [condition] | Kondisi untuk transisi |
 | **Action** | /action | Aksi yang dilakukan |
 
@@ -2005,12 +2005,12 @@ Pada gambar 3.x menunjukkan *state machine diagram* untuk siklus hidup pesanan d
 | **BATAL** | Pesanan dibatalkan | Log alasan pembatalan |
 
 **Transisi yang valid:**
-- DRAFT → MENUNGGU_PEMBAYARAN: Submit pesanan
-- MENUNGGU_PEMBAYARAN → DIPROSES: Pembayaran diterima
-- DIPROSES → SIAP_KIRIM: Barang siap
-- SIAP_KIRIM → DIKIRIM: Driver berangkat
-- DIKIRIM → SELESAI: Barang diterima
-- Semua state (kecuali SELESAI) → BATAL: Cancel
+- DRAFT â†’ MENUNGGU_PEMBAYARAN: Submit pesanan
+- MENUNGGU_PEMBAYARAN â†’ DIPROSES: Pembayaran diterima
+- DIPROSES â†’ SIAP_KIRIM: Barang siap
+- SIAP_KIRIM â†’ DIKIRIM: Driver berangkat
+- DIKIRIM â†’ SELESAI: Barang diterima
+- Semua state (kecuali SELESAI) â†’ BATAL: Cancel
 
 ---
 
@@ -2030,9 +2030,9 @@ Pada gambar 3.x menunjukkan *state machine diagram* untuk status pembayaran pesa
 | **PAID** | true | false | Pembayaran sudah lunas |
 
 **Transisi:**
-- UNPAID → PARTIAL: Bayar DP
-- UNPAID → PAID: Bayar langsung lunas
-- PARTIAL → PAID: Bayar sisa
+- UNPAID â†’ PARTIAL: Bayar DP
+- UNPAID â†’ PAID: Bayar langsung lunas
+- PARTIAL â†’ PAID: Bayar sisa
 
 ---
 
@@ -2053,10 +2053,10 @@ Pada gambar 3.x menunjukkan *state machine diagram* untuk order yang dibuat pang
 | **DITOLAK** | Order ditolak atau gagal | Log alasan |
 
 **Transisi:**
-- PENDING → DIKIRIM: Agen konfirmasi kirim
-- PENDING → DITOLAK: Agen menolak
-- DIKIRIM → DITERIMA: Pangkalan konfirmasi terima
-- DIKIRIM → DITOLAK: Gagal diterima
+- PENDING â†’ DIKIRIM: Agen konfirmasi kirim
+- PENDING â†’ DITOLAK: Agen menolak
+- DIKIRIM â†’ DITERIMA: Pangkalan konfirmasi terima
+- DIKIRIM â†’ DITOLAK: Gagal diterima
 
 ---
 
@@ -2077,11 +2077,11 @@ Pada gambar 3.x menunjukkan *state machine diagram* untuk session pengguna dalam
 | **KICKED_OUT** | mismatch | - | Login dari device lain |
 
 **Transisi:**
-- LOGGED_OUT → LOGGED_IN: Login success
-- LOGGED_IN → LOGGED_OUT: Logout
-- LOGGED_IN → SESSION_EXPIRED: Token expired
-- LOGGED_IN → KICKED_OUT: Login dari device lain
-- SESSION_EXPIRED/KICKED_OUT → LOGGED_OUT: Redirect ke login
+- LOGGED_OUT â†’ LOGGED_IN: Login success
+- LOGGED_IN â†’ LOGGED_OUT: Logout
+- LOGGED_IN â†’ SESSION_EXPIRED: Token expired
+- LOGGED_IN â†’ KICKED_OUT: Login dari device lain
+- SESSION_EXPIRED/KICKED_OUT â†’ LOGGED_OUT: Redirect ke login
 
 **Fitur Single Session Login:** Satu akun hanya dapat login dari satu device pada satu waktu. Login dari device baru akan menginvalidasi session lama.
 
@@ -2095,43 +2095,43 @@ Deployment Diagram menggambarkan arsitektur fisik sistem, meliputi node (server)
 ### Arsitektur Deployment SIM4LON
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                        INTERNET (HTTPS)                                  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-         â”‚                       â”‚                       â”‚
-         â–¼                       â–¼                       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚    BROWSER      â”‚    â”‚     VERCEL      â”‚    â”‚   GOOGLE CLOUD  â”‚
-â”‚    (Client)     â”‚    â”‚   (Frontend)    â”‚    â”‚   (Gemini AI)   â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ â€¢ Chrome        â”‚    â”‚ â€¢ Edge Network  â”‚    â”‚ â€¢ Gemini 2.0    â”‚
-â”‚ â€¢ Firefox       â”‚â—„â”€â”€â–ºâ”‚ â€¢ CDN Global    â”‚    â”‚ â€¢ Flash Model   â”‚
-â”‚ â€¢ Safari        â”‚    â”‚ â€¢ SSL/TLS       â”‚    â”‚ â€¢ REST API      â”‚
-â”‚ â€¢ Edge          â”‚    â”‚                 â”‚    â”‚                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚ HTTPS                â”‚ HTTPS
-                                â–¼                      â”‚
-                       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”             â”‚
-                       â”‚    RAILWAY      â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                       â”‚   (Backend)     â”‚
-                       â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                       â”‚ â€¢ NestJS 11     â”‚
-                       â”‚ â€¢ REST API      â”‚
-                       â”‚ â€¢ JWT Auth      â”‚
-                       â”‚ â€¢ Prisma ORM    â”‚
-                       â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚ TCP/5432
-                                â–¼
-                       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                       â”‚    RAILWAY      â”‚
-                       â”‚  (PostgreSQL)   â”‚
-                       â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                       â”‚ â€¢ PostgreSQL 15 â”‚
-                       â”‚ â€¢ 23 Tables     â”‚
-                       â”‚ â€¢ UUID Support  â”‚
-                       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â
+Ã¢â€â€š                        INTERNET (HTTPS)                                  Ã¢â€â€š
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ
+                                 Ã¢â€â€š
+         Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¼Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â
+         Ã¢â€â€š                       Ã¢â€â€š                       Ã¢â€â€š
+         Ã¢â€“Â¼                       Ã¢â€“Â¼                       Ã¢â€“Â¼
+Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â    Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â    Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â
+Ã¢â€â€š    BROWSER      Ã¢â€â€š    Ã¢â€â€š     VERCEL      Ã¢â€â€š    Ã¢â€â€š   GOOGLE CLOUD  Ã¢â€â€š
+Ã¢â€â€š    (Client)     Ã¢â€â€š    Ã¢â€â€š   (Frontend)    Ã¢â€â€š    Ã¢â€â€š   (Gemini AI)   Ã¢â€â€š
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¤    Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¤    Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¤
+Ã¢â€â€š Ã¢â‚¬Â¢ Chrome        Ã¢â€â€š    Ã¢â€â€š Ã¢â‚¬Â¢ Edge Network  Ã¢â€â€š    Ã¢â€â€š Ã¢â‚¬Â¢ Gemini 2.0    Ã¢â€â€š
+Ã¢â€â€š Ã¢â‚¬Â¢ Firefox       Ã¢â€â€šÃ¢â€”â€žÃ¢â€â‚¬Ã¢â€â‚¬Ã¢â€“ÂºÃ¢â€â€š Ã¢â‚¬Â¢ CDN Global    Ã¢â€â€š    Ã¢â€â€š Ã¢â‚¬Â¢ Flash Model   Ã¢â€â€š
+Ã¢â€â€š Ã¢â‚¬Â¢ Safari        Ã¢â€â€š    Ã¢â€â€š Ã¢â‚¬Â¢ SSL/TLS       Ã¢â€â€š    Ã¢â€â€š Ã¢â‚¬Â¢ REST API      Ã¢â€â€š
+Ã¢â€â€š Ã¢â‚¬Â¢ Edge          Ã¢â€â€š    Ã¢â€â€š                 Ã¢â€â€š    Ã¢â€â€š                 Ã¢â€â€š
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ    Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ    Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ
+                                Ã¢â€â€š HTTPS                Ã¢â€â€š HTTPS
+                                Ã¢â€“Â¼                      Ã¢â€â€š
+                       Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â             Ã¢â€â€š
+                       Ã¢â€â€š    RAILWAY      Ã¢â€â€šÃ¢â€”â€žÃ¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ
+                       Ã¢â€â€š   (Backend)     Ã¢â€â€š
+                       Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¤
+                       Ã¢â€â€š Ã¢â‚¬Â¢ NestJS 11     Ã¢â€â€š
+                       Ã¢â€â€š Ã¢â‚¬Â¢ REST API      Ã¢â€â€š
+                       Ã¢â€â€š Ã¢â‚¬Â¢ JWT Auth      Ã¢â€â€š
+                       Ã¢â€â€š Ã¢â‚¬Â¢ Prisma ORM    Ã¢â€â€š
+                       Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ
+                                Ã¢â€â€š TCP/5432
+                                Ã¢â€“Â¼
+                       Ã¢â€Å’Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â
+                       Ã¢â€â€š    RAILWAY      Ã¢â€â€š
+                       Ã¢â€â€š  (PostgreSQL)   Ã¢â€â€š
+                       Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Â¤
+                       Ã¢â€â€š Ã¢â‚¬Â¢ PostgreSQL 15 Ã¢â€â€š
+                       Ã¢â€â€š Ã¢â‚¬Â¢ 23 Tables     Ã¢â€â€š
+                       Ã¢â€â€š Ã¢â‚¬Â¢ UUID Support  Ã¢â€â€š
+                       Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€Ëœ
 ```
 
 ---
@@ -2203,8 +2203,8 @@ Sistem SIM4LON memiliki 3 role pengguna dengan hak akses berbeda terhadap halama
 | 21 | Perencanaan | v |  |  |
 | 22 | Riwayat Aktivitas | v |  |  |
 | 23 | Pengaturan | v |  |  |
-| 24 | Profil Admin | v | v |  |
-| 25 | Edit Profil Admin | v | v |  |
+| 24 | Profil Akun | v | v | pan |
+| 25 | Edit Profil Akun | v | v |  |
 | 26 | Dashboard Pangkalan |  |  | v |
 | 27 | Stok Pangkalan |  |  | v |
 | 28 | Catat Penjualan |  |  | v |
@@ -2832,3 +2832,4 @@ Perancangan sistem SIM4LON telah didokumentasikan secara komprehensif melalui be
 Semua diagram PlantUML tersimpan di folder `diagrams/` dan dapat di-render menggunakan PlantUML server atau VS Code extension.
 
 ---
+

@@ -41,17 +41,17 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'Menu Utama',
     items: [
-      { name: 'Dashboard', href: './dashboard.html', icon: 'LayoutDashboard' },
-      { name: 'Pesanan', href: './daftar-pesanan.html', icon: 'ShoppingCart' },
-      { name: 'Stok LPG', href: './stok-lpg.html', icon: 'Package' },
+      { name: 'Dashboard', href: '/dashboard', icon: 'LayoutDashboard' },
+      { name: 'Pesanan', href: '/daftar-pesanan', icon: 'ShoppingCart' },
+      { name: 'Stok LPG', href: '/stok-lpg', icon: 'Package' },
       { name: 'Laporan', href: '/laporan', icon: 'BarChart3', adminOnly: true },
     ]
   },
   {
     label: 'Operasional',
-    adminOnly: true,  // Entire group is admin-only
+    // Operator can access stock-related items (Penerimaan, Penyaluran, In/Out)
     items: [
-      { name: 'Perencanaan', href: '/perencanaan', icon: 'CalendarDays' },
+      { name: 'Perencanaan', href: '/perencanaan', icon: 'CalendarDays', adminOnly: true },
       { name: 'Penyaluran', href: '/penyaluran', icon: 'Send' },
       { name: 'Penerimaan', href: '/penerimaan', icon: 'PackageCheck' },
       { name: 'In / Out Agen', href: '/in-out-agen', icon: 'RefreshCw' },
@@ -61,17 +61,17 @@ const menuGroups: MenuGroup[] = [
     label: 'Manajemen',
     adminOnly: true,  // Entire group is admin-only
     items: [
-      { name: 'Pangkalan', href: './daftar-pangkalan.html', icon: 'Store' },
-      { name: 'Pengguna', href: './daftar-pengguna.html', icon: 'Users' },
-      { name: 'Supir', href: './daftar-driver.html', icon: 'Truck' },
+      { name: 'Pangkalan', href: '/daftar-pangkalan', icon: 'Store' },
+      { name: 'Pengguna', href: '/daftar-pengguna', icon: 'Users' },
+      { name: 'Supir', href: '/daftar-driver', icon: 'Truck' },
     ]
   },
   {
     label: 'Sistem',
     adminOnly: true,  // Entire group is admin-only
     items: [
-      { name: 'Log Riwayat', href: '/riwayat-aktivitas', icon: 'History' },
-      { name: 'Pengaturan', href: './pengaturan.html', icon: 'Settings' },
+      { name: 'Log Aktivitas', href: '/riwayat-aktivitas', icon: 'History' },
+      { name: 'Pengaturan', href: '/pengaturan', icon: 'Settings' },
     ]
   }
 ]
@@ -264,7 +264,7 @@ export default function AdminSidebar() {
         <div className="mt-auto pt-2 px-3">
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
           <p className="text-[14px] text-center text-muted-foreground/40 mt-2 font-medium">
-            SIM4LON v1.4
+            SIM4LON v1.5
           </p>
           <p className="text-[12px] text-center text-muted-foreground/40 font-normal">
             by Luthfi

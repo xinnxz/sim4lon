@@ -82,14 +82,14 @@ export default function DashboardRecentActivity() {
               <div key={activity.id}>
                 <div className="flex gap-3">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${activity.status === 'completed' ? 'bg-green-100' :
-                      activity.status === 'pending' ? 'bg-amber-100' :
-                        'bg-indigo-100'
+                    activity.status === 'pending' ? 'bg-amber-100' :
+                      'bg-indigo-100'
                     }`}>
                     <SafeIcon
                       name={activity.icon}
                       className={`h-5 w-5 ${activity.status === 'completed' ? 'text-green-700' :
-                          activity.status === 'pending' ? 'text-amber-700' :
-                            'text-indigo-700'
+                        activity.status === 'pending' ? 'text-amber-700' :
+                          'text-indigo-700'
                         }`}
                     />
                   </div>
@@ -108,7 +108,7 @@ export default function DashboardRecentActivity() {
               </div>
             ))}
           <Button variant="outline" className="w-full mt-4" asChild>
-            <a href="./daftar-pesanan.html">Lihat Semua Pembayaran</a>
+            <a href="/daftar-pesanan">Lihat Semua Pembayaran</a>
           </Button>
         </CardContent>
       </Card>
@@ -126,14 +126,14 @@ export default function DashboardRecentActivity() {
               <div key={activity.id}>
                 <div className="flex gap-3">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${activity.status === 'completed' ? 'bg-green-100' :
-                      activity.status === 'pending' ? 'bg-amber-100' :
-                        'bg-indigo-100'
+                    activity.status === 'pending' ? 'bg-amber-100' :
+                      'bg-indigo-100'
                     }`}>
                     <SafeIcon
                       name={activity.icon}
                       className={`h-5 w-5 ${activity.status === 'completed' ? 'text-green-700' :
-                          activity.status === 'pending' ? 'text-amber-700' :
-                            'text-indigo-700'
+                        activity.status === 'pending' ? 'text-amber-700' :
+                          'text-indigo-700'
                         }`}
                     />
                   </div>
@@ -152,7 +152,7 @@ export default function DashboardRecentActivity() {
               </div>
             ))}
           <Button variant="outline" className="w-full mt-4" asChild>
-            <a href="./daftar-pengiriman.html">Lihat Semua Pengiriman</a>
+            <a href="/daftar-pengiriman">Lihat Semua Pengiriman</a>
           </Button>
         </CardContent>
       </Card>

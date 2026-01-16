@@ -1,0 +1,73 @@
+@startuml AD_MelihatDashboard
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD: Melihat Dashboard (Admin/Operator)**\nSistem SIM4LON
+
+|Admin/Operator|
+start
+
+:Buka menu Dashboard;
+
+|Sistem|
+
+fork
+    :Load statistik KPI\n(Total Order, Pendapatan,\nStok, Piutang);
+fork again
+    :Load DSS Alerts\n(Low Stock, Overdue Payment,\nSales Trend);
+fork again
+    :Load Chart Penjualan\n(7 hari terakhir);
+fork again
+    :Load Chart Stok\n& Profit;
+fork again
+    :Load Top Pangkalan;
+fork again
+    :Load Aktivitas Terbaru;
+end fork
+
+:Tampilkan halaman Dashboard;
+
+|Admin/Operator|
+
+:Lihat ringkasan operasional;
+
+if (Aksi selanjutnya?) then (Lihat Detail KPI)
+    
+    :Klik card KPI;
+    
+    |Sistem|
+    :Redirect ke halaman terkait\n(Pesanan/Stok/Pembayaran);
+
+elseif (Respons DSS Alert) then
+    
+    :Klik tombol aksi pada alert;
+    
+    |Sistem|
+    :Redirect sesuai jenis alert:\n• Low Stock → Restock\n• Overdue → Tagih Bayar\n• Sales Trend → Laporan;
+
+elseif (Buat Pesanan Cepat) then
+    
+    :Klik "Buat Pesanan";
+    
+    #palegreen:<<AD-02>>\nBuat Pesanan|
+
+elseif (Lihat Aktivitas) then
+    
+    :Klik "Lihat Semua Aktivitas";
+    
+    #palegreen:<<AD-LogAktivitas>>\nLihat Log Aktivitas|
+
+else (Selesai)
+    
+    :Tutup Dashboard;
+    
+endif
+
+|Admin/Operator|
+stop
+
+@enduml

@@ -89,7 +89,7 @@ export default function DriverListTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <a href={`./edit-supir.html?id=${driver.id}`}>
+                        <a href={`/edit-supir?id=${driver.id}`}>
                           <SafeIcon name="Edit" className="mr-2 h-4 w-4" />
                           <span>Edit</span>
                         </a>

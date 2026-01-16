@@ -131,9 +131,40 @@ export class PangkalanService {
             }
         }
 
-        // Generate pangkalan code (PKL-001, PKL-002, etc.)
-        const pangkalanCount = await this.prisma.pangkalans.count();
-        const pangkalanCode = `PKL-${String(pangkalanCount + 1).padStart(3, '0')}`;
+        /**
+     * Generate pangkalan code dengan format Pertamina Cianjur
+     * Format: 3432629979040XXX
+     * - 3432: Kode Kabupaten Cianjur
+     * - 62: Kode Kecamatan
+     * - 9979: Kode Area
+     * - 04: Tahun registrasi
+     * - 0XXX: Nomor urut (4 digit)
+     * 
+     * Note: Mencari nomor tertinggi dari SEMUA kode yang ada, bukan hanya prefix standar
+     */
+        // Ambil semua pangkalan yang kodenya numeric (format Pertamina)
+        const allPangkalans = await this.prisma.pangkalans.findMany({
+            where: {
+                code: { startsWith: '3432' } // Semua kode Cianjur area
+            },
+            select: { code: true },
+            orderBy: { code: 'desc' }
+        });
+
+        let nextNumber = 1;
+        if (allPangkalans.length > 0) {
+            // Cari angka terakhir tertinggi dari semua kode yang ada
+            const maxNumber = Math.max(
+                ...allPangkalans.map(p => {
+                    const lastFour = p.code.slice(-4);
+                    return parseInt(lastFour, 10) || 0;
+                })
+            );
+            nextNumber = maxNumber + 1;
+        }
+
+        // Format: 3432629979040001, 3432629979040002, dst
+        const pangkalanCode = `343262997904${String(nextNumber).padStart(4, '0')}`;
 
         // 1. Create pangkalan
         const pangkalan = await this.prisma.pangkalans.create({
@@ -153,9 +184,18 @@ export class PangkalanService {
 
         // 2. Create user jika login_email dan login_password ada
         if (dto.login_email && dto.login_password) {
-            // Generate user code (USR-001, USR-002, etc.)
-            const userCount = await this.prisma.users.count();
-            const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
+            // Generate user code (USR-001, USR-002, etc.) - find highest existing code
+            const lastUser = await this.prisma.users.findFirst({
+                where: { code: { startsWith: 'USR-' } },
+                orderBy: { code: 'desc' },
+                select: { code: true }
+            });
+            let nextUserNum = 1;
+            if (lastUser?.code) {
+                const lastNum = parseInt(lastUser.code.replace('USR-', ''), 10);
+                nextUserNum = (lastNum || 0) + 1;
+            }
+            const userCode = `USR-${String(nextUserNum).padStart(3, '0')}`;
 
             const hashedPassword = await bcrypt.hash(dto.login_password, 10);
 
@@ -193,22 +233,67 @@ export class PangkalanService {
             },
         });
 
+        // Sync ke user terkait jika ada perubahan yang relevan
+        if (existing.users && existing.users.length > 0) {
+            const userId = existing.users[0].id;
+            const userUpdateData: any = { updated_at: new Date() };
+
+            // Sync email pangkalan ke user (jika email pangkalan berubah)
+            if (dto.email && dto.email !== existing.email) {
+                userUpdateData.email = dto.email;
+            }
+            // Sync phone
+            if (dto.phone && dto.phone !== existing.phone) {
+                userUpdateData.phone = dto.phone;
+            }
+            // Sync nama (pic_name atau name)
+            if (dto.pic_name && dto.pic_name !== existing.pic_name) {
+                userUpdateData.name = dto.pic_name;
+            } else if (dto.name && dto.name !== existing.name && !existing.pic_name) {
+                userUpdateData.name = dto.name;
+            }
+            // Sync status aktif
+            if (dto.is_active !== undefined && dto.is_active !== existing.is_active) {
+                userUpdateData.is_active = dto.is_active;
+            }
+
+            // Update user jika ada perubahan
+            if (Object.keys(userUpdateData).length > 1) { // > 1 karena updated_at selalu ada
+                await this.prisma.users.update({
+                    where: { id: userId },
+                    data: userUpdateData,
+                });
+            }
+        }
+
         // Log system_update activity
         await this.activityService.logActivity('system_update', 'Data Pangkalan Diperbarui', {
             description: `Data ${existing.name} berhasil diperbarui`,
             pangkalanName: existing.name,
         });
 
-        return pangkalan;
+        return this.findOne(id);
     }
 
     async remove(id: string) {
         const existing = await this.findOne(id);
 
+        // Soft delete pangkalan
         await this.prisma.pangkalans.update({
             where: { id },
             data: { deleted_at: new Date() },
         });
+
+        // Soft delete user terkait juga
+        if (existing.users && existing.users.length > 0) {
+            await this.prisma.users.updateMany({
+                where: { pangkalan_id: id },
+                data: {
+                    deleted_at: new Date(),
+                    is_active: false,
+                },
+            });
+        }
 
         // Log system_delete activity
         await this.activityService.logActivity('system_delete', 'Pangkalan Dihapus', {

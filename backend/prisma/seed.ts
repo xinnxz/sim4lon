@@ -39,6 +39,11 @@ const inOutAgen = [
     { day: 9, stokAwal: 1047, penerimaan: 560, penyaluran: 1071, stokAkhir: 536 },
     { day: 10, stokAwal: 536, penerimaan: 1120, penyaluran: 802, stokAkhir: 854 },
     { day: 11, stokAwal: 854, penerimaan: 0, penyaluran: 0, stokAkhir: 854 },
+    { day: 12, stokAwal: 854, penerimaan: 560, penyaluran: 709, stokAkhir: 705 },
+    { day: 13, stokAwal: 705, penerimaan: 560, penyaluran: 1054, stokAkhir: 211 },
+    { day: 14, stokAwal: 211, penerimaan: 0, penyaluran: 0, stokAkhir: 211 },
+    { day: 15, stokAwal: 211, penerimaan: 560, penyaluran: 668, stokAkhir: 103 },
+    { day: 16, stokAwal: 103, penerimaan: 0, penyaluran: 0, stokAkhir: 103 },
 ];
 
 // ============================================================
@@ -55,6 +60,9 @@ const penerimaanData = [
     { tanggal: jan(9), no_so: '0002595522', no_lo: '8183802172', qty: 560 }, // 09/01/2026
     { tanggal: jan(10), no_so: '0002595522', no_lo: '8183404851', qty: 560 }, // 10/01/2026
     { tanggal: jan(10), no_so: '0002595522', no_lo: '8183404852', qty: 560 }, // 10/01/2026 (2x = 1120)
+    { tanggal: jan(12), no_so: '0002595522', no_lo: '8183505001', qty: 560 }, // 12/01/2026
+    { tanggal: jan(13), no_so: '0002595522', no_lo: '8183505002', qty: 560 }, // 13/01/2026
+    { tanggal: jan(15), no_so: '0002595522', no_lo: '8183505003', qty: 560 }, // 15/01/2026
 ];
 
 // ============================================================
@@ -64,13 +72,16 @@ const penerimaanData = [
 const penyaluranPerPangkalan = [
     // Tgl 02: 6 pangkalan, Tgl 03: 3 pangkalan, Tgl 07: 4 pangkalan
     // Tgl 08: 7 pangkalan, Tgl 09: 7 pangkalan, Tgl 10: 7 pangkalan
-    { code: '343269997904002', name: 'AGUS', days: { 2: 100, 3: 100, 8: 150, 9: 150, 10: 102 } },
-    { code: '343262997904008', name: 'ASEP', days: { 2: 100, 3: 100, 8: 150, 9: 150, 10: 150 } },
-    { code: '343262997904002', name: 'DANG DANG', days: { 2: 100, 3: 134, 8: 150, 9: 150, 10: 150 } },
-    { code: '343262997904006', name: 'HERMAWAN SUTISNA', days: { 2: 112, 7: 350, 8: 150, 9: 150, 10: 100 } },
-    { code: '343269997904001', name: 'M. DIAN SUTISNA', days: { 2: 100, 7: 350, 8: 127, 9: 161, 10: 100 } },
-    { code: '343291199904001', name: 'MIMAH SITI ROHMAH', days: { 2: 50, 7: 350, 8: 100, 9: 160, 10: 100 } },
-    { code: '343262997904009', name: 'NAZRIL MUHAMMAD ILHAM', days: { 8: 100, 9: 150, 10: 100 } },
+    // Data dari screenshot: Tgl 02-15 Januari 2026
+    { code: '343269997904002', name: 'AGUS', days: { 2: 100, 3: 100, 8: 150, 9: 150, 10: 102, 12: 109, 13: 150, 15: 100 } },
+    { code: '343262997904008', name: 'ASEP', days: { 2: 100, 3: 100, 8: 150, 9: 150, 10: 150, 12: 100, 13: 154, 15: 88 } },
+    { code: '343262997904002', name: 'DANG DANG', days: { 2: 100, 3: 134, 8: 150, 9: 150, 10: 150, 12: 100, 13: 150, 15: 100 } },
+    { code: '343262997904006', name: 'HERMAWAN SUTISNA', days: { 2: 112, 7: 350, 8: 150, 9: 150, 10: 100, 12: 100, 13: 150, 15: 100 } },
+    { code: '343269997904001', name: 'M. DIAN SUTISNA', days: { 2: 100, 7: 350, 8: 127, 9: 161, 10: 100, 12: 100, 13: 150, 15: 100 } },
+    { code: '343291199904001', name: 'MIMAH SITI ROHMAH', days: { 2: 50, 7: 350, 8: 100, 9: 160, 10: 100, 12: 100, 13: 150, 15: 180 } },
+    { code: '343262997904009', name: 'NAZRIL MUHAMMAD ILHAM', days: { 8: 100, 9: 150, 10: 100, 12: 100, 13: 150 } },
+    // { code: '343265997904001', name: 'RAS 96', days: { 12: 100, 13: 150, 15: 100 } },
+    // { code: '343262997904001', name: 'CECE SUKANDI', days: { 12: 100, 13: 150, 15: 180 } },
 ];
 
 // Hitung total per hari dari data di atas
@@ -105,6 +116,8 @@ async function main() {
     await prisma.perencanaan_harian.deleteMany({});
     await prisma.penerimaan_stok.deleteMany({});
     await prisma.agen_orders.deleteMany({});
+    // Delete pangkalan users first (users with pangkalan_id) to avoid FK constraint
+    await prisma.users.deleteMany({ where: { pangkalan_id: { not: null } } });
     await prisma.pangkalans.deleteMany({});
     await prisma.drivers.deleteMany({});
     await prisma.agen.deleteMany({});
@@ -151,11 +164,11 @@ async function main() {
     console.log('✅ User Operator');
 
     await prisma.users.upsert({
-        where: { email: 'pkl001@demo.com' },
+        where: { email: 'tes2@demo.com' },
         update: { password: hashedPangkalan },
         create: {
             code: 'USR-003',
-            email: 'pkl001@demo.com',
+            email: 'tes2@demo.com',
             password: hashedPangkalan,
             role: 'PANGKALAN',
             name: 'Pangkalan Demo',
@@ -192,20 +205,20 @@ async function main() {
     // 3. CREATE PANGKALANS (14 dari Pertamina Cianjur)
     // ============================================================
     const pangkalansData = [
-        { code: '343262997904001', name: 'CECE SUKANDI', alokasi: 1000 },
-        { code: '343262997904002', name: 'DANG DANG', alokasi: 1000 },
-        { code: '343262997904003', name: 'DEDE DILALUDIN', alokasi: 1000 },
-        { code: '343262997904004', name: 'HJ. IIS SUAIBAH', alokasi: 1000 },
-        { code: '343262997904005', name: 'UNANG JUNAEDI', alokasi: 1000 },
-        { code: '343262997904006', name: 'HERMAWAN SUTISNA', alokasi: 1000 },
-        { code: '343262997904007', name: 'POPONG JUBAEDAH', alokasi: 1000 },
-        { code: '343262997904008', name: 'ASEP', alokasi: 1200 },
-        { code: '343262997904009', name: 'NAZRIL MUHAMMAD ILHAM', alokasi: 1000 },
-        { code: '343265997904001', name: 'RAS 96', alokasi: 1000 },
-        { code: '343269997904001', name: 'M. DIAN SUTISNA', alokasi: 1000 },
-        { code: '343269997904002', name: 'AGUS', alokasi: 1000 },
-        { code: '343285997904001', name: 'TOTOH ABDUL FATAH', alokasi: 1000 },
-        { code: '343291199904001', name: 'MIMAH SITI ROHMAH', alokasi: 1000 },
+        { code: '343262997904001', name: 'CECE SUKANDI', alokasi: 1000, phone: '081234567001', email: '4001@pangkalan.com' },
+        { code: '343262997904002', name: 'DANG DANG', alokasi: 1000, phone: '081234567002', email: '4002@pangkalan.com' },
+        { code: '343262997904003', name: 'DEDE DILALUDIN', alokasi: 1000, phone: '081234567003', email: '4003@pangkalan.com' },
+        { code: '343262997904004', name: 'HJ. IIS SUAIBAH', alokasi: 1000, phone: '081234567004', email: '4004@pangkalan.com' },
+        { code: '343262997904005', name: 'UNANG JUNAEDI', alokasi: 1000, phone: '081234567005', email: '4005@pangkalan.com' },
+        { code: '343262997904006', name: 'HERMAWAN SUTISNA', alokasi: 1000, phone: '081234567006', email: '4006@pangkalan.com' },
+        { code: '343262997904007', name: 'POPONG JUBAEDAH', alokasi: 1000, phone: '081234567007', email: '4007@pangkalan.com' },
+        { code: '343262997904008', name: 'ASEP', alokasi: 1200, phone: '081234567008', email: '4008@pangkalan.com' },
+        { code: '343262997904009', name: 'NAZRIL MUHAMMAD ILHAM', alokasi: 1000, phone: '081234567009', email: '4009@pangkalan.com' },
+        { code: '343265997904001', name: 'RAS 96', alokasi: 1000, phone: '081234567010', email: '5001@pangkalan.com' },
+        { code: '343269997904001', name: 'M. DIAN SUTISNA', alokasi: 1000, phone: '081234567011', email: '9001@pangkalan.com' },
+        { code: '343269997904002', name: 'AGUS', alokasi: 1000, phone: '081234567012', email: '9002@pangkalan.com' },
+        { code: '343285997904001', name: 'TOTOH ABDUL FATAH', alokasi: 1000, phone: '081234567013', email: '8001@pangkalan.com' },
+        { code: '343291199904001', name: 'MIMAH SITI ROHMAH', alokasi: 1000, phone: '081234567014', email: '9904@pangkalan.com' },
     ];
 
     const pangkalanMap: Record<string, { id: string; name: string }> = {};
@@ -216,6 +229,8 @@ async function main() {
                 name: p.name,
                 address: 'Kabupaten Cianjur, Jawa Barat',
                 region: 'KABUPATEN CIANJUR',
+                phone: p.phone,
+                email: p.email,
                 alokasi_bulanan: p.alokasi,
                 is_active: true,
             },
@@ -223,6 +238,33 @@ async function main() {
         pangkalanMap[p.code] = { id: pangkalan.id, name: p.name };
     }
     console.log('✅ 14 Pangkalans created');
+
+    // ============================================================
+    // 3.5 CREATE USER ACCOUNTS FOR PANGKALANS
+    // ============================================================
+    let userNum = 14; // Start from USR-010 to avoid conflict
+    for (const [code, data] of Object.entries(pangkalanMap)) {
+        const shortCode = code.slice(-4); // Get last 4 digits
+        await prisma.users.upsert({
+            where: { email: `${shortCode}@pangkalan.com` },
+            update: {
+                password: hashedPangkalan,
+                pangkalan_id: data.id,
+            },
+            create: {
+                code: `USR-${String(userNum).padStart(3, '0')}`,
+                email: `${shortCode}@pangkalan.com`,
+                password: hashedPangkalan,
+                role: 'PANGKALAN',
+                name: data.name,
+                phone: `0812345${String(userNum).padStart(5, '0')}`,
+                pangkalan_id: data.id,
+                is_active: true,
+            },
+        });
+        userNum++;
+    }
+    console.log('✅ 14 Pangkalan Users created');
 
     // ============================================================
     // 4. CREATE COMPANY PROFILE & LPG PRODUCT
@@ -445,10 +487,16 @@ async function main() {
     console.log('');
     console.log('🎉 SEED COMPLETED!');
     console.log('');
-    console.log('📋 Login:');
+    console.log('📋 Login Credentials:');
+    console.log('   ──────────────────────────────────────');
     console.log('   Admin     : admin@agen.com / admin123');
     console.log('   Operator  : operator@demo.com / operator123');
-    console.log('   Pangkalan : pkl001@demo.com / pangkalan123');
+    console.log('   ──────────────────────────────────────');
+    console.log('   Pangkalan Users (14 akun):');
+    console.log('   Email: [4 digit terakhir kode]@pangkalan.com');
+    console.log('   Password: pangkalan123');
+    console.log('   Contoh: 4001@pangkalan.com / pangkalan123');
+    console.log('   ──────────────────────────────────────');
 }
 
 main()

@@ -339,8 +339,8 @@ Penulis membuat wireframe menggunakan **Balsamiq Mockup** untuk setiap halaman u
 | 29. | Riwayat Aktivitas | Log aktivitas sistem |
 | 30. | Notifikasi | Daftar notifikasi sistem |
 | 31. | Pengaturan | Konfigurasi sistem |
-| 32. | Profil Admin | Profil pengguna admin |
-| 33. | Edit Profil | Form edit profil admin |
+| 32. | Profil Akun | Profil pengguna admin |
+| 33. | Edit Profil | Form edit Profil Akun |
 | 34. | Ubah Password | Form ubah password |
 
 ### Modul Pangkalan (9 halaman):

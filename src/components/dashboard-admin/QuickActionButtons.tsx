@@ -8,28 +8,28 @@ const quickActions = [
     title: 'Buat Pesanan',
     description: 'Pesanan baru',
     icon: 'Plus',
-    href: './buat-pesanan.html',
+    href: '/buat-pesanan',
     variant: 'default' as const
   },
   {
     title: 'Kelola Pangkalan',
     description: 'Lihat & tambah pangkalan',
     icon: 'Building2',
-    href: './daftar-pangkalan.html',
+    href: '/daftar-pangkalan',
     variant: 'outline' as const
   },
   {
     title: 'Update Stok',
     description: 'Perbarui stok',
     icon: 'Plus',
-    href: './stok-lpg.html',
+    href: '/stok-lpg',
     variant: 'outline' as const
   },
   {
     title: 'Tambah Pengguna',
     description: 'Pengguna baru',
     icon: 'Plus',
-    href: './daftar-pengguna.html',
+    href: '/daftar-pengguna',
     variant: 'outline' as const
   }
 ]

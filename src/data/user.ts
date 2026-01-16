@@ -37,7 +37,7 @@ export interface DriverManagementItemModel extends DriverSummaryModel {
 }
 
 /**
- * Model untuk data profil admin yang sedang login.
+ * Model untuk data Profil Akun yang sedang login.
  */
 export interface AdminProfileModel {
   userId: string;
@@ -97,7 +97,7 @@ export const MOCK_USERS_DATA: UserModel[] = [
   }
 ];
 
-// Data Mock Profil Admin (Rian Hidayat)
+// Data Mock Profil Akun (Rian Hidayat)
 export const MOCK_ADMIN_PROFILE: AdminProfileModel = {
   userId: "U-001",
   nama: "Rian Hidayat (Admin)",

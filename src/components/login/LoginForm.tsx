@@ -304,7 +304,7 @@ export default function LoginForm() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-orange-600 font-semibold min-w-[70px]">Pangkalan</span>
-                      <span className="text-gray-600">pkl001@demo.com</span>
+                      <span className="text-gray-600">tes2@demo.com</span>
                     </div>
                   </div>
 

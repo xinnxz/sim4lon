@@ -3,95 +3,48 @@
 skinparam backgroundColor #f0f8ff
 skinparam ActivityBackgroundColor #87CEEB
 skinparam ActivityBorderColor #1565c0
-skinparam PartitionBackgroundColor #e3f2fd
-skinparam PartitionBorderColor #1565c0
 
-title **AD: Kelola Pesanan**\nSistem SIM4LON
+title **AD: Kelola Pesanan (Admin/Operator)**\nSistem SIM4LON
 
-|Admin|
+|Admin/Operator|
 start
 
 :Buka menu Pesanan;
 
 |Sistem|
+:Load daftar pesanan;
+:Tampilkan statistik\n(hari ini);
+:Tampilkan halaman\nDaftar Pesanan;
 
-:Load daftar pesanan\ndari database;
+|Admin/Operator|
+:Lihat daftar pesanan;
 
-:Tampilkan halaman\nKelola Pesanan;
-
-|Admin|
-
-:Pilih aksi yang\nakan dilakukan;
-
-note right
-  Aksi yang tersedia:
-  • Buat Pesanan Baru
-  • Lihat Detail
-  • Update Status
-  • Catat Pembayaran
-  • Assign Driver
-  • Batalkan Pesanan
-end note
-
-if (Buat Pesanan?) then (ya)
-    :Input data pesanan;
-    note right: **→ AD-02** Buat Pesanan
+if (Aksi?) then (Buat Pesanan)
+    #palegreen:<<AD-02>>\nBuat Pesanan|
+elseif (Lihat Detail) then
+    #palegreen:<<AD-15>>\nLihat Detail Pesanan|
+elseif (Update Status) then
+    #palegreen:<<AD-03>>\nUpdate Status Pesanan|
+elseif (Catat Pembayaran) then
+    #palegreen:<<AD-04>>\nCatat Pembayaran|
+elseif (Assign Driver) then
+    #palegreen:<<AD-14>>\nAssign Driver|
+elseif (Cetak Dokumen) then
+    #palegreen:<<AD-16>>\nGenerate Invoice/Nota|
+else (Batalkan)
     |Sistem|
-    :Simpan pesanan baru;
-else (tidak)
-endif
-
-if (Lihat Detail?) then (ya)
-    :Klik baris pesanan;
-    note right: **→ AD-15** Lihat Detail
-    |Sistem|
-    :Tampilkan detail pesanan;
-else (tidak)
-endif
-
-if (Update Status?) then (ya)
-    :Pilih status baru;
-    note right: **→ AD-03** Update Status
-    |Sistem|
-    :Update status pesanan;
-else (tidak)
-endif
-
-if (Catat Pembayaran?) then (ya)
-    :Input data pembayaran;
-    note right: **→ AD-04** Catat Pembayaran
-    |Sistem|
-    :Simpan record pembayaran;
-else (tidak)
-endif
-
-if (Assign Driver?) then (ya)
-    :Pilih driver;
-    note right: **→ AD-14** Assign Driver
-    |Sistem|
-    :Assign driver ke pesanan;
-else (tidak)
-endif
-
-if (Batalkan Pesanan?) then (ya)
     :Konfirmasi pembatalan;
-    |Sistem|
     :Update status = BATAL;
-else (tidak)
+    :Catat timeline;
 endif
 
-|Sistem|
-
-:Refresh tampilan\ndaftar pesanan;
-
-|Admin|
-
-if (Lanjutkan aksi lain?) then (ya)
-    :Kembali pilih aksi;
-    backward:Pilih aksi yang\nakan dilakukan;
-else (tidak)
-endif
-
+|Admin/Operator|
 stop
+
+legend right
+**Keterangan:**
+|<#palegreen> Simbol |= Artinya |
+| <<AD-XX>>\\nNama| | Call Behavior\n(Sub-Activity) |
+endlegend
 
 @enduml
