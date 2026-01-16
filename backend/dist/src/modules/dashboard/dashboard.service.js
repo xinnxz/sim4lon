@@ -12,14 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const timezone_util_1 = require("../../common/utils/timezone.util");
 let DashboardService = class DashboardService {
     prisma;
     constructor(prisma) {
         this.prisma = prisma;
     }
     async getStats() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = (0, timezone_util_1.todayWIB)();
         const todayOrders = await this.prisma.client.orders.count({
             where: {
                 order_date: { gte: today },

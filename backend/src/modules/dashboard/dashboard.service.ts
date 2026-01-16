@@ -16,6 +16,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { todayWIB, nowWIB } from '../../common/utils/timezone.util';
 
 @Injectable()
 export class DashboardService {
@@ -33,8 +34,8 @@ export class DashboardService {
      * - dynamicProducts: Stok produk LPG dinamis
      */
     async getStats() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Use WIB timezone for "today" calculation
+        const today = todayWIB();
 
         // Count today's orders
         const todayOrders = await this.prisma.client.orders.count({
