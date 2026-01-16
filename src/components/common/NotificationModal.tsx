@@ -34,8 +34,8 @@ export default function NotificationModal({ open, onOpenChange }: NotificationMo
   const fetchNotifications = async () => {
     try {
       setIsLoading(true)
-      const response = await notificationApi.getNotifications(20)
-      setNotifications(response.notifications)
+      const response = await notificationApi.getDropdownNotifications(20)
+      setNotifications(response.data)
     } catch (error) {
       console.error('Failed to fetch notifications:', error)
     } finally {
