@@ -11,13 +11,15 @@ exports.formatTimeWIB = formatTimeWIB;
 exports.isTodayWIB = isTodayWIB;
 exports.getRelativeTimeWIB = getRelativeTimeWIB;
 exports.TIMEZONE = 'Asia/Jakarta';
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 function nowWIB() {
-    return new Date(new Date().toLocaleString('en-US', { timeZone: exports.TIMEZONE }));
+    const now = new Date();
+    return new Date(now.getTime() + WIB_OFFSET_MS);
 }
 function todayWIB() {
-    const now = nowWIB();
-    now.setHours(0, 0, 0, 0);
-    return now;
+    const wibNow = nowWIB();
+    wibNow.setUTCHours(0, 0, 0, 0);
+    return new Date(wibNow.getTime() - WIB_OFFSET_MS);
 }
 function startOfDayWIB(date) {
     const wibDate = new Date(date.toLocaleString('en-US', { timeZone: exports.TIMEZONE }));

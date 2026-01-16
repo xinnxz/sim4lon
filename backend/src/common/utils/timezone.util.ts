@@ -9,24 +9,38 @@
  */
 
 export const TIMEZONE = 'Asia/Jakarta';
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;  // UTC+7 in milliseconds
 
 /**
  * Get current date/time in WIB timezone
  * Gunakan ini sebagai pengganti `new Date()` untuk business logic
+ * 
+ * PENTING: Returns a Date object that when used in Prisma queries,
+ * will correctly compare against UTC timestamps in the database.
  */
 export function nowWIB(): Date {
-    return new Date(new Date().toLocaleString('en-US', { timeZone: TIMEZONE }));
+    // Get current UTC time
+    const now = new Date();
+    // Add 7 hours to shift to WIB
+    return new Date(now.getTime() + WIB_OFFSET_MS);
 }
 
 /**
  * Get today's date at midnight in WIB timezone
  * Berguna untuk filter "hari ini"
+ * 
+ * Returns UTC timestamp that represents 00:00 WIB
+ * Example: Jan 17 00:00 WIB = Jan 16 17:00 UTC
  */
 export function todayWIB(): Date {
-    const now = nowWIB();
-    now.setHours(0, 0, 0, 0);
-    return now;
+    // Get current time in WIB
+    const wibNow = nowWIB();
+    // Set to midnight WIB
+    wibNow.setUTCHours(0, 0, 0, 0);
+    // Convert back to UTC by subtracting 7 hours
+    return new Date(wibNow.getTime() - WIB_OFFSET_MS);
 }
+
 
 /**
  * Get start of day in WIB for a given date
