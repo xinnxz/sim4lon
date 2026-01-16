@@ -960,9 +960,9 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 <SafeIcon name="Truck" className="h-4 w-4 mr-2" />
                                 Pesan ke Agen
                                 {/* Pending Orders Badge */}
-                                {agenOrders.filter(o => o.status === 'PENDING' || o.status === 'DIKIRIM').length > 0 && (
+                                {agenOrders.filter(o => o.status === 'PENDING').length > 0 && (
                                     <span className="absolute -top-2 -right-2 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                                        {agenOrders.filter(o => o.status === 'PENDING' || o.status === 'DIKIRIM').length}
+                                        {agenOrders.filter(o => o.status === 'PENDING').length}
                                     </span>
                                 )}
                             </Button>
