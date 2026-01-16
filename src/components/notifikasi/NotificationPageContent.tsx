@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
 import { notificationApi, agenPangkalanOrdersApi, type NotificationItem } from '@/lib/api'
 import { toast } from 'sonner'
 
-const ITEMS_PER_PAGE = 10
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100]
 
 export default function NotificationPageContent() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
@@ -18,6 +19,7 @@ export default function NotificationPageContent() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
 
@@ -28,12 +30,12 @@ export default function NotificationPageContent() {
   // Fetch notifications
   useEffect(() => {
     fetchNotifications()
-  }, [currentPage, selectedFilter])
+  }, [currentPage, pageSize, selectedFilter])
 
   const fetchNotifications = async () => {
     try {
       setIsLoading(true)
-      const response = await notificationApi.getNotifications(currentPage, ITEMS_PER_PAGE, selectedFilter)
+      const response = await notificationApi.getNotifications(currentPage, pageSize, selectedFilter)
       setNotifications(response.data)
       setTotal(response.meta.total)
       setTotalPages(response.meta.totalPages)
@@ -50,6 +52,11 @@ export default function NotificationPageContent() {
   const handleFilterChange = (filter: typeof selectedFilter) => {
     setSelectedFilter(filter)
     setCurrentPage(1) // Reset to first page when filter changes
+  }
+
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(parseInt(value))
+    setCurrentPage(1) // Reset to first page when page size changes
   }
 
   const getNotificationColor = (type: NotificationItem['type']) => {
@@ -336,31 +343,54 @@ export default function NotificationPageContent() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Halaman {currentPage} dari {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1 || isLoading}
-            >
-              <SafeIcon name="ChevronLeft" className="h-4 w-4 mr-1" />
-              Sebelumnya
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages || isLoading}
-            >
-              Selanjutnya
-              <SafeIcon name="ChevronRight" className="h-4 w-4 ml-1" />
-            </Button>
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Tampilkan</span>
+              <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                <SelectTrigger className="w-[80px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map(size => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">per halaman</span>
+            </div>
+            <span className="text-sm text-muted-foreground hidden sm:inline">
+              Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, total)} dari {total}
+            </span>
           </div>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1 || isLoading}
+              >
+                <SafeIcon name="ChevronLeft" className="h-4 w-4 mr-1" />
+                Sebelumnya
+              </Button>
+              <span className="text-sm font-medium px-2">
+                {currentPage} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages || isLoading}
+              >
+                Selanjutnya
+                <SafeIcon name="ChevronRight" className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
