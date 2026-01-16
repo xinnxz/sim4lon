@@ -5,10 +5,11 @@ export declare class LpgProductsService {
     constructor(prisma: PrismaService);
     findAll(includeInactive?: boolean): Promise<{
         id: string;
-        name: string;
-        is_active: boolean;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        is_active: boolean;
         deleted_at: Date | null;
         description: string | null;
         size_kg: import("@prisma/client/runtime/library").Decimal;
@@ -16,15 +17,15 @@ export declare class LpgProductsService {
         color: string | null;
         image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
-        name: string;
-        is_active: boolean;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        is_active: boolean;
         deleted_at: Date | null;
         description: string | null;
         size_kg: import("@prisma/client/runtime/library").Decimal;
@@ -32,7 +33,6 @@ export declare class LpgProductsService {
         color: string | null;
         image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
     }>;
     getStockSummary(): Promise<{
@@ -42,10 +42,11 @@ export declare class LpgProductsService {
             current: number;
         };
         id: string;
-        name: string;
-        is_active: boolean;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        is_active: boolean;
         deleted_at: Date | null;
         description: string | null;
         size_kg: import("@prisma/client/runtime/library").Decimal;
@@ -53,15 +54,15 @@ export declare class LpgProductsService {
         color: string | null;
         image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
     }[]>;
     create(dto: CreateLpgProductDto): Promise<{
         id: string;
-        name: string;
-        is_active: boolean;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        is_active: boolean;
         deleted_at: Date | null;
         description: string | null;
         size_kg: import("@prisma/client/runtime/library").Decimal;
@@ -69,15 +70,15 @@ export declare class LpgProductsService {
         color: string | null;
         image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
     }>;
     update(id: string, dto: UpdateLpgProductDto): Promise<{
         id: string;
-        name: string;
-        is_active: boolean;
+        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        is_active: boolean;
         deleted_at: Date | null;
         description: string | null;
         size_kg: import("@prisma/client/runtime/library").Decimal;
@@ -85,7 +86,6 @@ export declare class LpgProductsService {
         color: string | null;
         image_url: string | null;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal | null;
         brand: string | null;
     }>;
     remove(id: string): Promise<{

@@ -11,10 +11,10 @@ export declare class PaymentService {
                 name: string;
             };
             orders: {
-                id: string;
                 pangkalans: {
                     name: string;
                 };
+                id: string;
             } | null;
             invoices: {
                 id: string;
@@ -22,15 +22,15 @@ export declare class PaymentService {
             } | null;
         } & {
             id: string;
+            note: string | null;
             created_at: Date;
             order_id: string | null;
-            note: string | null;
             recorded_by_user_id: string;
+            amount: import("@prisma/client/runtime/library").Decimal;
+            method: import("@prisma/client").$Enums.payment_method;
+            payment_time: Date;
             proof_url: string | null;
             invoice_id: string | null;
-            method: import("@prisma/client").$Enums.payment_method;
-            amount: import("@prisma/client/runtime/library").Decimal;
-            payment_time: Date;
         })[];
         meta: {
             total: number;
@@ -42,84 +42,84 @@ export declare class PaymentService {
     findOneRecord(id: string): Promise<{
         users: {
             id: string;
-            email: string;
             name: string;
+            email: string;
         };
         orders: ({
             pangkalans: {
                 id: string;
                 code: string;
-                email: string | null;
-                name: string;
-                phone: string | null;
-                is_active: boolean;
+                note: string | null;
                 created_at: Date;
                 updated_at: Date;
-                deleted_at: Date | null;
-                note: string | null;
+                name: string;
                 address: string;
+                phone: string | null;
+                email: string | null;
                 pic_name: string | null;
                 region: string | null;
-                capacity: number | null;
+                is_active: boolean;
+                deleted_at: Date | null;
                 agen_id: string | null;
+                capacity: number | null;
                 alokasi_bulanan: number;
             };
             order_items: {
+                qty: number;
                 id: string;
+                lpg_type: import("@prisma/client").$Enums.lpg_type;
+                price_per_unit: import("@prisma/client/runtime/library").Decimal;
                 created_at: Date;
                 updated_at: Date;
                 order_id: string;
-                lpg_type: import("@prisma/client").$Enums.lpg_type;
-                qty: number;
                 tax_amount: import("@prisma/client/runtime/library").Decimal;
-                label: string | null;
-                price_per_unit: import("@prisma/client/runtime/library").Decimal;
                 sub_total: import("@prisma/client/runtime/library").Decimal | null;
+                label: string | null;
                 is_taxable: boolean;
             }[];
         } & {
+            current_status: import("@prisma/client").$Enums.status_pesanan;
             id: string;
             code: string;
             pangkalan_id: string;
+            total_amount: import("@prisma/client/runtime/library").Decimal;
+            note: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            note: string | null;
             order_date: Date;
             driver_id: string | null;
-            current_status: import("@prisma/client").$Enums.status_pesanan;
             subtotal: import("@prisma/client/runtime/library").Decimal;
             tax_amount: import("@prisma/client/runtime/library").Decimal;
-            total_amount: import("@prisma/client/runtime/library").Decimal;
         }) | null;
         invoices: {
             id: string;
+            payment_status: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
-            sub_total: import("@prisma/client/runtime/library").Decimal;
-            payment_status: string | null;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
+            sub_total: import("@prisma/client/runtime/library").Decimal;
             tax_rate: import("@prisma/client/runtime/library").Decimal | null;
             grand_total: import("@prisma/client/runtime/library").Decimal;
         } | null;
     } & {
         id: string;
+        note: string | null;
         created_at: Date;
         order_id: string | null;
-        note: string | null;
         recorded_by_user_id: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        method: import("@prisma/client").$Enums.payment_method;
+        payment_time: Date;
         proof_url: string | null;
         invoice_id: string | null;
-        method: import("@prisma/client").$Enums.payment_method;
-        amount: import("@prisma/client/runtime/library").Decimal;
-        payment_time: Date;
     }>;
     createRecord(dto: CreatePaymentRecordDto, userId: string): Promise<{
         users: {
@@ -127,67 +127,67 @@ export declare class PaymentService {
             name: string;
         };
         orders: {
+            current_status: import("@prisma/client").$Enums.status_pesanan;
             id: string;
             code: string;
             pangkalan_id: string;
+            total_amount: import("@prisma/client/runtime/library").Decimal;
+            note: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            note: string | null;
             order_date: Date;
             driver_id: string | null;
-            current_status: import("@prisma/client").$Enums.status_pesanan;
             subtotal: import("@prisma/client/runtime/library").Decimal;
             tax_amount: import("@prisma/client/runtime/library").Decimal;
-            total_amount: import("@prisma/client/runtime/library").Decimal;
         } | null;
         invoices: {
             id: string;
+            payment_status: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             order_id: string;
             tax_amount: import("@prisma/client/runtime/library").Decimal | null;
-            sub_total: import("@prisma/client/runtime/library").Decimal;
-            payment_status: string | null;
             invoice_number: string | null;
             invoice_date: Date;
             due_date: Date | null;
             billing_address: string | null;
             billed_to_name: string | null;
+            sub_total: import("@prisma/client/runtime/library").Decimal;
             tax_rate: import("@prisma/client/runtime/library").Decimal | null;
             grand_total: import("@prisma/client/runtime/library").Decimal;
         } | null;
     } & {
         id: string;
+        note: string | null;
         created_at: Date;
         order_id: string | null;
-        note: string | null;
         recorded_by_user_id: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        method: import("@prisma/client").$Enums.payment_method;
+        payment_time: Date;
         proof_url: string | null;
         invoice_id: string | null;
-        method: import("@prisma/client").$Enums.payment_method;
-        amount: import("@prisma/client/runtime/library").Decimal;
-        payment_time: Date;
     }>;
     updateOrderPayment(orderId: string, dto: UpdateOrderPaymentDto): Promise<{
         id: string;
         created_at: Date;
         updated_at: Date;
         order_id: string;
+        proof_url: string | null;
         is_paid: boolean;
         is_dp: boolean;
         payment_method: import("@prisma/client").$Enums.payment_method | null;
         amount_paid: import("@prisma/client/runtime/library").Decimal | null;
         payment_date: Date | null;
-        proof_url: string | null;
     }>;
     getOrderPayment(orderId: string): Promise<{
         orders: {
-            id: string;
             pangkalans: {
                 name: string;
             };
+            id: string;
             total_amount: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
@@ -195,11 +195,11 @@ export declare class PaymentService {
         created_at: Date;
         updated_at: Date;
         order_id: string;
+        proof_url: string | null;
         is_paid: boolean;
         is_dp: boolean;
         payment_method: import("@prisma/client").$Enums.payment_method | null;
         amount_paid: import("@prisma/client/runtime/library").Decimal | null;
         payment_date: Date | null;
-        proof_url: string | null;
     }>;
 }

@@ -33,14 +33,16 @@ let OrderController = class OrderController {
     findOne(id) {
         return this.orderService.findOne(id);
     }
-    create(dto) {
-        return this.orderService.create(dto);
+    create(dto, req) {
+        const userId = req.user?.sub || req.user?.id;
+        return this.orderService.create(dto, userId);
     }
     update(id, dto) {
         return this.orderService.update(id, dto);
     }
-    updateStatus(id, dto) {
-        return this.orderService.updateStatus(id, dto);
+    updateStatus(id, dto, req) {
+        const userId = req.user?.sub || req.user?.id;
+        return this.orderService.updateStatus(id, dto, userId);
     }
     remove(id) {
         return this.orderService.remove(id);
@@ -77,8 +79,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.CreateOrderDto]),
+    __metadata("design:paramtypes", [dto_1.CreateOrderDto, Object]),
     __metadata("design:returntype", void 0)
 ], OrderController.prototype, "create", null);
 __decorate([
@@ -93,8 +96,9 @@ __decorate([
     (0, common_1.Patch)(':id/status'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, dto_1.UpdateOrderStatusDto]),
+    __metadata("design:paramtypes", [String, dto_1.UpdateOrderStatusDto, Object]),
     __metadata("design:returntype", void 0)
 ], OrderController.prototype, "updateStatus", null);
 __decorate([

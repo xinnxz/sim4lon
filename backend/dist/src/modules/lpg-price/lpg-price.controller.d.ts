@@ -6,22 +6,22 @@ export declare class LpgPriceController {
     findAll(req: any): Promise<{
         id: string;
         pangkalan_id: string;
-        is_active: boolean;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        cost_price: import("@prisma/client/runtime/library").Decimal;
         created_at: Date;
         updated_at: Date;
+        is_active: boolean;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
     }[]>;
     update(id: string, dto: UpdateLpgPriceDto, req: any): Promise<{
         id: string;
         pangkalan_id: string;
-        is_active: boolean;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        cost_price: import("@prisma/client/runtime/library").Decimal;
         created_at: Date;
         updated_at: Date;
+        is_active: boolean;
         selling_price: import("@prisma/client/runtime/library").Decimal;
-        cost_price: import("@prisma/client/runtime/library").Decimal;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
     }>;
     bulkUpdate(dto: BulkUpdateLpgPricesDto, req: any): Promise<any[]>;
 }

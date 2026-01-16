@@ -16,13 +16,13 @@ export declare class PenyaluranService {
     } & {
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
+        tipe_pembayaran: string;
         jumlah_fakultatif: number;
         jumlah_normal: number;
-        tipe_pembayaran: string;
     })[]>;
     getRekapitulasi(bulan: string, tipePembayaran?: string, lpgType?: string): Promise<{
         bulan: string;
@@ -45,23 +45,23 @@ export declare class PenyaluranService {
     update(id: string, dto: UpdatePenyaluranDto): Promise<{
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
+        tipe_pembayaran: string;
         jumlah_fakultatif: number;
         jumlah_normal: number;
-        tipe_pembayaran: string;
     }>;
     delete(id: string): Promise<{
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
+        tipe_pembayaran: string;
         jumlah_fakultatif: number;
         jumlah_normal: number;
-        tipe_pembayaran: string;
     }>;
 }

@@ -63,7 +63,7 @@ export class PenerimaanService {
         };
     }
 
-    async create(dto: CreatePenerimaanDto) {
+    async create(dto: CreatePenerimaanDto, userId?: string) {
         // Use transaction to ensure both records are created atomically
         const result = await this.prisma.client.$transaction(async (tx) => {
             // 1. Create penerimaan record
@@ -111,6 +111,7 @@ export class PenerimaanService {
                     lpg_type: detectedLpgType, // Use detected type, not hardcoded!
                     lpg_product_id: productId || null,
                     timestamp: new Date(dto.tanggal),
+                    recorded_by_user_id: userId || null,  // Track user
                 },
             });
 

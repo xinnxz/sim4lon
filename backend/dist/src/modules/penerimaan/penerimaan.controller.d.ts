@@ -8,12 +8,12 @@ export declare class PenerimaanController {
             id: string;
             created_at: Date;
             updated_at: Date;
+            tanggal: Date;
             no_so: string;
             no_lo: string;
             nama_material: string;
             qty_pcs: number;
             qty_kg: import("@prisma/client/runtime/library").Decimal;
-            tanggal: Date;
             sumber: string | null;
         }[];
         meta: {
@@ -37,28 +37,28 @@ export declare class PenerimaanController {
             stok_akhir: number;
         }>;
     }>;
-    create(dto: CreatePenerimaanDto): Promise<{
+    create(dto: CreatePenerimaanDto, req: any): Promise<{
         id: string;
         created_at: Date;
         updated_at: Date;
+        tanggal: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
         qty_pcs: number;
         qty_kg: import("@prisma/client/runtime/library").Decimal;
-        tanggal: Date;
         sumber: string | null;
     }>;
     delete(id: string): Promise<{
         id: string;
         created_at: Date;
         updated_at: Date;
+        tanggal: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
         qty_pcs: number;
         qty_kg: import("@prisma/client/runtime/library").Decimal;
-        tanggal: Date;
         sumber: string | null;
     }>;
 }

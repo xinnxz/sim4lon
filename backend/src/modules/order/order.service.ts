@@ -88,7 +88,7 @@ export class OrderService {
         return order;
     }
 
-    async create(dto: CreateOrderDto) {
+    async create(dto: CreateOrderDto, userId?: string) {
 
         // VALIDASI: Tidak boleh submit order tanpa items
         if (!dto.items || dto.items.length === 0) {
@@ -391,6 +391,7 @@ export class OrderService {
                     movement_type: 'KELUAR',
                     qty: orderItem.qty,
                     note: `Order ${order.code} - ${orderItem.label || orderItem.lpg_type}`,
+                    recorded_by_user_id: userId || null,  // Track user who created order
                 },
             });
         }
@@ -519,7 +520,7 @@ export class OrderService {
         return this.findOne(id);
     }
 
-    async updateStatus(id: string, dto: UpdateOrderStatusDto) {
+    async updateStatus(id: string, dto: UpdateOrderStatusDto, userId?: string) {
         const order = await this.findOne(id);
 
         // Validate status transition
@@ -593,6 +594,7 @@ export class OrderService {
                         movement_type: 'MASUK',  // MASUK = stock kembali
                         qty: item.qty,
                         note: `Batal Order ${updated.code} - ${item.label || item.lpg_type}`,
+                        recorded_by_user_id: userId || null,  // Track user who cancelled
                     },
                 });
             }

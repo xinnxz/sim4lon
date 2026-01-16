@@ -5,15 +5,15 @@ export declare class AgenController {
     getMyAgen(user: any): Promise<{
         id: string;
         code: string;
-        email: string | null;
-        name: string;
-        phone: string | null;
-        is_active: boolean;
+        note: string | null;
         created_at: Date;
         updated_at: Date;
-        deleted_at: Date | null;
-        note: string | null;
+        name: string;
         address: string | null;
+        phone: string | null;
+        email: string | null;
         pic_name: string | null;
+        is_active: boolean;
+        deleted_at: Date | null;
     } | null>;
 }

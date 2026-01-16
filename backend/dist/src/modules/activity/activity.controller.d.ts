@@ -10,10 +10,10 @@ export declare class ActivityController {
                 name: string;
             } | null;
             orders: {
-                id: string;
                 pangkalans: {
                     name: string;
                 };
+                id: string;
             } | null;
         } & {
             id: string;
@@ -42,10 +42,10 @@ export declare class ActivityController {
             name: string;
         } | null;
         orders: {
-            id: string;
             pangkalans: {
                 name: string;
             };
+            id: string;
         } | null;
     } & {
         id: string;
@@ -67,10 +67,10 @@ export declare class ActivityController {
             name: string;
         } | null;
         orders: {
-            id: string;
             pangkalans: {
                 name: string;
             };
+            id: string;
         } | null;
     } & {
         id: string;

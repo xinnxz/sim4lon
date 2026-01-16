@@ -32,25 +32,25 @@ export declare class PangkalanStockService {
         difference: number;
     }>;
     getMovements(pangkalanId: string, startDate?: string, endDate?: string, limit?: number): Promise<{
-        id: string;
-        pangkalan_id: string;
-        created_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         movement_type: string;
         qty: number;
+        id: string;
+        pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
+        created_at: Date;
         source: string | null;
         reference_id: string | null;
         movement_date: Date;
     }[]>;
     updateLevels(pangkalanId: string, dto: UpdateStockLevelsDto): Promise<{
-        id: string;
-        pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         qty: number;
         warning_level: number;
         critical_level: number;
+        id: string;
+        pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        created_at: Date;
+        updated_at: Date;
     }>;
 }

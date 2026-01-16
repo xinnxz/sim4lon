@@ -84,7 +84,7 @@ let OrderService = class OrderService {
         }
         return order;
     }
-    async create(dto) {
+    async create(dto, userId) {
         if (!dto.items || dto.items.length === 0) {
             throw new common_1.BadRequestException('Silakan tambahkan minimal satu item LPG');
         }
@@ -306,6 +306,7 @@ let OrderService = class OrderService {
                     movement_type: 'KELUAR',
                     qty: orderItem.qty,
                     note: `Order ${order.code} - ${orderItem.label || orderItem.lpg_type}`,
+                    recorded_by_user_id: userId || null,
                 },
             });
         }
@@ -404,7 +405,7 @@ let OrderService = class OrderService {
         }
         return this.findOne(id);
     }
-    async updateStatus(id, dto) {
+    async updateStatus(id, dto, userId) {
         const order = await this.findOne(id);
         this.validateStatusTransition(order.current_status, dto.status);
         const updated = await this.prisma.orders.update({
@@ -466,6 +467,7 @@ let OrderService = class OrderService {
                         movement_type: 'MASUK',
                         qty: item.qty,
                         note: `Batal Order ${updated.code} - ${item.label || item.lpg_type}`,
+                        recorded_by_user_id: userId || null,
                     },
                 });
             }

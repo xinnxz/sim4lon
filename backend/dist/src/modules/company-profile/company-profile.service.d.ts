@@ -7,15 +7,15 @@ export declare class CompanyProfileService {
     private generate6DigitId;
     getProfile(): Promise<{
         id: string;
-        email: string | null;
-        phone: string | null;
         created_at: Date;
         updated_at: Date;
-        address: string;
-        pic_name: string | null;
-        region: string | null;
         company_name: string;
+        address: string;
+        phone: string | null;
+        email: string | null;
+        pic_name: string | null;
         sppbe_number: string | null;
+        region: string | null;
         logo_url: string | null;
         ppn_rate: import("@prisma/client/runtime/library").Decimal;
         critical_stock_limit: number;
@@ -24,15 +24,15 @@ export declare class CompanyProfileService {
     }>;
     updateProfile(dto: UpdateCompanyProfileDto): Promise<{
         id: string;
-        email: string | null;
-        phone: string | null;
         created_at: Date;
         updated_at: Date;
-        address: string;
-        pic_name: string | null;
-        region: string | null;
         company_name: string;
+        address: string;
+        phone: string | null;
+        email: string | null;
+        pic_name: string | null;
         sppbe_number: string | null;
+        region: string | null;
         logo_url: string | null;
         ppn_rate: import("@prisma/client/runtime/library").Decimal;
         critical_stock_limit: number;

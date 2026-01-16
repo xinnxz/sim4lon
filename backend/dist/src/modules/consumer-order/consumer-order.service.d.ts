@@ -18,21 +18,21 @@ export declare class ConsumerOrderService {
                 phone: string | null;
             } | null;
         } & {
+            qty: number;
             id: string;
             code: string;
             pangkalan_id: string;
-            created_at: Date;
-            updated_at: Date;
-            cost_price: Decimal;
-            lpg_type: import("@prisma/client").$Enums.lpg_type;
-            qty: number;
-            note: string | null;
-            total_amount: Decimal;
-            price_per_unit: Decimal;
             consumer_id: string | null;
             consumer_name: string | null;
+            lpg_type: import("@prisma/client").$Enums.lpg_type;
+            price_per_unit: Decimal;
+            cost_price: Decimal;
+            total_amount: Decimal;
             payment_status: import("@prisma/client").$Enums.consumer_payment_status;
+            note: string | null;
             sale_date: Date;
+            created_at: Date;
+            updated_at: Date;
         })[];
         meta: {
             total: number;
@@ -44,34 +44,34 @@ export declare class ConsumerOrderService {
     findOne(id: string, pangkalanId: string): Promise<{
         consumers: {
             id: string;
-            name: string;
-            phone: string | null;
             pangkalan_id: string;
-            is_active: boolean;
+            note: string | null;
             created_at: Date;
             updated_at: Date;
-            note: string | null;
+            name: string;
             address: string | null;
+            phone: string | null;
+            is_active: boolean;
             nik: string | null;
             kk: string | null;
             consumer_type: import("@prisma/client").$Enums.consumer_type;
         } | null;
     } & {
+        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
-        cost_price: Decimal;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        note: string | null;
-        total_amount: Decimal;
-        price_per_unit: Decimal;
         consumer_id: string | null;
         consumer_name: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        price_per_unit: Decimal;
+        cost_price: Decimal;
+        total_amount: Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
+        note: string | null;
         sale_date: Date;
+        created_at: Date;
+        updated_at: Date;
     }>;
     create(pangkalanId: string, dto: CreateConsumerOrderDto): Promise<{
         consumers: {
@@ -80,21 +80,21 @@ export declare class ConsumerOrderService {
             phone: string | null;
         } | null;
     } & {
+        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
-        cost_price: Decimal;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        note: string | null;
-        total_amount: Decimal;
-        price_per_unit: Decimal;
         consumer_id: string | null;
         consumer_name: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        price_per_unit: Decimal;
+        cost_price: Decimal;
+        total_amount: Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
+        note: string | null;
         sale_date: Date;
+        created_at: Date;
+        updated_at: Date;
     }>;
     update(id: string, pangkalanId: string, dto: UpdateConsumerOrderDto): Promise<{
         consumers: {
@@ -103,21 +103,21 @@ export declare class ConsumerOrderService {
             phone: string | null;
         } | null;
     } & {
+        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
-        cost_price: Decimal;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        note: string | null;
-        total_amount: Decimal;
-        price_per_unit: Decimal;
         consumer_id: string | null;
         consumer_name: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        price_per_unit: Decimal;
+        cost_price: Decimal;
+        total_amount: Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
+        note: string | null;
         sale_date: Date;
+        created_at: Date;
+        updated_at: Date;
     }>;
     remove(id: string, pangkalanId: string): Promise<{
         message: string;
@@ -137,21 +137,21 @@ export declare class ConsumerOrderService {
             name: string;
         } | null;
     } & {
+        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
-        cost_price: Decimal;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
-        qty: number;
-        note: string | null;
-        total_amount: Decimal;
-        price_per_unit: Decimal;
         consumer_id: string | null;
         consumer_name: string | null;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
+        price_per_unit: Decimal;
+        cost_price: Decimal;
+        total_amount: Decimal;
         payment_status: import("@prisma/client").$Enums.consumer_payment_status;
+        note: string | null;
         sale_date: Date;
+        created_at: Date;
+        updated_at: Date;
     })[]>;
     getChartData(pangkalanId: string): Promise<{
         day: string;

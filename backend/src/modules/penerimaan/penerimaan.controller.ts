@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { PenerimaanService } from './penerimaan.service';
 import { CreatePenerimaanDto, GetPenerimaanQueryDto } from './dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
@@ -23,8 +23,9 @@ export class PenerimaanController {
     @Post()
     @UseGuards(RolesGuard)
     @Roles(user_role.ADMIN, user_role.OPERATOR)
-    create(@Body() dto: CreatePenerimaanDto) {
-        return this.penerimaanService.create(dto);
+    create(@Body() dto: CreatePenerimaanDto, @Request() req: any) {
+        const userId = req.user?.sub || req.user?.id;
+        return this.penerimaanService.create(dto, userId);
     }
 
     @Delete(':id')

@@ -30,8 +30,9 @@ let PenerimaanController = class PenerimaanController {
     getInOutAgen(bulan) {
         return this.penerimaanService.getInOutAgen(bulan);
     }
-    create(dto) {
-        return this.penerimaanService.create(dto);
+    create(dto, req) {
+        const userId = req.user?.sub || req.user?.id;
+        return this.penerimaanService.create(dto, userId);
     }
     delete(id) {
         return this.penerimaanService.delete(id);
@@ -57,8 +58,9 @@ __decorate([
     (0, common_1.UseGuards)(guards_1.RolesGuard),
     (0, decorators_1.Roles)(client_1.user_role.ADMIN, client_1.user_role.OPERATOR),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.CreatePenerimaanDto]),
+    __metadata("design:paramtypes", [dto_1.CreatePenerimaanDto, Object]),
     __metadata("design:returntype", void 0)
 ], PenerimaanController.prototype, "create", null);
 __decorate([

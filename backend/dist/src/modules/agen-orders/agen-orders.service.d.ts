@@ -15,16 +15,16 @@ export declare class AgenOrdersService {
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     }>;
     findAll(pangkalanId: string, status?: string): Promise<({
         agen: {
@@ -35,16 +35,16 @@ export declare class AgenOrdersService {
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     })[]>;
     findOne(id: string, pangkalanId: string): Promise<{
         agen: {
@@ -55,32 +55,32 @@ export declare class AgenOrdersService {
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     }>;
     receive(id: string, pangkalanId: string, dto: ReceiveAgenOrderDto): Promise<unknown>;
     cancel(id: string, pangkalanId: string): Promise<{
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     }>;
     getStats(pangkalanId: string): Promise<{
         pending: number;
@@ -90,28 +90,28 @@ export declare class AgenOrdersService {
         total: number;
     }>;
     findAllForAgen(status?: string): Promise<({
+        agen: {
+            name: string;
+        } | null;
         pangkalans: {
             code: string;
             name: string;
             phone: string | null;
         };
-        agen: {
-            name: string;
-        } | null;
     } & {
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     })[]>;
     getStatsForAgen(): Promise<{
         pending: number;
@@ -124,31 +124,31 @@ export declare class AgenOrdersService {
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     }>;
     completeOrder(id: string, dto: ReceiveAgenOrderDto): Promise<unknown>;
     cancelFromAgen(id: string): Promise<{
         id: string;
         code: string;
         pangkalan_id: string;
-        created_at: Date;
-        updated_at: Date;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
         note: string | null;
-        agen_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        status: import("@prisma/client").$Enums.agen_order_status;
         qty_ordered: number;
         qty_received: number;
-        status: import("@prisma/client").$Enums.agen_order_status;
         order_date: Date;
         received_date: Date | null;
+        agen_id: string | null;
     }>;
 }

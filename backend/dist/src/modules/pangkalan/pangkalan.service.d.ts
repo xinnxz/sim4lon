@@ -19,19 +19,19 @@ export declare class PangkalanService {
         } & {
             id: string;
             code: string;
-            name: string;
-            address: string;
-            region: string | null;
-            pic_name: string | null;
-            phone: string | null;
-            email: string | null;
-            capacity: number | null;
             note: string | null;
-            is_active: boolean;
             created_at: Date;
             updated_at: Date;
+            name: string;
+            address: string;
+            phone: string | null;
+            email: string | null;
+            pic_name: string | null;
+            region: string | null;
+            is_active: boolean;
             deleted_at: Date | null;
             agen_id: string | null;
+            capacity: number | null;
             alokasi_bulanan: number;
         })[];
         meta: {
@@ -57,19 +57,19 @@ export declare class PangkalanService {
     } & {
         id: string;
         code: string;
-        name: string;
-        address: string;
-        region: string | null;
-        pic_name: string | null;
-        phone: string | null;
-        email: string | null;
-        capacity: number | null;
         note: string | null;
-        is_active: boolean;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        address: string;
+        phone: string | null;
+        email: string | null;
+        pic_name: string | null;
+        region: string | null;
+        is_active: boolean;
         deleted_at: Date | null;
         agen_id: string | null;
+        capacity: number | null;
         alokasi_bulanan: number;
     }>;
     create(dto: CreatePangkalanDto): Promise<{
@@ -85,19 +85,19 @@ export declare class PangkalanService {
     } & {
         id: string;
         code: string;
-        name: string;
-        address: string;
-        region: string | null;
-        pic_name: string | null;
-        phone: string | null;
-        email: string | null;
-        capacity: number | null;
         note: string | null;
-        is_active: boolean;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        address: string;
+        phone: string | null;
+        email: string | null;
+        pic_name: string | null;
+        region: string | null;
+        is_active: boolean;
         deleted_at: Date | null;
         agen_id: string | null;
+        capacity: number | null;
         alokasi_bulanan: number;
     }>;
     update(id: string, dto: UpdatePangkalanDto): Promise<{
@@ -113,19 +113,19 @@ export declare class PangkalanService {
     } & {
         id: string;
         code: string;
-        name: string;
-        address: string;
-        region: string | null;
-        pic_name: string | null;
-        phone: string | null;
-        email: string | null;
-        capacity: number | null;
         note: string | null;
-        is_active: boolean;
         created_at: Date;
         updated_at: Date;
+        name: string;
+        address: string;
+        phone: string | null;
+        email: string | null;
+        pic_name: string | null;
+        region: string | null;
+        is_active: boolean;
         deleted_at: Date | null;
         agen_id: string | null;
+        capacity: number | null;
         alokasi_bulanan: number;
     }>;
     remove(id: string): Promise<{

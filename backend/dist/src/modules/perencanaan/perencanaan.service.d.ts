@@ -14,13 +14,13 @@ export declare class PerencanaanService {
     } & {
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
-        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
+        alokasi_bulan: number;
     })[]>;
     getRekapitulasi(bulan: string, kondisi?: string, lpgType?: string): Promise<{
         bulan: string;
@@ -41,36 +41,36 @@ export declare class PerencanaanService {
     create(dto: CreatePerencanaanDto): Promise<{
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
-        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
+        alokasi_bulan: number;
     }>;
     bulkUpdate(dto: BulkUpdatePerencanaanDto): Promise<any[]>;
     update(id: string, dto: UpdatePerencanaanDto): Promise<{
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
-        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
+        alokasi_bulan: number;
     }>;
     delete(id: string): Promise<{
         id: string;
         pangkalan_id: string;
+        lpg_type: import("@prisma/client").$Enums.lpg_type;
         created_at: Date;
         updated_at: Date;
-        lpg_type: import("@prisma/client").$Enums.lpg_type;
         tanggal: Date;
-        alokasi_bulan: number;
         jumlah_fakultatif: number;
         jumlah_normal: number;
+        alokasi_bulan: number;
     }>;
     autoGenerate(bulan: string, lpgType?: string, kondisi?: string, overwrite?: boolean): Promise<{
         success: boolean;

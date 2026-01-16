@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto, UpdateOrderStatusDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards';
@@ -42,8 +42,9 @@ export class OrderController {
     }
 
     @Post()
-    create(@Body() dto: CreateOrderDto) {
-        return this.orderService.create(dto);
+    create(@Body() dto: CreateOrderDto, @Request() req: any) {
+        const userId = req.user?.sub || req.user?.id;
+        return this.orderService.create(dto, userId);
     }
 
     @Put(':id')
@@ -52,8 +53,9 @@ export class OrderController {
     }
 
     @Patch(':id/status')
-    updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
-        return this.orderService.updateStatus(id, dto);
+    updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto, @Request() req: any) {
+        const userId = req.user?.sub || req.user?.id;
+        return this.orderService.updateStatus(id, dto, userId);
     }
 
     @Delete(':id')

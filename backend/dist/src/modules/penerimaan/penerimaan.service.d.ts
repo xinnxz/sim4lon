@@ -10,12 +10,12 @@ export declare class PenerimaanService {
             id: string;
             created_at: Date;
             updated_at: Date;
+            tanggal: Date;
             no_so: string;
             no_lo: string;
             nama_material: string;
             qty_pcs: number;
             qty_kg: import("@prisma/client/runtime/library").Decimal;
-            tanggal: Date;
             sumber: string | null;
         }[];
         meta: {
@@ -25,28 +25,28 @@ export declare class PenerimaanService {
             totalPages: number;
         };
     }>;
-    create(dto: CreatePenerimaanDto): Promise<{
+    create(dto: CreatePenerimaanDto, userId?: string): Promise<{
         id: string;
         created_at: Date;
         updated_at: Date;
+        tanggal: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
         qty_pcs: number;
         qty_kg: import("@prisma/client/runtime/library").Decimal;
-        tanggal: Date;
         sumber: string | null;
     }>;
     delete(id: string): Promise<{
         id: string;
         created_at: Date;
         updated_at: Date;
+        tanggal: Date;
         no_so: string;
         no_lo: string;
         nama_material: string;
         qty_pcs: number;
         qty_kg: import("@prisma/client/runtime/library").Decimal;
-        tanggal: Date;
         sumber: string | null;
     }>;
     getInOutAgen(bulan: string): Promise<{

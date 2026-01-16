@@ -65,7 +65,7 @@ let PenerimaanService = class PenerimaanService {
             },
         };
     }
-    async create(dto) {
+    async create(dto, userId) {
         const result = await this.prisma.client.$transaction(async (tx) => {
             const penerimaan = await tx.penerimaan_stok.create({
                 data: {
@@ -103,6 +103,7 @@ let PenerimaanService = class PenerimaanService {
                     lpg_type: detectedLpgType,
                     lpg_product_id: productId || null,
                     timestamp: new Date(dto.tanggal),
+                    recorded_by_user_id: userId || null,
                 },
             });
             return penerimaan;

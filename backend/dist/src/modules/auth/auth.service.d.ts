@@ -12,10 +12,10 @@ export declare class AuthService {
         user: {
             id: string;
             code: string;
-            email: string;
-            name: string;
-            role: import("@prisma/client").$Enums.user_role;
             created_at: Date;
+            name: string;
+            email: string;
+            role: import("@prisma/client").$Enums.user_role;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -36,39 +36,39 @@ export declare class AuthService {
         };
     }>;
     getProfile(userId: string): Promise<{
-        id: string;
-        code: string;
-        email: string;
-        name: string;
-        phone: string | null;
-        avatar_url: string | null;
-        role: import("@prisma/client").$Enums.user_role;
-        pangkalan_id: string | null;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
         pangkalans: {
             id: string;
             code: string;
             name: string;
-            phone: string | null;
             address: string;
+            phone: string | null;
         } | null;
+        id: string;
+        code: string;
+        pangkalan_id: string | null;
+        created_at: Date;
+        updated_at: Date;
+        name: string;
+        phone: string | null;
+        email: string;
+        avatar_url: string | null;
+        role: import("@prisma/client").$Enums.user_role;
+        is_active: boolean;
     }>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
         message: string;
         user: {
             id: string;
             code: string;
-            email: string;
-            name: string;
-            phone: string | null;
-            avatar_url: string | null;
-            role: import("@prisma/client").$Enums.user_role;
             pangkalan_id: string | null;
-            is_active: boolean;
             created_at: Date;
             updated_at: Date;
+            name: string;
+            phone: string | null;
+            email: string;
+            avatar_url: string | null;
+            role: import("@prisma/client").$Enums.user_role;
+            is_active: boolean;
         };
     }>;
     changePassword(userId: string, oldPassword: string, newPassword: string): Promise<{
