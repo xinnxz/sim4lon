@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma';
 import { CreateOrderDto, UpdateOrderDto, UpdateOrderStatusDto } from './dto';
 import { status_pesanan, lpg_type } from '@prisma/client';
 import { ActivityService } from '../activity/activity.service';
+import { todayWIB } from '../../common/utils/timezone.util';
 
 @Injectable()
 export class OrderService {
@@ -803,8 +804,7 @@ export class OrderService {
 
         // If todayOnly, filter by created_at >= start of today
         if (todayOnly) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = todayWIB();  // Use WIB timezone
             where.created_at = { gte: today };
         }
 

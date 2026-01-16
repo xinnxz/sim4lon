@@ -179,7 +179,7 @@ export class DashboardService {
         const result: { day: string; sales: number }[] = [];
 
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = nowWIB();  // Use WIB timezone
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
 
@@ -237,7 +237,7 @@ export class DashboardService {
         const days: Record<string, any>[] = [];
 
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = nowWIB();  // Use WIB timezone
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
 
@@ -372,7 +372,7 @@ export class DashboardService {
         });
 
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = nowWIB();  // Use WIB timezone
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
 
@@ -468,7 +468,7 @@ export class DashboardService {
         const result: { day: string; lpg3kg: number; lpg12kg: number; lpg50kg: number }[] = [];
 
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = nowWIB();  // Use WIB timezone
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
 
@@ -568,7 +568,7 @@ export class DashboardService {
         });
 
         // Get start date for usage analysis (30 days ago)
-        const startDate = new Date();
+        const startDate = nowWIB();  // Use WIB timezone
         startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
         startDate.setHours(0, 0, 0, 0);
 
@@ -639,7 +639,7 @@ export class DashboardService {
         });
 
         // ========== 2. PAYMENT OVERDUE ALERTS ==========
-        const overdueDate = new Date();
+        const overdueDate = nowWIB();  // Use WIB timezone
         overdueDate.setDate(overdueDate.getDate() - OVERDUE_DAYS);
 
         // Query orders yang belum lunas dan sudah lewat OVERDUE_DAYS
@@ -676,7 +676,7 @@ export class DashboardService {
         });
 
         const paymentOverdueAlerts = overdueOrders.map(order => {
-            const daysOverdue = Math.floor((new Date().getTime() - new Date(order.order_date).getTime()) / (1000 * 60 * 60 * 24));
+            const daysOverdue = Math.floor((nowWIB().getTime() - new Date(order.order_date).getTime()) / (1000 * 60 * 60 * 24));
             const severity = daysOverdue > 14 ? 'critical' : 'warning';
             const amountPaid = Number(order.order_payment_details?.amount_paid) || 0;
 
@@ -774,7 +774,7 @@ export class DashboardService {
         });
 
         // Get start date (30 days ago)
-        const startDate = new Date();
+        const startDate = nowWIB();  // Use WIB timezone
         startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
         startDate.setHours(0, 0, 0, 0);
 
@@ -910,7 +910,7 @@ export class DashboardService {
         const ANALYSIS_DAYS = ANALYSIS_WEEKS * 7;
 
         // Get start date
-        const startDate = new Date();
+        const startDate = nowWIB();  // Use WIB timezone
         startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
         startDate.setHours(0, 0, 0, 0);
 
@@ -918,7 +918,7 @@ export class DashboardService {
         const dailySales: { date: Date; dayOfWeek: number; sales: number; orderCount: number }[] = [];
 
         for (let i = ANALYSIS_DAYS - 1; i >= 0; i--) {
-            const date = new Date();
+            const date = nowWIB();  // Use WIB timezone
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
 

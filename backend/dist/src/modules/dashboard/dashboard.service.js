@@ -128,7 +128,7 @@ let DashboardService = class DashboardService {
         const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
         const result = [];
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = (0, timezone_util_1.nowWIB)();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
@@ -163,7 +163,7 @@ let DashboardService = class DashboardService {
         });
         const days = [];
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = (0, timezone_util_1.nowWIB)();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
@@ -249,7 +249,7 @@ let DashboardService = class DashboardService {
             }
         });
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = (0, timezone_util_1.nowWIB)();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
@@ -317,7 +317,7 @@ let DashboardService = class DashboardService {
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const result = [];
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = (0, timezone_util_1.nowWIB)();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);
@@ -390,7 +390,7 @@ let DashboardService = class DashboardService {
             },
             orderBy: { size_kg: 'asc' }
         });
-        const startDate = new Date();
+        const startDate = (0, timezone_util_1.nowWIB)();
         startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
         startDate.setHours(0, 0, 0, 0);
         const usageData = await this.prisma.client.stock_histories.groupBy({
@@ -440,7 +440,7 @@ let DashboardService = class DashboardService {
                 });
             }
         });
-        const overdueDate = new Date();
+        const overdueDate = (0, timezone_util_1.nowWIB)();
         overdueDate.setDate(overdueDate.getDate() - OVERDUE_DAYS);
         const overdueOrders = await this.prisma.client.orders.findMany({
             where: {
@@ -473,7 +473,7 @@ let DashboardService = class DashboardService {
             take: 10
         });
         const paymentOverdueAlerts = overdueOrders.map(order => {
-            const daysOverdue = Math.floor((new Date().getTime() - new Date(order.order_date).getTime()) / (1000 * 60 * 60 * 24));
+            const daysOverdue = Math.floor(((0, timezone_util_1.nowWIB)().getTime() - new Date(order.order_date).getTime()) / (1000 * 60 * 60 * 24));
             const severity = daysOverdue > 14 ? 'critical' : 'warning';
             const amountPaid = Number(order.order_payment_details?.amount_paid) || 0;
             return {
@@ -537,7 +537,7 @@ let DashboardService = class DashboardService {
             },
             orderBy: { size_kg: 'asc' }
         });
-        const startDate = new Date();
+        const startDate = (0, timezone_util_1.nowWIB)();
         startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
         startDate.setHours(0, 0, 0, 0);
         const usageData = await this.prisma.client.stock_histories.groupBy({
@@ -637,12 +637,12 @@ let DashboardService = class DashboardService {
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const ANALYSIS_WEEKS = 4;
         const ANALYSIS_DAYS = ANALYSIS_WEEKS * 7;
-        const startDate = new Date();
+        const startDate = (0, timezone_util_1.nowWIB)();
         startDate.setDate(startDate.getDate() - ANALYSIS_DAYS);
         startDate.setHours(0, 0, 0, 0);
         const dailySales = [];
         for (let i = ANALYSIS_DAYS - 1; i >= 0; i--) {
-            const date = new Date();
+            const date = (0, timezone_util_1.nowWIB)();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);

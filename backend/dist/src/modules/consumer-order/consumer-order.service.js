@@ -13,6 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConsumerOrderService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const timezone_util_1 = require("../../common/utils/timezone.util");
 let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
     prisma;
     logger = new common_1.Logger(ConsumerOrderService_1.name);
@@ -237,8 +238,7 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
     async getStats(pangkalanId, todayOnly = false) {
         const dateFilter = {};
         if (todayOnly) {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+            const today = (0, timezone_util_1.todayWIB)();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
             dateFilter.sale_date = {
@@ -273,8 +273,7 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
         const marginKotor = totalRevenue - totalModal;
         const expenseFilter = { pangkalan_id: pangkalanId };
         if (todayOnly) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = (0, timezone_util_1.todayWIB)();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
             expenseFilter.expense_date = {
@@ -318,7 +317,7 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
         const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
         const result = [];
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = (0, timezone_util_1.nowWIB)();
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
             const nextDay = new Date(date);

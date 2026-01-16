@@ -13,6 +13,7 @@ exports.OrderService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../prisma");
 const activity_service_1 = require("../activity/activity.service");
+const timezone_util_1 = require("../../common/utils/timezone.util");
 let OrderService = class OrderService {
     prisma;
     activityService;
@@ -612,8 +613,7 @@ let OrderService = class OrderService {
     async getStats(todayOnly = false) {
         const where = { deleted_at: null };
         if (todayOnly) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = (0, timezone_util_1.todayWIB)();
             where.created_at = { gte: today };
         }
         const [total, menungguPembayaran, diproses, siapKirim, dikirim, selesai, batal,] = await Promise.all([

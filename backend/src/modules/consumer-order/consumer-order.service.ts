@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException,
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateConsumerOrderDto, UpdateConsumerOrderDto } from './dto';
 import { Decimal } from '@prisma/client/runtime/library';
+import { todayWIB, nowWIB } from '../../common/utils/timezone.util';
 
 /**
  * ConsumerOrderService
@@ -322,10 +323,8 @@ export class ConsumerOrderService {
         // Build date filter
         const dateFilter: any = {};
         if (todayOnly) {
-            // Use fixed timezone offset for WIB (UTC+7)
-            const now = new Date();
-            // Get start of today in WIB timezone
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+            // Use WIB timezone for "today" calculation
+            const today = todayWIB();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -371,8 +370,7 @@ export class ConsumerOrderService {
         // Get expenses for the period
         const expenseFilter: any = { pangkalan_id: pangkalanId };
         if (todayOnly) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = todayWIB();  // Use WIB timezone
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
             expenseFilter.expense_date = {
@@ -435,9 +433,9 @@ export class ConsumerOrderService {
             laba: number;
         }> = [];
 
-        // Get data for last 7 days
+        // Get data for last 7 days (using WIB timezone)
         for (let i = 6; i >= 0; i--) {
-            const date = new Date();
+            const date = nowWIB();  // Use WIB timezone
             date.setDate(date.getDate() - i);
             date.setHours(0, 0, 0, 0);
 

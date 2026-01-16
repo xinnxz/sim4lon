@@ -18,13 +18,13 @@ export declare class ConsumerOrderService {
                 phone: string | null;
             } | null;
         } & {
-            qty: number;
             id: string;
             code: string;
             pangkalan_id: string;
             consumer_id: string | null;
             consumer_name: string | null;
             lpg_type: import("@prisma/client").$Enums.lpg_type;
+            qty: number;
             price_per_unit: Decimal;
             cost_price: Decimal;
             total_amount: Decimal;
@@ -49,21 +49,21 @@ export declare class ConsumerOrderService {
             created_at: Date;
             updated_at: Date;
             name: string;
-            address: string | null;
-            phone: string | null;
-            is_active: boolean;
             nik: string | null;
             kk: string | null;
+            phone: string | null;
+            address: string | null;
+            is_active: boolean;
             consumer_type: import("@prisma/client").$Enums.consumer_type;
         } | null;
     } & {
-        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
         consumer_id: string | null;
         consumer_name: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         price_per_unit: Decimal;
         cost_price: Decimal;
         total_amount: Decimal;
@@ -80,13 +80,13 @@ export declare class ConsumerOrderService {
             phone: string | null;
         } | null;
     } & {
-        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
         consumer_id: string | null;
         consumer_name: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         price_per_unit: Decimal;
         cost_price: Decimal;
         total_amount: Decimal;
@@ -103,13 +103,13 @@ export declare class ConsumerOrderService {
             phone: string | null;
         } | null;
     } & {
-        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
         consumer_id: string | null;
         consumer_name: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         price_per_unit: Decimal;
         cost_price: Decimal;
         total_amount: Decimal;
@@ -137,13 +137,13 @@ export declare class ConsumerOrderService {
             name: string;
         } | null;
     } & {
-        qty: number;
         id: string;
         code: string;
         pangkalan_id: string;
         consumer_id: string | null;
         consumer_name: string | null;
         lpg_type: import("@prisma/client").$Enums.lpg_type;
+        qty: number;
         price_per_unit: Decimal;
         cost_price: Decimal;
         total_amount: Decimal;
