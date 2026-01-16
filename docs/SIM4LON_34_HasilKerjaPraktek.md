@@ -92,13 +92,13 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.3 Tampilan Halaman Dashboard Agen](figures/dashboard-admin.png)
 
-**Keterangan:** Dashboard utama untuk Admin dan Operator yang menampilkan *Key Performance Indicators* (KPI) bisnis secara real-time. Terdiri dari: (1) Kartu statistik pesanan aktif, pending pembayaran, dan overdue; (2) Grafik penjualan harian/mingguan/bulanan interaktif; (3) Ringkasan stok per jenis LPG dengan indikator warning; (4) Chart distribusi pesanan per pangkalan; (5) Panel rekomendasi dari Decision Support System berisi alert stok menipis dan saran aksi. Semua komponen menggunakan animasi smooth dan *glassmorphism* design.
+**Keterangan:** Dashboard utama untuk Admin dan Operator yang berfungsi sebagai pusat monitoring bisnis secara real-time. Halaman ini menampilkan *Key Performance Indicators* (KPI) melalui kartu statistik yang memuat data pesanan aktif, pending pembayaran, dan pembayaran overdue. Grafik penjualan interaktif dapat disesuaikan untuk menampilkan data harian, mingguan, atau bulanan. Ringkasan stok per jenis LPG ditampilkan dengan indikator visual berupa warna warning untuk stok yang mendekati level kritis. Terdapat juga chart distribusi pesanan per pangkalan serta panel rekomendasi dari Decision Support System yang memberikan alert otomatis dan saran aksi operasional. Seluruh komponen menggunakan animasi smooth dan desain *glassmorphism* yang modern.
 
 ##### 4. Tampilan Halaman Dashboard (Pangkalan)
 
 ![Gambar 3.4 Tampilan Halaman Dashboard Pangkalan](figures/dashboard-pangkalan.png)
 
-**Keterangan:** Dashboard khusus untuk pengguna dengan role Pangkalan yang menampilkan informasi relevan untuk operasional harian. Terdiri dari: (1) Kartu ringkasan stok LPG yang dimiliki dengan alert low stock; (2) Daftar pengiriman masuk yang perlu dikonfirmasi; (3) Status hutang/piutang ke agen; (4) Grafik penjualan harian; (5) Quick action button untuk "Catat Penjualan" dan "Pesan Stok". Dilengkapi floating voice widget untuk input penjualan via suara.
+**Keterangan:** Dashboard khusus untuk pengguna dengan role Pangkalan yang menyajikan informasi relevan untuk operasional harian. Halaman ini menampilkan kartu ringkasan stok LPG yang dimiliki lengkap dengan alert ketika stok menipis. Daftar pengiriman masuk yang membutuhkan konfirmasi penerimaan ditampilkan secara real-time, disertai status hutang atau piutang terhadap agen. Grafik penjualan harian membantu monitoring performa, sementara quick action buttons memudahkan akses ke fitur "Catat Penjualan" dan "Pesan Stok". Halaman ini dilengkapi floating voice widget yang memungkinkan input penjualan melalui perintah suara.
 
 ---
 
@@ -108,19 +108,19 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.5 Tampilan Halaman Daftar Pesanan](figures/daftar-pesanan.png)
 
-**Keterangan:** Halaman yang menampilkan daftar semua pesanan dalam bentuk tabel dengan kolom: kode pesanan, pangkalan, tanggal, jumlah item, total, status, dan aksi. Dilengkapi fitur: (1) Filter berdasarkan status (Draft, Menunggu Pembayaran, Diproses, Dikirim, Selesai, Dibatalkan); (2) Pencarian berdasarkan kode pesanan atau nama pangkalan; (3) Filter tanggal dengan date range picker; (4) Pagination untuk navigasi data banyak; (5) Quick action button untuk melihat detail atau edit. Tabel mendukung sorting per kolom.
+**Keterangan:** Halaman yang menampilkan daftar seluruh pesanan dalam format tabel yang informatif. Setiap baris menampilkan kode pesanan, nama pangkalan, tanggal order, jumlah item, total harga, status, dan tombol aksi. Fitur filter tersedia untuk menyaring pesanan berdasarkan status seperti Draft, Menunggu Pembayaran, Diproses, Dikirim, Selesai, atau Dibatalkan. Pencarian dapat dilakukan berdasarkan kode pesanan maupun nama pangkalan, sementara date range picker memungkinkan filter berdasarkan rentang tanggal tertentu. Sistem pagination memudahkan navigasi data dalam jumlah besar, dan tabel mendukung sorting per kolom untuk fleksibilitas tampilan data.
 
 ##### 6. Tampilan Halaman Buat Pesanan
 
 ![Gambar 3.6 Tampilan Halaman Buat Pesanan](figures/buat-pesanan.png)
 
-**Keterangan:** Halaman form interaktif untuk membuat pesanan baru. Alur penggunaan: (1) Pilih pangkalan tujuan dari dropdown atau ketik untuk search; (2) Tambahkan item produk LPG dengan pilih jenis dan jumlah; (3) Sistem otomatis menghitung subtotal dan total; (4) Review dan submit. Dilengkapi fitur **Voice Order** berbasis AI yang memungkinkan input pesanan menggunakan perintah suara dalam Bahasa Indonesia, diproses oleh Google Gemini 2.0 Flash untuk Natural Language Processing.
+**Keterangan:** Halaman form interaktif untuk membuat pesanan baru dengan alur yang intuitif. Pengguna dapat memilih pangkalan tujuan melalui dropdown dengan fitur pencarian, kemudian menambahkan item produk LPG dengan memilih jenis dan memasukkan jumlah yang diinginkan. Sistem secara otomatis menghitung subtotal dan total pembayaran. Halaman ini dilengkapi fitur unggulan **Voice Order** berbasis AI yang memungkinkan pembuatan pesanan menggunakan perintah suara dalam Bahasa Indonesia. Teknologi Natural Language Processing dari Google Gemini 2.0 Flash digunakan untuk memproses dan menginterpretasikan perintah suara menjadi data pesanan yang akurat.
 
 ##### 7. Tampilan Halaman Detail Pesanan
 
 ![Gambar 3.7 Tampilan Halaman Detail Pesanan](figures/detail-pesanan.png)
 
-**Keterangan:** Halaman yang menampilkan informasi lengkap satu pesanan meliputi: (1) Header berisi kode pesanan, status badge, dan tanggal; (2) Data pangkalan (nama, alamat, PIC); (3) Tabel item pesanan dengan harga dan subtotal; (4) Ringkasan pembayaran (total, DP, sisa); (5) Informasi driver yang ditugaskan; (6) Timeline perubahan status dengan timestamp. Aksi tersedia: ubah status, assign driver, batalkan pesanan, cetak nota. Layout responsive dengan action buttons sticky di mobile.
+**Keterangan:** Halaman yang menampilkan informasi lengkap satu pesanan secara komprehensif. Bagian header memuat kode pesanan, status dalam bentuk badge berwarna, dan tanggal pemesanan. Data pangkalan ditampilkan meliputi nama, alamat, dan Person in Charge. Tabel item pesanan menyajikan detail produk dengan harga satuan dan subtotal. Ringkasan pembayaran menunjukkan total tagihan, jumlah DP yang sudah dibayar, dan sisa yang harus dilunasi. Informasi driver yang ditugaskan untuk pengiriman serta timeline perubahan status dengan timestamp membantu tracking pesanan. Tersedia aksi untuk mengubah status pesanan, menugaskan driver, membatalkan pesanan, atau mencetak nota. Layout dirancang responsive dengan action buttons yang sticky di tampilan mobile.
 
 ##### 8. Tampilan Halaman Catat Pesanan
 
@@ -132,13 +132,13 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.9 Tampilan Halaman Nota Invoice](figures/nota-invoice.png)
 
-**Keterangan:** Halaman yang menampilkan nota pembayaran dalam format profesional siap cetak. Terdiri dari: (1) Header dengan logo dan data perusahaan; (2) Nomor invoice dan tanggal terbit; (3) Data pembeli (nama pangkalan, alamat); (4) Tabel item dengan kolom produk, qty, harga satuan, subtotal; (5) Total, PPN (jika ada), dan grand total; (6) Status pembayaran (Lunas/Belum); (7) Footer dengan TTD dan stempel. Mendukung aksi: print langsung via browser, download PDF, dan share via WhatsApp.
+**Keterangan:** Halaman yang menampilkan nota pembayaran dalam format profesional yang siap cetak. Bagian header memuat logo dan informasi lengkap perusahaan, diikuti nomor invoice unik dan tanggal terbit. Data pembeli mencakup nama pangkalan dan alamat lengkap. Tabel item menyajikan detail produk yang dipesan beserta kuantitas, harga satuan, dan subtotal per item. Bagian kalkulasi menampilkan total sebelum pajak, PPN jika berlaku, dan grand total yang harus dibayar. Status pembayaran ditandai dengan label "Lunas" atau "Belum Lunas". Footer menyediakan area untuk tanda tangan dan stempel. Pengguna dapat langsung mencetak via browser, mengunduh dalam format PDF, atau membagikan nota melalui WhatsApp.
 
 ##### 10. Tampilan Halaman Catat Penjualan (Pangkalan)
 
 ![Gambar 3.10 Tampilan Halaman Catat Penjualan](figures/catat-penjualan.png)
 
-**Keterangan:** Halaman khusus pangkalan untuk mencatat penjualan LPG ke konsumen akhir. Menampilkan form dengan field: pilih konsumen (dropdown dari data terdaftar atau input baru), pilih jenis LPG, masukkan jumlah, dan harga jual. Untuk konsumen baru, sistem memvalidasi NIK agar sesuai format 16 digit. Setelah submit, stok pangkalan otomatis berkurang dan transaksi tercatat di laporan penjualan. Dilengkapi fitur voice input untuk input cepat.
+**Keterangan:** Halaman khusus pangkalan untuk mencatat penjualan LPG kepada konsumen akhir. Form penjualan menyediakan field untuk memilih konsumen dari data yang sudah terdaftar atau menambahkan konsumen baru, memilih jenis LPG, memasukkan jumlah tabung, dan menentukan harga jual. Untuk konsumen baru, sistem melakukan validasi format NIK agar sesuai standar 16 digit. Setelah submit berhasil, stok pangkalan secara otomatis berkurang sesuai jumlah yang dijual dan transaksi tercatat dalam laporan penjualan. Halaman ini juga dilengkapi fitur voice input untuk mempercepat proses pencatatan.
 
 ---
 
@@ -148,13 +148,13 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.11 Tampilan Halaman Stok LPG](figures/stok-lpg.png)
 
-**Keterangan:** Dashboard stok yang menampilkan ringkasan ketersediaan tabung LPG dalam bentuk kartu per kategori (3kg, 5kg, 12kg, 50kg, Bright Gas 220gr). Setiap kartu menunjukkan: gambar produk, jumlah stok saat ini, level minimum, dan progress bar persentase. Kartu dengan stok di bawah level warning ditandai warna merah dengan animasi pulse. Terdapat tombol "Kelola Produk" untuk CRUD tipe LPG dan harga. Halaman ini menjadi acuan DSS untuk alert stok menipis.
+**Keterangan:** Dashboard stok yang menampilkan ringkasan ketersediaan tabung LPG dalam format kartu visual per kategori produk meliputi 3kg, 5.5kg, 12kg, 50kg, dan Bright Gas 220gr. Setiap kartu menampilkan gambar produk, jumlah stok saat ini, level minimum yang ditetapkan, serta progress bar yang menunjukkan persentase ketersediaan. Kartu dengan stok di bawah level warning ditandai dengan warna merah dan animasi pulse untuk menarik perhatian. Tombol "Kelola Produk" tersedia untuk mengelola tipe LPG dan mengatur harga jual. Halaman ini menjadi acuan bagi Decision Support System dalam memberikan alert stok menipis.
 
 ##### 12. Tampilan Halaman Stok LPG (Pangkalan)
 
 ![Gambar 3.12 Tampilan Halaman Stok Pangkalan](figures/stok-pangkalan.png)
 
-**Keterangan:** Halaman stok khusus untuk pangkalan yang menampilkan: (1) Kartu ringkasan stok per jenis LPG yang dimiliki; (2) Tombol "Pesan Stok" untuk order ke agen; (3) Daftar pengiriman masuk yang menunggu konfirmasi penerimaan; (4) Riwayat transaksi stok masuk (dari agen) dan keluar (penjualan ke konsumen). Setiap transaksi tercatat dengan timestamp dan dapat di-filter berdasarkan tanggal.
+**Keterangan:** Halaman stok khusus untuk pangkalan yang menyajikan informasi stok secara komprehensif. Kartu ringkasan menampilkan jumlah stok per jenis LPG yang dimiliki. Tombol "Pesan Stok" memudahkan pangkalan untuk melakukan order ke agen. Daftar pengiriman masuk yang menunggu konfirmasi penerimaan ditampilkan secara real-time agar tidak ada pengiriman yang terlewat. Riwayat transaksi mencatat semua stok masuk dari agen maupun stok keluar dari penjualan ke konsumen. Setiap transaksi tercatat dengan timestamp dan dapat di-filter berdasarkan rentang tanggal.
 
 ---
 
@@ -170,13 +170,13 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.14 Tampilan Halaman Perencanaan Input](figures/perencanaan-input.png)
 
-**Keterangan:** Form input untuk membuat atau mengedit rencana distribusi LPG ke pangkalan. Tersedia dua mode: (1) Manual - input target per pangkalan satu per satu; (2) Generate Otomatis - sistem menghitung target optimal berdasarkan data historis penjualan 3 bulan terakhir dan kapasitas alokasi. Setelah generate, user dapat mereview dan menyesuaikan sebelum menyimpan. Data rencana ini digunakan sebagai acuan monitoring penyaluran.
+**Keterangan:** Form input untuk membuat atau mengedit rencana distribusi LPG ke pangkalan dengan dua mode input yang tersedia. Mode Manual memungkinkan pengguna menginput target distribusi per pangkalan satu per satu. Mode Generate Otomatis memanfaatkan kecerdasan sistem untuk menghitung target optimal berdasarkan data historis penjualan tiga bulan terakhir dan kapasitas alokasi yang tersedia. Setelah proses generate selesai, pengguna dapat mereview hasil perhitungan dan melakukan penyesuaian sebelum menyimpan. Data rencana yang tersimpan digunakan sebagai acuan monitoring penyaluran bulanan.
 
 ##### 15. Tampilan Halaman Penyaluran
 
 ![Gambar 3.15 Tampilan Halaman Penyaluran](figures/penyaluran.png)
 
-**Keterangan:** Halaman yang mencatat semua penyaluran stok dari agen ke pangkalan. Menampilkan tabel dengan kolom: tanggal, pangkalan tujuan, jenis LPG, jumlah, status pengiriman, dan driver. Terdapat dua jenis penyaluran: (1) Berdasarkan Pesanan - otomatis tercatat saat pesanan dikirim; (2) Fakultatif - penyaluran manual di luar pesanan. Setiap penyaluran terintegrasi dengan modul stok sehingga stok agen otomatis berkurang.
+**Keterangan:** Halaman yang mencatat seluruh penyaluran stok dari agen ke pangkalan. Tampilan tabel menyajikan informasi tanggal penyaluran, pangkalan tujuan, jenis LPG, jumlah tabung, status pengiriman, dan driver yang bertugas. Sistem mengakomodasi dua jenis penyaluran, yaitu penyaluran berdasarkan pesanan yang tercatat otomatis saat pesanan dikirim, serta penyaluran fakultatif untuk distribusi manual di luar pesanan reguler. Setiap transaksi penyaluran terintegrasi dengan modul stok sehingga stok agen berkurang secara otomatis sesuai jumlah yang disalurkan.
 
 ##### 16. Tampilan Halaman Penerimaan
 
@@ -204,7 +204,7 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.19 Tampilan Halaman Detail Pangkalan](figures/detail-pangkalan.png)
 
-**Keterangan:** Halaman yang menampilkan informasi lengkap satu pangkalan meliputi: (1) Data Pangkalan - nama, alamat, koordinat lokasi; (2) Data PIC - nama, telepon, email; (3) Data Bisnis - NPWP, nomor rekening; (4) Alokasi - kuota bulanan per jenis LPG; (5) Statistik - total pesanan, revenue, rata-rata pembelian; (6) Riwayat Pesanan - 10 pesanan terakhir. Admin dapat mengedit semua data dan melakukan reset password akun pangkalan dari halaman ini.
+**Keterangan:** Halaman yang menampilkan informasi lengkap satu pangkalan secara detail. Bagian Data Pangkalan mencakup nama usaha, alamat lengkap, dan koordinat lokasi untuk keperluan pemetaan. Data PIC (Person in Charge) meliputi nama pemilik atau pengelola, nomor telepon, dan email. Data Bisnis menyimpan informasi NPWP dan nomor rekening bank. Bagian Alokasi menunjukkan kuota distribusi bulanan per jenis LPG. Statistik performa menampilkan total pesanan, total revenue, dan rata-rata pembelian. Riwayat sepuluh pesanan terakhir juga ditampilkan untuk referensi cepat. Admin memiliki akses untuk mengedit semua data serta melakukan reset password akun pangkalan melalui halaman ini.
 
 ##### 20. Tampilan Halaman Profil Pangkalan
 
@@ -236,7 +236,7 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.23 Tampilan Halaman Laporan Penjualan](figures/laporan-penjualan.png)
 
-**Keterangan:** Halaman laporan penjualan komprehensif untuk agen yang menampilkan: (1) Kartu summary - total revenue, jumlah transaksi, rata-rata per transaksi; (2) Line chart trend penjualan harian/mingguan/bulanan; (3) Pie chart distribusi per jenis LPG; (4) Tabel detail transaksi dengan kolom tanggal, pangkalan, item, total, status pembayaran. Filter tersedia berdasarkan periode tanggal. Mendukung export ke PDF dan Excel dengan kop perusahaan.
+**Keterangan:** Halaman laporan penjualan komprehensif untuk agen yang menyajikan data bisnis secara visual dan analitis. Kartu summary di bagian atas menampilkan total revenue, jumlah transaksi, dan rata-rata nilai per transaksi. Line chart interaktif memvisualisasikan trend penjualan yang dapat disesuaikan untuk tampilan harian, mingguan, atau bulanan. Pie chart menunjukkan distribusi penjualan per jenis LPG untuk analisis produk. Tabel detail transaksi menyajikan informasi lengkap meliputi tanggal, nama pangkalan, item yang dibeli, total nilai, dan status pembayaran. Filter berdasarkan periode tanggal tersedia untuk analisis spesifik. Laporan mendukung export ke format PDF dan Excel dengan kop perusahaan.
 
 ##### 24. Tampilan Halaman Laporan Pangkalan
 
@@ -248,7 +248,7 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.25 Tampilan Halaman Laporan Stok](figures/laporan-stok.png)
 
-**Keterangan:** Halaman laporan pergerakan stok yang menampilkan: (1) Kartu summary - stok awal periode, total masuk, total keluar, stok akhir; (2) Bar chart perbandingan masuk vs keluar per jenis LPG; (3) Tabel detail transaksi stok dengan kolom tanggal, tipe (masuk/keluar), jenis LPG, jumlah, sumber/tujuan, dan catatan. Filter berdasarkan periode dan jenis LPG. Mendukung export ke Excel untuk rekonsiliasi.
+**Keterangan:** Halaman laporan pergerakan stok yang menyajikan analisis inventory secara menyeluruh. Kartu summary menampilkan stok awal periode, total penerimaan masuk, total penyaluran keluar, dan saldo stok akhir. Bar chart memvisualisasikan perbandingan volume masuk versus keluar per jenis LPG untuk identifikasi pola perdagangan. Tabel detail transaksi mencatat setiap pergerakan stok dengan informasi tanggal, tipe transaksi (masuk atau keluar), jenis LPG, jumlah tabung, sumber atau tujuan, dan catatan tambahan. Filter berdasarkan periode dan jenis LPG memudahkan analisis spesifik. Fitur export ke Excel tersedia untuk keperluan rekonsiliasi dan audit.
 
 ##### 26. Tampilan Halaman Log Riwayat
 
@@ -260,7 +260,7 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.27 Tampilan Halaman Laporan Pangkalan](figures/laporan-penjualan-pangkalan.png)
 
-**Keterangan:** Halaman laporan penjualan khusus untuk pangkalan yang menampilkan data penjualan ke konsumen akhir. Terdiri dari: (1) Kartu summary - total penjualan, jumlah transaksi, profit kotor; (2) Line chart trend penjualan harian; (3) Tabel riwayat penjualan dengan kolom tanggal, konsumen, jenis LPG, jumlah, harga jual, dan total. Filter berdasarkan periode. Mendukung export PDF dan Excel.
+**Keterangan:** Halaman laporan penjualan khusus untuk pangkalan yang menyajikan data penjualan kepada konsumen akhir. Kartu summary menampilkan total penjualan, jumlah transaksi yang berhasil, dan estimasi profit kotor. Line chart memvisualisasikan trend penjualan harian untuk monitoring performa. Tabel riwayat penjualan mencatat setiap transaksi dengan informasi tanggal, nama konsumen, jenis LPG, jumlah tabung, harga jual per unit, dan total nilai transaksi. Filter berdasarkan periode tersedia untuk analisis jangka waktu tertentu. Laporan mendukung export ke format PDF dan Excel untuk dokumentasi.
 
 ---
 
@@ -276,7 +276,7 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.29 Tampilan Halaman Pengaturan Tampilan](figures/pengaturan-tampilan.png)
 
-**Keterangan:** Halaman pengaturan preferensi tampilan yang tersimpan per user. Opsi yang tersedia: (1) Tema - Light atau Dark mode; (2) Format tanggal - DD/MM/YYYY atau YYYY-MM-DD; (3) Bahasa - Indonesia atau English (jika tersedia); (4) Notifikasi - enable/disable notifikasi browser. Perubahan langsung ter-apply tanpa perlu reload halaman.
+**Keterangan:** Halaman pengaturan preferensi tampilan yang tersimpan secara individual per user. Opsi tema memungkinkan pemilihan antara Light mode atau Dark mode sesuai kenyamanan visual pengguna. Format tanggal dapat disesuaikan antara format Indonesia (DD/MM/YYYY) atau format internasional (YYYY-MM-DD). Pengaturan bahasa tersedia untuk memilih Bahasa Indonesia atau English jika tersedia. Notifikasi browser dapat diaktifkan atau dinonaktifkan sesuai kebutuhan. Setiap perubahan preferensi langsung ter-apply tanpa memerlukan reload halaman.
 
 ##### 30. Tampilan Halaman Pengaturan Aplikasi
 
@@ -448,7 +448,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Halaman Detail Pangkalan (tombol "Reset Password")  
 **Trigger:** Klik tombol "Reset Password"  
-**Keterangan:** Modal untuk mereset password akun login pangkalan oleh admin. Terdapat dua opsi: (1) Generate password acak otomatis; (2) Input password manual. Setelah reset, password baru ditampilkan di modal untuk dicatat dan diinformasikan ke PIC pangkalan. Password lama langsung tidak berlaku.
+**Keterangan:** Modal untuk mereset password akun login pangkalan oleh admin. Admin dapat memilih untuk generate password acak secara otomatis atau memasukkan password baru secara manual. Setelah reset berhasil, password baru akan ditampilkan di modal agar dapat dicatat dan diinformasikan kepada PIC pangkalan. Password lama langsung tidak berlaku dan akan digantikan oleh password baru.
 
 ---
 
@@ -460,7 +460,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Halaman Stok LPG (tombol "Kelola Produk")  
 **Trigger:** Klik tombol "Kelola Produk"  
-**Keterangan:** Modal untuk mengelola master data produk LPG. Menampilkan daftar produk dengan info: gambar, nama (3kg, 12kg, dll), harga modal, harga jual, level minimum stok, dan status aktif. Admin dapat: (1) Tambah produk baru dengan upload gambar; (2) Edit harga dan parameter; (3) Nonaktifkan produk yang tidak dijual. Perubahan harga langsung ter-apply ke pesanan baru.
+**Keterangan:** Modal untuk mengelola master data produk LPG yang menyajikan daftar lengkap produk dengan informasi gambar, nama produk, harga modal, harga jual, level minimum stok, dan status aktif. Admin dapat menambahkan produk baru lengkap dengan upload gambar, mengedit harga dan parameter existing, serta menonaktifkan produk yang tidak dijual lagi. Setiap perubahan harga langsung ter-apply untuk pesanan baru.
 
 ##### 15. Modal Catat Penerimaan
 
@@ -496,7 +496,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Halaman Perencanaan (tombol "Generate Otomatis")  
 **Trigger:** Klik tombol "Generate Otomatis"  
-**Keterangan:** Dialog konfirmasi sebelum menjalankan fitur auto-generate rencana distribusi. Sistem akan menghitung target optimal untuk setiap pangkalan berdasarkan: (1) Data penjualan 3 bulan terakhir; (2) Kapasitas alokasi bulanan pangkalan; (3) Trend permintaan. Setelah konfirmasi, rencana baru dibuat dan user dapat mereview sebelum menyimpan.
+**Keterangan:** Dialog konfirmasi sebelum menjalankan fitur auto-generate rencana distribusi. Sistem akan menghitung target optimal untuk setiap pangkalan berdasarkan data penjualan selama tiga bulan terakhir, kapasitas alokasi bulanan masing-masing pangkalan, dan trend permintaan yang terdeteksi. Setelah user mengkonfirmasi, sistem akan membuat rencana distribusi baru yang dapat direview dan disesuaikan sebelum disimpan secara final.
 
 ---
 
@@ -516,7 +516,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Halaman Profil Akun (tombol "Ubah Password")  
 **Trigger:** Klik tombol "Ubah Password"  
-**Keterangan:** Form untuk mengubah password akun yang sedang login. Memerlukan: (1) Input password lama untuk verifikasi; (2) Password baru minimal 8 karakter; (3) Konfirmasi password baru harus sama. Jika password lama salah, sistem menampilkan error. Setelah berhasil, user tetap login dan password baru langsung berlaku.
+**Keterangan:** Form untuk mengubah password akun yang sedang login dengan mekanisme keamanan berlapis. Pengguna harus memasukkan password lama untuk verifikasi identitas, kemudian menginput password baru dengan minimal 8 karakter, dan mengkonfirmasi password baru tersebut. Jika password lama yang dimasukkan salah, sistem akan menampilkan pesan error. Setelah berhasil, user tetap login dengan password baru yang langsung berlaku.
 
 ##### 21. Modal Crop Avatar
 
@@ -524,7 +524,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Halaman Profil atau Edit Profil (setelah memilih file foto)  
 **Trigger:** Otomatis muncul setelah user memilih file gambar dari device  
-**Keterangan:** Tool untuk memotong dan menyesuaikan foto profil sebelum diupload. Fitur: zoom in/out, rotate, drag untuk reposisi, dan preview hasil crop dalam format circular. Setelah konfirmasi, gambar diproses dan diupload ke server, foto profil langsung terupdate di seluruh sistem.
+**Keterangan:** Tool untuk memotong dan menyesuaikan foto profil sebelum diupload dengan fitur interaktif lengkap. Pengguna dapat melakukan zoom in dan out, merotasi gambar, serta drag untuk reposisi area foto yang diinginkan. Preview hasil crop ditampilkan dalam format circular sesuai standar foto profil. Setelah konfirmasi, gambar diproses dan diupload ke server, kemudian foto profil langsung terupdate di seluruh sistem.
 
 ##### 22. Modal Ubah Password (Pangkalan)
 
@@ -544,7 +544,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Global (sebelum aksi berbahaya seperti hapus data)  
 **Trigger:** Otomatis muncul sebelum aksi yang tidak dapat dibatalkan  
-**Keterangan:** Dialog konfirmasi standar yang digunakan di berbagai tempat untuk memastikan user benar-benar ingin melakukan aksi berbahaya. Menampilkan: judul aksi, icon warning, pesan penjelasan dampak aksi, tombol "Batal" dan "Konfirmasi" dengan warna merah. Digunakan untuk: hapus data, batalkan pesanan, logout, dll.
+**Keterangan:** Dialog konfirmasi standar yang digunakan di berbagai tempat dalam sistem untuk memastikan user benar-benar ingin melakukan aksi berbahaya. Dialog menampilkan judul aksi, icon warning, pesan yang menjelaskan dampak dari aksi tersebut, serta tombol "Batal" dan "Konfirmasi" dengan warna merah sebagai penanda aksi destruktif. Modal ini digunakan untuk berbagai keperluan seperti menghapus data, membatalkan pesanan, dan logout dari sistem.
 
 ##### 24. Modal Notifikasi
 
@@ -552,7 +552,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 **Lokasi:** Header aplikasi (icon lonceng di pojok kanan)  
 **Trigger:** Klik icon lonceng notifikasi  
-**Keterangan:** Panel dropdown yang menampilkan daftar notifikasi terbaru. Setiap notifikasi menunjukkan: icon tipe (pesanan/stok/pembayaran), judul singkat, waktu relatif (5 menit lalu, dll), dan status baca. Klik notifikasi untuk navigate ke halaman terkait. Terdapat badge angka di icon untuk indikasi notifikasi belum dibaca dan link "Lihat Semua" ke halaman Notifikasi.
+**Keterangan:** Panel dropdown yang menampilkan daftar notifikasi terbaru untuk pengguna. Setiap notifikasi menunjukkan icon berdasarkan tipe notifikasi (pesanan, stok, atau pembayaran), judul singkat, waktu relatif seperti "5 menit lalu", dan status sudah dibaca atau belum. Mengklik notifikasi akan mengarahkan pengguna ke halaman terkait. Badge angka di icon lonceng menunjukkan jumlah notifikasi yang belum dibaca, dan link "Lihat Semua" tersedia untuk menuju halaman Notifikasi lengkap.
 
 ---
 

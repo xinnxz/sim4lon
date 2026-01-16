@@ -125,6 +125,9 @@ const PRODUCT_PATTERNS: { pattern: RegExp; keyword: string }[] = [
     // Bright Gas (220g can)
     { pattern: /bright\s*gas/i, keyword: 'bright_gas' },
     { pattern: /kaleng/i, keyword: 'bright_gas' },
+    { pattern: /220\s*(?:gr|gram)/i, keyword: 'bright_gas' },  // "220 gram", "220gr"
+    { pattern: /dua\s*ratus\s*(?:dua\s*puluh)?\s*(?:gr|gram)/i, keyword: 'bright_gas' },  // "dua ratus dua puluh gram"
+    { pattern: /0[,.]?22\s*(?:kg|kilo)/i, keyword: 'bright_gas' },  // "0.22 kg"
 ]
 
 // ===========================================

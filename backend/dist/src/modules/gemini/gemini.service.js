@@ -208,7 +208,15 @@ PENTING:
             this.logger.log(`Found quantity from pattern match: ${quantity}`);
         }
         let matchedProduct = null;
-        if (/3\s*(?:kg|kilo)/.test(normalized) || /tiga\s*(?:kg|kilo)/.test(normalized)) {
+        if (/220\s*(?:gr|gram)/i.test(normalized) || /bright\s*gas\s*(?:can|kaleng)/i.test(normalized) || /kaleng/i.test(normalized)) {
+            matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 0.22) < 0.1) || null;
+            this.logger.log(`Matched product: 220gr / Bright Gas Can`);
+        }
+        else if (/5[,.]?5\s*(?:kg|kilo)/i.test(normalized) || /lima\s*(?:setengah|koma\s*lima)\s*(?:kg|kilo)/i.test(normalized) || /bright\s*gas(?!\s*can)/i.test(normalized)) {
+            matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 5.5) < 0.5) || null;
+            this.logger.log(`Matched product: 5.5kg / Bright Gas`);
+        }
+        else if (/3\s*(?:kg|kilo)/.test(normalized) || /tiga\s*(?:kg|kilo)/.test(normalized) || /subsidi/i.test(normalized)) {
             matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 3) < 0.5) || null;
             this.logger.log(`Matched product: 3kg`);
         }
@@ -221,8 +229,8 @@ PENTING:
             this.logger.log(`Matched product: 50kg`);
         }
         else {
-            matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 3) < 0.5) || products[0] || null;
-            this.logger.log(`Defaulting to 3kg product`);
+            this.logger.log(`No product pattern matched in text: "${normalized}"`);
+            matchedProduct = null;
         }
         let matchedPangkalan = null;
         const pangkalanPatterns = [

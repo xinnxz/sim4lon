@@ -310,19 +310,34 @@ PENTING:
         // ============================================
         let matchedProduct: ProductData | null = null;
 
-        if (/3\s*(?:kg|kilo)/.test(normalized) || /tiga\s*(?:kg|kilo)/.test(normalized)) {
+        // 220gr / Bright Gas Can patterns
+        if (/220\s*(?:gr|gram)/i.test(normalized) || /bright\s*gas\s*(?:can|kaleng)/i.test(normalized) || /kaleng/i.test(normalized)) {
+            matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 0.22) < 0.1) || null;
+            this.logger.log(`Matched product: 220gr / Bright Gas Can`);
+        }
+        // 5.5kg / Bright Gas patterns  
+        else if (/5[,.]?5\s*(?:kg|kilo)/i.test(normalized) || /lima\s*(?:setengah|koma\s*lima)\s*(?:kg|kilo)/i.test(normalized) || /bright\s*gas(?!\s*can)/i.test(normalized)) {
+            matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 5.5) < 0.5) || null;
+            this.logger.log(`Matched product: 5.5kg / Bright Gas`);
+        }
+        // 3kg patterns
+        else if (/3\s*(?:kg|kilo)/.test(normalized) || /tiga\s*(?:kg|kilo)/.test(normalized) || /subsidi/i.test(normalized)) {
             matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 3) < 0.5) || null;
             this.logger.log(`Matched product: 3kg`);
-        } else if (/12\s*(?:kg|kilo)/.test(normalized) || /dua\s*belas/.test(normalized)) {
+        }
+        // 12kg patterns
+        else if (/12\s*(?:kg|kilo)/.test(normalized) || /dua\s*belas/.test(normalized)) {
             matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 12) < 0.5) || null;
             this.logger.log(`Matched product: 12kg`);
-        } else if (/50\s*(?:kg|kilo)/.test(normalized) || /lima\s*puluh\s*(?:kg|kilo)/.test(normalized)) {
+        }
+        // 50kg patterns
+        else if (/50\s*(?:kg|kilo)/.test(normalized) || /lima\s*puluh\s*(?:kg|kilo)/.test(normalized)) {
             matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 50) < 0.5) || null;
             this.logger.log(`Matched product: 50kg`);
         } else {
-            // Default to 3kg (most common)
-            matchedProduct = products.find(p => Math.abs(Number(p.size_kg) - 3) < 0.5) || products[0] || null;
-            this.logger.log(`Defaulting to 3kg product`);
+            // NO DEFAULT - Return error if product not detected (prevent wrong detection)
+            this.logger.log(`No product pattern matched in text: "${normalized}"`);
+            matchedProduct = null;
         }
 
         // ============================================

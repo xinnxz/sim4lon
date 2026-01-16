@@ -70,10 +70,16 @@ export default function PenerimaanPage() {
     const [isSaving, setIsSaving] = useState(false)
 
     // Form state - Multi-item support
+    // Use local date format (not UTC) to prevent timezone issues
+    const getLocalDateString = () => {
+        const now = new Date()
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    }
+
     const [headerData, setHeaderData] = useState({
         no_so: '',           // Sales Order - dari Agen (shared)
         no_lo: '',           // Loading Order - dari SPBE (shared)
-        tanggal: new Date().toISOString().split('T')[0],
+        tanggal: getLocalDateString(),
     })
 
     // Dynamic items array
@@ -207,7 +213,7 @@ export default function PenerimaanPage() {
         setHeaderData({
             no_so: '',
             no_lo: '',
-            tanggal: new Date().toISOString().split('T')[0],
+            tanggal: getLocalDateString(),
         })
         setItems([{ id: crypto.randomUUID(), lpg_product_id: '', qty_pcs: '' }])
     }
