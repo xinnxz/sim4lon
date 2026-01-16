@@ -1427,7 +1427,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">Semua Tipe</SelectItem>
-                                        <SelectItem value="g220">Bright Gas Can</SelectItem>
+                                        <SelectItem value="gr220">Bright Gas Can</SelectItem>
                                         <SelectItem value="kg3">LPG 3 kg</SelectItem>
                                         <SelectItem value="kg5">LPG 5.5 kg</SelectItem>
                                         <SelectItem value="kg12">LPG 12 kg</SelectItem>
