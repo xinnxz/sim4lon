@@ -42,7 +42,7 @@ const getPersonalizedMessage = (profile: UserProfile) => {
                 message: 'Dashboard lengkap sudah siap! Waktunya kita gaweee!',
                 emoji: '👑',
                 color: 'from-purple-500 to-indigo-600',
-                tip: 'Cek Alert DSS untuk rekomendasi strategis hari ini!'
+                tip: 'Silakan Cek DSS Pak utk insight hari ini!'
             }
 
         case 'OPERATOR':
