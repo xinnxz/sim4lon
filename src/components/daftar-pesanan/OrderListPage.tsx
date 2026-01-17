@@ -584,7 +584,18 @@ export default function OrderListPage() {
                             {order.pangkalans?.name || '-'}
                           </TableCell>
                           <TableCell className="text-sm">
-                            {getItemsSummary(order)}
+                            <div className="flex items-center gap-2">
+                              {order.order_items && order.order_items[0] && LPG_IMAGES[order.order_items[0].label] && (
+                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                                  <img
+                                    src={LPG_IMAGES[order.order_items[0].label]}
+                                    alt={order.order_items[0].label}
+                                    className="w-6 h-6 object-contain"
+                                  />
+                                </div>
+                              )}
+                              <span>{getItemsSummary(order)}</span>
+                            </div>
                           </TableCell>
                           <TableCell className="text-right text-sm">
                             {getTotalQty(order)} unit
