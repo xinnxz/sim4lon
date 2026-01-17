@@ -1451,9 +1451,11 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 </div>
                             ) : movements.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-                                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                                        <SafeIcon name="Inbox" className="h-8 w-8 text-slate-300" />
-                                    </div>
+                                    <img
+                                        src="/images/illustrations/empty-stock.png"
+                                        alt="Belum ada riwayat"
+                                        className="w-40 h-40 object-contain opacity-70 mb-4"
+                                    />
                                     <p className="font-medium">Belum ada riwayat</p>
                                     <p className="text-sm text-slate-400">Pergerakan stok akan muncul di sini</p>
                                 </div>

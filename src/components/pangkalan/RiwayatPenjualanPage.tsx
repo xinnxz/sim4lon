@@ -405,7 +405,11 @@ export default function RiwayatPenjualanPage() {
                 <CardContent className="p-0">
                     {orders.length === 0 ? (
                         <div className="text-center py-16">
-                            <SafeIcon name="Inbox" className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                            <img
+                                src="/images/illustrations/empty-sales.png"
+                                alt="Belum ada penjualan"
+                                className="w-48 h-48 object-contain mx-auto mb-4 opacity-80"
+                            />
                             <h3 className="text-lg font-semibold text-slate-700 mb-2">Belum Ada Penjualan</h3>
                             <p className="text-slate-400 mb-6">Mulai catat penjualan LPG Anda</p>
                             <Button

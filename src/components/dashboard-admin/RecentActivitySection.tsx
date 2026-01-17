@@ -121,7 +121,11 @@ export default function RecentActivitySection() {
           ) : activities.length === 0 ? (
             // Empty state
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <SafeIcon name="Inbox" className="h-10 w-10 mb-2 opacity-50" />
+              <img
+                src="/images/illustrations/empty-notification.png"
+                alt="Belum ada aktivitas"
+                className="w-24 h-24 object-contain opacity-70 mb-2"
+              />
               <p className="text-sm">Belum ada aktivitas</p>
             </div>
           ) : (

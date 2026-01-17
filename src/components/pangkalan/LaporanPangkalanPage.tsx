@@ -1113,7 +1113,11 @@ export default function LaporanPangkalanPage() {
                                 {dailySummaryArray.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="text-center py-12">
-                                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                            <img
+                                                src="/images/illustrations/empty-report.png"
+                                                alt="Belum ada data"
+                                                className="w-32 h-32 object-contain mx-auto mb-3 opacity-70"
+                                            />
                                             <p className="text-slate-400">Belum ada data untuk periode ini</p>
                                         </td>
                                     </tr>
@@ -1193,7 +1197,11 @@ export default function LaporanPangkalanPage() {
                                 {recentSales.length === 0 ? (
                                     <tr>
                                         <td colSpan={10} className="text-center py-12">
-                                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                            <img
+                                                src="/images/illustrations/empty-sales.png"
+                                                alt="Belum ada transaksi"
+                                                className="w-32 h-32 object-contain mx-auto mb-3 opacity-70"
+                                            />
                                             <p className="text-slate-400">Belum ada transaksi</p>
                                         </td>
                                     </tr>

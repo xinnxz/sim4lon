@@ -122,11 +122,11 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 **Keterangan:** Halaman yang menampilkan informasi lengkap satu pesanan secara komprehensif. Bagian header memuat kode pesanan, status dalam bentuk badge berwarna, dan tanggal pemesanan. Data pangkalan ditampilkan meliputi nama, alamat, dan Person in Charge. Tabel item pesanan menyajikan detail produk dengan harga satuan dan subtotal. Ringkasan pembayaran menunjukkan total tagihan, jumlah DP yang sudah dibayar, dan sisa yang harus dilunasi. Informasi driver yang ditugaskan untuk pengiriman serta timeline perubahan status dengan timestamp membantu tracking pesanan. Tersedia aksi untuk mengubah status pesanan, menugaskan driver, membatalkan pesanan, atau mencetak nota. Layout dirancang responsive dengan action buttons yang sticky di tampilan mobile.
 
-##### 8. Tampilan Halaman Catat Pesanan
+##### 8. Tampilan Halaman Catat Pembayaran
 
-![Gambar 3.8 Tampilan Halaman Catat Pesanan](figures/catat-pesanan.png)
+![Gambar 3.8 Tampilan Halaman Catat Pembayaran](figures/catat-pembayaran.png)
 
-**Keterangan:** Halaman khusus untuk mencatat pesanan yang diterima via telepon atau offline. Berbeda dengan Buat Pesanan, halaman ini lebih ringkas untuk input cepat oleh operator.
+**Keterangan:** Halaman untuk mencatat pembayaran pesanan dengan pilihan metode Cash atau Cashless (transfer bank). Form pembayaran menampilkan nominal sesuai total pesanan, area upload bukti transfer, dan field catatan opsional. Panel ringkasan di sisi kanan menampilkan detail pesanan meliputi kode, pangkalan tujuan, produk yang dipesan, dan total pembayaran. Status pesanan otomatis berubah ke "Diproses" setelah pembayaran dikonfirmasi.
 
 ##### 9. Tampilan Halaman Nota/Invoice
 
@@ -330,6 +330,24 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ---
 
+#### C.12 Aset Visual & Ilustrasi
+
+Untuk meningkatkan pengalaman pengguna dan memberikan kesan profesional enterprise-grade, aplikasi SIM4LON dilengkapi dengan aset visual berupa gambar produk LPG dan ilustrasi untuk berbagai state aplikasi.
+
+##### 37. Gambar Produk LPG
+
+![Gambar 3.37 Variasi Produk LPG](figures/produk-lpg-variasi.png)
+
+**Keterangan:** Gambar produk LPG yang digunakan di seluruh aplikasi untuk memberikan identitas visual yang jelas pada setiap jenis produk. Setiap gambar menampilkan tabung gas dengan warna yang sesuai standar industri: hijau untuk LPG 3 kg (subsidi), pink untuk LPG 5.5 kg, biru untuk LPG 12 kg, merah untuk LPG 50 kg, dan oranye untuk Bright Gas 220gr. Gambar ditampilkan pada kartu stok, form pesanan, modal konfirmasi, dan laporan untuk memudahkan identifikasi produk secara visual tanpa harus membaca label teks.
+
+##### 38. Ilustrasi Empty State
+
+![Gambar 3.38 Ilustrasi Empty State](figures/ilustrasi-empty-state.png)
+
+**Keterangan:** Koleksi ilustrasi yang ditampilkan saat halaman atau komponen tidak memiliki data (*empty state*). Ilustrasi meliputi: tabung kosong untuk stok yang belum ada, dokumen dengan tanda centang untuk pesanan selesai, truk pengiriman untuk status pengiriman, grafik analitik untuk dashboard, dan notifikasi untuk halaman aktivitas. Penggunaan ilustrasi empty state mengikuti best practice UX modern untuk memberikan feedback visual yang ramah kepada pengguna, menggantikan pesan teks sederhana yang kurang informatif. Setiap ilustrasi menggunakan palet warna konsisten dengan tema aplikasi SIM4LON.
+
+---
+
 ### D. Tampilan Modal (Dialog)
 
 Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi yang lebih fokus. Berikut adalah daftar modal yang dikelompokkan berdasarkan fungsi:
@@ -340,7 +358,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 1. Modal Voice Widget
 
-![Gambar 3.37 Modal Voice Widget](figures/modal-voice-widget.png)
+![Gambar 3.39 Modal Voice Widget](figures/modal-voice-widget.png)
 
 **Lokasi:** Global (tombol mic biru floating di pojok kanan bawah)  
 **Trigger:** Klik tombol microphone  
@@ -348,14 +366,14 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 2. Modal Konfirmasi Voice Order
 
-![Gambar 3.38 Modal Konfirmasi Voice](figures/modal-konfirmasi-voice.png)
+![Gambar 3.40 Modal Konfirmasi Voice](figures/modal-konfirmasi-voice.png)
 
 **Lokasi:** Setelah voice input diproses  
 **Keterangan:** Menampilkan hasil parsing perintah suara untuk verifikasi pangkalan, item, dan jumlah sebelum konfirmasi.
 
 ##### 3. Modal Pilih Driver
 
-![Gambar 3.39 Modal Pilih Driver](figures/modal-pilih-driver.png)
+![Gambar 3.41 Modal Pilih Driver](figures/modal-pilih-driver.png)
 
 **Lokasi:** Halaman Detail Pesanan (tombol "Tugaskan Driver")  
 **Trigger:** Klik tombol "Tugaskan Driver" ketika pesanan siap kirim  
@@ -363,14 +381,14 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 4. Modal Batalkan Pesanan
 
-![Gambar 3.40 Modal Batalkan Pesanan](figures/modal-batalkan-pesanan.png)
+![Gambar 3.42 Modal Batalkan Pesanan](figures/modal-batalkan-pesanan.png)
 
 **Lokasi:** Halaman Detail Pesanan  
 **Keterangan:** Konfirmasi pembatalan pesanan dengan input alasan. Stok yang dialokasikan akan dikembalikan.
 
 ##### 5. Modal Ranking Pangkalan
 
-![Gambar 3.41 Modal Ranking Pangkalan](figures/modal-ranking-pangkalan.png)
+![Gambar 3.43 Modal Ranking Pangkalan](figures/modal-ranking-pangkalan.png)
 
 **Lokasi:** Dashboard Agen (chart ranking)  
 **Keterangan:** Ranking lengkap semua pangkalan berdasarkan performa dengan data yang dapat di-sort.
@@ -381,7 +399,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 6. Modal Tambah Driver
 
-![Gambar 3.42 Modal Tambah Driver](figures/modal-tambah-driver.png)
+![Gambar 3.44 Modal Tambah Driver](figures/modal-tambah-driver.png)
 
 **Lokasi:** Halaman Daftar Driver (tombol "+ Tambah Driver")  
 **Trigger:** Klik tombol "+ Tambah Driver"  
@@ -389,7 +407,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 7. Modal Hapus Driver
 
-![Gambar 3.43 Modal Hapus Driver](figures/modal-hapus-driver.png)
+![Gambar 3.45 Modal Hapus Driver](figures/modal-hapus-driver.png)
 
 **Lokasi:** Halaman Daftar Driver  
 **Keterangan:** Konfirmasi penghapusan driver dengan warning aksi permanen.
@@ -400,7 +418,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 8. Modal Tambah User
 
-![Gambar 3.44 Modal Tambah User](figures/modal-tambah-user.png)
+![Gambar 3.46 Modal Tambah User](figures/modal-tambah-user.png)
 
 **Lokasi:** Halaman Daftar Pengguna (tombol "+ Tambah User")  
 **Trigger:** Klik tombol "+ Tambah User"  
@@ -408,7 +426,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 9. Modal Edit User
 
-![Gambar 3.45 Modal Edit User](figures/modal-edit-user.png)
+![Gambar 3.47 Modal Edit User](figures/modal-edit-user.png)
 
 **Lokasi:** Halaman Daftar Pengguna (icon edit pada baris user)  
 **Trigger:** Klik icon pensil pada baris user yang ingin diedit  
@@ -416,7 +434,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 10. Modal Hapus User
 
-![Gambar 3.46 Modal Hapus User](figures/modal-hapus-user.png)
+![Gambar 3.48 Modal Hapus User](figures/modal-hapus-user.png)
 
 **Lokasi:** Halaman Daftar Pengguna (icon hapus pada baris user)  
 **Trigger:** Klik icon trash pada baris user yang ingin dihapus  
@@ -424,7 +442,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 11. Modal Nonaktifkan User
 
-![Gambar 3.47 Modal Nonaktifkan User](figures/modal-disable-user.png)
+![Gambar 3.49 Modal Nonaktifkan User](figures/modal-disable-user.png)
 
 **Lokasi:** Halaman Daftar Pengguna (toggle status pada baris user)  
 **Trigger:** Klik toggle switch status aktif/nonaktif  
@@ -436,7 +454,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 12. Modal Tambah Pangkalan
 
-![Gambar 3.48 Modal Tambah Pangkalan](figures/modal-tambah-pangkalan.png)
+![Gambar 3.50 Modal Tambah Pangkalan](figures/modal-tambah-pangkalan.png)
 
 **Lokasi:** Halaman Daftar Pangkalan (tombol "+ Tambah Pangkalan")  
 **Trigger:** Klik tombol "+ Tambah Pangkalan"  
@@ -444,7 +462,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 13. Modal Reset Password Pangkalan
 
-![Gambar 3.49 Modal Reset Password](figures/modal-reset-password.png)
+![Gambar 3.51 Modal Reset Password](figures/modal-reset-password.png)
 
 **Lokasi:** Halaman Detail Pangkalan (tombol "Reset Password")  
 **Trigger:** Klik tombol "Reset Password"  
@@ -456,7 +474,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 14. Modal Kelola Produk LPG
 
-![Gambar 3.50 Modal Kelola Produk](figures/modal-kelola-produk.png)
+![Gambar 3.52 Modal Kelola Produk](figures/modal-kelola-produk.png)
 
 **Lokasi:** Halaman Stok LPG (tombol "Kelola Produk")  
 **Trigger:** Klik tombol "Kelola Produk"  
@@ -464,7 +482,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 15. Modal Catat Penerimaan
 
-![Gambar 3.51 Modal Catat Penerimaan](figures/modal-catat-penerimaan.png)
+![Gambar 3.53 Modal Catat Penerimaan](figures/modal-catat-penerimaan.png)
 
 **Lokasi:** Halaman Penerimaan (tombol "+ Catat Penerimaan")  
 **Trigger:** Klik tombol "+ Catat Penerimaan"  
@@ -472,7 +490,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 16. Modal Penyaluran Fakultatif
 
-![Gambar 3.52 Modal Penyaluran](figures/modal-penyaluran.png)
+![Gambar 3.54 Modal Penyaluran](figures/modal-penyaluran.png)
 
 **Lokasi:** Halaman Penyaluran (tombol "Penyaluran Manual")  
 **Trigger:** Klik tombol "Penyaluran Manual"  
@@ -484,7 +502,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 17. Modal Edit Perencanaan
 
-![Gambar 3.53 Modal Edit Perencanaan](figures/modal-edit-perencanaan.png)
+![Gambar 3.55 Modal Edit Perencanaan](figures/modal-edit-perencanaan.png)
 
 **Lokasi:** Halaman Perencanaan (icon edit pada baris rencana)  
 **Trigger:** Klik icon pensil pada baris pangkalan yang ingin diedit rencananya  
@@ -492,7 +510,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 18. Modal Generate Otomatis
 
-![Gambar 3.54 Modal Generate Otomatis](figures/modal-generate-otomatis.png)
+![Gambar 3.56 Modal Generate Otomatis](figures/modal-generate-otomatis.png)
 
 **Lokasi:** Halaman Perencanaan (tombol "Generate Otomatis")  
 **Trigger:** Klik tombol "Generate Otomatis"  
@@ -504,7 +522,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 19. Modal Edit Profil
 
-![Gambar 3.55 Modal Edit Profil](figures/modal-edit-profil.png)
+![Gambar 3.57 Modal Edit Profil](figures/modal-edit-profil.png)
 
 **Lokasi:** Halaman Profil Akun (tombol "Edit Profil")  
 **Trigger:** Klik tombol "Edit Profil"  
@@ -512,7 +530,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 20. Modal Ubah Password (Admin)
 
-![Gambar 3.56 Modal Ubah Password Admin](figures/modal-ubah-password-admin.png)
+![Gambar 3.58 Modal Ubah Password Admin](figures/modal-ubah-password-admin.png)
 
 **Lokasi:** Halaman Profil Akun (tombol "Ubah Password")  
 **Trigger:** Klik tombol "Ubah Password"  
@@ -520,7 +538,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 21. Modal Crop Avatar
 
-![Gambar 3.57 Modal Crop Avatar](figures/modal-crop-avatar.png)
+![Gambar 3.59 Modal Crop Avatar](figures/modal-crop-avatar.png)
 
 **Lokasi:** Halaman Profil atau Edit Profil (setelah memilih file foto)  
 **Trigger:** Otomatis muncul setelah user memilih file gambar dari device  
@@ -528,7 +546,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 22. Modal Ubah Password (Pangkalan)
 
-![Gambar 3.58 Modal Ubah Password Pangkalan](figures/modal-ubah-password-pangkalan.png)
+![Gambar 3.60 Modal Ubah Password Pangkalan](figures/modal-ubah-password-pangkalan.png)
 
 **Lokasi:** Halaman Profil Pangkalan (tombol "Ubah Password")  
 **Trigger:** Klik tombol "Ubah Password"  
@@ -540,7 +558,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 23. Modal Konfirmasi Umum
 
-![Gambar 3.59 Modal Konfirmasi](figures/modal-konfirmasi.png)
+![Gambar 3.61 Modal Konfirmasi](figures/modal-konfirmasi.png)
 
 **Lokasi:** Global (sebelum aksi berbahaya seperti hapus data)  
 **Trigger:** Otomatis muncul sebelum aksi yang tidak dapat dibatalkan  
@@ -548,7 +566,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 24. Modal Notifikasi
 
-![Gambar 3.60 Modal Notifikasi](figures/modal-notifikasi.png)
+![Gambar 3.62 Modal Notifikasi](figures/modal-notifikasi.png)
 
 **Lokasi:** Header aplikasi (icon lonceng di pojok kanan)  
 **Trigger:** Klik icon lonceng notifikasi  
@@ -560,7 +578,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 25. Modal Pesan Stok
 
-![Gambar 3.61 Modal Pesan Stok](figures/modal-pesan-stok.png)
+![Gambar 3.63 Modal Pesan Stok](figures/modal-pesan-stok.png)
 
 **Lokasi:** Halaman Stok Pangkalan (tombol "Pesan Stok")  
 **Trigger:** Klik tombol "Pesan Stok"  
@@ -568,7 +586,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 26. Modal Terima Stok
 
-![Gambar 3.62 Modal Terima Stok](figures/modal-terima-stok.png)
+![Gambar 3.64 Modal Terima Stok](figures/modal-terima-stok.png)
 
 **Lokasi:** Halaman Stok Pangkalan (tombol "Terima" pada pengiriman masuk)  
 **Trigger:** Klik tombol "Terima" pada baris pengiriman yang statusnya "Dikirim"  
@@ -576,7 +594,7 @@ Selain halaman utama, sistem SIM4LON menggunakan komponen modal untuk interaksi 
 
 ##### 27. Modal Tambah Pengeluaran
 
-![Gambar 3.63 Modal Tambah Pengeluaran](figures/modal-tambah-pengeluaran.png)
+![Gambar 3.65 Modal Tambah Pengeluaran](figures/modal-tambah-pengeluaran.png)
 
 **Lokasi:** Halaman Pengeluaran Pangkalan (tombol "+ Catat Pengeluaran")  
 **Trigger:** Klik tombol "+ Catat Pengeluaran"  

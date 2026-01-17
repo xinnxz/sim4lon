@@ -605,7 +605,11 @@ export default function PangkalanDashboard() {
                     <CardContent className="pt-6">
                         {expenseSummary.byCategory.length === 0 ? (
                             <div className="text-center py-8">
-                                <SafeIcon name="Wallet" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                <img
+                                    src="/images/illustrations/empty-report.png"
+                                    alt="Belum ada pengeluaran"
+                                    className="w-32 h-32 object-contain mx-auto mb-3 opacity-70"
+                                />
                                 <p className="text-slate-400">Belum ada pengeluaran bulan ini</p>
                             </div>
                         ) : (
@@ -710,7 +714,11 @@ export default function PangkalanDashboard() {
                 <CardContent className="p-0">
                     {recentSales.length === 0 ? (
                         <div className="text-center py-12">
-                            <SafeIcon name="Inbox" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                            <img
+                                src="/images/illustrations/empty-sales.png"
+                                alt="Belum ada penjualan"
+                                className="w-40 h-40 object-contain mx-auto mb-3 opacity-70"
+                            />
                             <p className="text-slate-400">Belum ada penjualan hari ini</p>
                             <Button
                                 variant="outline"

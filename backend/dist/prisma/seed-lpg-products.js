@@ -77,7 +77,7 @@ async function seedLpgProducts() {
             data: product,
         });
         const status = result.is_active ? '🟢 AKTIF' : '⚪ NONAKTIF';
-        console.log(`✅ CREATE: "${result.name}" (${result.size_kg}kg) @ Rp ${result.selling_price?.toLocaleString('id-ID')} - ${status}`);
+        console.log(`✅ CREATE: "${result.name}" (${result.size_kg}kg) @ Rp ${Number(result.selling_price || 0).toLocaleString('id-ID')} - ${status}`);
         created++;
     }
     console.log('━'.repeat(60));
@@ -91,7 +91,7 @@ async function seedLpgProducts() {
     console.log('━'.repeat(60));
     all.forEach((p, i) => {
         const status = p.is_active ? '🟢' : '⚪';
-        console.log(`   ${i + 1}. ${status} ${p.name.padEnd(25)} | ${String(p.size_kg).padStart(5)} kg | Rp ${p.selling_price?.toLocaleString('id-ID')}`);
+        console.log(`   ${i + 1}. ${status} ${p.name.padEnd(25)} | ${String(p.size_kg).padStart(5)} kg | Rp ${Number(p.selling_price || 0).toLocaleString('id-ID')}`);
     });
     console.log('━'.repeat(60));
     console.log(`   Total: ${all.length} products\n`);

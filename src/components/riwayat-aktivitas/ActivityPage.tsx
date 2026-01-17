@@ -396,9 +396,11 @@ export default function ActivityPage() {
           ) : activities.length === 0 ? (
             // Empty State
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center mb-4">
-                <SafeIcon name="Inbox" className="h-12 w-12 text-primary/60" />
-              </div>
+              <img
+                src="/images/illustrations/empty-notification.png"
+                alt="Belum ada aktivitas"
+                className="w-48 h-48 object-contain opacity-80 mb-4"
+              />
               <h3 className="font-semibold text-xl mb-2">Belum Ada Aktivitas</h3>
               <p className="text-muted-foreground max-w-md">
                 Aktivitas sistem akan muncul di sini saat pesanan dibuat, pembayaran diterima, atau stok diperbarui.

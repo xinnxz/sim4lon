@@ -471,9 +471,22 @@ export default function OrderListPage() {
                     </a>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center gap-2 py-8">
-                    <SafeIcon name="Inbox" className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-muted-foreground">Tidak ada pesanan</p>
+                  <div className="flex flex-col items-center gap-4 py-12">
+                    <img
+                      src="/images/illustrations/empty-orders.png"
+                      alt="Tidak ada pesanan"
+                      className="w-40 h-40 object-contain opacity-80"
+                    />
+                    <div className="text-center">
+                      <h3 className="font-semibold text-foreground mb-1">Tidak ada pesanan</h3>
+                      <p className="text-sm text-muted-foreground">Belum ada pesanan yang sesuai dengan kriteria pencarian</p>
+                    </div>
+                    <a href="/buat-pesanan">
+                      <Button size="sm" className="gap-2">
+                        <SafeIcon name="Plus" className="h-4 w-4" />
+                        Buat Pesanan Baru
+                      </Button>
+                    </a>
                   </div>
                 )}
               </div>
@@ -577,10 +590,23 @@ export default function OrderListPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <SafeIcon name="Inbox" className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">Tidak ada pesanan yang ditemukan</p>
+                        <TableCell colSpan={8} className="text-center py-12">
+                          <div className="flex flex-col items-center gap-4">
+                            <img
+                              src="/images/illustrations/empty-orders.png"
+                              alt="Tidak ada pesanan"
+                              className="w-48 h-48 object-contain opacity-80"
+                            />
+                            <div className="text-center">
+                              <h3 className="font-semibold text-foreground mb-1">Tidak ada pesanan ditemukan</h3>
+                              <p className="text-sm text-muted-foreground">Coba ubah filter atau kata kunci pencarian</p>
+                            </div>
+                            <a href="/buat-pesanan">
+                              <Button size="sm" className="gap-2">
+                                <SafeIcon name="Plus" className="h-4 w-4" />
+                                Buat Pesanan Baru
+                              </Button>
+                            </a>
                           </div>
                         </TableCell>
                       </TableRow>

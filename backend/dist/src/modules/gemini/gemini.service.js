@@ -89,12 +89,13 @@ Ekstrak angka yang diasosiasikan dengan SETIAP produk:
 - "dua puluh" → 20
 Default 1 HANYA jika tidak ada angka.
 
-⚖️ UKURAN PRODUK (match ke database!):
-- "3 kilo" / "3kg" / "tiga kilo" / "melon" / "kecil" → cari produk 3kg
+⚖️ UKURAN PRODUK (match ke database!) - PENTING!:
+- "kaleng" / "can" / "bright gas can" / "220 gram" / "220gr" → cari produk 0.22kg / 220gr (Bright Gas Can)
+- "bright gas" / "5 kilo" / "5.5kg" / "lima kilo" → cari produk 5.5kg (Bright Gas tabung)
+- "3 kilo" / "3kg" / "tiga kilo" / "melon" / "kecil" / "subsidi" → cari produk 3kg
 - "12 kilo" / "12kg" / "dua belas kilo" → cari produk 12kg  
-- "50 kilo" / "50kg" / "besar" → cari produk 50kg
-- "5 kilo" / "5kg" → HANYA jika ada 5kg di database, jika tidak → ERROR!
-- "220 gram" → HANYA jika ada 220gr di database, jika tidak → ERROR!
+- "50 kilo" / "50kg" / "besar" / "industri" → cari produk 50kg
+- Jika ukuran TIDAK ADA di database → ERROR! Jangan fallback ke ukuran lain!
 
 🏪 PANGKALAN:
 Fuzzy match - cari kata kunci dari nama:
@@ -168,6 +169,33 @@ PENTING:
             }
             const parsed = JSON.parse(jsonMatch[0]);
             parsed.rawText = text;
+            const textLower = text.toLowerCase();
+            if (/kaleng|can|220\s*gr/.test(textLower)) {
+                const product220gr = products.find(p => Math.abs(Number(p.size_kg) - 0.22) < 0.1);
+                if (product220gr && parsed.items?.length > 0) {
+                    const oldProduct = parsed.items[0].productName;
+                    if (Number(products.find(p => p.id === parsed.items[0].productId)?.size_kg || 0) > 1) {
+                        this.logger.log(`[POST-PROCESS] Override: "${oldProduct}" → "${product220gr.name}" (detected 'kaleng' keyword)`);
+                        parsed.items[0].productId = product220gr.id;
+                        parsed.items[0].productName = product220gr.name;
+                        parsed.items[0].lpgType = 'gr220';
+                        parsed.items[0].price = Number(product220gr.selling_price) || 0;
+                    }
+                }
+            }
+            else if (/bright\s*gas(?!\s*can)/i.test(textLower) && !/kaleng|can/.test(textLower)) {
+                const product55kg = products.find(p => Math.abs(Number(p.size_kg) - 5.5) < 0.5);
+                if (product55kg && parsed.items?.length > 0) {
+                    const currentSize = Number(products.find(p => p.id === parsed.items[0].productId)?.size_kg || 0);
+                    if (currentSize === 3) {
+                        this.logger.log(`[POST-PROCESS] Override: "${parsed.items[0].productName}" → "${product55kg.name}" (detected 'bright gas' keyword)`);
+                        parsed.items[0].productId = product55kg.id;
+                        parsed.items[0].productName = product55kg.name;
+                        parsed.items[0].lpgType = 'kg5';
+                        parsed.items[0].price = Number(product55kg.selling_price) || 0;
+                    }
+                }
+            }
             this.logger.log(`Gemini parsed successfully: ${JSON.stringify(parsed)}`);
             return parsed;
         }
