@@ -38,7 +38,7 @@ export function toFrontendFormat(type: string): string {
  * DTO untuk terima stok dari agen
  */
 export class ReceiveStockDto {
-    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg, 220gr' })
     @Transform(({ value }) => toBackendFormat(value))
     lpg_type: LpgType;
 
@@ -59,7 +59,7 @@ export class ReceiveStockDto {
  * DTO untuk stock opname (adjustment)
  */
 export class AdjustStockDto {
-    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg, 220gr' })
     @Transform(({ value }) => toBackendFormat(value))
     lpg_type: LpgType;
 
@@ -76,7 +76,7 @@ export class AdjustStockDto {
  * DTO untuk update stock level alerts
  */
 export class UpdateStockLevelsDto {
-    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' })
+    @IsIn(ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg, 220gr' })
     @Transform(({ value }) => toBackendFormat(value))
     lpg_type: LpgType;
 

@@ -42,7 +42,7 @@ class ReceiveStockDto {
 }
 exports.ReceiveStockDto = ReceiveStockDto;
 __decorate([
-    (0, class_validator_1.IsIn)(exports.ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' }),
+    (0, class_validator_1.IsIn)(exports.ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg, 220gr' }),
     (0, class_transformer_1.Transform)(({ value }) => toBackendFormat(value)),
     __metadata("design:type", String)
 ], ReceiveStockDto.prototype, "lpg_type", void 0);
@@ -68,7 +68,7 @@ class AdjustStockDto {
 }
 exports.AdjustStockDto = AdjustStockDto;
 __decorate([
-    (0, class_validator_1.IsIn)(exports.ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' }),
+    (0, class_validator_1.IsIn)(exports.ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg, 220gr' }),
     (0, class_transformer_1.Transform)(({ value }) => toBackendFormat(value)),
     __metadata("design:type", String)
 ], AdjustStockDto.prototype, "lpg_type", void 0);
@@ -89,7 +89,7 @@ class UpdateStockLevelsDto {
 }
 exports.UpdateStockLevelsDto = UpdateStockLevelsDto;
 __decorate([
-    (0, class_validator_1.IsIn)(exports.ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg' }),
+    (0, class_validator_1.IsIn)(exports.ALL_LPG_TYPES, { message: 'lpg_type must be one of: 3kg, 5kg, 12kg, 50kg, 220gr' }),
     (0, class_transformer_1.Transform)(({ value }) => toBackendFormat(value)),
     __metadata("design:type", String)
 ], UpdateStockLevelsDto.prototype, "lpg_type", void 0);
