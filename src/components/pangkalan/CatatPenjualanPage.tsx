@@ -25,11 +25,11 @@ import { toast } from 'sonner'
 // IMPORTANT: value and dbType must match Prisma lpg_type enum exactly!
 // Database enum: kg3, kg5, kg12, kg50, gr220 (maps to "3kg", "5.5kg", "12kg", "50kg", "220gr")
 const LPG_DISPLAY = [
-    { value: 'kg3', dbType: 'kg3', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
-    { value: 'kg5', dbType: 'kg5', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
-    { value: 'kg12', dbType: 'kg12', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
-    { value: 'kg50', dbType: 'kg50', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
-    { value: 'gr220', dbType: 'gr220', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
+    { value: 'kg3', dbType: 'kg3', stockType: '3kg', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
+    { value: 'kg5', dbType: 'kg5', stockType: '5.5kg', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
+    { value: 'kg12', dbType: 'kg12', stockType: '12kg', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
+    { value: 'kg50', dbType: 'kg50', stockType: '50kg', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
+    { value: 'gr220', dbType: 'gr220', stockType: '220gr', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
 ]
 
 // LPG product images mapping (uses value/dbType as key)
@@ -93,9 +93,12 @@ export default function CatatPenjualanPage() {
         return priceFromDb ? priceFromDb.is_active : true // Default active if not in DB
     }
 
-    // Get current stock for LPG type
+    // Get current stock for LPG type (handles format mismatch between UI and API)
     const getStockForType = (type: string): number => {
-        const stock = stockLevels.find(s => s.lpg_type === type)
+        const displayItem = LPG_DISPLAY.find(l => l.value === type)
+        if (!displayItem) return 0
+        // API returns stock with lpg_type like "3kg", "5.5kg", "220gr" etc
+        const stock = stockLevels.find(s => s.lpg_type === displayItem.stockType)
         return stock?.qty ?? 0
     }
 
@@ -123,15 +126,16 @@ export default function CatatPenjualanPage() {
 
     const formatCurrency = (v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(v)
 
-    // Hold to increment/decrement
+    // Hold to increment/decrement (with stock limit)
     const startHold = useCallback((action: 'inc' | 'dec') => {
+        const maxStock = getStockForType(lpgType)
         holdTimeoutRef.current = setTimeout(() => {
             holdIntervalRef.current = setInterval(() => {
-                if (action === 'inc') setQty(prev => prev + 1)
+                if (action === 'inc') setQty(prev => Math.min(maxStock, prev + 1))
                 else setQty(prev => Math.max(1, prev - 1))
             }, 80)
         }, 300)
-    }, [])
+    }, [lpgType])
 
     const stopHold = useCallback(() => {
         if (holdTimeoutRef.current) clearTimeout(holdTimeoutRef.current)
@@ -271,10 +275,10 @@ export default function CatatPenjualanPage() {
                                                     <span className={`font-bold block ${lpgType === lpg.value ? 'text-white' : 'text-slate-900'}`}>{lpg.display}</span>
                                                     <span className={`text-xs ${lpgType === lpg.value ? 'text-white/80' : 'text-slate-500'}`}>{formatCurrency(getPrice(lpg.value))}</span>
                                                     <span className={`text-xs block ${getStockForType(lpg.value) === 0
-                                                            ? 'text-red-500 font-semibold'
-                                                            : getStockForType(lpg.value) < 10
-                                                                ? 'text-amber-500'
-                                                                : lpgType === lpg.value ? 'text-white/60' : 'text-slate-400'
+                                                        ? 'text-red-500 font-semibold'
+                                                        : getStockForType(lpg.value) < 10
+                                                            ? 'text-amber-500'
+                                                            : lpgType === lpg.value ? 'text-white/60' : 'text-slate-400'
                                                         }`}>
                                                         Stok: {getStockForType(lpg.value)}
                                                     </span>
@@ -308,7 +312,9 @@ export default function CatatPenjualanPage() {
                                         value={qty === 0 ? '' : qty.toString()}
                                         onChange={(e) => {
                                             const val = e.target.value.replace(/^0+/, '').replace(/\D/g, '')
-                                            setQty(val === '' ? 0 : parseInt(val))
+                                            const numVal = val === '' ? 0 : parseInt(val)
+                                            const maxStock = getStockForType(lpgType)
+                                            setQty(Math.min(maxStock, numVal))
                                         }}
                                         placeholder="0"
                                         className="h-14 sm:h-12 text-center font-bold text-xl flex-1 rounded-xl"
@@ -317,12 +323,16 @@ export default function CatatPenjualanPage() {
                                         type="button"
                                         variant="outline"
                                         className="h-14 w-14 sm:h-12 sm:w-12 text-xl sm:text-lg font-bold rounded-xl touch-target"
-                                        onClick={() => setQty(qty + 1)}
+                                        onClick={() => {
+                                            const maxStock = getStockForType(lpgType)
+                                            setQty(prev => Math.min(maxStock, prev + 1))
+                                        }}
                                         onMouseDown={() => startHold('inc')}
                                         onMouseUp={stopHold}
                                         onMouseLeave={stopHold}
                                         onTouchStart={() => startHold('inc')}
                                         onTouchEnd={stopHold}
+                                        disabled={qty >= getStockForType(lpgType)}
                                     >+</Button>
                                 </div>
                             </div>

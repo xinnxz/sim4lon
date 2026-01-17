@@ -102,8 +102,10 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
     paymentMethod: null,
     paidAmount: 0,
     delivery: {
-      status: apiOrder.drivers ? 'assigned' : 'not_scheduled',
-      statusLabel: apiOrder.drivers ? 'Sedang Dikirim' : 'Belum Dijadwalkan',
+      status: apiOrder.current_status === 'BATAL' ? 'cancelled'
+        : apiOrder.drivers ? 'assigned' : 'not_scheduled',
+      statusLabel: apiOrder.current_status === 'BATAL' ? 'Dibatalkan'
+        : apiOrder.drivers ? 'Sedang Dikirim' : 'Belum Dijadwalkan',
       driver: apiOrder.drivers?.name || null,
       driverPhone: apiOrder.drivers?.phone || null,
       estimatedDate: null,
