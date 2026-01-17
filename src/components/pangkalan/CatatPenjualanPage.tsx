@@ -22,14 +22,14 @@ import { consumerOrdersApi, consumersApi, lpgPricesApi, pangkalanStockApi, type 
 import { toast } from 'sonner'
 
 // Static LPG display options (colors, display names)
-// IMPORTANT: value and dbType must match Prisma lpg_type enum exactly!
-// Database enum: kg3, kg5, kg12, kg50, gr220 (maps to "3kg", "5.5kg", "12kg", "50kg", "220gr")
+// IMPORTANT: stockType must match API toFrontendFormat output
+// API returns: 3kg, 5kg, 12kg, 50kg, gr220 (not 5.5kg or 220gr!)
 const LPG_DISPLAY = [
     { value: 'kg3', dbType: 'kg3', stockType: '3kg', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
-    { value: 'kg5', dbType: 'kg5', stockType: '5.5kg', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
+    { value: 'kg5', dbType: 'kg5', stockType: '5kg', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
     { value: 'kg12', dbType: 'kg12', stockType: '12kg', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
     { value: 'kg50', dbType: 'kg50', stockType: '50kg', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
-    { value: 'gr220', dbType: 'gr220', stockType: '220gr', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
+    { value: 'gr220', dbType: 'gr220', stockType: 'gr220', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
 ]
 
 // LPG product images mapping (uses value/dbType as key)
