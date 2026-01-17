@@ -1,4 +1,8 @@
-
+/**
+ * @deprecated LEGACY MOCK DATA - Tidak digunakan di produksi
+ * File ini hanya untuk demo. PPN rate seharusnya diambil dari settings.
+ * Untuk implementasi real, gunakan useAppSettings hook.
+ */
 
 import { type OrderDetailModel, getOrderDetail } from "./order";
 

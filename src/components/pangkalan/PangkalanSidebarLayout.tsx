@@ -6,11 +6,14 @@
  * │      HEADER (full width, sticky)    │  ← Spans entire width
  * ├──────────┬──────────────────────────┤
  * │ SIDEBAR  │       CONTENT            │  ← Sidebar + Content in row
- * │          │                          │
+ * │          │       FOOTER             │  ← Footer inside content area
  * └──────────┴──────────────────────────┘
  * 
  * Header is inside SidebarProvider (for hamburger menu access)
  * but wrapped in a flex-col container to place it ABOVE the sidebar+content row.
+ * 
+ * Footer is now INSIDE this component to prevent hydration flash
+ * where footer shows before content is ready.
  */
 
 'use client'
@@ -23,6 +26,7 @@ import FloatingVoiceWidgetPangkalan from '@/components/pangkalan/FloatingVoiceWi
 import PangkalanMobileNav from '@/components/pangkalan/PangkalanMobileNav'
 import QueryProvider from '@/components/providers/QueryProvider'
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog'
+import AdminFooter from '@/components/common/AdminFooter'
 
 interface PangkalanSidebarLayoutProps {
     children: React.ReactNode
@@ -93,6 +97,8 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
                                         {children}
                                     </div>
                                 </main>
+                                {/* Footer - Now inside React component to prevent hydration flash */}
+                                <AdminFooter />
                             </SidebarInset>
                         </div>
                     </div>
@@ -107,3 +113,4 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
         </QueryProvider>
     )
 }
+

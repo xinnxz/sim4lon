@@ -233,7 +233,7 @@ ${itemLines}
 
 \`\`\`
 Subtotal : ${formatCurrency(data.subtotal)}
-PPN 12%  : ${formatCurrency(data.taxAmount)}
+PPN ${data.taxRate}%  : ${formatCurrency(data.taxAmount)}
 ─────────────────────
 TOTAL    : ${formatCurrency(data.total)}
 \`\`\`
