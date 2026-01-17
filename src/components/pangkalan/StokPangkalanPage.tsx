@@ -1206,8 +1206,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 tabung dari {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).length} tipe LPG aktif
                             </p>
                         </div>
-                        <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <SafeIcon name="Flame" className="h-10 w-10" />
+                        <div className="w-20 h-20 rounded-2xl overflow-hidden backdrop-blur-sm">
+                            <img src="/images/icons/stock-icon.png" alt="LPG Stock" className="w-full h-full object-contain" />
                         </div>
                     </div>
                 </CardContent>

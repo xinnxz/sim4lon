@@ -208,9 +208,7 @@ export default function WeeklyConsumptionChart({ refreshTrigger }: WeeklyConsump
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-primary/10 to-accent/10">
-              <img src="/images/icons/chart-icon.png" alt="Chart" className="w-full h-full object-contain" />
-            </div>
+            <img src="/images/icons/chart-icon.png" alt="Chart" className="w-10 h-10 rounded-xl overflow-hidden object-contain" />
             <div>
               <CardTitle className="text-lg font-bold">Tren Pemakaian Mingguan</CardTitle>
               <CardDescription className="text-xs">
