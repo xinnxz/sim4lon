@@ -386,19 +386,58 @@ export default function CatatPenjualanPage() {
                                 <Label className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
                                     Konsumen <Badge variant="secondary" className="text-xs ml-2">Opsional</Badge>
                                 </Label>
-                                <div className="relative">
-                                    <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <Input
-                                        value={consumerSearch}
-                                        onChange={(e) => { setConsumerSearch(e.target.value); setSelectedConsumer(null); setShowDropdown(true) }}
-                                        onFocus={() => setShowDropdown(true)}
-                                        placeholder="Cari konsumen..."
-                                        className="h-12 pl-10 rounded-xl"
-                                    />
-                                    {selectedConsumer && (
-                                        <SafeIcon name="CheckCircle2" className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                    )}
-                                </div>
+
+                                {/* Show selected consumer card OR search input */}
+                                {selectedConsumer ? (
+                                    <div className={`h-14 px-4 rounded-xl border-2 flex items-center gap-3 transition-all ${selectedConsumer.consumer_type === 'WARUNG'
+                                        ? 'border-orange-300 bg-orange-50'
+                                        : selectedConsumer.consumer_type === 'RUMAH_TANGGA'
+                                            ? 'border-green-300 bg-green-50'
+                                            : 'border-blue-300 bg-blue-50'
+                                        }`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${selectedConsumer.consumer_type === 'WARUNG'
+                                            ? 'bg-orange-200'
+                                            : selectedConsumer.consumer_type === 'RUMAH_TANGGA'
+                                                ? 'bg-green-200'
+                                                : 'bg-blue-200'
+                                            }`}>
+                                            <SafeIcon
+                                                name={selectedConsumer.consumer_type === 'WARUNG' ? 'Store' : selectedConsumer.consumer_type === 'RUMAH_TANGGA' ? 'Home' : 'User'}
+                                                className={`h-5 w-5 ${selectedConsumer.consumer_type === 'WARUNG'
+                                                    ? 'text-orange-700'
+                                                    : selectedConsumer.consumer_type === 'RUMAH_TANGGA'
+                                                        ? 'text-green-700'
+                                                        : 'text-blue-700'
+                                                    }`}
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-slate-900 truncate text-sm">{selectedConsumer.name}</p>
+                                            <p className="text-xs text-slate-500 truncate">
+                                                {selectedConsumer.consumer_type === 'WARUNG' ? 'Warung' : selectedConsumer.consumer_type === 'RUMAH_TANGGA' ? 'Rumah Tangga' : 'Konsumen'}
+                                                {selectedConsumer.nik ? ` • ${selectedConsumer.nik}` : ''}
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setSelectedConsumer(null); setConsumerSearch('') }}
+                                            className="p-1.5 rounded-full hover:bg-white/50 transition-colors"
+                                        >
+                                            <SafeIcon name="X" className="h-4 w-4 text-slate-500" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="relative">
+                                        <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <Input
+                                            value={consumerSearch}
+                                            onChange={(e) => { setConsumerSearch(e.target.value); setShowDropdown(true) }}
+                                            onFocus={() => setShowDropdown(true)}
+                                            placeholder="Cari konsumen..."
+                                            className="h-12 pl-10 rounded-xl"
+                                        />
+                                    </div>
+                                )}
                                 {showDropdown && (
                                     <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 max-h-48 overflow-y-auto">
                                         {isLoading ? (
@@ -414,25 +453,25 @@ export default function CatatPenjualanPage() {
                                                     className="w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
                                                 >
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${c.consumer_type === 'WARUNG'
-                                                            ? 'bg-orange-100'
-                                                            : c.consumer_type === 'RUMAH_TANGGA'
-                                                                ? 'bg-green-100'
-                                                                : 'bg-blue-100'
+                                                        ? 'bg-orange-100'
+                                                        : c.consumer_type === 'RUMAH_TANGGA'
+                                                            ? 'bg-green-100'
+                                                            : 'bg-blue-100'
                                                         }`}>
                                                         <SafeIcon
                                                             name={c.consumer_type === 'WARUNG' ? 'Store' : c.consumer_type === 'RUMAH_TANGGA' ? 'Home' : 'User'}
                                                             className={`h-5 w-5 ${c.consumer_type === 'WARUNG'
-                                                                    ? 'text-orange-600'
-                                                                    : c.consumer_type === 'RUMAH_TANGGA'
-                                                                        ? 'text-green-600'
-                                                                        : 'text-blue-600'
+                                                                ? 'text-orange-600'
+                                                                : c.consumer_type === 'RUMAH_TANGGA'
+                                                                    ? 'text-green-600'
+                                                                    : 'text-blue-600'
                                                                 }`}
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-semibold text-slate-900 truncate">{c.name}</p>
                                                         <p className="text-xs text-slate-500 truncate">
-                                                            {c.consumer_type === 'WARUNG' ? '🏪 Warung' : c.consumer_type === 'RUMAH_TANGGA' ? '🏠 Rumah Tangga' : ''}
+                                                            {c.consumer_type === 'WARUNG' ? 'Warung' : c.consumer_type === 'RUMAH_TANGGA' ? 'Rumah Tangga' : ''}
                                                             {c.nik ? ` • NIK: ${c.nik}` : c.phone ? ` • ${c.phone}` : ''}
                                                         </p>
                                                     </div>
