@@ -480,11 +480,18 @@ export default function PangkalanListPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <SafeIcon name="Search" className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">
+                      <TableCell colSpan={10} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <img
+                            src="/images/illustrations/empty-pangkalan.png"
+                            alt="Tidak ada pangkalan"
+                            className="w-32 h-32 object-contain opacity-80"
+                          />
+                          <p className="text-muted-foreground font-medium">
                             Tidak ada pangkalan ditemukan
+                          </p>
+                          <p className="text-sm text-muted-foreground/70">
+                            Coba ubah kata kunci pencarian atau filter
                           </p>
                         </div>
                       </TableCell>

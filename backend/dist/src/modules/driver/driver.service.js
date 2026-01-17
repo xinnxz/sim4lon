@@ -17,11 +17,18 @@ let DriverService = class DriverService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async findAll(page = 1, limit = 10, isActive) {
+    async findAll(page = 1, limit = 10, search, isActive) {
         const skip = (page - 1) * limit;
         const where = { deleted_at: null };
         if (isActive !== undefined) {
             where.is_active = isActive;
+        }
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+                { code: { contains: search, mode: 'insensitive' } },
+            ];
         }
         const [drivers, total, totalActive, totalInactive] = await Promise.all([
             this.prisma.drivers.findMany({

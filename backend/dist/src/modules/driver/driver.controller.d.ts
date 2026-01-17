@@ -3,32 +3,32 @@ import { CreateDriverDto, UpdateDriverDto } from './dto';
 export declare class DriverController {
     private readonly driverService;
     constructor(driverService: DriverService);
-    findAll(page?: string, limit?: string, isActive?: string): Promise<{
+    findAll(page?: string, limit?: string, search?: string, isActive?: string): Promise<{
         data: {
             is_busy: boolean;
             active_order: {
-                current_status: import("@prisma/client").$Enums.status_pesanan;
                 id: string;
                 code: string;
+                current_status: import("@prisma/client").$Enums.status_pesanan;
             };
             orders: {
-                current_status: import("@prisma/client").$Enums.status_pesanan;
                 id: string;
                 code: string;
+                current_status: import("@prisma/client").$Enums.status_pesanan;
             }[];
             _count: {
                 orders: number;
             };
             id: string;
             code: string;
-            note: string | null;
-            created_at: Date;
-            updated_at: Date;
             name: string;
             phone: string | null;
-            is_active: boolean;
-            deleted_at: Date | null;
             vehicle_id: string | null;
+            note: string | null;
+            is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
         }[];
         meta: {
             total: number;
@@ -47,38 +47,38 @@ export declare class DriverController {
     } & {
         id: string;
         code: string;
-        note: string | null;
-        created_at: Date;
-        updated_at: Date;
         name: string;
         phone: string | null;
-        is_active: boolean;
-        deleted_at: Date | null;
         vehicle_id: string | null;
+        note: string | null;
+        is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     create(dto: CreateDriverDto): Promise<{
         id: string;
         code: string;
-        note: string | null;
-        created_at: Date;
-        updated_at: Date;
         name: string;
         phone: string | null;
-        is_active: boolean;
-        deleted_at: Date | null;
         vehicle_id: string | null;
+        note: string | null;
+        is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     update(id: string, dto: UpdateDriverDto): Promise<{
         id: string;
         code: string;
-        note: string | null;
-        created_at: Date;
-        updated_at: Date;
         name: string;
         phone: string | null;
-        is_active: boolean;
-        deleted_at: Date | null;
         vehicle_id: string | null;
+        note: string | null;
+        is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     remove(id: string): Promise<{
         message: string;

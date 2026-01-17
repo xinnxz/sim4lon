@@ -473,10 +473,17 @@ export default function DriverListPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <SafeIcon name="Users" className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">Tidak ada supir ditemukan</p>
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <img
+                            src="/images/illustrations/delivery-truck.png"
+                            alt="Tidak ada supir"
+                            className="w-32 h-32 object-contain opacity-80"
+                          />
+                          <p className="text-muted-foreground font-medium">Tidak ada supir ditemukan</p>
+                          <p className="text-sm text-muted-foreground/70">
+                            Coba ubah kata kunci pencarian atau filter
+                          </p>
                         </div>
                       </TableCell>
                     </TableRow>

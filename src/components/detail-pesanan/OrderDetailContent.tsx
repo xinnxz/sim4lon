@@ -346,8 +346,15 @@ export default function OrderDetailContent() {
   if (!order) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
-        <SafeIcon name="AlertCircle" className="h-16 w-16 text-destructive" />
+        <img
+          src="/images/illustrations/error-illustration.png"
+          alt="Pesanan tidak ditemukan"
+          className="w-40 h-40 object-contain opacity-80"
+        />
         <h2 className="text-xl font-semibold">Pesanan Tidak Ditemukan</h2>
+        <p className="text-muted-foreground text-center text-sm max-w-md">
+          Pesanan yang Anda cari tidak tersedia atau mungkin sudah dihapus.
+        </p>
         <Button onClick={() => window.location.href = '/daftar-pesanan'}>
           <SafeIcon name="ArrowLeft" className="mr-2 h-4 w-4" />
           Kembali ke Daftar

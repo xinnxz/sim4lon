@@ -551,10 +551,28 @@ export default function UserListPage() {
                     })
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <SafeIcon name="Users" className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">Tidak ada pengguna ditemukan</p>
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-4">
+                          <img
+                            src="/images/illustrations/empty-users.png"
+                            alt="Tidak ada pengguna"
+                            className="w-40 h-40 object-contain opacity-90"
+                          />
+                          <div className="space-y-1.5">
+                            <p className="text-lg font-semibold text-muted-foreground">Tidak ada pengguna ditemukan</p>
+                            <p className="text-sm text-muted-foreground/70">
+                              Coba ubah kata kunci pencarian atau filter
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setSearchTerm(''); setRoleFilter('all'); }}
+                            className="mt-2"
+                          >
+                            <SafeIcon name="RefreshCw" className="w-4 h-4 mr-2" />
+                            Reset Filter
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

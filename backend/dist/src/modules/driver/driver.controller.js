@@ -22,8 +22,8 @@ let DriverController = class DriverController {
     constructor(driverService) {
         this.driverService = driverService;
     }
-    findAll(page, limit, isActive) {
-        return this.driverService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, isActive !== undefined ? isActive === 'true' : undefined);
+    findAll(page, limit, search, isActive) {
+        return this.driverService.findAll(page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, search || undefined, isActive !== undefined ? isActive === 'true' : undefined);
     }
     findOne(id) {
         return this.driverService.findOne(id);
@@ -43,9 +43,10 @@ __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
-    __param(2, (0, common_1.Query)('is_active')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('is_active')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], DriverController.prototype, "findAll", null);
 __decorate([

@@ -953,7 +953,11 @@ export default function PerencanaanPage() {
                         <CardContent className="p-4">
                             {!rekapData || rekapData.data.length === 0 ? (
                                 <div className="text-center py-12 text-muted-foreground">
-                                    <SafeIcon name="AlertCircle" className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                    <img
+                                        src="/images/illustrations/dss-analytics.png"
+                                        alt="Tidak ada data perencanaan"
+                                        className="w-32 h-32 object-contain mx-auto mb-4 opacity-80"
+                                    />
                                     <p className="text-lg font-medium">Tidak ada data</p>
                                     <p className="text-sm">Gunakan "Generate Otomatis" untuk membuat rencana awal</p>
                                 </div>

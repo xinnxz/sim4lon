@@ -246,21 +246,28 @@ export default function FloatingVoiceWidget() {
 
                         {/* Error */}
                         {status === 'error' && (
-                            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
-                                {parseResult?.validation && !parseResult.validation.isValid ? (
-                                    <div className="space-y-2">
-                                        {parseResult.validation.issues.map((issue, i) => (
-                                            <div key={i}>
-                                                <p className="text-sm text-red-600 dark:text-red-400">{issue.message}</p>
-                                                {issue.suggestion && (
-                                                    <p className="text-xs text-zinc-500 mt-1">💡 {issue.suggestion}</p>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-red-600 dark:text-red-400">{error}</p>
-                                )}
+                            <div className="py-4 text-center space-y-4">
+                                <img
+                                    src="/images/illustrations/voice-ai.png"
+                                    alt="Voice AI"
+                                    className="w-24 h-24 object-contain mx-auto opacity-70"
+                                />
+                                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
+                                    {parseResult?.validation && !parseResult.validation.isValid ? (
+                                        <div className="space-y-2">
+                                            {parseResult.validation.issues.map((issue, i) => (
+                                                <div key={i}>
+                                                    <p className="text-sm text-red-600 dark:text-red-400">{issue.message}</p>
+                                                    {issue.suggestion && (
+                                                        <p className="text-xs text-zinc-500 mt-1">💡 {issue.suggestion}</p>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-red-600 dark:text-red-400">{error}</p>
+                                    )}
+                                </div>
                             </div>
                         )}
 

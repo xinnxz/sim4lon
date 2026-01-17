@@ -12,11 +12,13 @@ export class DriverController {
     findAll(
         @Query('page') page?: string,
         @Query('limit') limit?: string,
+        @Query('search') search?: string,
         @Query('is_active') isActive?: string,
     ) {
         return this.driverService.findAll(
             page ? parseInt(page, 10) : 1,
             limit ? parseInt(limit, 10) : 10,
+            search || undefined,
             isActive !== undefined ? isActive === 'true' : undefined,
         );
     }

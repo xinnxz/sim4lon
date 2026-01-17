@@ -6,12 +6,20 @@ import { CreateDriverDto, UpdateDriverDto } from './dto';
 export class DriverService {
     constructor(private prisma: PrismaService) { }
 
-    async findAll(page = 1, limit = 10, isActive?: boolean) {
+    async findAll(page = 1, limit = 10, search?: string, isActive?: boolean) {
         const skip = (page - 1) * limit;
 
         const where: any = { deleted_at: null };
         if (isActive !== undefined) {
             where.is_active = isActive;
+        }
+        // Add search filter for name or phone
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+                { code: { contains: search, mode: 'insensitive' } },
+            ];
         }
 
         // dapatkan data, total, total aktif, total tidak aktif

@@ -638,8 +638,16 @@ export default function PenerimaanPage() {
                                     </tr>
                                 ) : data?.data.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                                            Tidak ada data penerimaan untuk bulan ini
+                                        <td colSpan={6} className="text-center py-12">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <img
+                                                    src="/images/illustrations/warehouse-lpg.png"
+                                                    alt="Tidak ada data"
+                                                    className="w-32 h-32 object-contain opacity-80"
+                                                />
+                                                <p className="text-muted-foreground font-medium">Tidak ada data penerimaan</p>
+                                                <p className="text-sm text-muted-foreground/70">Belum ada penerimaan untuk bulan ini</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
