@@ -24,6 +24,40 @@ const LPG_NAMES: Record<string, string> = {
     '5kg': '5.5 kg',
     '12kg': '12 kg',
     '50kg': '50 kg',
+    'kg3': '3 kg',
+    'kg5': '5.5 kg',
+    'kg12': '12 kg',
+    'kg50': '50 kg',
+    'gr220': 'Bright Gas 220gr',
+    '220gr': 'Bright Gas 220gr',
+}
+
+// LPG type colors
+const LPG_COLORS: Record<string, string> = {
+    '3kg': '#22C55E',
+    'kg3': '#22C55E',
+    '5kg': '#ff82c5',
+    'kg5': '#ff82c5',
+    '12kg': '#3B82F6',
+    'kg12': '#3B82F6',
+    '50kg': '#ef0e0e',
+    'kg50': '#ef0e0e',
+    'gr220': '#FFA500',
+    '220gr': '#FFA500',
+}
+
+// LPG product images
+const LPG_IMAGES: Record<string, string> = {
+    'gr220': '/images/products/bright-gas-220gr.png',
+    '220gr': '/images/products/bright-gas-220gr.png',
+    '3kg': '/images/products/lpg-3kg.png',
+    'kg3': '/images/products/lpg-3kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    'kg5': '/images/products/lpg-5kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    'kg12': '/images/products/lpg-12kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+    'kg50': '/images/products/lpg-50kg.png',
 }
 
 export default function RiwayatPenjualanPage() {
@@ -442,9 +476,22 @@ export default function RiwayatPenjualanPage() {
                                         {/* Mobile Layout */}
                                         <div className="lg:hidden">
                                             <div className="flex items-start gap-3">
-                                                {/* Icon */}
-                                                <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                                                    <SafeIcon name="Flame" className="h-5 w-5 text-blue-600" />
+                                                {/* Icon - Product Image */}
+                                                <div
+                                                    className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center overflow-hidden"
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}20, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}10)`
+                                                    }}
+                                                >
+                                                    {LPG_IMAGES[order.lpg_type] ? (
+                                                        <img
+                                                            src={LPG_IMAGES[order.lpg_type]}
+                                                            alt={LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                            className="w-8 h-8 object-contain"
+                                                        />
+                                                    ) : (
+                                                        <SafeIcon name="Cylinder" className="h-5 w-5" style={{ color: LPG_COLORS[order.lpg_type] || '#3B82F6' }} />
+                                                    )}
                                                 </div>
 
                                                 {/* Info */}

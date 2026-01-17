@@ -178,52 +178,46 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
         </div>
       )}
 
-      {/* Product Stock Cards Grid - READ ONLY */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+      {/* Product Stock Cards Grid - Clean 4-Column Layout */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product, index) => {
           const minStock = product.category === 'SUBSIDI' ? 100 : 50
           const status = getStatusFromStock(product.stock.current, minStock)
           const displayPrice = product.selling_price || product.prices?.find(p => p.is_default)?.price || product.prices?.[0]?.price || 0
+          const colorHex = getColorHex(product.color)
 
           return (
             <div
               key={product.id}
               className="animate-fadeInUp"
-              style={{ animationDelay: `${0.1 + index * 0.05}s` }}
+              style={{ animationDelay: `${0.05 + index * 0.03}s` }}
             >
               <Card
-                className="overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                style={{
-                  background: `linear-gradient(135deg, ${getColorHex(product.color)}08 0%, transparent 50%)`,
-                }}
+                className="group h-full flex flex-col overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-card"
               >
                 {/* Color accent bar at top */}
                 <div
-                  className="h-1.5 w-full"
-                  style={{ background: `linear-gradient(90deg, ${getColorHex(product.color)}, ${getColorHex(product.color)}80)` }}
+                  className="h-1 w-full shrink-0"
+                  style={{ background: `linear-gradient(90deg, ${colorHex}, ${colorHex}60)` }}
                 />
-                <CardHeader className="pb-2 pt-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg font-bold truncate">{product.name}</CardTitle>
-                      <div className="text-muted-foreground text-sm font-medium">
-                        {product.size_kg} kg
-                      </div>
-                    </div>
+
+                {/* Main Content */}
+                <CardContent className="flex-1 flex flex-col p-4">
+                  {/* Product Image - LARGE */}
+                  <div className="flex justify-center py-2">
                     <div
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl overflow-hidden"
+                      className="w-28 h-28 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105"
                       style={{
-                        background: `linear-gradient(135deg, ${getColorHex(product.color)}30, ${getColorHex(product.color)}10)`,
-                        boxShadow: `0 4px 12px -2px ${getColorHex(product.color)}40`,
+                        background: `linear-gradient(145deg, ${colorHex}12, ${colorHex}05)`,
                       }}
                     >
                       {product.image_url ? (
                         <img
                           src={product.image_url}
                           alt={product.name}
-                          className="h-10 w-10 object-contain"
+                          className="w-24 h-24 object-contain"
                           onError={(e) => {
-                            // Fallback to icon if image fails to load
                             e.currentTarget.style.display = 'none';
                             e.currentTarget.nextElementSibling?.classList.remove('hidden');
                           }}
@@ -231,48 +225,54 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
                       ) : null}
                       <SafeIcon
                         name="Cylinder"
-                        className={`h-6 w-6 ${product.image_url ? 'hidden' : ''}`}
-                        style={{ color: getColorHex(product.color) }}
+                        className={`w-14 h-14 ${product.image_url ? 'hidden' : ''}`}
+                        style={{ color: colorHex }}
                       />
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Current Stock - Large Display with gradient background */}
-                  <div
-                    className="text-center py-4 rounded-xl"
-                    style={{ background: `linear-gradient(135deg, ${getColorHex(product.color)}08, transparent)` }}
-                  >
-                    <span
-                      className={`text-5xl font-bold ${product.stock.current < 0 ? 'text-destructive' : ''}`}
-                      style={{ color: product.stock.current >= 0 ? getColorHex(product.color) : undefined }}
-                    >
-                      <AnimatedNumber value={product.stock.current} delay={500 + index * 100} />
-                    </span>
-                    <span className="text-lg text-muted-foreground ml-2">unit</span>
+
+                  {/* Product Name & Size */}
+                  <div className="text-center mb-3">
+                    <h3 className="font-semibold text-sm text-foreground leading-snug line-clamp-2 min-h-[2.5rem]">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{product.size_kg} kg</p>
                   </div>
 
-                  {/* Price & Category */}
-                  <div className="flex justify-between items-center">
+                  {/* Stock Count */}
+                  <div className="text-center mb-3">
+                    <span
+                      className={`text-3xl font-bold ${product.stock.current < 0 ? 'text-destructive' : ''}`}
+                      style={{ color: product.stock.current >= 0 ? colorHex : undefined }}
+                    >
+                      <AnimatedNumber value={product.stock.current} delay={300 + index * 50} />
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-1">unit</span>
+                  </div>
+
+                  {/* Category & Price Row */}
+                  <div className="flex justify-between items-center gap-2 mb-2">
                     <Badge
                       variant="outline"
-                      className={`px-3 py-1 font-medium ${product.category === 'SUBSIDI'
-                        ? 'bg-primary/10 text-primary border-primary/30 dark:bg-primary/20'
-                        : 'bg-accent/10 text-accent border-accent/30 dark:bg-accent/20'
+                      className={`text-[10px] px-1.5 py-0.5 font-medium ${product.category === 'SUBSIDI'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400'
+                        : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
                         }`}
                     >
                       {getCategoryLabel(product.category)}
                     </Badge>
                     {displayPrice > 0 && (
-                      <span className="font-bold text-lg">{formatPrice(Number(displayPrice))}</span>
+                      <span className="font-semibold text-sm text-foreground">
+                        {formatPrice(Number(displayPrice))}
+                      </span>
                     )}
                   </div>
 
-                  {/* Status Badge & Info - READ ONLY */}
-                  <div className="flex justify-between items-center pt-2 border-t">
+                  {/* Status Footer - Push to bottom */}
+                  <div className="flex justify-between items-center pt-2 mt-auto border-t border-border/40">
                     {getStatusBadge(status)}
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <SafeIcon name="Lock" className="h-3 w-3" />
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
+                      <SafeIcon name="Lock" className="h-2.5 w-2.5" />
                       <span>Read-only</span>
                     </div>
                   </div>

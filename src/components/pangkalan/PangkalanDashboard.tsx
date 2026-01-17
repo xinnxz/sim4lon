@@ -49,6 +49,20 @@ const lpgTypeConfig: Record<string, { name: string; color: string }> = {
     'kg50': { name: '50 kg', color: '#ef0e0eff' },
 }
 
+// LPG product images mapping
+const LPG_IMAGES: Record<string, string> = {
+    'gr220': '/images/products/bright-gas-220gr.png',
+    '220gr': '/images/products/bright-gas-220gr.png',
+    '3kg': '/images/products/lpg-3kg.png',
+    'kg3': '/images/products/lpg-3kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    'kg5': '/images/products/lpg-5kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    'kg12': '/images/products/lpg-12kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+    'kg50': '/images/products/lpg-50kg.png',
+}
+
 // Custom tooltip component
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -735,8 +749,21 @@ export default function PangkalanDashboard() {
                             {recentSales.map((sale, index) => (
                                 <div key={sale.id} className={`flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                                            <SafeIcon name="Flame" className="h-5 w-5 text-blue-600" />
+                                        <div
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${lpgTypeConfig[sale.lpg_type]?.color || '#3B82F6'}20, ${lpgTypeConfig[sale.lpg_type]?.color || '#3B82F6'}10)`
+                                            }}
+                                        >
+                                            {LPG_IMAGES[sale.lpg_type] ? (
+                                                <img
+                                                    src={LPG_IMAGES[sale.lpg_type]}
+                                                    alt={lpgTypeConfig[sale.lpg_type]?.name || sale.lpg_type}
+                                                    className="w-8 h-8 object-contain"
+                                                />
+                                            ) : (
+                                                <SafeIcon name="Cylinder" className="h-5 w-5" style={{ color: lpgTypeConfig[sale.lpg_type]?.color || '#3B82F6' }} />
+                                            )}
                                         </div>
                                         <div>
                                             <p className="font-semibold text-slate-900">
