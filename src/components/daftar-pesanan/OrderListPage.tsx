@@ -64,6 +64,33 @@ const statusColors: Record<OrderStatus, string> = {
   BATAL: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
+/**
+ * LPG product images mapping (support all format variations)
+ */
+const LPG_IMAGES: Record<string, string> = {
+  // 220gr / Bright Gas
+  'gr220': '/images/products/bright-gas-220gr.png',
+  '220gr': '/images/products/bright-gas-220gr.png',
+  'bright_gas_220gr': '/images/products/bright-gas-220gr.png',
+  'Bright Gas 220gr': '/images/products/bright-gas-220gr.png',
+  // 3kg
+  'kg3': '/images/products/lpg-3kg.png',
+  '3kg': '/images/products/lpg-3kg.png',
+  'LPG 3 kg': '/images/products/lpg-3kg.png',
+  // 5.5kg
+  'kg5': '/images/products/lpg-5kg.png',
+  '5kg': '/images/products/lpg-5kg.png',
+  'LPG 5.5 kg': '/images/products/lpg-5kg.png',
+  // 12kg
+  'kg12': '/images/products/lpg-12kg.png',
+  '12kg': '/images/products/lpg-12kg.png',
+  'LPG 12 kg': '/images/products/lpg-12kg.png',
+  // 50kg
+  'kg50': '/images/products/lpg-50kg.png',
+  '50kg': '/images/products/lpg-50kg.png',
+  'LPG 50 kg': '/images/products/lpg-50kg.png',
+}
+
 export default function OrderListPage() {
   // Data state
   const [orders, setOrders] = useState<Order[]>([])
