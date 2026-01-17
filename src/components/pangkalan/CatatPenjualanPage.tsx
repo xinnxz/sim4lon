@@ -413,13 +413,27 @@ export default function CatatPenjualanPage() {
                                                     onClick={() => { setSelectedConsumer(c); setConsumerSearch(c.name); setShowDropdown(false) }}
                                                     className="w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
                                                 >
-                                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                                        <SafeIcon name="User" className="h-5 w-5 text-blue-600" />
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${c.consumer_type === 'WARUNG'
+                                                            ? 'bg-orange-100'
+                                                            : c.consumer_type === 'RUMAH_TANGGA'
+                                                                ? 'bg-green-100'
+                                                                : 'bg-blue-100'
+                                                        }`}>
+                                                        <SafeIcon
+                                                            name={c.consumer_type === 'WARUNG' ? 'Store' : c.consumer_type === 'RUMAH_TANGGA' ? 'Home' : 'User'}
+                                                            className={`h-5 w-5 ${c.consumer_type === 'WARUNG'
+                                                                    ? 'text-orange-600'
+                                                                    : c.consumer_type === 'RUMAH_TANGGA'
+                                                                        ? 'text-green-600'
+                                                                        : 'text-blue-600'
+                                                                }`}
+                                                        />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-semibold text-slate-900 truncate">{c.name}</p>
                                                         <p className="text-xs text-slate-500 truncate">
-                                                            {c.nik ? `NIK: ${c.nik}` : c.phone || 'Konsumen terdaftar'}
+                                                            {c.consumer_type === 'WARUNG' ? '🏪 Warung' : c.consumer_type === 'RUMAH_TANGGA' ? '🏠 Rumah Tangga' : ''}
+                                                            {c.nik ? ` • NIK: ${c.nik}` : c.phone ? ` • ${c.phone}` : ''}
                                                         </p>
                                                     </div>
                                                 </button>
