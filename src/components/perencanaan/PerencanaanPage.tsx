@@ -520,46 +520,99 @@ export default function PerencanaanPage() {
             {/* Page Header */}
             <PageHeader
                 title="Perencanaan"
-                subtitle="Kelola perencanaan distribusi LPG bulanan ke pangkalan"
+                subtitle="Kelola perencanaan distribusi LPG 3KG bulanan ke pangkalan"
             />
 
-            {/* Tabs */}
+            {/* Tabs - Left aligned with LPG indicator */}
             <Tabs value={activeTab} onValueChange={handleTabChange}>
-                <TabsList className="glass-card p-1 mb-4">
-                    <TabsTrigger value="rekapitulasi" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-                        <SafeIcon name="Table" className="w-4 h-4 mr-2" />
-                        Rekapitulasi
-                    </TabsTrigger>
-                    <TabsTrigger value="form" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-                        <SafeIcon name="Edit" className="w-4 h-4 mr-2" />
-                        Input Form
-                    </TabsTrigger>
-                </TabsList>
-
-                {/* LPG Type Sub-Tabs */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {lpgTypeOptions.map(opt => (
-                        <Button
-                            key={opt.value}
-                            variant={selectedLpgType === opt.value ? 'default' : 'outline'}
-                            size="sm"
-                            className={selectedLpgType === opt.value
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0'
-                                : 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}
-                            onClick={() => setSelectedLpgType(opt.value)}
-                        >
-                            {opt.label}
-                            <span className="ml-1 text-xs opacity-70">({opt.description})</span>
-                        </Button>
-                    ))}
+                {/* Header: LPG image on left, Tabs on right */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                    {/* LPG 3kg indicator */}
+                    <div className="flex items-center gap-3">
+                        <img
+                            src="/images/products/lpg-3kg.png"
+                            alt="LPG 3kg"
+                            className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                        />
+                    </div>
+                    {/* Tabs - full width on mobile */}
+                    <TabsList className="glass-card p-1 w-full sm:w-auto">
+                        <TabsTrigger value="rekapitulasi" className="flex-1 sm:flex-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
+                            <SafeIcon name="Table" className="w-4 h-4 mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Rekapitulasi</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="form" className="flex-1 sm:flex-none data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
+                            <SafeIcon name="Edit" className="w-4 h-4 mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Input Form</span>
+                        </TabsTrigger>
+                    </TabsList>
                 </div>
 
-                {/* Filter Bar */}
-                <Card className="glass-card mb-6">
+                {/* Filter Section - Clean mobile layout like Pertamina */}
+                <div className="sm:hidden space-y-4 mb-6">
+                    {/* Mobile: Simple stacked filters without card */}
+                    <div className="space-y-3">
+                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                            <SelectTrigger className="w-full bg-white border-gray-200 h-12">
+                                <SelectValue placeholder="Bulan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {monthOptions.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={kondisi} onValueChange={setKondisi}>
+                            <SelectTrigger className="w-full bg-white border-gray-200 h-12">
+                                <SelectValue placeholder="Kondisi" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Semua</SelectItem>
+                                <SelectItem value="NORMAL">Normal</SelectItem>
+                                <SelectItem value="FAKULTATIF">Fakultatif</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={tipePembayaran} onValueChange={setTipePembayaran}>
+                            <SelectTrigger className="w-full bg-white border-gray-200 h-12">
+                                <SelectValue placeholder="Tipe Pembayaran" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Semua</SelectItem>
+                                <SelectItem value="CASHLESS">Cashless</SelectItem>
+                                <SelectItem value="CASH">Cash</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                    <SafeIcon name="Download" className="w-4 h-4 mr-2" />
+                                    Download Sebagai
+                                    <SafeIcon name="ChevronDown" className="w-4 h-4 ml-2" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="center" className="w-56">
+                                <DropdownMenuItem onClick={handleDownloadPDF}>
+                                    <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
+                                    Download PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleDownloadExcel}>
+                                    <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+                                    Download Excel
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+
+                {/* Desktop: Original filter card layout */}
+                <Card className="glass-card mb-6 hidden sm:block">
                     <CardContent className="p-4">
                         <div className="flex flex-col gap-4">
-                            {/* Filters - Stack vertically on mobile */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {/* Filters */}
+                            <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1.5">
                                     <span className="text-xs font-medium text-muted-foreground">Bulan</span>
                                     <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -603,12 +656,11 @@ export default function PerencanaanPage() {
                                 </div>
                             </div>
 
-                            {/* Action Buttons - Responsive grid */}
-                            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2">
-                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading} className="w-full sm:w-auto">
-                                    <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                                    <span className="hidden sm:inline">Refresh</span>
-                                    <span className="sm:hidden">Muat Ulang</span>
+                            {/* Action Buttons */}
+                            <div className="flex flex-row gap-2">
+                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading}>
+                                    <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                                    Refresh
                                 </Button>
 
                                 <AlertDialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
@@ -617,21 +669,19 @@ export default function PerencanaanPage() {
                                             variant="default"
                                             size="sm"
                                             disabled={isGenerating}
-                                            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                                            className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                                         >
-                                            <SafeIcon name="Wand2" className={`w-4 h-4 mr-1 ${isGenerating ? 'animate-spin' : ''}`} />
-                                            <span className="hidden sm:inline">{isGenerating ? 'Generating...' : 'Generate Otomatis'}</span>
-                                            <span className="sm:hidden">{isGenerating ? '...' : 'Generate'}</span>
+                                            <SafeIcon name="Wand2" className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+                                            {isGenerating ? 'Generating...' : 'Generate Otomatis'}
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="mx-4 max-w-[calc(100vw-2rem)] sm:max-w-lg">
+                                    <AlertDialogContent className="max-w-lg">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Generate Perencanaan Otomatis</AlertDialogTitle>
                                             <AlertDialogDescription className="space-y-3">
                                                 <p>Generate perencanaan otomatis untuk bulan <strong>{selectedMonth}</strong>?</p>
                                                 <p>Ini akan membuat rencana harian berdasarkan alokasi bulanan setiap pangkalan.</p>
 
-                                                {/* Overwrite Checkbox */}
                                                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                                                     <input
                                                         type="checkbox"
@@ -663,8 +713,8 @@ export default function PerencanaanPage() {
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm" className="w-full sm:w-auto col-span-2 sm:col-span-1">
-                                            <SafeIcon name="Download" className="w-4 h-4 mr-1" />
+                                        <Button variant="outline" size="sm">
+                                            <SafeIcon name="Download" className="w-4 h-4 mr-2" />
                                             Download
                                             <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
                                         </Button>
@@ -685,72 +735,74 @@ export default function PerencanaanPage() {
                     </CardContent>
                 </Card>
 
+
+
                 {/* Rekapitulasi Tab */}
                 <TabsContent value="rekapitulasi">
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                    {/* Summary Cards - More compact on mobile */}
+                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-6">
                         <Card className="glass-card">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-xl bg-blue-500/10">
-                                        <SafeIcon name="Building2" className="w-5 h-5 text-blue-500" />
+                            <CardContent className="p-3 sm:p-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-blue-500/10">
+                                        <SafeIcon name="Building2" className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Total Pangkalan</p>
-                                        <p className="text-xl font-bold"><AnimatedNumber value={summaryStats.totalPangkalan} delay={100} /></p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground">Pangkalan</p>
+                                        <p className="text-lg sm:text-xl font-bold"><AnimatedNumber value={summaryStats.totalPangkalan} delay={100} /></p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                         <Card className="glass-card">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-xl bg-green-500/10">
-                                        <SafeIcon name="Target" className="w-5 h-5 text-green-500" />
+                            <CardContent className="p-3 sm:p-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-green-500/10">
+                                        <SafeIcon name="Target" className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Total Alokasi</p>
-                                        <p className="text-xl font-bold"><AnimatedNumber value={summaryStats.totalAlokasi} delay={200} /></p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground">Alokasi</p>
+                                        <p className="text-lg sm:text-xl font-bold"><AnimatedNumber value={summaryStats.totalAlokasi} delay={200} /></p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                         <Card className="glass-card">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-xl bg-purple-500/10">
-                                        <SafeIcon name="TrendingUp" className="w-5 h-5 text-purple-500" />
+                            <CardContent className="p-3 sm:p-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-purple-500/10">
+                                        <SafeIcon name="TrendingUp" className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Realisasi</p>
-                                        <p className="text-xl font-bold text-purple-600"><AnimatedNumber value={summaryStats.totalRealisasi} delay={300} /></p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground">Realisasi</p>
+                                        <p className="text-lg sm:text-xl font-bold text-purple-600"><AnimatedNumber value={summaryStats.totalRealisasi} delay={300} /></p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                         <Card className="glass-card">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-xl bg-orange-500/10">
-                                        <SafeIcon name="AlertCircle" className="w-5 h-5 text-orange-500" />
+                            <CardContent className="p-3 sm:p-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-orange-500/10">
+                                        <SafeIcon name="AlertCircle" className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Sisa Alokasi</p>
-                                        <p className={`text-xl font-bold ${summaryStats.sisaAlokasi < 0 ? 'text-red-500' : 'text-orange-600'}`}>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground">Sisa</p>
+                                        <p className={`text-lg sm:text-xl font-bold ${summaryStats.sisaAlokasi < 0 ? 'text-red-500' : 'text-orange-600'}`}>
                                             <AnimatedNumber value={summaryStats.sisaAlokasi} delay={400} />
                                         </p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card className={`glass-card ${summaryStats.overAlokasi > 0 ? 'border-red-500/50 bg-red-500/5' : summaryStats.nearLimit > 0 ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-xl ${summaryStats.overAlokasi > 0 ? 'bg-red-500/20' : 'bg-yellow-500/10'}`}>
-                                        <SafeIcon name="AlertTriangle" className={`w-5 h-5 ${summaryStats.overAlokasi > 0 ? 'text-red-500' : 'text-yellow-500'}`} />
+                        <Card className={`glass-card col-span-2 lg:col-span-1 ${summaryStats.overAlokasi > 0 ? 'border-red-500/50 bg-red-500/5' : summaryStats.nearLimit > 0 ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
+                            <CardContent className="p-3 sm:p-4">
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl ${summaryStats.overAlokasi > 0 ? 'bg-red-500/20' : 'bg-yellow-500/10'}`}>
+                                        <SafeIcon name="AlertTriangle" className={`w-4 h-4 sm:w-5 sm:h-5 ${summaryStats.overAlokasi > 0 ? 'text-red-500' : 'text-yellow-500'}`} />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Status Alokasi</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground">Status</p>
                                         <div className="flex items-center gap-2">
                                             {summaryStats.overAlokasi > 0 ? (
                                                 <span className="text-sm font-bold text-red-500">⚠️ {summaryStats.overAlokasi} Over</span>
@@ -763,27 +815,35 @@ export default function PerencanaanPage() {
                             </CardContent>
                         </Card>
                     </div>
-                    <Card className="chart-card-premium">
-                        <CardHeader className="border-b border-border/50 pb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                <CardTitle className="text-lg font-semibold">Rekapitulasi Perencanaan</CardTitle>
-                                <Badge variant="outline" className="ml-auto">
+                    <Card className="chart-card-premium overflow-hidden">
+                        <CardHeader className="border-b border-border/50 pb-3 sm:pb-4 px-3 sm:px-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                    <CardTitle className="text-sm sm:text-lg font-semibold">Rekapitulasi</CardTitle>
+                                </div>
+                                <Badge variant="outline" className="w-fit text-xs">
                                     {rekapData?.data.length || 0} Pangkalan
                                 </Badge>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 overflow-hidden">
                             <div
                                 ref={tableScrollRef}
-                                className="overflow-x-auto scrollbar-thin-auto"
-                                style={{ scrollBehavior: 'auto' }}
+                                className="overflow-x-auto max-w-full"
+                                style={{ scrollBehavior: 'auto', WebkitOverflowScrolling: 'touch' }}
                             >
-                                <table className="w-full text-sm">
+                                <table className="w-full text-[10px] sm:text-xs lg:text-sm min-w-[600px] sm:min-w-[800px]">
                                     <thead className="bg-muted/50 sticky top-0 z-20">
                                         <tr>
-                                            <th className="sticky left-0 z-30 bg-muted px-3 py-3 text-left font-medium min-w-[120px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">ID Registrasi</th>
-                                            <th className="sticky left-[120px] z-30 bg-muted px-3 py-3 text-left font-medium min-w-[180px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Nama Pangkalan</th>
+                                            <th className="sticky left-0 z-30 bg-muted px-1.5 sm:px-3 py-1.5 sm:py-3 text-left font-medium min-w-[70px] sm:min-w-[120px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                                <span className="hidden sm:inline">ID Registrasi</span>
+                                                <span className="sm:hidden">ID</span>
+                                            </th>
+                                            <th className="sticky left-[70px] sm:left-[120px] z-30 bg-muted px-1.5 sm:px-3 py-1.5 sm:py-3 text-left font-medium min-w-[100px] sm:min-w-[180px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                                <span className="hidden sm:inline">Nama Pangkalan</span>
+                                                <span className="sm:hidden">Pangkalan</span>
+                                            </th>
                                             <th className="px-3 py-3 text-center font-medium min-w-[60px]">Status</th>
                                             <th className="px-3 py-3 text-center font-medium min-w-[70px]">Alokasi</th>
                                             {dayHeaders.map(dayInfo => {
@@ -822,14 +882,14 @@ export default function PerencanaanPage() {
                                         ) : (
                                             (computedRekapData?.data || []).map((row, idx) => (
                                                 <tr key={row.pangkalan_id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
-                                                    <td className="sticky left-0 z-10 bg-background px-3 py-2 font-mono text-xs shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">{row.id_registrasi}</td>
-                                                    <td className="sticky left-[120px] z-10 bg-background px-3 py-2 font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">{row.nama_pangkalan}</td>
-                                                    <td className="px-3 py-2 text-center">
-                                                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-xs">
+                                                    <td className="sticky left-0 z-10 bg-background px-1.5 sm:px-3 py-1.5 sm:py-2 font-mono shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[70px] sm:min-w-[120px]">{row.id_registrasi}</td>
+                                                    <td className="sticky left-[70px] sm:left-[120px] z-10 bg-background px-1.5 sm:px-3 py-1.5 sm:py-2 font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] min-w-[100px] sm:min-w-[180px] truncate max-w-[100px] sm:max-w-none">{row.nama_pangkalan}</td>
+                                                    <td className="px-1.5 sm:px-3 py-1.5 sm:py-2 text-center">
+                                                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-[9px] sm:text-xs">
                                                             {row.status}
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-3 py-2 text-center font-medium">{row.alokasi.toLocaleString()}</td>
+                                                    <td className="px-1.5 sm:px-3 py-1.5 sm:py-2 text-center font-medium">{row.alokasi.toLocaleString()}</td>
                                                     {dayHeaders.map(dayInfo => {
                                                         // Use edited value if available
                                                         const value = getEditedValue(row.pangkalan_id, dayInfo.day, row.daily[dayInfo.day] || 0)

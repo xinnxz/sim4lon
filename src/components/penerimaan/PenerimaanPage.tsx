@@ -532,21 +532,21 @@ export default function PenerimaanPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Page Header */}
             <PageHeader
                 title="Penerimaan"
                 subtitle="Catat dan kelola penerimaan stok LPG dari SPBE"
             />
 
-            {/* Filter Bar */}
-            <Card className="glass-card">
-                <CardContent className="p-4">
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Bulan:</span>
+            {/* Filter Bar - Mobile First */}
+            < Card className="glass-card mb-4" >
+                <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col gap-3">
+                        {/* Mobile: Stacked filters */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-center gap-2 sm:gap-3">
                             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="w-48">
+                                <SelectTrigger className="w-full lg:w-48 h-10 sm:h-9">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -555,57 +555,59 @@ export default function PenerimaanPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
+
+                            <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading} className="h-10 sm:h-9">
+                                <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+                                <span className="text-xs sm:text-sm">Refresh</span>
+                            </Button>
                         </div>
 
-                        <Button variant="outline" onClick={fetchData} disabled={isLoading}>
-                            <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                            Refresh
-                        </Button>
+                        {/* Action buttons */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button onClick={() => setShowAddModal(true)} className="h-10 gap-1 bg-gradient-to-r from-primary to-primary/80 text-xs sm:text-sm">
+                                <SafeIcon name="Plus" className="w-4 h-4" />
+                                <span className="hidden sm:inline">Tambah Penerimaan</span>
+                                <span className="sm:hidden">Tambah</span>
+                            </Button>
 
-                        <div className="flex-1" />
-
-                        <Button onClick={() => setShowAddModal(true)} className="gap-2 bg-gradient-to-r from-primary to-primary/80">
-                            <SafeIcon name="Plus" className="w-4 h-4" />
-                            Tambah Penerimaan
-                        </Button>
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline">
-                                    <SafeIcon name="Download" className="w-4 h-4 mr-2" />
-                                    Download
-                                    <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={handleDownloadPDF}>
-                                    <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
-                                    Download PDF
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleDownloadExcel}>
-                                    <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
-                                    Download Excel
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="h-10 text-xs sm:text-sm">
+                                        <SafeIcon name="Download" className="w-4 h-4 mr-1" />
+                                        Download
+                                        <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={handleDownloadPDF}>
+                                        <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
+                                        Download PDF
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleDownloadExcel}>
+                                        <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+                                        Download Excel
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </CardContent>
-            </Card>
+            </Card >
 
             {/* Data Table */}
-            <Card className="chart-card-premium">
-                <CardHeader className="border-b border-border/50 pb-4">
-                    <div className="flex items-center gap-3">
+            < Card className="chart-card-premium overflow-hidden" >
+                <CardHeader className="border-b border-border/50 pb-3 sm:pb-4 px-3 sm:px-6">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-                        <CardTitle className="text-lg font-semibold">Rekapitulasi Penerimaan</CardTitle>
-                        <Badge variant="outline" className="ml-auto">
+                        <CardTitle className="text-sm sm:text-lg font-semibold">Rekapitulasi Penerimaan</CardTitle>
+                        <Badge variant="outline" className="ml-auto text-xs">
                             {data?.meta.total || 0} Entries
                         </Badge>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                <CardContent className="p-0 overflow-hidden">
+                    <div className="overflow-x-auto max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <table className="w-full text-[10px] sm:text-xs lg:text-sm min-w-[500px] sm:min-w-[700px]">
                             <thead className="bg-muted/50">
                                 <tr>
                                     <th className="px-4 py-3 text-left font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('tanggal')}>
@@ -696,10 +698,10 @@ export default function PenerimaanPage() {
                         </div>
                     )}
                 </CardContent>
-            </Card>
+            </Card >
 
             {/* Add Modal - Multi-Item Support */}
-            <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+            < Dialog open={showAddModal} onOpenChange={setShowAddModal} >
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">

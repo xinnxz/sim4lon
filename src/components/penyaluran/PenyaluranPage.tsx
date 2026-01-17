@@ -374,159 +374,142 @@ export default function PenyaluranPage() {
             />
 
             <Tabs value={activeTab} onValueChange={handleTabChange}>
-                <TabsList className="glass-card p-1 mb-4">
-                    <TabsTrigger value="rekapitulasi" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
-                        <SafeIcon name="Table" className="w-4 h-4 mr-2" />
-                        Rekapitulasi
-                    </TabsTrigger>
-                    <TabsTrigger value="form" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
-                        <SafeIcon name="Edit" className="w-4 h-4 mr-2" />
-                        Input Form
-                    </TabsTrigger>
-                </TabsList>
+                {/* Tab Header - Left aligned with LPG image */}
+                <div className="flex items-center gap-2 mb-2">
+                    <img
+                        src={`/images/products/${selectedLpgType === 'gr220' ? 'bright-gas-220gr' : 'lpg-' + selectedLpgType.replace('kg', '') + 'kg'}.png`}
+                        alt={lpgTypeOptions.find(o => o.value === selectedLpgType)?.label || 'LPG'}
+                        className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                        onError={(e) => { e.currentTarget.src = '/images/products/lpg-3kg.png' }}
+                    />
+                    <TabsList className="glass-card p-1">
+                        <TabsTrigger value="rekapitulasi" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-xs sm:text-sm px-3 sm:px-4">
+                            <SafeIcon name="Table" className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                            Rekapitulasi
+                        </TabsTrigger>
+                        <TabsTrigger value="form" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-xs sm:text-sm px-3 sm:px-4">
+                            <SafeIcon name="Edit" className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                            Input Form
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-                {/* Category Tabs: Subsidi / Non-Subsidi */}
-                <div className="flex gap-2 mb-3">
+                {/* Category Buttons - Separate row */}
+                <div className="flex gap-1.5 mb-2">
                     <Button
                         variant={selectedCategory === 'SUBSIDI' ? 'default' : 'outline'}
-                        className={selectedCategory === 'SUBSIDI'
-                            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-0 shadow-lg'
-                            : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'}
+                        size="sm"
+                        className={`h-7 px-2 text-xs ${selectedCategory === 'SUBSIDI'
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-0'
+                            : ''}`}
                         onClick={() => setSelectedCategory('SUBSIDI')}
                     >
-                        <SafeIcon name="Shield" className="w-4 h-4 mr-2" />
-                        LPG Subsidi
+                        <SafeIcon name="Shield" className="w-3 h-3 mr-1" />
+                        Subsidi
                     </Button>
                     <Button
                         variant={selectedCategory === 'NON_SUBSIDI' ? 'default' : 'outline'}
-                        className={selectedCategory === 'NON_SUBSIDI'
-                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg'
-                            : 'hover:bg-amber-50 dark:hover:bg-amber-900/20'}
+                        size="sm"
+                        className={`h-7 px-2 text-xs ${selectedCategory === 'NON_SUBSIDI'
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0'
+                            : ''}`}
                         onClick={() => setSelectedCategory('NON_SUBSIDI')}
                     >
-                        <SafeIcon name="Flame" className="w-4 h-4 mr-2" />
-                        LPG Non-Subsidi
+                        <SafeIcon name="Flame" className="w-3 h-3 mr-1" />
+                        Non-Sub
                     </Button>
                 </div>
 
-                {/* LPG Type Sub-Tabs (filtered by category) */}
-                {lpgTypeOptions.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {lpgTypeOptions.map(opt => (
-                            <Button
-                                key={opt.value}
-                                variant={selectedLpgType === opt.value ? 'default' : 'outline'}
-                                size="sm"
-                                className={selectedLpgType === opt.value
-                                    ? isSubsidi
-                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0'
-                                        : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0'
-                                    : 'hover:bg-muted'}
-                                onClick={() => setSelectedLpgType(opt.value)}
-                            >
-                                {opt.label}
-                            </Button>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-sm text-muted-foreground mb-4 p-3 bg-muted/50 rounded-lg">
-                        Tidak ada produk LPG {selectedCategory === 'SUBSIDI' ? 'Subsidi' : 'Non-Subsidi'} yang aktif
-                    </div>
-                )}
+                {/* LPG Type Pills - Separate row */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                    {lpgTypeOptions.map(opt => (
+                        <Button
+                            key={opt.value}
+                            variant={selectedLpgType === opt.value ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => setSelectedLpgType(opt.value)}
+                        >
+                            {opt.label}
+                        </Button>
+                    ))}
+                </div>
 
-                {/* Filter Bar */}
-                <Card className="glass-card mb-6">
-                    <CardContent className="p-4">
-                        <div className="flex flex-col gap-4">
-                            {/* Filters - Stack vertically on mobile */}
-                            <div className={`grid gap-3 ${selectedCategory === 'SUBSIDI' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1'}`}>
-                                <div className="space-y-1.5">
-                                    <span className="text-xs font-medium text-muted-foreground">Bulan</span>
-                                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                        <SelectTrigger className="w-full">
+                {/* Filter Bar - All in 1 row */}
+                <Card className="glass-card mb-4">
+                    <CardContent className="p-2 sm:p-3">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            {/* Month filter */}
+                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                <SelectTrigger className="h-8 w-auto min-w-[100px] text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {monthOptions.map(opt => (
+                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {selectedCategory === 'SUBSIDI' && (
+                                <>
+                                    <Select value={kondisi} onValueChange={setKondisi}>
+                                        <SelectTrigger className="h-8 w-auto min-w-[70px] text-xs">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {monthOptions.map(opt => (
-                                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                            ))}
+                                            <SelectItem value="ALL">Semua</SelectItem>
+                                            <SelectItem value="NORMAL">Normal</SelectItem>
+                                            <SelectItem value="FAKULTATIF">Fakultatif</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                </div>
 
-                                {/* Only show Kondisi and Tipe filters for Subsidi */}
-                                {selectedCategory === 'SUBSIDI' && (
-                                    <>
-                                        <div className="space-y-1.5">
-                                            <span className="text-xs font-medium text-muted-foreground">Kondisi</span>
-                                            <Select value={kondisi} onValueChange={setKondisi}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="ALL">Semua</SelectItem>
-                                                    <SelectItem value="NORMAL">Normal</SelectItem>
-                                                    <SelectItem value="FAKULTATIF">Fakultatif</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                    <Select value={tipePembayaran} onValueChange={setTipePembayaran}>
+                                        <SelectTrigger className="h-8 w-auto min-w-[70px] text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ALL">Semua</SelectItem>
+                                            <SelectItem value="CASHLESS">Cashless</SelectItem>
+                                            <SelectItem value="CASH">Cash</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </>
+                            )}
 
-                                        <div className="space-y-1.5">
-                                            <span className="text-xs font-medium text-muted-foreground">Tipe</span>
-                                            <Select value={tipePembayaran} onValueChange={setTipePembayaran}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="ALL">Semua</SelectItem>
-                                                    <SelectItem value="CASHLESS">Cashless</SelectItem>
-                                                    <SelectItem value="CASH">Cash</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                            {/* Action Buttons */}
+                            <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => setShowFakultatifModal(true)}
+                                className="h-8 px-2 text-xs bg-gradient-to-r from-amber-500 to-orange-500"
+                            >
+                                <SafeIcon name="Plus" className="w-3 h-3 mr-1" />
+                                Fakultatif
+                            </Button>
 
-                            {/* Action Buttons - Responsive grid */}
-                            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2">
-                                <Button
-                                    variant="default"
-                                    size="sm"
-                                    onClick={() => setShowFakultatifModal(true)}
-                                    className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-                                >
-                                    <SafeIcon name="Plus" className="w-4 h-4 mr-1" />
-                                    <span className="hidden sm:inline">Tambah Fakultatif</span>
-                                    <span className="sm:hidden">Fakultatif</span>
-                                </Button>
+                            <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading} className="h-8 px-2">
+                                <SafeIcon name="RefreshCw" className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                            </Button>
 
-                                <Button variant="outline" size="sm" onClick={fetchRekapitulasi} disabled={isLoading} className="w-full sm:w-auto">
-                                    <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                                    <span className="hidden sm:inline">Refresh</span>
-                                    <span className="sm:hidden">Muat Ulang</span>
-                                </Button>
-
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm" className="w-full sm:w-auto col-span-2 sm:col-span-1">
-                                            <SafeIcon name="Download" className="w-4 h-4 mr-1" />
-                                            Download
-                                            <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={handleDownloadPDF}>
-                                            <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
-                                            Download PDF
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={handleDownloadExcel}>
-                                            <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
-                                            Download Excel
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-8 px-2">
+                                        <SafeIcon name="Download" className="w-3 h-3" />
+                                        <SafeIcon name="ChevronDown" className="w-2 h-2 ml-0.5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={handleDownloadPDF}>
+                                        <SafeIcon name="FileText" className="w-4 h-4 mr-2" />
+                                        PDF
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleDownloadExcel}>
+                                        <SafeIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+                                        Excel
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </CardContent>
                 </Card>

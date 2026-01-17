@@ -209,7 +209,7 @@ export default function PangkalanListPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
+    <div className="flex-1 space-y-3 sm:space-y-4 p-4 sm:p-6 lg:p-8 dashboard-gradient-bg min-h-screen">
       {/* Header - Theme-Aware PageHeader + Action Button */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
@@ -229,7 +229,7 @@ export default function PangkalanListPage() {
       <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       {/* Summary Stats - Modern Glass Card Style with 3D Tilt */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {isLoading ? (
           // Skeleton Cards during loading
           <>
@@ -254,14 +254,14 @@ export default function PangkalanListPage() {
           <>
             <Tilt3DCard>
               <Card className="border-0 glass-card animate-fadeInUp h-full">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-primary/10 dark:bg-primary/15">
-                      <SafeIcon name="Building2" className="w-5 h-5 text-primary" />
+                <CardContent className="p-2 sm:p-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-primary/10 dark:bg-primary/15">
+                      <SafeIcon name="Building2" className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Total Pangkalan</p>
-                      <p className="text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
+                    <div className="text-center sm:text-left">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Total Pangkalan</p>
+                      <p className="text-lg sm:text-2xl font-bold"><AnimatedNumber value={totalItems} delay={100} /></p>
                     </div>
                   </div>
                 </CardContent>
@@ -270,14 +270,14 @@ export default function PangkalanListPage() {
 
             <Tilt3DCard>
               <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.1s' }}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15">
-                      <SafeIcon name="CheckCircle" className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <CardContent className="p-2 sm:p-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15">
+                      <SafeIcon name="CheckCircle" className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Aktif</p>
-                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"><AnimatedNumber value={aktivCount} delay={200} /></p>
+                    <div className="text-center sm:text-left">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Aktif</p>
+                      <p className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400"><AnimatedNumber value={aktivCount} delay={200} /></p>
                     </div>
                   </div>
                 </CardContent>
@@ -286,14 +286,14 @@ export default function PangkalanListPage() {
 
             <Tilt3DCard>
               <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-rose-500/10 dark:bg-rose-500/15">
-                      <SafeIcon name="XCircle" className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                <CardContent className="p-2 sm:p-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-rose-500/10 dark:bg-rose-500/15">
+                      <SafeIcon name="XCircle" className="w-4 h-4 sm:w-5 sm:h-5 text-rose-600 dark:text-rose-400" />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Nonaktif</p>
-                      <p className="text-2xl font-bold text-rose-600 dark:text-rose-400"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
+                    <div className="text-center sm:text-left">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Nonaktif</p>
+                      <p className="text-lg sm:text-2xl font-bold text-rose-600 dark:text-rose-400"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
                     </div>
                   </div>
                 </CardContent>

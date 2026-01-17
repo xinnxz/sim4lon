@@ -106,9 +106,21 @@ export class UserService {
 
         const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-        // Generate user code (USR-001, USR-002, etc.)
-        const userCount = await this.prisma.users.count();
-        const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
+        // Generate user code (USR-001, USR-002, etc.) - find max existing code
+        const lastUser = await this.prisma.users.findFirst({
+            where: { code: { startsWith: 'USR-' } },
+            orderBy: { code: 'desc' },
+            select: { code: true },
+        });
+
+        let nextNumber = 1;
+        if (lastUser?.code) {
+            const match = lastUser.code.match(/USR-(\d+)/);
+            if (match) {
+                nextNumber = parseInt(match[1], 10) + 1;
+            }
+        }
+        const userCode = `USR-${String(nextNumber).padStart(3, '0')}`;
 
         const user = await this.prisma.users.create({
             data: {

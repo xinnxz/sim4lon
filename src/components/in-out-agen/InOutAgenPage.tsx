@@ -280,7 +280,7 @@ export default function InOutAgenPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Page Header */}
             <PageHeader
                 title="In / Out Agen"
@@ -288,17 +288,17 @@ export default function InOutAgenPage() {
             />
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                 <Tilt3DCard>
                     <Card className="glass-card h-full">
-                        <CardContent className="p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-blue-500/10">
-                                    <SafeIcon name="PackagePlus" className="w-5 h-5 text-blue-500" />
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 rounded-xl bg-blue-500/10">
+                                    <SafeIcon name="PackagePlus" className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-muted-foreground">Stok Awal Bulan</p>
-                                    <p className="text-xl font-bold"><AnimatedNumber value={data?.stok_awal_bulan || 0} delay={100} /></p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Stok Awal</p>
+                                    <p className="text-lg sm:text-xl font-bold"><AnimatedNumber value={data?.stok_awal_bulan || 0} delay={100} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -307,14 +307,14 @@ export default function InOutAgenPage() {
 
                 <Tilt3DCard>
                     <Card className="glass-card h-full">
-                        <CardContent className="p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-green-500/10">
-                                    <SafeIcon name="ArrowDownCircle" className="w-5 h-5 text-green-500" />
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 rounded-xl bg-green-500/10">
+                                    <SafeIcon name="ArrowDownCircle" className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-muted-foreground">Total Penerimaan</p>
-                                    <p className="text-xl font-bold text-green-600"><AnimatedNumber value={data?.total_penerimaan || 0} delay={200} /></p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Penerimaan</p>
+                                    <p className="text-lg sm:text-xl font-bold text-green-600"><AnimatedNumber value={data?.total_penerimaan || 0} delay={200} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -323,14 +323,14 @@ export default function InOutAgenPage() {
 
                 <Tilt3DCard>
                     <Card className="glass-card h-full">
-                        <CardContent className="p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-orange-500/10">
-                                    <SafeIcon name="ArrowUpCircle" className="w-5 h-5 text-orange-500" />
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 rounded-xl bg-orange-500/10">
+                                    <SafeIcon name="ArrowUpCircle" className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-muted-foreground">Total Penyaluran</p>
-                                    <p className="text-xl font-bold text-orange-600"><AnimatedNumber value={data?.total_penyaluran || 0} delay={300} /></p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Penyaluran</p>
+                                    <p className="text-lg sm:text-xl font-bold text-orange-600"><AnimatedNumber value={data?.total_penyaluran || 0} delay={300} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -339,14 +339,14 @@ export default function InOutAgenPage() {
 
                 <Tilt3DCard>
                     <Card className="glass-card h-full">
-                        <CardContent className="p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-purple-500/10">
-                                    <SafeIcon name="PackageOpen" className="w-5 h-5 text-purple-500" />
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="p-1.5 sm:p-2 rounded-xl bg-purple-500/10">
+                                    <SafeIcon name="PackageOpen" className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-muted-foreground">Stok Akhir Bulan</p>
-                                    <p className="text-xl font-bold text-purple-600"><AnimatedNumber value={data?.stok_akhir_bulan || 0} delay={400} /></p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Stok Akhir</p>
+                                    <p className="text-lg sm:text-xl font-bold text-purple-600"><AnimatedNumber value={data?.stok_akhir_bulan || 0} delay={400} /></p>
                                 </div>
                             </div>
                         </CardContent>
@@ -354,35 +354,32 @@ export default function InOutAgenPage() {
                 </Tilt3DCard>
             </div>
 
-            {/* Filter Bar */}
+            {/* Filter Bar - Mobile First */}
             <Card className="glass-card">
-                <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Bulan:</span>
-                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="w-44">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {monthOptions.map(opt => (
-                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                            <SelectTrigger className="w-full sm:w-44 h-10 sm:h-9">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {monthOptions.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
 
-                        <div className="flex items-center gap-2 sm:ml-auto">
-                            <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
+                        <div className="grid grid-cols-2 sm:flex gap-2 sm:ml-auto">
+                            <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading} className="h-10 sm:h-9">
                                 <SafeIcon name="RefreshCw" className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                                Refresh
+                                <span className="text-xs sm:text-sm">Refresh</span>
                             </Button>
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="sm">
+                                    <Button variant="outline" size="sm" className="h-10 sm:h-9">
                                         <SafeIcon name="Download" className="w-4 h-4 mr-1" />
-                                        Download
+                                        <span className="text-xs sm:text-sm">Download</span>
                                         <SafeIcon name="ChevronDown" className="w-3 h-3 ml-1" />
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -403,28 +400,28 @@ export default function InOutAgenPage() {
             </Card>
 
             {/* In-Out Table */}
-            <Card className="chart-card-premium">
-                <CardHeader className="border-b border-border/50 pb-4">
-                    <div className="flex items-center gap-3">
+            <Card className="chart-card-premium overflow-hidden">
+                <CardHeader className="border-b border-border/50 pb-3 sm:pb-4 px-3 sm:px-6">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                        <CardTitle className="text-lg font-semibold">In Out Agen</CardTitle>
-                        <Badge variant="outline" className="ml-auto">
+                        <CardTitle className="text-sm sm:text-lg font-semibold">In Out Agen</CardTitle>
+                        <Badge variant="outline" className="ml-auto text-xs">
                             {data?.days_in_month || 0} Hari
                         </Badge>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-0 overflow-hidden">
                     <div
-                        className="overflow-x-auto cursor-grab active:cursor-grabbing"
+                        className="overflow-x-auto max-w-full"
+                        style={{ WebkitOverflowScrolling: 'touch' }}
                         onWheel={(e) => {
-                            // Convert vertical scroll to horizontal scroll
                             if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
                                 e.preventDefault()
                                 e.currentTarget.scrollLeft += e.deltaY
                             }
                         }}
                     >
-                        <table className="w-full text-sm">
+                        <table className="w-full text-[10px] sm:text-xs lg:text-sm min-w-[600px]">
                             <thead className="bg-muted/50 sticky top-0 z-20">
                                 <tr>
                                     <th className="sticky left-0 z-30 bg-muted px-4 py-3 text-left font-medium min-w-[120px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Field</th>

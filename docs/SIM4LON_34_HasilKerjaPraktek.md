@@ -154,7 +154,7 @@ Berikut ini merupakan tampilan antarmuka dari Aplikasi SIM4LON berbasis web yang
 
 ![Gambar 3.12 Tampilan Halaman Stok Pangkalan](figures/stok-pangkalan.png)
 
-**Keterangan:** Halaman stok khusus untuk pangkalan yang menyajikan informasi stok secara komprehensif. Kartu ringkasan menampilkan jumlah stok per jenis LPG yang dimiliki. Tombol "Pesan Stok" memudahkan pangkalan untuk melakukan order ke agen. Daftar pengiriman masuk yang menunggu konfirmasi penerimaan ditampilkan secara real-time agar tidak ada pengiriman yang terlewat. Riwayat transaksi mencatat semua stok masuk dari agen maupun stok keluar dari penjualan ke konsumen. Setiap transaksi tercatat dengan timestamp dan dapat di-filter berdasarkan rentang tanggal.
+**Keterangan:** Halaman manajemen stok komprehensif yang dirancang khusus untuk pengelola pangkalan. Halaman ini terbagi menjadi tiga tab utama: **Stok Saat Ini**, **Riwayat**, dan **Kelola Produk**. Pada tab Stok, ditampilkan kartu ringkasan total stok tersedia dengan visualisasi ikon produk LPG modern, serta kartu individual per jenis LPG yang menampilkan gambar produk, jumlah stok, harga jual, dan status ketersediaan. Panel **Aksi Cepat** menyediakan akses langsung ke fitur pemesanan stok ke agen. Fitur **Koreksi Stok** dan **Stock Opname** tersedia untuk penyesuaian inventori manual. Tab Riwayat menampilkan log seluruh pergerakan stok dengan filter berdasarkan tipe LPG, informasi jenis transaksi (masuk/keluar), sumber, dan catatan. Tab Kelola Produk memungkinkan pangkalan mengatur harga modal, harga jual, dan margin per produk LPG yang dijual. Seluruh tampilan dioptimasi untuk penggunaan mobile dengan layout responsif dan navigasi intuitif.
 
 ---
 
