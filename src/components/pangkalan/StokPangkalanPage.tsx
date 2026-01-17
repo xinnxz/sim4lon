@@ -449,9 +449,12 @@ export default function StokPangkalanPage() {
         })
     }
 
-    // Pagination
-    const totalPages = Math.ceil(movements.length / itemsPerPage)
-    const paginatedMovements = movements.slice(
+    // Pagination with client-side filtering backup
+    const filteredMovements = filterType === 'all'
+        ? movements
+        : movements.filter(m => normalizeType(m.lpg_type) === normalizeType(filterType))
+    const totalPages = Math.ceil(filteredMovements.length / itemsPerPage)
+    const paginatedMovements = filteredMovements.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     )
@@ -1206,8 +1209,8 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 tabung dari {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).length} tipe LPG aktif
                             </p>
                         </div>
-                        <div className="w-20 h-20 rounded-2xl overflow-hidden backdrop-blur-sm">
-                            <img src="/images/icons/stock-icon.png" alt="LPG Stock" className="w-full h-full object-contain" />
+                        <div className="w-24 h-24 rounded-xl overflow-hidden backdrop-blur-sm">
+                            <img src="/images/icons/stock-icon-2.png" alt="LPG Stock" className="w-full h-full object-contain" />
                         </div>
                     </div>
                 </CardContent>
@@ -1351,33 +1354,33 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                     {/* <Badge className="ml-auto bg-amber-100 text-amber-700 hover:bg-amber-200">Soon</Badge> */}
                                 </button>
 
-                                {/* Terima Stok */}
-                                <button
-                                    onClick={() => setIsReceiveOpen(true)}
-                                    className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-green-200 bg-green-50/50 hover:bg-green-100 hover:border-green-300 transition-all group"
+                                {/* Terima Stok - DISABLED */}
+                                <div
+                                    className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative"
                                 >
-                                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <SafeIcon name="PackagePlus" className="h-6 w-6 text-green-600" />
+                                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
+                                        <SafeIcon name="PackagePlus" className="h-6 w-6 text-slate-400" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="font-semibold text-slate-900">Koreksi Stok</p>
-                                        <p className="text-sm text-slate-500">Penyesuaian manual (opname)</p>
+                                        <p className="font-semibold text-slate-500">Koreksi Stok</p>
+                                        <p className="text-sm text-slate-400">Penyesuaian manual (opname)</p>
                                     </div>
-                                </button>
+                                    <Badge className="ml-auto bg-amber-100 text-amber-700 text-xs whitespace-nowrap">Coming Soon</Badge>
+                                </div>
 
-                                {/* Stock Opname */}
-                                <button
-                                    onClick={() => toast.info('santai brader 😭')}
-                                    className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-100 hover:border-slate-300 transition-all group"
+                                {/* Stock Opname - DISABLED */}
+                                <div
+                                    className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative"
                                 >
-                                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <SafeIcon name="ClipboardCheck" className="h-6 w-6 text-slate-600" />
+                                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
+                                        <SafeIcon name="ClipboardCheck" className="h-6 w-6 text-slate-400" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="font-semibold text-slate-900">Stock Opname</p>
-                                        <p className="text-sm text-slate-500">Sesuaikan stok aktual</p>
+                                        <p className="font-semibold text-slate-500">Stock Opname</p>
+                                        <p className="text-sm text-slate-400">Sesuaikan stok aktual</p>
                                     </div>
-                                </button>
+                                    <Badge className="ml-auto bg-amber-100 text-amber-700 text-xs whitespace-nowrap">Coming Soon</Badge>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -1423,13 +1426,13 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                     {/* Filter Bar */}
                     <Card className="bg-white shadow-lg rounded-2xl border-0">
                         <CardContent className="p-4">
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                <div className="flex items-center gap-2 flex-shrink-0">
                                     <SafeIcon name="Filter" className="h-4 w-4 text-slate-500" />
                                     <span className="text-sm font-medium text-slate-600">Filter:</span>
                                 </div>
-                                <Select value={filterType} onValueChange={setFilterType}>
-                                    <SelectTrigger className="w-[180px] rounded-xl">
+                                <Select value={filterType} onValueChange={(val) => { setFilterType(val); setCurrentPage(1); }}>
+                                    <SelectTrigger className="w-full sm:w-[180px] rounded-xl">
                                         <SelectValue placeholder="Semua Tipe" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1441,10 +1444,17 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         <SelectItem value="kg50">LPG 50 kg</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <Button variant="outline" size="sm" onClick={fetchMovements} className="rounded-xl ml-auto">
-                                    <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
-                                    Refresh
-                                </Button>
+                                <div className="flex items-center gap-2 sm:ml-auto">
+                                    {filterType !== 'all' && (
+                                        <Badge variant="secondary" className="text-xs">
+                                            {filteredMovements.length} hasil
+                                        </Badge>
+                                    )}
+                                    <Button variant="outline" size="sm" onClick={fetchMovements} className="rounded-xl flex-1 sm:flex-none">
+                                        <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
+                                        Refresh
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -1515,9 +1525,9 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
 
                                     {/* Pagination */}
                                     {totalPages > 1 && (
-                                        <div className="flex items-center justify-between px-4 py-3 border-t bg-slate-50">
-                                            <p className="text-sm text-slate-600">
-                                                Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, movements.length)} dari {movements.length}
+                                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t bg-slate-50">
+                                            <p className="text-sm text-slate-600 text-center sm:text-left">
+                                                Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredMovements.length)} dari {filteredMovements.length}
                                             </p>
                                             <div className="flex items-center gap-2">
                                                 <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="rounded-lg">
