@@ -64,15 +64,22 @@ const LPG_CONFIG: Record<string, { name: string; color: string; gradient: string
     'kg50': { name: 'LPG 50 kg', color: '#8B5CF6', gradient: 'from-violet-500 to-purple-600' },
 }
 
-// LPG product images mapping
+// LPG product images mapping (support all format variations)
 const LPG_IMAGES: Record<string, string> = {
+    // 220gr / Bright Gas
     'gr220': '/images/products/bright-gas-220gr.png',
+    '220gr': '/images/products/bright-gas-220gr.png',
+    'bright_gas_220gr': '/images/products/bright-gas-220gr.png',
+    // 3kg
     'kg3': '/images/products/lpg-3kg.png',
     '3kg': '/images/products/lpg-3kg.png',
+    // 5.5kg
     'kg5': '/images/products/lpg-5kg.png',
     '5kg': '/images/products/lpg-5kg.png',
+    // 12kg
     'kg12': '/images/products/lpg-12kg.png',
     '12kg': '/images/products/lpg-12kg.png',
+    // 50kg
     'kg50': '/images/products/lpg-50kg.png',
     '50kg': '/images/products/lpg-50kg.png',
 }

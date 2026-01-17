@@ -537,11 +537,29 @@ export default function RiwayatPenjualanPage() {
                                                 </span>
                                             </div>
 
-                                            {/* LPG Type */}
+                                            {/* LPG Type - With Image */}
                                             <div className="flex justify-center">
-                                                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                                                    {LPG_NAMES[order.lpg_type] || order.lpg_type}
-                                                </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}20, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}10)`
+                                                        }}
+                                                    >
+                                                        {LPG_IMAGES[order.lpg_type] ? (
+                                                            <img
+                                                                src={LPG_IMAGES[order.lpg_type]}
+                                                                alt={LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                                className="w-7 h-7 object-contain"
+                                                            />
+                                                        ) : (
+                                                            <SafeIcon name="Cylinder" className="h-4 w-4" style={{ color: LPG_COLORS[order.lpg_type] || '#3B82F6' }} />
+                                                        )}
+                                                    </div>
+                                                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                                                        {LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                    </Badge>
+                                                </div>
                                             </div>
 
                                             {/* Qty */}
