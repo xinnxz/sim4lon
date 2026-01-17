@@ -95,8 +95,8 @@ export default function RingkasanStokPageContent() {
               <div className="flex flex-col xl:flex-row xl:items-center gap-4">
                 {/* Left: Title + Total */}
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg">
-                    <SafeIcon name="Package" className="h-7 w-7 text-white" />
+                  <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-primary/10 to-accent/10">
+                    <img src="/images/icons/stock-icon.png" alt="Stok LPG" className="w-full h-full object-contain" />
                   </div>
                   <div>
                     <div className="flex items-center gap-3">

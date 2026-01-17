@@ -146,8 +146,8 @@ export default function StockSummaryCards({ refreshTrigger, showSummary = true }
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               {/* Total Keseluruhan */}
               <div className="flex items-center gap-4">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg">
-                  <SafeIcon name="Package" className="h-8 w-8 text-white" />
+                <div className="w-14 h-14 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img src="/images/icons/stock-icon.png" alt="Stok" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Stok Keseluruhan</p>
