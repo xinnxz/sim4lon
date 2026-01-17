@@ -27,6 +27,7 @@ const LPG_DISPLAY = [
     { value: '5kg', dbType: 'kg5', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
     { value: '12kg', dbType: 'kg12', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
     { value: '50kg', dbType: 'kg50', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
+    { value: 'bright_gas_220gr', dbType: 'bright_gas_220gr', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
 ]
 
 // LPG product images mapping
@@ -35,6 +36,7 @@ const LPG_IMAGES: Record<string, string> = {
     '5kg': '/images/products/lpg-5kg.png',
     '12kg': '/images/products/lpg-12kg.png',
     '50kg': '/images/products/lpg-50kg.png',
+    'bright_gas_220gr': '/images/products/bright-gas-220gr.png',
 }
 
 export default function CatatPenjualanPage() {
