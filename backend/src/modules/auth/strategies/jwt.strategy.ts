@@ -48,11 +48,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException('Pangkalan Anda sudah dinonaktifkan. Silakan hubungi agen.');
         }
 
-        // TEMPORARILY DISABLED FOR TESTING - Enable for production
         // Single-session validation: check if JWT session_id matches DB session_id
-        // if (payload.session_id && user.session_id && payload.session_id !== user.session_id) {
-        //     throw new UnauthorizedException('Sesi tidak valid. Anda mungkin sudah login di perangkat lain.');
-        // }
+        // If user logged in from another device, the session_id in DB will be different
+        if (payload.session_id && user.session_id && payload.session_id !== user.session_id) {
+            throw new UnauthorizedException('SESSION_EXPIRED: Sesi tidak valid. Anda sudah login di perangkat lain.');
+        }
 
         return user;
     }

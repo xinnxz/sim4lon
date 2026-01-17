@@ -43,6 +43,9 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         if (user.role === 'PANGKALAN' && user.pangkalans && !user.pangkalans.is_active) {
             throw new common_1.UnauthorizedException('Pangkalan Anda sudah dinonaktifkan. Silakan hubungi agen.');
         }
+        if (payload.session_id && user.session_id && payload.session_id !== user.session_id) {
+            throw new common_1.UnauthorizedException('SESSION_EXPIRED: Sesi tidak valid. Anda sudah login di perangkat lain.');
+        }
         return user;
     }
 };

@@ -75,6 +75,15 @@ async function apiRequest<T>(
             removeToken();
             // Cek apakah bukan di halaman login sebelum redirect
             if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+                // Check if session expired due to login from another device
+                const isSessionExpired = data.message?.includes('SESSION_EXPIRED') ||
+                    data.message?.includes('perangkat lain');
+
+                if (isSessionExpired) {
+                    // Show alert before redirect for better UX
+                    alert('⚠️ Sesi Anda telah berakhir.\n\nAnda sudah login di perangkat lain. Hanya 1 perangkat yang dapat aktif dalam satu waktu.\n\nSilakan login kembali.');
+                }
+
                 window.location.href = '/login';
             }
         }
