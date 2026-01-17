@@ -25,6 +25,36 @@ import { formatCurrency } from '@/lib/currency'
 import { toast } from 'sonner'
 import { useAppSettings } from '@/hooks/useAppSettings'
 
+/**
+ * Get LPG product image based on label (flexible matching)
+ */
+const getLpgImage = (label: string): string | null => {
+  if (!label) return null
+  const l = label.toLowerCase()
+
+  // Bright Gas / 220gr
+  if (l.includes('bright') || l.includes('220')) {
+    return '/images/products/bright-gas-220gr.png'
+  }
+  // 50kg
+  if (l.includes('50kg') || l.includes('50 kg')) {
+    return '/images/products/lpg-50kg.png'
+  }
+  // 12kg
+  if (l.includes('12kg') || l.includes('12 kg')) {
+    return '/images/products/lpg-12kg.png'
+  }
+  // 5.5kg / 5kg
+  if (l.includes('5.5') || l.includes('5kg') || l.includes('5 kg')) {
+    return '/images/products/lpg-5kg.png'
+  }
+  // 3kg
+  if (l.includes('3kg') || l.includes('3 kg')) {
+    return '/images/products/lpg-3kg.png'
+  }
+  return null
+}
+
 type DocumentType = 'invoice' | 'nota'
 
 interface DocumentData {
@@ -436,14 +466,30 @@ _SIM4LON - Sistem Manajemen LPG_`
                   </tr>
                 </thead>
                 <tbody>
-                  {data.items.map((item, index) => (
-                    <tr key={index} className="border-t dark:border-border/50 hover:bg-muted/30 transition-colors">
-                      <td className="p-3 text-sm">{item.name}</td>
-                      <td className="p-3 text-sm text-center">{item.quantity}</td>
-                      <td className="p-3 text-sm text-right">{formatCurrency(item.unitPrice)}</td>
-                      <td className="p-3 text-sm text-right font-medium">{formatCurrency(item.subtotal)}</td>
-                    </tr>
-                  ))}
+                  {data.items.map((item, index) => {
+                    const imgSrc = getLpgImage(item.name)
+                    return (
+                      <tr key={index} className="border-t dark:border-border/50 hover:bg-muted/30 transition-colors">
+                        <td className="p-3 text-sm">
+                          <div className="flex items-center gap-3">
+                            {imgSrc && (
+                              <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 print:bg-gray-100">
+                                <img
+                                  src={imgSrc}
+                                  alt={item.name}
+                                  className="w-8 h-8 object-contain"
+                                />
+                              </div>
+                            )}
+                            <span>{item.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-sm text-center">{item.quantity}</td>
+                        <td className="p-3 text-sm text-right">{formatCurrency(item.unitPrice)}</td>
+                        <td className="p-3 text-sm text-right font-medium">{formatCurrency(item.subtotal)}</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

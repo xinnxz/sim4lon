@@ -5,7 +5,7 @@
  * Component ini menampilkan:
  * - Tanggal pesanan
  * - Daftar item pesanan dengan total row
- * - Breakdown harga: Subtotal, PPN 12% (jika ada), Total
+ * - Breakdown harga: Subtotal, PPN (dari settings), Total
  * - Menggunakan formatCurrency untuk format uang yang konsisten
  */
 
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import OrderItemsTable from './OrderItemsTable'
 import { formatCurrency } from '@/lib/currency'
+import { useAppSettings } from '@/hooks/useAppSettings'
 
 interface OrderSummaryCardProps {
   order: {
@@ -35,6 +36,8 @@ interface OrderSummaryCardProps {
 }
 
 export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
+  const { settings: appSettings } = useAppSettings()
+
   return (
     <Card>
       <CardHeader className="pb-2 sm:pb-4">
@@ -62,11 +65,11 @@ export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
             <span className="font-medium">{formatCurrency(order.subtotal)}</span>
           </div>
 
-          {/* PPN 12% - highlighted with orange accent */}
+          {/* PPN - dynamic from settings */}
           {order.tax > 0 && (
             <div className="flex justify-between text-xs sm:text-sm">
               <span className="text-muted-foreground flex items-center gap-1 sm:gap-2">
-                PPN 12%
+                PPN {appSettings.ppnRate}%
                 <Badge variant="outline" className="text-[8px] sm:text-[10px] px-1 sm:px-1.5 py-0 bg-orange-50 text-orange-600 border-orange-200">
                   Non-Subsidi
                 </Badge>
@@ -85,4 +88,5 @@ export default function OrderSummaryCard({ order }: OrderSummaryCardProps) {
     </Card>
   )
 }
+
 

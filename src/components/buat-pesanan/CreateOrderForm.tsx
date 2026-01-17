@@ -983,7 +983,7 @@ export default function CreateOrderForm() {
               {calculateTax() > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground flex items-center gap-1">
-                    PPN 12%
+                    PPN {appSettings.ppnRate}%
                     <Badge variant="outline" className="text-[10px] px-1 py-0 bg-orange-50 text-orange-600 border-orange-200">
                       Non-Subsidi
                     </Badge>

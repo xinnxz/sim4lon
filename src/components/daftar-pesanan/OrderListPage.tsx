@@ -65,30 +65,33 @@ const statusColors: Record<OrderStatus, string> = {
 }
 
 /**
- * LPG product images mapping (support all format variations)
+ * Get LPG product image based on label (flexible matching)
  */
-const LPG_IMAGES: Record<string, string> = {
-  // 220gr / Bright Gas
-  'gr220': '/images/products/bright-gas-220gr.png',
-  '220gr': '/images/products/bright-gas-220gr.png',
-  'bright_gas_220gr': '/images/products/bright-gas-220gr.png',
-  'Bright Gas 220gr': '/images/products/bright-gas-220gr.png',
-  // 3kg
-  'kg3': '/images/products/lpg-3kg.png',
-  '3kg': '/images/products/lpg-3kg.png',
-  'LPG 3 kg': '/images/products/lpg-3kg.png',
-  // 5.5kg
-  'kg5': '/images/products/lpg-5kg.png',
-  '5kg': '/images/products/lpg-5kg.png',
-  'LPG 5.5 kg': '/images/products/lpg-5kg.png',
-  // 12kg
-  'kg12': '/images/products/lpg-12kg.png',
-  '12kg': '/images/products/lpg-12kg.png',
-  'LPG 12 kg': '/images/products/lpg-12kg.png',
+const getLpgImage = (label: string): string | null => {
+  if (!label) return null
+  const l = label.toLowerCase()
+
+  // Bright Gas / 220gr
+  if (l.includes('bright') || l.includes('220')) {
+    return '/images/products/bright-gas-220gr.png'
+  }
   // 50kg
-  'kg50': '/images/products/lpg-50kg.png',
-  '50kg': '/images/products/lpg-50kg.png',
-  'LPG 50 kg': '/images/products/lpg-50kg.png',
+  if (l.includes('50kg') || l.includes('50 kg')) {
+    return '/images/products/lpg-50kg.png'
+  }
+  // 12kg
+  if (l.includes('12kg') || l.includes('12 kg')) {
+    return '/images/products/lpg-12kg.png'
+  }
+  // 5.5kg / 5kg
+  if (l.includes('5.5') || l.includes('5kg') || l.includes('5 kg')) {
+    return '/images/products/lpg-5kg.png'
+  }
+  // 3kg
+  if (l.includes('3kg') || l.includes('3 kg')) {
+    return '/images/products/lpg-3kg.png'
+  }
+  return null
 }
 
 export default function OrderListPage() {
@@ -585,13 +588,27 @@ export default function OrderListPage() {
                           </TableCell>
                           <TableCell className="text-sm">
                             <div className="flex items-center gap-2">
-                              {order.order_items && order.order_items[0] && LPG_IMAGES[order.order_items[0].label] && (
-                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-                                  <img
-                                    src={LPG_IMAGES[order.order_items[0].label]}
-                                    alt={order.order_items[0].label}
-                                    className="w-6 h-6 object-contain"
-                                  />
+                              {/* Stacked product images - show up to 5 */}
+                              {order.order_items && order.order_items.length > 0 && (
+                                <div className="flex -space-x-2 shrink-0">
+                                  {order.order_items.slice(0, 5).map((item, idx) => {
+                                    const imgSrc = getLpgImage(item.label)
+                                    if (!imgSrc) return null
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm"
+                                        style={{ zIndex: 5 - idx }}
+                                        title={item.label}
+                                      >
+                                        <img
+                                          src={imgSrc}
+                                          alt={item.label}
+                                          className="w-6 h-6 object-contain"
+                                        />
+                                      </div>
+                                    )
+                                  })}
                                 </div>
                               )}
                               <span>{getItemsSummary(order)}</span>

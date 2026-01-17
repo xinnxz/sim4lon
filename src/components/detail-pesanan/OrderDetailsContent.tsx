@@ -15,6 +15,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import OrderItemsTable from './OrderItemsTable'
 import OrderTimelineStatus from './OrderTimelineStatus'
 import { formatCurrency } from '@/lib/currency'
+import { useAppSettings } from '@/hooks/useAppSettings'
 
 // Mock order data dengan interface yang benar
 const mockOrder = {
@@ -49,6 +50,7 @@ const mockOrder = {
 
 export default function OrderDetailsContent() {
   const [order] = useState(mockOrder)
+  const { settings: appSettings } = useAppSettings()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -168,7 +170,7 @@ export default function OrderDetailsContent() {
                 <span className="font-medium">{formatCurrency(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">PPN 12%</span>
+                <span className="text-muted-foreground">PPN {appSettings.ppnRate}%</span>
                 <span className="font-medium">{formatCurrency(order.tax)}</span>
               </div>
               <Separator />
