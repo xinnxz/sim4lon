@@ -45,17 +45,25 @@ export default function ApplicationSettings() {
     const [isSaving, setIsSaving] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
 
-    // Load settings from API on mount
+    // Load settings from API + localStorage on mount
     useEffect(() => {
         const loadSettings = async () => {
             try {
                 const profile = await companyProfileApi.get()
+
+                // Load toggles from localStorage (client-side preferences)
+                const savedStockAlerts = localStorage.getItem('app_stockAlerts')
+                const savedEmailNotifications = localStorage.getItem('app_emailNotifications')
+
                 setSettings(prev => ({
                     ...prev,
                     ppnPercentage: Number(profile.ppn_rate) || 12,
                     criticalStockLimit: profile.critical_stock_limit || 10,
                     paymentDueDays: Number(profile.payment_due_days) || 7,
                     minOrderQuantity: Number(profile.min_order_quantity) || 1,
+                    // Client-side preferences from localStorage
+                    stockAlerts: savedStockAlerts !== null ? savedStockAlerts === 'true' : true,
+                    emailNotifications: savedEmailNotifications !== null ? savedEmailNotifications === 'true' : true,
                 }))
             } catch (error) {
                 console.error('Failed to load settings:', error)
@@ -74,13 +82,18 @@ export default function ApplicationSettings() {
     const handleSave = async () => {
         setIsSaving(true)
         try {
-            // Save to backend via company profile API
+            // Save to backend via company profile API (database settings)
             await companyProfileApi.update({
                 ppn_rate: settings.ppnPercentage,
                 critical_stock_limit: settings.criticalStockLimit,
                 payment_due_days: settings.paymentDueDays,
                 min_order_quantity: settings.minOrderQuantity,
             })
+
+            // Save toggles to localStorage (client-side preferences)
+            localStorage.setItem('app_stockAlerts', String(settings.stockAlerts))
+            localStorage.setItem('app_emailNotifications', String(settings.emailNotifications))
+
             // Clear cache so other components get fresh data
             clearAppSettingsCache()
             toast.success('Pengaturan aplikasi berhasil disimpan')

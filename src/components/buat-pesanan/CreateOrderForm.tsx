@@ -496,6 +496,13 @@ export default function CreateOrderForm() {
       }
     }
 
+    // VALIDASI MIN ORDER: Cek total quantity minimal sesuai setting
+    const totalQuantity = formData.items.reduce((sum, item) => sum + item.quantity, 0)
+    if (totalQuantity < appSettings.minOrderQuantity) {
+      toast.error(`Total pesanan minimal ${appSettings.minOrderQuantity} tabung. Saat ini: ${totalQuantity} tabung.`)
+      return
+    }
+
     setIsSubmitting(true)
 
     try {

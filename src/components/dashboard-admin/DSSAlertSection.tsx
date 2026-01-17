@@ -283,8 +283,13 @@ export default function DSSAlertSection() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [showStockAlerts, setShowStockAlerts] = useState(true);
 
     useEffect(() => {
+        // Read stockAlerts setting from localStorage
+        const savedStockAlerts = localStorage.getItem('app_stockAlerts');
+        setShowStockAlerts(savedStockAlerts !== 'false'); // Default to true if not set
+
         fetchDSSAlerts();
     }, []);
 
@@ -323,7 +328,8 @@ export default function DSSAlertSection() {
         );
     }
 
-    const hasAlerts = data.lowStockAlerts.length > 0 || data.paymentOverdueAlerts.length > 0;
+    const hasAlerts = (showStockAlerts && data.lowStockAlerts.length > 0) || data.paymentOverdueAlerts.length > 0;
+    const visibleAlertCount = (showStockAlerts ? data.lowStockAlerts.length : 0) + data.paymentOverdueAlerts.length;
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
 
@@ -338,7 +344,7 @@ export default function DSSAlertSection() {
                             Perlu Tindakan!
                             {hasAlerts && (
                                 <Badge variant="destructive" className="animate-pulse text-xs">
-                                    {data.lowStockAlerts.length + data.paymentOverdueAlerts.length} alerts
+                                    {visibleAlertCount} alerts
                                 </Badge>
                             )}
                         </h2>
@@ -399,28 +405,45 @@ export default function DSSAlertSection() {
 
             {/* Alert Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Low Stock Alerts */}
-                <AlertSectionCard
-                    title="Low Stock Alerts"
-                    icon="Package"
-                    iconBg="bg-amber-100 dark:bg-amber-500/20"
-                    iconColor="text-amber-600 dark:text-amber-400"
-                    count={data.lowStockAlerts.length}
-                    criticalCount={data.lowStockAlerts.filter(a => a.severity === 'critical').length}
-                    isEmpty={data.lowStockAlerts.length === 0}
-                    emptyMessage="Semua stok dalam kondisi aman"
-                >
-                    {data.lowStockAlerts.map(alert => (
-                        <AlertItem
-                            key={alert.id}
-                            severity={alert.severity}
-                            title={alert.name}
-                            subtitle={`Stok: ${alert.currentStock} unit`}
-                            badge={alert.severity === 'critical' ? 'Kritis' : 'Warning'}
-                            recommendation={alert.recommendation}
-                        />
-                    ))}
-                </AlertSectionCard>
+                {/* Low Stock Alerts - Conditional based on settings */}
+                {showStockAlerts ? (
+                    <AlertSectionCard
+                        title="Low Stock Alerts"
+                        icon="Package"
+                        iconBg="bg-amber-100 dark:bg-amber-500/20"
+                        iconColor="text-amber-600 dark:text-amber-400"
+                        count={data.lowStockAlerts.length}
+                        criticalCount={data.lowStockAlerts.filter(a => a.severity === 'critical').length}
+                        isEmpty={data.lowStockAlerts.length === 0}
+                        emptyMessage="Semua stok dalam kondisi aman"
+                    >
+                        {data.lowStockAlerts.map(alert => (
+                            <AlertItem
+                                key={alert.id}
+                                severity={alert.severity}
+                                title={alert.name}
+                                subtitle={`Stok: ${alert.currentStock} unit`}
+                                badge={alert.severity === 'critical' ? 'Kritis' : 'Warning'}
+                                recommendation={alert.recommendation}
+                            />
+                        ))}
+                    </AlertSectionCard>
+                ) : (
+                    <Card className="bg-card dark:bg-card shadow-lg rounded-2xl border-0 overflow-hidden">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                                    <SafeIcon name="Package" className="w-5 h-5 text-muted-foreground" />
+                                </div>
+                                <p className="font-semibold text-foreground">Low Stock Alerts</p>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground bg-muted/50 p-3 rounded-xl">
+                                <SafeIcon name="EyeOff" className="w-5 h-5" />
+                                <span className="text-sm">Notifikasi stok dinonaktifkan dari Pengaturan</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Payment Overdue Alerts */}
                 <AlertSectionCard

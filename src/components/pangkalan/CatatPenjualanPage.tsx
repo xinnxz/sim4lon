@@ -18,29 +18,31 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
-import { consumerOrdersApi, consumersApi, lpgPricesApi, type Consumer, type PangkalanLpgPrice } from '@/lib/api'
+import { consumerOrdersApi, consumersApi, lpgPricesApi, pangkalanStockApi, type Consumer, type PangkalanLpgPrice, type StockLevel } from '@/lib/api'
 import { toast } from 'sonner'
 
 // Static LPG display options (colors, display names)
+// IMPORTANT: value and dbType must match Prisma lpg_type enum exactly!
+// Database enum: kg3, kg5, kg12, kg50, gr220 (maps to "3kg", "5.5kg", "12kg", "50kg", "220gr")
 const LPG_DISPLAY = [
-    { value: '3kg', dbType: 'kg3', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
-    { value: '5kg', dbType: 'kg5', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
-    { value: '12kg', dbType: 'kg12', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
-    { value: '50kg', dbType: 'kg50', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
-    { value: 'bright_gas_220gr', dbType: 'bright_gas_220gr', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
+    { value: 'kg3', dbType: 'kg3', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
+    { value: 'kg5', dbType: 'kg5', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
+    { value: 'kg12', dbType: 'kg12', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
+    { value: 'kg50', dbType: 'kg50', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
+    { value: 'gr220', dbType: 'gr220', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
 ]
 
-// LPG product images mapping
+// LPG product images mapping (uses value/dbType as key)
 const LPG_IMAGES: Record<string, string> = {
-    '3kg': '/images/products/lpg-3kg.png',
-    '5kg': '/images/products/lpg-5kg.png',
-    '12kg': '/images/products/lpg-12kg.png',
-    '50kg': '/images/products/lpg-50kg.png',
-    'bright_gas_220gr': '/images/products/bright-gas-220gr.png',
+    'kg3': '/images/products/lpg-3kg.png',
+    'kg5': '/images/products/lpg-5kg.png',
+    'kg12': '/images/products/lpg-12kg.png',
+    'kg50': '/images/products/lpg-50kg.png',
+    'gr220': '/images/products/bright-gas-220gr.png',
 }
 
 export default function CatatPenjualanPage() {
-    const [lpgType, setLpgType] = useState('3kg')
+    const [lpgType, setLpgType] = useState('kg3')
     const [qty, setQty] = useState(1)
     const [selectedConsumer, setSelectedConsumer] = useState<Consumer | null>(null)
     const [consumerSearch, setConsumerSearch] = useState('')
@@ -51,22 +53,27 @@ export default function CatatPenjualanPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [lpgPrices, setLpgPrices] = useState<PangkalanLpgPrice[]>([])
     const [manualPrice, setManualPrice] = useState<number | null>(null) // null = use default from API
+    const [stockLevels, setStockLevels] = useState<StockLevel[]>([]) // Stock for validation
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const holdIntervalRef = useRef<NodeJS.Timeout | null>(null)
     const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Fetch LPG prices on mount
+    // Fetch LPG prices and stock levels on mount
     useEffect(() => {
-        const fetchPrices = async () => {
+        const fetchData = async () => {
             try {
-                const prices = await lpgPricesApi.getAll()
+                const [prices, stockResponse] = await Promise.all([
+                    lpgPricesApi.getAll(),
+                    pangkalanStockApi.getStockLevels(),
+                ])
                 setLpgPrices(prices)
+                setStockLevels(stockResponse.stocks)
             } catch (error) {
-                console.error('Failed to fetch LPG prices:', error)
+                console.error('Failed to fetch data:', error)
             }
         }
-        fetchPrices()
+        fetchData()
     }, [])
 
     // Get price for current LPG type (from API or default)
@@ -84,6 +91,12 @@ export default function CatatPenjualanPage() {
         if (!displayItem) return false
         const priceFromDb = lpgPrices.find(p => p.lpg_type === displayItem.dbType)
         return priceFromDb ? priceFromDb.is_active : true // Default active if not in DB
+    }
+
+    // Get current stock for LPG type
+    const getStockForType = (type: string): number => {
+        const stock = stockLevels.find(s => s.lpg_type === type)
+        return stock?.qty ?? 0
     }
 
     // Get active LPG types
@@ -152,6 +165,15 @@ export default function CatatPenjualanPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (qty < 1) return toast.error('Jumlah minimal 1')
+
+        // VALIDASI STOK: Cek stok mencukupi
+        const currentStock = getStockForType(lpgType)
+        const lpgDisplay = LPG_DISPLAY.find(l => l.value === lpgType)
+        if (qty > currentStock) {
+            toast.error(`Stok ${lpgDisplay?.display || lpgType} tidak mencukupi! Tersedia: ${currentStock} tabung, diminta: ${qty} tabung.`)
+            return
+        }
+
         try {
             setIsSubmitting(true)
             await consumerOrdersApi.create({
@@ -162,6 +184,12 @@ export default function CatatPenjualanPage() {
                 price_per_unit: currentPrice, // Use dynamic price from API
                 // payment_status selalu LUNAS (fitur hutang tidak tersedia)
             })
+
+            // Update local stock after successful sale
+            setStockLevels(prev => prev.map(s =>
+                s.lpg_type === lpgType ? { ...s, qty: s.qty - qty } : s
+            ))
+
             setShowSuccess(true)
             toast.success('Penjualan berhasil!')
             setTimeout(() => {
@@ -242,6 +270,14 @@ export default function CatatPenjualanPage() {
                                                 <div>
                                                     <span className={`font-bold block ${lpgType === lpg.value ? 'text-white' : 'text-slate-900'}`}>{lpg.display}</span>
                                                     <span className={`text-xs ${lpgType === lpg.value ? 'text-white/80' : 'text-slate-500'}`}>{formatCurrency(getPrice(lpg.value))}</span>
+                                                    <span className={`text-xs block ${getStockForType(lpg.value) === 0
+                                                            ? 'text-red-500 font-semibold'
+                                                            : getStockForType(lpg.value) < 10
+                                                                ? 'text-amber-500'
+                                                                : lpgType === lpg.value ? 'text-white/60' : 'text-slate-400'
+                                                        }`}>
+                                                        Stok: {getStockForType(lpg.value)}
+                                                    </span>
                                                 </div>
                                             </div>
                                             {lpgType === lpg.value && <SafeIcon name="Check" className="absolute top-2 right-2 h-4 w-4 text-white" />}

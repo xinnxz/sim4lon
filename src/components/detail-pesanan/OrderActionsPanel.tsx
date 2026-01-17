@@ -105,7 +105,7 @@ export default function OrderActionsPanel({
                 )}
 
                 {/* Complete Order */}
-                {isDriverAssigned && !isCompleted && (
+                {isDriverAssigned && !isCompleted && !isCancelled && (
                     <Button
                         onClick={onCompleteOrder}
                         className="w-full bg-green-600 hover:bg-green-700"
