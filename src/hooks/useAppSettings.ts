@@ -9,10 +9,10 @@ import { useState, useEffect } from 'react'
 import { companyProfileApi } from '@/lib/api'
 
 export interface AppSettings {
-    ppnRate: number          // PPN percentage, e.g., 12 for 12%
-    criticalStockLimit: number
-    invoicePrefix: string
-    orderCodePrefix: string
+    ppnRate: number              // PPN percentage, e.g., 12 for 12%
+    criticalStockLimit: number   // Minimum stock before alert
+    paymentDueDays: number       // Days until payment is due (default: 7)
+    minOrderQuantity: number     // Minimum tabung per order (default: 1)
 }
 
 const APP_SETTINGS_KEY = 'app_settings_cache'
@@ -26,8 +26,8 @@ interface CachedSettings {
 const defaultSettings: AppSettings = {
     ppnRate: 12,
     criticalStockLimit: 10,
-    invoicePrefix: 'INV-',
-    orderCodePrefix: 'ORD-',
+    paymentDueDays: 7,
+    minOrderQuantity: 1,
 }
 
 /**
@@ -87,8 +87,8 @@ export function useAppSettings() {
                 const newSettings: AppSettings = {
                     ppnRate: Number(profile.ppn_rate) || defaultSettings.ppnRate,
                     criticalStockLimit: profile.critical_stock_limit || defaultSettings.criticalStockLimit,
-                    invoicePrefix: profile.invoice_prefix || defaultSettings.invoicePrefix,
-                    orderCodePrefix: profile.order_code_prefix || defaultSettings.orderCodePrefix,
+                    paymentDueDays: Number(profile.payment_due_days) || defaultSettings.paymentDueDays,
+                    minOrderQuantity: Number(profile.min_order_quantity) || defaultSettings.minOrderQuantity,
                 }
 
                 setSettings(newSettings)
@@ -120,8 +120,8 @@ export function useAppSettings() {
             const newSettings: AppSettings = {
                 ppnRate: Number(profile.ppn_rate) || defaultSettings.ppnRate,
                 criticalStockLimit: profile.critical_stock_limit || defaultSettings.criticalStockLimit,
-                invoicePrefix: profile.invoice_prefix || defaultSettings.invoicePrefix,
-                orderCodePrefix: profile.order_code_prefix || defaultSettings.orderCodePrefix,
+                paymentDueDays: Number(profile.payment_due_days) || defaultSettings.paymentDueDays,
+                minOrderQuantity: Number(profile.min_order_quantity) || defaultSettings.minOrderQuantity,
             }
 
             setSettings(newSettings)
@@ -153,8 +153,17 @@ export function getPpnRateFromCache(): number {
 }
 
 /**
+ * Utility function to get payment due days from cache
+ */
+export function getPaymentDueDaysFromCache(): number {
+    const cached = getCachedSettings()
+    return cached?.paymentDueDays ?? defaultSettings.paymentDueDays
+}
+
+/**
  * Clear settings cache (call after updating settings)
  */
 export function clearAppSettingsCache(): void {
     localStorage.removeItem(APP_SETTINGS_KEY)
 }
+

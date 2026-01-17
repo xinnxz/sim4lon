@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
 import { companyProfileApi } from '@/lib/api'
@@ -17,32 +16,28 @@ import { clearAppSettingsCache } from '@/hooks/useAppSettings'
  * 
  * Pengaturan khusus untuk operasional distribusi LPG:
  * - Batas stok kritis (untuk notifikasi)
- * - Prefix invoice
  * - PPN percentage
+ * - Jatuh tempo pembayaran
+ * - Minimum order per pesanan
  * - Notifikasi email
- * - Auto-generate kode
  */
 
 interface ApplicationState {
     criticalStockLimit: number
-    invoicePrefix: string
     ppnPercentage: number
-    priceRounding: string
+    paymentDueDays: number       // Batas hari jatuh tempo
+    minOrderQuantity: number     // Minimum tabung per pesanan
     emailNotifications: boolean
     stockAlerts: boolean
-    autoGenerateCode: boolean
-    orderCodePrefix: string
 }
 
 const initialSettings: ApplicationState = {
     criticalStockLimit: 10,
-    invoicePrefix: 'INV-',
-    ppnPercentage: 11,
-    priceRounding: '100',
+    ppnPercentage: 12,
+    paymentDueDays: 7,
+    minOrderQuantity: 1,
     emailNotifications: true,
     stockAlerts: true,
-    autoGenerateCode: true,
-    orderCodePrefix: 'PO-'
 }
 
 export default function ApplicationSettings() {
@@ -59,8 +54,8 @@ export default function ApplicationSettings() {
                     ...prev,
                     ppnPercentage: Number(profile.ppn_rate) || 12,
                     criticalStockLimit: profile.critical_stock_limit || 10,
-                    invoicePrefix: profile.invoice_prefix || 'INV-',
-                    orderCodePrefix: profile.order_code_prefix || 'ORD-',
+                    paymentDueDays: Number(profile.payment_due_days) || 7,
+                    minOrderQuantity: Number(profile.min_order_quantity) || 1,
                 }))
             } catch (error) {
                 console.error('Failed to load settings:', error)
@@ -83,8 +78,8 @@ export default function ApplicationSettings() {
             await companyProfileApi.update({
                 ppn_rate: settings.ppnPercentage,
                 critical_stock_limit: settings.criticalStockLimit,
-                invoice_prefix: settings.invoicePrefix,
-                order_code_prefix: settings.orderCodePrefix,
+                payment_due_days: settings.paymentDueDays,
+                min_order_quantity: settings.minOrderQuantity,
             })
             // Clear cache so other components get fresh data
             clearAppSettingsCache()
@@ -150,7 +145,7 @@ export default function ApplicationSettings() {
                 </CardContent>
             </Card>
 
-            {/* Invoice & Pricing Settings */}
+            {/* Pricing & Payment Settings */}
             <Card className="border shadow-sm">
                 <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
@@ -158,45 +153,12 @@ export default function ApplicationSettings() {
                             <SafeIcon name="Receipt" className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Invoice & Harga</CardTitle>
-                            <CardDescription>Pengaturan format invoice dan perhitungan harga</CardDescription>
+                            <CardTitle className="text-lg">Harga & Pembayaran</CardTitle>
+                            <CardDescription>Pengaturan pajak, pembayaran, dan biaya pengiriman</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-5">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="invoicePrefix" className="text-sm font-medium">
-                                Prefix Invoice
-                            </Label>
-                            <Input
-                                id="invoicePrefix"
-                                value={settings.invoicePrefix}
-                                onChange={(e) => handleChange('invoicePrefix', e.target.value)}
-                                placeholder="INV-"
-                                className="h-10"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Contoh hasil: {settings.invoicePrefix}2026-0001
-                            </p>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="orderCodePrefix" className="text-sm font-medium">
-                                Prefix Kode Pesanan
-                            </Label>
-                            <Input
-                                id="orderCodePrefix"
-                                value={settings.orderCodePrefix}
-                                onChange={(e) => handleChange('orderCodePrefix', e.target.value)}
-                                placeholder="PO-"
-                                className="h-10"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Contoh hasil: {settings.orderCodePrefix}2026-0001
-                            </p>
-                        </div>
-                    </div>
-
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                             <Label htmlFor="ppnPercentage" className="text-sm font-medium">
@@ -212,38 +174,57 @@ export default function ApplicationSettings() {
                                 className="h-10"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Tarif PPN yang berlaku untuk penjualan
+                                Tarif PPN untuk produk non-subsidi
                             </p>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="priceRounding" className="text-sm font-medium">
-                                Pembulatan Harga
+                            <Label htmlFor="paymentDueDays" className="text-sm font-medium">
+                                Jatuh Tempo Pembayaran (Hari)
                             </Label>
-                            <Select value={settings.priceRounding} onValueChange={(v) => handleChange('priceRounding', v)}>
-                                <SelectTrigger id="priceRounding" className="h-10">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="1">Tidak ada pembulatan</SelectItem>
-                                    <SelectItem value="100">Ke Rp 100 terdekat</SelectItem>
-                                    <SelectItem value="1000">Ke Rp 1.000 terdekat</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Input
+                                id="paymentDueDays"
+                                type="number"
+                                min="1"
+                                max="90"
+                                value={settings.paymentDueDays}
+                                onChange={(e) => handleChange('paymentDueDays', parseInt(e.target.value) || 7)}
+                                className="h-10"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Batas hari untuk pembayaran pesanan (default: 7 hari)
+                            </p>
                         </div>
                     </div>
 
-                    {/* Auto Generate Code Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border">
-                        <div className="space-y-1">
-                            <p className="font-medium text-sm">Auto-Generate Kode Pesanan</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="minOrderQuantity" className="text-sm font-medium">
+                                Minimum Order (Tabung)
+                            </Label>
+                            <Input
+                                id="minOrderQuantity"
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={settings.minOrderQuantity}
+                                onChange={(e) => handleChange('minOrderQuantity', parseInt(e.target.value) || 1)}
+                                className="h-10"
+                            />
                             <p className="text-xs text-muted-foreground">
-                                Buat kode pesanan secara otomatis saat membuat order baru
+                                Jumlah minimum tabung per pesanan (default: 1)
                             </p>
                         </div>
-                        <Switch
-                            checked={settings.autoGenerateCode}
-                            onCheckedChange={(checked) => handleChange('autoGenerateCode', checked)}
-                        />
+                    </div>
+
+                    {/* Info Box */}
+                    <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                        <SafeIcon name="Info" className="h-5 w-5 text-primary mt-0.5" />
+                        <div>
+                            <p className="text-sm font-medium text-foreground">Konfigurasi Pembayaran & Order</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Pesanan yang melewati jatuh tempo akan ditandai sebagai "overdue" di daftar pesanan. Pesanan dengan jumlah tabung kurang dari minimum akan ditolak.
+                            </p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -319,3 +300,4 @@ export default function ApplicationSettings() {
         </div>
     )
 }
+

@@ -413,8 +413,8 @@ export interface CompanyProfile {
     // App Settings
     ppn_rate: number;
     critical_stock_limit: number;
-    invoice_prefix: string;
-    order_code_prefix: string;
+    payment_due_days: number;       // Days until payment is due
+    min_order_quantity: number;     // Minimum tabung per order
     created_at: string;
     updated_at: string;
 }
