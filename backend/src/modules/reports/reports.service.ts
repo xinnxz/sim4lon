@@ -410,7 +410,7 @@ export class ReportsService {
             total_orders_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_consumer_orders, 0),
             total_tabung_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_tabung_to_consumers, 0),
             total_revenue_subsidi: pangkalanStats.reduce((sum, p) => sum + p.total_revenue, 0),
-            // Non-Subsidi (5.5kg+) - untuk business overview
+            // Non-Subsidi - untuk business overview
             total_nonsubsidi_orders: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_orders, 0),
             total_nonsubsidi_tabung: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_tabung, 0),
             total_nonsubsidi_revenue: pangkalanStats.reduce((sum, p) => sum + p.total_nonsubsidi_revenue, 0),

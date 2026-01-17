@@ -537,7 +537,7 @@ export interface PangkalanReportSummary {
     total_orders_subsidi: number;
     total_tabung_subsidi: number;
     total_revenue_subsidi: number;
-    // Non-Subsidi (5.5kg+)
+    // Non-Subsidi
     total_nonsubsidi_orders: number;
     total_nonsubsidi_tabung: number;
     total_nonsubsidi_revenue: number;

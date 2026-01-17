@@ -67,7 +67,7 @@ export default function PangkalanListPage() {
   const [pageSize, setPageSize] = useState<PageSize>(10) // Default 10 items per page
   // Stats counts (dari backend - selalu menampilkan total sebenarnya)
   const [aktivCount, setAktivCount] = useState(0)
-  const [nonaktifCount, setNonaktifCount] = useState(0)
+  const [totalAlokasi, setTotalAlokasi] = useState(0)
 
   // State untuk filter dan search
   const [searchTerm, setSearchTerm] = useState('')
@@ -150,7 +150,7 @@ export default function PangkalanListPage() {
       setTotalPages(response.meta.totalPages)
       // Set stats from backend meta (true totals, not affected by filter)
       setAktivCount(response.meta.totalActive || 0)
-      setNonaktifCount(response.meta.totalInactive || 0)
+      setTotalAlokasi((response.meta as any).totalAlokasi || 0)
     } catch (error) {
       console.error('Failed to fetch pangkalan:', error)
       toast.error('Gagal memuat data pangkalan')
@@ -288,12 +288,12 @@ export default function PangkalanListPage() {
               <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
                 <CardContent className="p-2 sm:p-4">
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
-                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-rose-500/10 dark:bg-rose-500/15">
-                      <SafeIcon name="XCircle" className="w-4 h-4 sm:w-5 sm:h-5 text-rose-600 dark:text-rose-400" />
+                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/15">
+                      <SafeIcon name="Package" className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div className="text-center sm:text-left">
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">Nonaktif</p>
-                      <p className="text-lg sm:text-2xl font-bold text-rose-600 dark:text-rose-400"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Total Alokasi</p>
+                      <p className="text-lg sm:text-2xl font-bold text-amber-600 dark:text-amber-400"><AnimatedNumber value={totalAlokasi} delay={300} /></p>
                     </div>
                   </div>
                 </CardContent>

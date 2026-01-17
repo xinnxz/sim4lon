@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import SafeIcon from '@/components/common/SafeIcon'
 import Tilt3DCard from '@/components/dashboard-admin/Tilt3DCard'
 import AnimatedNumber from '@/components/common/AnimatedNumber'
@@ -16,6 +17,10 @@ import {
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { exportToPDF, exportToExcel, formatCurrencyExport, formatDateExport, createFooterRow } from '@/lib/export-utils'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+
+// Pie chart colors
+const PIE_COLORS = ['#10b981', '#14b8a6', '#0ea5e9', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1']
 
 interface PangkalanTabContentProps {
     dateRange: { start: string; end: string }
@@ -63,6 +68,7 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
     const [selectedPangkalanId, setSelectedPangkalanId] = useState<string>('')
     const [isLoading, setIsLoading] = useState(initialLoading)
     const [isLoadingConsumers, setIsLoadingConsumers] = useState(false)
+    const [isRefreshing, setIsRefreshing] = useState(false)
 
     // Sub-tab state
     const [activeSubTab, setActiveSubTab] = useState<SubTabType>(getInitialSubTab)
@@ -108,27 +114,37 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
         }
     }
 
-    // Fetch pangkalan data
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true)
-            try {
-                const data = await reportsApi.getPangkalanReport(dateRange.start, dateRange.end)
-                setPangkalanData(data)
-                setSelectedPangkalanId('')
-                setConsumersData(null)
-                // Notify parent of total pangkalan
-                if (onSummaryLoad && data?.summary?.total_pangkalan) {
-                    onSummaryLoad(data.summary.total_pangkalan)
-                }
-            } catch (error: any) {
-                toast.error(error.message || 'Gagal memuat data pangkalan')
-            } finally {
-                setIsLoading(false)
+    // Fetch pangkalan data function (reusable for refresh)
+    const fetchPangkalanData = async (showRefreshState = false) => {
+        if (showRefreshState) setIsRefreshing(true)
+        else setIsLoading(true)
+        try {
+            const data = await reportsApi.getPangkalanReport(dateRange.start, dateRange.end)
+            setPangkalanData(data)
+            setSelectedPangkalanId('')
+            setConsumersData(null)
+            // Notify parent of total pangkalan
+            if (onSummaryLoad && data?.summary?.total_pangkalan) {
+                onSummaryLoad(data.summary.total_pangkalan)
             }
+            if (showRefreshState) toast.success('Data berhasil diperbarui')
+        } catch (error: any) {
+            toast.error(error.message || 'Gagal memuat data pangkalan')
+        } finally {
+            setIsLoading(false)
+            setIsRefreshing(false)
         }
-        fetchData()
-    }, [dateRange.start, dateRange.end, onSummaryLoad])
+    }
+
+    // Initial fetch
+    useEffect(() => {
+        fetchPangkalanData()
+    }, [dateRange.start, dateRange.end])
+
+    // Refresh handler
+    const handleRefresh = () => {
+        fetchPangkalanData(true)
+    }
 
     // Fetch consumers for selected pangkalan (subsidi only)
     const fetchConsumers = async (pangkalanId: string) => {
@@ -153,29 +169,30 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
         fetchConsumers(pangkalanId)
     }
 
-    // Helper function to extract kabupaten from full region string
-    const extractKabupaten = (region: string): string => {
-        // Format: "Kec. X, Kab. Y" or "Kab. Y" or just "Y"
-        const kabMatch = region.match(/Kab(?:upaten)?\.?\s*([^\,]+)/i);
-        if (kabMatch) return `Kab. ${kabMatch[1].trim()}`;
+    // Helper function to extract kecamatan from full region string
+    const extractKecamatan = (region: string): string => {
+        // Format: "Kec. X, Kab. Y" or "Kecamatan X, Kabupaten Y"
+        const kecMatch = region.match(/Kec(?:amatan)?\\.?\\s*([^\\,]+)/i);
+        if (kecMatch) return `Kec. ${kecMatch[1].trim()}`;
 
-        const kotaMatch = region.match(/Kota\.?\s*([^\,]+)/i);
-        if (kotaMatch) return `Kota ${kotaMatch[1].trim()}`;
+        // If no kecamatan found, try to return first part before comma
+        const parts = region.split(',');
+        if (parts.length > 0) return parts[0].trim();
 
         // If no pattern matches, return original
         return region;
     }
 
-    // Get unique kabupaten for filter (extracted from region)
-    const kabupatenList = useMemo(() => {
+    // Get unique kecamatan for filter (extracted from region)
+    const kecamatanList = useMemo(() => {
         if (!pangkalanData?.data) return []
-        const kabupatenSet = new Set<string>()
+        const kecamatanSet = new Set<string>()
         pangkalanData.data.forEach(p => {
             if (p.region && p.region !== '-') {
-                kabupatenSet.add(extractKabupaten(p.region))
+                kecamatanSet.add(extractKecamatan(p.region))
             }
         })
-        return Array.from(kabupatenSet).sort()
+        return Array.from(kecamatanSet).sort()
     }, [pangkalanData])
 
     // Filter and sort data based on active sub-tab and user sorting
@@ -194,9 +211,9 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
             )
         }
 
-        // Apply kabupaten filter
+        // Apply kecamatan filter
         if (regionFilter !== 'ALL') {
-            filtered = filtered.filter(p => extractKabupaten(p.region) === regionFilter)
+            filtered = filtered.filter(p => extractKecamatan(p.region) === regionFilter)
         }
 
         // Dynamic sorting based on sortBy and sortOrder
@@ -245,21 +262,23 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
 
     const handleExportPDF = async () => {
         try {
-            const subTabLabel = activeSubTab === 'subsidi' ? 'Subsidi (3kg)' : 'Non-Subsidi (5.5kg+)'
+            const subTabLabel = activeSubTab === 'subsidi' ? 'Subsidi (3kg)' : 'Non-Subsidi'
             const title = `Laporan Pangkalan - ${subTabLabel}`
             const period = getPeriodLabel()
             const filename = `laporan-pangkalan-${activeSubTab}-${new Date().toISOString().split('T')[0]}`
 
             const columns = [
+                { header: 'No.', key: 'no', width: 6, align: 'center' as const },
                 { header: 'Kode', key: 'code', width: 12 },
-                { header: 'Pangkalan', key: 'name', width: 25 },
-                { header: 'Wilayah', key: 'region', width: 25 },
-                { header: 'Transaksi', key: 'transactions', width: 12, align: 'center' as const },
-                { header: 'Tabung', key: 'tabung', width: 12, align: 'center' as const },
+                { header: 'Pangkalan', key: 'name', width: 22 },
+                { header: 'Wilayah', key: 'region', width: 22 },
+                { header: 'Transaksi', key: 'transactions', width: 10, align: 'center' as const },
+                { header: 'Tabung', key: 'tabung', width: 10, align: 'center' as const },
                 { header: 'Pendapatan', key: 'revenue', width: 18, align: 'right' as const },
             ]
 
-            const data = filteredData.map(item => ({
+            const data = filteredData.map((item, index) => ({
+                no: index + 1,
                 code: item.code,
                 name: item.name,
                 region: item.region || '-',
@@ -318,21 +337,23 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
 
     const handleExportExcel = () => {
         try {
-            const subTabLabel = activeSubTab === 'subsidi' ? 'Subsidi (3kg)' : 'Non-Subsidi (5.5kg+)'
+            const subTabLabel = activeSubTab === 'subsidi' ? 'Subsidi (3kg)' : 'Non-Subsidi'
             const title = `Laporan Pangkalan - ${subTabLabel}`
             const period = getPeriodLabel()
             const filename = `laporan-pangkalan-${activeSubTab}-${new Date().toISOString().split('T')[0]}`
 
             const columns = [
+                { header: 'No.', key: 'no', width: 6 },
                 { header: 'Kode', key: 'code', width: 12 },
-                { header: 'Pangkalan', key: 'name', width: 25 },
-                { header: 'Wilayah', key: 'region', width: 25 },
-                { header: 'Transaksi', key: 'transactions', width: 12 },
-                { header: 'Tabung', key: 'tabung', width: 12 },
+                { header: 'Pangkalan', key: 'name', width: 22 },
+                { header: 'Wilayah', key: 'region', width: 22 },
+                { header: 'Transaksi', key: 'transactions', width: 10 },
+                { header: 'Tabung', key: 'tabung', width: 10 },
                 { header: 'Pendapatan', key: 'revenue', width: 18 },
             ]
 
-            const data = filteredData.map(item => ({
+            const data = filteredData.map((item, index) => ({
+                no: index + 1,
                 code: item.code,
                 name: item.name,
                 region: item.region || '-',
@@ -384,272 +405,650 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
         }
     }
 
+    // Export ALL data (tanpa filter)
+    const handleExportAllPDF = async () => {
+        if (!pangkalanData?.data?.length) return
+        try {
+            const title = `Laporan Pangkalan - Semua Data`
+            const period = getPeriodLabel()
+            const filename = `laporan-pangkalan-all-${new Date().toISOString().split('T')[0]}`
+
+            const columns = [
+                { header: 'No.', key: 'no', width: 6, align: 'center' as const },
+                { header: 'Kode', key: 'code', width: 10 },
+                { header: 'Pangkalan', key: 'name', width: 20 },
+                { header: 'Wilayah', key: 'region', width: 20 },
+                { header: 'Subsidi', key: 'tabung_subsidi', width: 10, align: 'center' as const },
+                { header: 'Non-Subsidi', key: 'tabung_nonsubsidi', width: 10, align: 'center' as const },
+                { header: 'Total', key: 'tabung_total', width: 8, align: 'center' as const },
+                { header: 'Pendapatan', key: 'revenue', width: 16, align: 'right' as const },
+            ]
+
+            const data = pangkalanData.data.map((item, index) => ({
+                no: index + 1,
+                code: item.code,
+                name: item.name,
+                region: item.region || '-',
+                tabung_subsidi: item.total_tabung_to_consumers,
+                tabung_nonsubsidi: item.total_nonsubsidi_tabung,
+                tabung_total: item.total_all_tabung,
+                revenue: formatCurrencyExport(item.total_all_revenue),
+            }))
+
+            const summary = [
+                { label: 'Total Pangkalan', value: pangkalanData.summary.total_pangkalan },
+                { label: 'Total Tabung Subsidi', value: pangkalanData.summary.total_tabung_subsidi },
+                { label: 'Total Tabung Non-Subsidi', value: pangkalanData.summary.total_nonsubsidi_tabung },
+                { label: 'Total Pendapatan', value: formatCurrencyExport(pangkalanData.summary.total_all_revenue) },
+            ]
+
+            const footerRows = [
+                createFooterRow('TOTAL', {
+                    name: `${pangkalanData.summary.total_pangkalan} Pangkalan`,
+                    region: '',
+                    tabung_subsidi: pangkalanData.summary.total_tabung_subsidi,
+                    tabung_nonsubsidi: pangkalanData.summary.total_nonsubsidi_tabung,
+                    tabung_total: pangkalanData.summary.total_all_tabung,
+                    revenue: formatCurrencyExport(pangkalanData.summary.total_all_revenue),
+                }, 'code'),
+            ]
+
+            await exportToPDF(data, columns, summary, { title, period, filename }, footerRows)
+            toast.success('PDF semua data berhasil diexport!')
+        } catch (error) {
+            console.error('Export All PDF error:', error)
+            toast.error('Gagal export PDF')
+        }
+    }
+
+    const handleExportAllExcel = () => {
+        if (!pangkalanData?.data?.length) return
+        try {
+            const title = `Laporan Pangkalan - Semua Data`
+            const period = getPeriodLabel()
+            const filename = `laporan-pangkalan-all-${new Date().toISOString().split('T')[0]}`
+
+            const columns = [
+                { header: 'No.', key: 'no', width: 6 },
+                { header: 'Kode', key: 'code', width: 10 },
+                { header: 'Pangkalan', key: 'name', width: 22 },
+                { header: 'Wilayah', key: 'region', width: 22 },
+                { header: 'Tabung Subsidi', key: 'tabung_subsidi', width: 12 },
+                { header: 'Tabung Non-Subsidi', key: 'tabung_nonsubsidi', width: 15 },
+                { header: 'Total Tabung', key: 'tabung_total', width: 10 },
+                { header: 'Pendapatan', key: 'revenue', width: 15 },
+            ]
+
+            const data = pangkalanData.data.map((item, index) => ({
+                no: index + 1,
+                code: item.code,
+                name: item.name,
+                region: item.region || '-',
+                tabung_subsidi: item.total_tabung_to_consumers,
+                tabung_nonsubsidi: item.total_nonsubsidi_tabung,
+                tabung_total: item.total_all_tabung,
+                revenue: item.total_all_revenue,
+            }))
+
+            const summary = [
+                { label: 'Total Pangkalan', value: pangkalanData.summary.total_pangkalan },
+                { label: 'Total Tabung Subsidi', value: pangkalanData.summary.total_tabung_subsidi },
+                { label: 'Total Tabung Non-Subsidi', value: pangkalanData.summary.total_nonsubsidi_tabung },
+                { label: 'Total Pendapatan', value: pangkalanData.summary.total_all_revenue },
+            ]
+
+            const footerRows = [
+                createFooterRow('TOTAL', {
+                    name: `${pangkalanData.summary.total_pangkalan} Pangkalan`,
+                    region: '',
+                    tabung_subsidi: pangkalanData.summary.total_tabung_subsidi,
+                    tabung_nonsubsidi: pangkalanData.summary.total_nonsubsidi_tabung,
+                    tabung_total: pangkalanData.summary.total_all_tabung,
+                    revenue: pangkalanData.summary.total_all_revenue,
+                }, 'code'),
+            ]
+
+            exportToExcel(data, columns, summary, { title, period, filename }, footerRows)
+            toast.success('Excel semua data berhasil diexport!')
+        } catch (error) {
+            console.error('Export All Excel error:', error)
+            toast.error('Gagal export Excel')
+        }
+    }
+
+    // Export Consumer Audit PDF
+    const handleExportConsumerPDF = async () => {
+        if (!consumersData?.data?.length) return
+        try {
+            const pangkalanName = consumersData.summary.pangkalan_name
+            const title = `Audit Konsumen Subsidi - ${pangkalanName}`
+            const period = getPeriodLabel()
+            const filename = `audit-konsumen-${consumersData.summary.pangkalan_code}-${new Date().toISOString().split('T')[0]}`
+
+            const columns = [
+                { header: 'No.', key: 'no', width: 6, align: 'center' as const },
+                { header: 'Nama', key: 'name', width: 22 },
+                { header: 'NIK', key: 'nik', width: 18 },
+                { header: 'No. HP', key: 'phone', width: 14 },
+                { header: 'Tipe', key: 'type', width: 10 },
+                { header: 'Pembelian', key: 'purchases', width: 10, align: 'center' as const },
+                { header: 'Tabung', key: 'tabung', width: 8, align: 'center' as const },
+                { header: 'Terakhir', key: 'last_purchase', width: 12 },
+            ]
+
+            const data = consumersData.data.map((c, index) => ({
+                no: index + 1,
+                name: c.name,
+                nik: c.nik || '-',
+                phone: c.phone || '-',
+                type: c.consumer_type === 'WARUNG' ? 'Warung' : c.consumer_type === 'RUMAH_TANGGA' ? 'RT' : 'Walk-in',
+                purchases: c.total_purchases,
+                tabung: c.total_tabung,
+                last_purchase: formatDateExport(c.last_purchase),
+            }))
+
+            const summary = [
+                { label: 'Pangkalan', value: pangkalanName },
+                { label: 'Total Konsumen', value: consumersData.summary.total_consumers },
+                { label: 'Terdaftar', value: consumersData.summary.registered_consumers },
+                { label: 'Total Transaksi', value: consumersData.summary.total_transactions },
+                { label: 'Total Tabung', value: consumersData.summary.total_tabung },
+            ]
+
+            const footerRows = [
+                createFooterRow('TOTAL', {
+                    nik: '',
+                    phone: '',
+                    type: '',
+                    purchases: consumersData.summary.total_transactions,
+                    tabung: consumersData.summary.total_tabung,
+                    last_purchase: '',
+                }, 'name'),
+            ]
+
+            await exportToPDF(data, columns, summary, { title, period, filename }, footerRows)
+            toast.success('PDF Audit Konsumen berhasil diexport!')
+        } catch (error) {
+            console.error('Export Consumer PDF error:', error)
+            toast.error('Gagal export PDF')
+        }
+    }
+
+    // Export Consumer Audit Excel
+    const handleExportConsumerExcel = () => {
+        if (!consumersData?.data?.length) return
+        try {
+            const pangkalanName = consumersData.summary.pangkalan_name
+            const title = `Audit Konsumen Subsidi - ${pangkalanName}`
+            const period = getPeriodLabel()
+            const filename = `audit-konsumen-${consumersData.summary.pangkalan_code}-${new Date().toISOString().split('T')[0]}`
+
+            const columns = [
+                { header: 'No.', key: 'no', width: 6 },
+                { header: 'Nama', key: 'name', width: 22 },
+                { header: 'NIK', key: 'nik', width: 18 },
+                { header: 'No. HP', key: 'phone', width: 14 },
+                { header: 'Tipe', key: 'type', width: 10 },
+                { header: 'Pembelian', key: 'purchases', width: 10 },
+                { header: 'Tabung', key: 'tabung', width: 8 },
+                { header: 'Terakhir', key: 'last_purchase', width: 12 },
+            ]
+
+            const data = consumersData.data.map((c, index) => ({
+                no: index + 1,
+                name: c.name,
+                nik: c.nik || '-',
+                phone: c.phone || '-',
+                type: c.consumer_type === 'WARUNG' ? 'Warung' : c.consumer_type === 'RUMAH_TANGGA' ? 'RT' : 'Walk-in',
+                purchases: c.total_purchases,
+                tabung: c.total_tabung,
+                last_purchase: formatDateExport(c.last_purchase),
+            }))
+
+            const summary = [
+                { label: 'Pangkalan', value: pangkalanName },
+                { label: 'Total Konsumen', value: consumersData.summary.total_consumers },
+                { label: 'Terdaftar', value: consumersData.summary.registered_consumers },
+                { label: 'Total Transaksi', value: consumersData.summary.total_transactions },
+                { label: 'Total Tabung', value: consumersData.summary.total_tabung },
+            ]
+
+            const footerRows = [
+                createFooterRow('TOTAL', {
+                    nik: '',
+                    phone: '',
+                    type: '',
+                    purchases: consumersData.summary.total_transactions,
+                    tabung: consumersData.summary.total_tabung,
+                    last_purchase: '',
+                }, 'name'),
+            ]
+
+            exportToExcel(data, columns, summary, { title, period, filename }, footerRows)
+            toast.success('Excel Audit Konsumen berhasil diexport!')
+        } catch (error) {
+            console.error('Export Consumer Excel error:', error)
+            toast.error('Gagal export Excel')
+        }
+    }
+
+    // Compute kecamatan distribution for pie chart
+    const wilayahDistribution = useMemo(() => {
+        if (!pangkalanData?.data) return []
+        const distribution: Record<string, { name: string; tabung: number; revenue: number }> = {}
+        pangkalanData.data.forEach(p => {
+            const kecamatan = extractKecamatan(p.region) || 'Lainnya'
+            if (!distribution[kecamatan]) {
+                distribution[kecamatan] = { name: kecamatan, tabung: 0, revenue: 0 }
+            }
+            distribution[kecamatan].tabung += activeSubTab === 'subsidi' ? p.total_tabung_to_consumers : p.total_nonsubsidi_tabung
+            distribution[kecamatan].revenue += activeSubTab === 'subsidi' ? p.total_revenue : p.total_nonsubsidi_revenue
+        })
+        return Object.values(distribution).sort((a, b) => b.tabung - a.tabung)
+    }, [pangkalanData, activeSubTab])
+
     return (
-        <div className="space-y-6">
-            {/* ===== CORE SUMMARY CARDS (Always Visible) ===== */}
-            <div>
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-primary to-emerald-500" />
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Overview Pangkalan</h3>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow">
-                        <div className="p-5 relative">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pangkalan</p>
-                                    <p className="text-3xl font-bold text-primary mt-2">
-                                        {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_pangkalan || 0} delay={100} />}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">Pangkalan aktif</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30" style={{ boxShadow: '0 4px 12px -2px hsl(152 100% 30% / 0.3)' }}>
-                                    <SafeIcon name="Store" className="h-5 w-5 text-primary" />
-                                </div>
+        <div className="space-y-4 sm:space-y-6">
+            {/* ===== CORE SUMMARY CARDS ===== */}
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+                <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow">
+                    <div className="p-3 sm:p-5 relative">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pangkalan</p>
+                                <p className="text-xl sm:text-3xl font-bold text-primary mt-1 sm:mt-2">
+                                    {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_pangkalan || 0} delay={100} />}
+                                </p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Pangkalan aktif</p>
                             </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-300 via-primary to-emerald-300" />
-                        </div>
-                    </Tilt3DCard>
-                    <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
-                        <div className="p-5 relative">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Transaksi</p>
-                                    <p className="text-3xl font-bold text-teal-600 dark:text-teal-400 mt-2">
-                                        {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_all_orders || 0} delay={200} />}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">Semua tipe LPG</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30" style={{ boxShadow: '0 4px 12px -2px rgba(20,184,166,0.3)' }}>
-                                    <SafeIcon name="ShoppingCart" className="h-5 w-5 text-teal-600 dark:text-teal-400" />
-                                </div>
+                            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30" style={{ boxShadow: '0 4px 12px -2px hsl(152 100% 30% / 0.3)' }}>
+                                <SafeIcon name="Store" className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                             </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
                         </div>
-                    </Tilt3DCard>
-                    <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
-                        <div className="p-5 relative">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Tabung</p>
-                                    <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
-                                        {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_all_tabung || 0} delay={300} />}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">Keseluruhan jenis tabung</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30" style={{ boxShadow: '0 4px 12px -2px rgba(16,185,129,0.3)' }}>
-                                    <SafeIcon name="Boxes" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-emerald-300 via-primary to-emerald-300" />
+                    </div>
+                </Tilt3DCard>
+                <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-2 card-hover-glow">
+                    <div className="p-3 sm:p-5 relative">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Transaksi</p>
+                                <p className="text-xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400 mt-1 sm:mt-2">
+                                    {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_all_orders || 0} delay={200} />}
+                                </p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Semua tipe LPG</p>
                             </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-300" />
-                        </div>
-                    </Tilt3DCard>
-                    <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
-                        <div className="p-5 relative">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
-                                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-2">
-                                        {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_all_revenue || 0} delay={400} isCurrency />}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">Revenue keseluruhan</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-yellow-200 dark:from-amber-900/30 dark:to-yellow-800/30" style={{ boxShadow: '0 4px 12px -2px hsl(48 100% 50% / 0.3)' }}>
-                                    <SafeIcon name="Wallet" className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                                </div>
+                            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30" style={{ boxShadow: '0 4px 12px -2px rgba(20,184,166,0.3)' }}>
+                                <SafeIcon name="ShoppingCart" className="h-4 w-4 sm:h-5 sm:w-5 text-teal-600 dark:text-teal-400" />
                             </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-300" />
                         </div>
-                    </Tilt3DCard>
-                </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
+                    </div>
+                </Tilt3DCard>
+                <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-3 card-hover-glow">
+                    <div className="p-3 sm:p-5 relative">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Tabung</p>
+                                <p className="text-xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 sm:mt-2">
+                                    {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_all_tabung || 0} delay={300} />}
+                                </p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Keseluruhan jenis tabung</p>
+                                <p className="text-[10px] text-muted-foreground mt-0.5 sm:hidden">Semua jenis</p>
+                            </div>
+                            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30" style={{ boxShadow: '0 4px 12px -2px rgba(16,185,129,0.3)' }}>
+                                <SafeIcon name="Boxes" className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-300" />
+                    </div>
+                </Tilt3DCard>
+                <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden animate-slideInBlur stagger-4 card-hover-glow">
+                    <div className="p-3 sm:p-5 relative">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Pendapatan</p>
+                                <p className="text-lg sm:text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 sm:mt-2">
+                                    {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_all_revenue || 0} delay={400} isCurrency />}
+                                </p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Revenue keseluruhan</p>
+                                <p className="text-[10px] text-muted-foreground mt-0.5 sm:hidden">Revenue total</p>
+                            </div>
+                            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 to-yellow-200 dark:from-amber-900/30 dark:to-yellow-800/30" style={{ boxShadow: '0 4px 12px -2px hsl(48 100% 50% / 0.3)' }}>
+                                <SafeIcon name="Wallet" className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
+                            </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-300" />
+                    </div>
+                </Tilt3DCard>
             </div>
 
             {/* ===== SUB-TAB SWITCHER ===== */}
-            <div className="flex gap-2">
-                <Button
-                    variant={activeSubTab === 'subsidi' ? 'default' : 'outline'}
-                    className={activeSubTab === 'subsidi'
-                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 shadow-lg'
-                        : 'hover:bg-green-50 dark:hover:bg-green-900/20'}
-                    onClick={() => handleSubTabChange('subsidi')}
-                >
-                    <SafeIcon name="Shield" className="w-4 h-4 mr-2" />
-                    LPG Subsidi (3kg)
-                    <Badge variant="secondary" className="ml-2 bg-white/20 text-inherit">
-                        {pangkalanData?.summary.total_tabung_subsidi || 0}
-                    </Badge>
-                </Button>
-                <Button
-                    variant={activeSubTab === 'nonsubsidi' ? 'default' : 'outline'}
-                    className={activeSubTab === 'nonsubsidi'
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg'
-                        : 'hover:bg-amber-50 dark:hover:bg-amber-900/20'}
-                    onClick={() => handleSubTabChange('nonsubsidi')}
-                >
-                    <SafeIcon name="Flame" className="w-4 h-4 mr-2" />
-                    LPG Non-Subsidi
-                    <Badge variant="secondary" className="ml-2 bg-white/20 text-inherit">
-                        {pangkalanData?.summary.total_nonsubsidi_tabung || 0}
-                    </Badge>
-                </Button>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="flex gap-2 min-w-max">
+                    <Button
+                        variant={activeSubTab === 'subsidi' ? 'default' : 'outline'}
+                        size="sm"
+                        className={`h-8 sm:h-10 text-xs sm:text-sm ${activeSubTab === 'subsidi'
+                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 shadow-lg'
+                            : 'hover:bg-green-50 dark:hover:bg-green-900/20'}`}
+                        onClick={() => handleSubTabChange('subsidi')}
+                    >
+                        <SafeIcon name="Shield" className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">LPG Subsidi (3kg)</span>
+                        <span className="sm:hidden">Subsidi 3kg</span>
+                        <Badge variant="secondary" className="ml-1.5 sm:ml-2 bg-white/20 text-inherit text-[10px] sm:text-xs">
+                            {pangkalanData?.summary.total_tabung_subsidi || 0}
+                        </Badge>
+                    </Button>
+                    <Button
+                        variant={activeSubTab === 'nonsubsidi' ? 'default' : 'outline'}
+                        size="sm"
+                        className={`h-8 sm:h-10 text-xs sm:text-sm ${activeSubTab === 'nonsubsidi'
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg'
+                            : 'hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
+                        onClick={() => handleSubTabChange('nonsubsidi')}
+                    >
+                        <SafeIcon name="Flame" className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">LPG Non-Subsidi</span>
+                        <span className="sm:hidden">Non-Subsidi</span>
+                        <Badge variant="secondary" className="ml-1.5 sm:ml-2 bg-white/20 text-inherit text-[10px] sm:text-xs">
+                            {pangkalanData?.summary.total_nonsubsidi_tabung || 0}
+                        </Badge>
+                    </Button>
+                </div>
             </div>
+
+            {/* ===== PERIOD BADGE + EXPORT & REFRESH (TOP) ===== */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700 text-xs">
+                    <SafeIcon name="Calendar" className="h-3 w-3 mr-1" />
+                    Periode: {getPeriodLabel()}
+                </Badge>
+                <div className="flex items-center gap-2">
+                    {/* Refresh Button */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRefresh}
+                        disabled={isLoading || isRefreshing}
+                        className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                        title="Refresh data"
+                    >
+                        <SafeIcon name="RefreshCw" className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    </Button>
+                    {/* Export Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isLoading || !pangkalanData?.data?.length}
+                                className="h-8 text-xs border-primary/30 text-primary hover:bg-primary/10"
+                            >
+                                <SafeIcon name="Download" className="h-3.5 w-3.5 mr-1" />
+                                Export
+                                <SafeIcon name="ChevronDown" className="h-3 w-3 ml-1" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
+                                {activeSubTab === 'subsidi' ? '1. Subsidi PDF' : '1. Non-Subsidi PDF'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
+                                {activeSubTab === 'subsidi' ? '2. Subsidi Excel' : '2. Non-Subsidi Excel'}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleExportAllPDF} className="cursor-pointer">
+                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-blue-500" />
+                                3. Semua Data (PDF)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportAllExcel} className="cursor-pointer">
+                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-blue-500" />
+                                4. Semua Data (Excel)
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </div>
+
+            {/* ===== BREAKDOWN TABUNG BY TYPE ===== */}
+            {pangkalanData?.summary.tabung_by_type && (
+                <div className="glass-card rounded-xl p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <SafeIcon name="Package" className="h-4 w-4 text-primary" />
+                        <span className="text-xs sm:text-sm font-semibold text-muted-foreground">Breakdown Tabung per Jenis</span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2 sm:gap-3">
+                        {[
+                            { label: '3kg', value: pangkalanData.summary.tabung_by_type.kg3, color: 'bg-green-100 dark:bg-green-900/30', image: '/images/products/lpg-3kg.png' },
+                            { label: '5.5kg', value: pangkalanData.summary.tabung_by_type.kg5, color: 'bg-blue-100 dark:bg-blue-900/30', image: '/images/products/lpg-5kg.png' },
+                            { label: '12kg', value: pangkalanData.summary.tabung_by_type.kg12, color: 'bg-amber-100 dark:bg-amber-900/30', image: '/images/products/lpg-12kg.png' },
+                            { label: '50kg', value: pangkalanData.summary.tabung_by_type.kg50, color: 'bg-orange-100 dark:bg-orange-900/30', image: '/images/products/lpg-50kg.png' },
+                            { label: '220gr', value: pangkalanData.summary.tabung_by_type.gr220, color: 'bg-purple-100 dark:bg-purple-900/30', image: '/images/products/bright-gas-220gr.png' },
+                        ].map((item) => (
+                            <div key={item.label} className={`rounded-lg p-2 sm:p-3 text-center ${item.color}`}>
+                                <img
+                                    src={item.image}
+                                    alt={item.label}
+                                    className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-1 object-contain"
+                                />
+                                <p className="text-lg sm:text-xl font-bold text-foreground">{item.value.toLocaleString('id-ID')}</p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground">{item.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* ===== PIE CHART DISTRIBUTION ===== */}
+            {wilayahDistribution.length > 0 && (
+                <Card className="glass-card rounded-2xl overflow-hidden">
+                    <CardHeader className="pb-2 border-b border-border/50">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <CardTitle className="text-base sm:text-lg font-semibold">Distribusi per Kecamatan</CardTitle>
+                            <Badge variant="outline" className="ml-auto text-[10px] sm:text-xs">
+                                {activeSubTab === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}
+                            </Badge>
+                        </div>
+                        <CardDescription className="text-xs sm:text-sm">
+                            Distribusi tabung berdasarkan kecamatan
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4">
+                        <div className="h-[200px] sm:h-[250px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={wilayahDistribution}
+                                        dataKey="tabung"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={80}
+                                        label={({ name, percent }) => `${name.replace('Kec. ', '').replace('Kab. ', '').replace('Kota ', '')} ${(percent * 100).toFixed(0)}%`}
+                                        labelLine={false}
+                                    >
+                                        {wilayahDistribution.map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(value: number) => [value.toLocaleString('id-ID'), 'Tabung']}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                                    />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                        formatter={(value) => <span className="text-xs">{value}</span>}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* ===== SUB-TAB SPECIFIC CARDS ===== */}
             {activeSubTab === 'subsidi' ? (
                 <div>
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="hidden sm:flex items-center gap-2 mb-3">
                         <div className="w-3 h-3 rounded-full bg-green-500" />
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Distribusi Subsidi (3kg)</h3>
                         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs dark:bg-green-900/30 dark:text-green-400 dark:border-green-700">Audit Focus</Badge>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-1">
-                            <div className="p-5 relative">
+                    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-1">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi Subsidi</p>
-                                        <p className="text-3xl font-bold text-green-600 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi Subsidi</p>
+                                        <p className="text-xl sm:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_orders_subsidi || 0} delay={100} />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Transaksi 3kg</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Transaksi 3kg</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
-                                        <SafeIcon name="ShoppingBag" className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
+                                        <SafeIcon name="ShoppingBag" className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-2">
-                            <div className="p-5 relative">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-2">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung Subsidi</p>
-                                        <p className="text-3xl font-bold text-teal-600 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung Subsidi</p>
+                                        <p className="text-xl sm:text-3xl font-bold text-teal-600 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_tabung_subsidi || 0} delay={200} />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Tabung 3kg terdistribusi</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Tabung 3kg terdistribusi</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 sm:hidden">Terdistribusi</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30">
-                                        <SafeIcon name="Package" className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30">
+                                        <SafeIcon name="Package" className="h-4 w-4 sm:h-5 sm:w-5 text-teal-600 dark:text-teal-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-3">
-                            <div className="p-5 relative">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-3">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan Subsidi</p>
-                                        <p className="text-2xl font-bold text-lime-600 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan Subsidi</p>
+                                        <p className="text-lg sm:text-2xl font-bold text-lime-600 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_revenue_subsidi || 0} delay={300} isCurrency />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Revenue 3kg</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Revenue 3kg</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-lime-100 to-lime-200 dark:from-lime-900/30 dark:to-lime-800/30">
-                                        <SafeIcon name="CircleDollarSign" className="h-5 w-5 text-lime-600 dark:text-lime-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-lime-100 to-lime-200 dark:from-lime-900/30 dark:to-lime-800/30">
+                                        <SafeIcon name="CircleDollarSign" className="h-4 w-4 sm:h-5 sm:w-5 text-lime-600 dark:text-lime-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-lime-300 via-lime-500 to-lime-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-lime-300 via-lime-500 to-lime-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-4">
-                            <div className="p-5 relative">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-4">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Konsumen Aktif</p>
-                                        <p className="text-3xl font-bold text-purple-600 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Konsumen Aktif</p>
+                                        <p className="text-xl sm:text-3xl font-bold text-purple-600 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.active_consumers || 0} delay={400} />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Pembeli subsidi</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Pembeli subsidi</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30">
-                                        <SafeIcon name="Users" className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30">
+                                        <SafeIcon name="Users" className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
                             </div>
                         </Tilt3DCard>
                     </div>
                 </div>
             ) : (
                 <div>
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="hidden sm:flex items-center gap-2 mb-3">
                         <div className="w-3 h-3 rounded-full bg-amber-500" />
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">LPG Non-Subsidi (5.5kg+)</h3>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">LPG Non-Subsidi</h3>
                         <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700">Business</Badge>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-1">
-                            <div className="p-5 relative">
+                    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-1">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi Non-Subsidi</p>
-                                        <p className="text-3xl font-bold text-amber-600 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi Non-Subsidi</p>
+                                        <p className="text-xl sm:text-3xl font-bold text-amber-600 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_orders || 0} delay={100} />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Tabung Non-Subsidi</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Tabung Non-Subsidi</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
-                                        <SafeIcon name="ShoppingBag" className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
+                                        <SafeIcon name="ShoppingBag" className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-2">
-                            <div className="p-5 relative">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-2">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung Non-Subsidi</p>
-                                        <p className="text-3xl font-bold text-orange-600 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung Non-Subsidi</p>
+                                        <p className="text-xl sm:text-3xl font-bold text-orange-600 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_tabung || 0} delay={200} />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Tabung terjual</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Tabung terjual</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30">
-                                        <SafeIcon name="Flame" className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30">
+                                        <SafeIcon name="Flame" className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 dark:text-orange-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-3">
-                            <div className="p-5 relative">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-3">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan Non-Subsidi</p>
-                                        <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan Non-Subsidi</p>
+                                        <p className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1 sm:mt-2">
                                             {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_revenue || 0} delay={300} isCurrency />}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Revenue non-3kg</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Revenue non-3kg</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30">
-                                        <SafeIcon name="CircleDollarSign" className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30">
+                                        <SafeIcon name="CircleDollarSign" className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 dark:text-yellow-400" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-300" />
                             </div>
                         </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-4">
-                            <div className="p-5 relative">
+                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-4">
+                            <div className="p-3 sm:p-5 relative">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Pangkalan</p>
-                                        <p className="text-lg font-bold text-primary mt-2 truncate max-w-[120px]">
+                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Pangkalan</p>
+                                        <p className="text-sm sm:text-lg font-bold text-primary mt-1 sm:mt-2 truncate max-w-[80px] sm:max-w-[120px]">
                                             {isLoading ? '...' : (() => {
                                                 const sorted = [...(pangkalanData?.data || [])].sort((a, b) => b.total_nonsubsidi_tabung - a.total_nonsubsidi_tabung);
                                                 return sorted[0]?.name || '-';
                                             })()}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">Penjualan terbanyak</p>
+                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Penjualan terbanyak</p>
                                     </div>
-                                    <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30">
-                                        <SafeIcon name="Trophy" className="h-5 w-5 text-primary" />
+                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30">
+                                        <SafeIcon name="Trophy" className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-300 via-primary to-emerald-300" />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-emerald-300 via-primary to-emerald-300" />
                             </div>
                         </Tilt3DCard>
                     </div>
@@ -658,34 +1057,34 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
 
             {/* ===== FILTER BAR ===== */}
             <Card className="glass-card">
-                <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
+                <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-wrap gap-2 sm:gap-4 items-center">
+                        <div className="flex-1 min-w-[120px] sm:min-w-[200px]">
                             <div className="relative">
-                                <SafeIcon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <SafeIcon name="Search" className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Cari pangkalan..."
                                     value={searchQuery}
                                     onChange={(e) => { setSearchQuery(e.target.value); setPangkalanCurrentPage(1); }}
-                                    className="pl-9"
+                                    className="pl-8 sm:pl-9 h-8 sm:h-10 text-xs sm:text-sm"
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground whitespace-nowrap">Wilayah:</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap hidden sm:inline">Kecamatan:</span>
                             <Select value={regionFilter} onValueChange={(v) => { setRegionFilter(v); setPangkalanCurrentPage(1); }}>
-                                <SelectTrigger className="w-[140px]">
+                                <SelectTrigger className="w-[100px] sm:w-[140px] h-8 sm:h-10 text-xs sm:text-sm">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="ALL">Semua</SelectItem>
-                                    {kabupatenList.map((r: string) => (
+                                    {kecamatanList.map((r: string) => (
                                         <SelectItem key={r} value={r}>{r}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="hidden sm:flex items-center gap-2">
                             <span className="text-sm text-muted-foreground whitespace-nowrap">Tampilkan:</span>
                             <Select value={pangkalanRowsPerPage.toString()} onValueChange={(v) => { setPangkalanRowsPerPage(Number(v)); setPangkalanCurrentPage(1); }}>
                                 <SelectTrigger className="w-[80px]">
@@ -697,29 +1096,6 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-                        {/* Export Buttons */}
-                        <div className="flex items-center gap-2 ml-auto">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading || !pangkalanData?.data?.length}
-                                onClick={handleExportPDF}
-                                className="border-red-300 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 hover:border-red-400 transition-all shadow-sm hover:shadow-md"
-                            >
-                                <SafeIcon name="FileText" className="h-4 w-4 mr-2" />
-                                Export PDF
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading || !pangkalanData?.data?.length}
-                                onClick={handleExportExcel}
-                                className="border-green-300 text-green-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 hover:text-green-700 hover:border-green-400 transition-all shadow-sm hover:shadow-md"
-                            >
-                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2" />
-                                Export Excel
-                            </Button>
                         </div>
                     </div>
                 </CardContent>
@@ -930,10 +1306,10 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                                     Data pembeli gas subsidi 3kg untuk verifikasi
                                 </CardDescription>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-sm text-muted-foreground">Pilih Pangkalan:</span>
                                 <Select value={selectedPangkalanId} onValueChange={handlePangkalanSelect}>
-                                    <SelectTrigger className="w-[200px]">
+                                    <SelectTrigger className="w-[180px] sm:w-[200px]">
                                         <SelectValue placeholder="Pilih pangkalan..." />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -942,6 +1318,31 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                {/* Export Consumer Buttons */}
+                                {consumersData?.data?.length > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleExportConsumerPDF}
+                                            disabled={isLoadingConsumers}
+                                            className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                                        >
+                                            <SafeIcon name="FileText" className="h-3.5 w-3.5 mr-1" />
+                                            PDF
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleExportConsumerExcel}
+                                            disabled={isLoadingConsumers}
+                                            className="h-8 text-xs border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300"
+                                        >
+                                            <SafeIcon name="FileSpreadsheet" className="h-3.5 w-3.5 mr-1" />
+                                            Excel
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </CardHeader>

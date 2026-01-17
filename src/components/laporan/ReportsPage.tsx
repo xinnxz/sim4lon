@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -547,18 +548,18 @@ export default function ReportsPage() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Filter Bar */}
-            <div className="glass-card rounded-2xl p-5">
-                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                    {/* Period Filter */}
-                    <div className="flex flex-wrap gap-3 items-center">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50">
-                            <SafeIcon name="Calendar" className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm font-medium text-foreground">Periode</span>
+        <div className="space-y-3 sm:space-y-6">
+            {/* Filter Bar - Compact on mobile */}
+            <div className="glass-card rounded-xl sm:rounded-2xl p-3 sm:p-5">
+                <div className="flex flex-col gap-2 sm:gap-4">
+                    {/* Period Filter - Inline on mobile */}
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/50">
+                            <SafeIcon name="Calendar" className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-xs font-medium text-foreground">Periode</span>
                         </div>
                         <Select value={datePreset} onValueChange={handlePresetChange}>
-                            <SelectTrigger className="w-[180px] bg-background border-border/50 hover:border-primary/50 transition-colors">
+                            <SelectTrigger className="w-[130px] sm:w-[180px] h-8 text-xs sm:text-sm bg-background border-border/50 hover:border-primary/50 transition-colors">
                                 <SelectValue placeholder="Pilih periode" />
                             </SelectTrigger>
                             <SelectContent>
@@ -601,114 +602,119 @@ export default function ReportsPage() {
                             </SelectContent>
                         </Select>
 
-                        {datePreset === 'custom' && (
-                            <div className="flex gap-2 items-center bg-muted/30 p-2 rounded-lg border border-border/50">
-                                <Input
-                                    type="date"
-                                    value={customStart}
-                                    onChange={(e) => setCustomStart(e.target.value)}
-                                    className="w-[140px] h-9 bg-background"
-                                />
-                                <SafeIcon name="ArrowRight" className="h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    type="date"
-                                    value={customEnd}
-                                    onChange={(e) => setCustomEnd(e.target.value)}
-                                    className="w-[140px] h-9 bg-background"
-                                />
-                                <Button size="sm" onClick={handleCustomDateApply} className="h-9">
-                                    <SafeIcon name="Check" className="h-4 w-4 mr-1" />
-                                    Terapkan
-                                </Button>
-                            </div>
-                        )}
-
                         {/* Refresh Button */}
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={fetchReports}
                             disabled={isLoading}
-                            className="h-9 w-9 hover:bg-primary/10 hover:text-primary"
+                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                         >
                             <SafeIcon
                                 name="RefreshCw"
-                                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                                className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`}
                             />
                         </Button>
+
+                        {/* Export Dropdown - Inline with filters */}
+                        {activeTab !== 'pangkalan' && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isLoading}
+                                        className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                                    >
+                                        <SafeIcon name="Download" className="h-3.5 w-3.5" />
+                                        <span className="hidden sm:inline">Export</span>
+                                        <SafeIcon name="ChevronDown" className="h-3 w-3" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40">
+                                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                        <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
+                                        Export PDF
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                                        <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
+                                        Export Excel
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </div>
 
-                    {/* Export Buttons - Hidden for Pangkalan tab (has its own export buttons) */}
-                    {activeTab !== 'pangkalan' && (
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading}
-                                onClick={handleExportPDF}
-                                className="border-red-300 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 hover:border-red-400 transition-all shadow-sm hover:shadow-md"
-                            >
-                                <SafeIcon name="FileText" className="h-4 w-4 mr-2" />
-                                Export PDF
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading}
-                                onClick={handleExportExcel}
-                                className="border-green-300 text-green-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 hover:text-green-700 hover:border-green-400 transition-all shadow-sm hover:shadow-md"
-                            >
-                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2" />
-                                Export Excel
+                    {/* Custom date inputs */}
+                    {datePreset === 'custom' && (
+                        <div className="flex gap-2 items-center flex-wrap bg-muted/30 p-2 rounded-lg border border-border/50">
+                            <Input
+                                type="date"
+                                value={customStart}
+                                onChange={(e) => setCustomStart(e.target.value)}
+                                className="w-[130px] h-8 text-xs bg-background"
+                            />
+                            <SafeIcon name="ArrowRight" className="h-3 w-3 text-muted-foreground" />
+                            <Input
+                                type="date"
+                                value={customEnd}
+                                onChange={(e) => setCustomEnd(e.target.value)}
+                                className="w-[130px] h-8 text-xs bg-background"
+                            />
+                            <Button size="sm" onClick={handleCustomDateApply} className="h-8 text-xs">
+                                <SafeIcon name="Check" className="h-3 w-3 mr-1" />
+                                OK
                             </Button>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Tabs with Glass Effect */}
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-                <TabsList className="inline-flex h-auto gap-1.5 rounded-2xl glass-card p-2 shadow-lg">
-                    <TabsTrigger
-                        value="sales"
-                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20"
-                    >
-                        <SafeIcon name="ShoppingCart" className="h-4 w-4" />
-                        <span>Penjualan</span>
-                        {salesData && salesData.summary.total_orders > 0 && (
-                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'sales' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary dark:bg-primary/20'}`}>
-                                {salesData.summary.total_orders}
-                            </Badge>
-                        )}
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="pangkalan"
-                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-accent/80 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-accent/10 hover:text-accent dark:hover:bg-accent/20"
-                    >
-                        <SafeIcon name="Store" className="h-4 w-4" />
-                        <span>Pangkalan</span>
-                        {totalPangkalan > 0 && (
-                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'pangkalan' ? 'bg-white/20 text-white' : 'bg-accent/10 text-accent dark:bg-accent/20'}`}>
-                                {totalPangkalan}
-                            </Badge>
-                        )}
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="stock"
-                        className="relative flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-amber-500/10 hover:text-amber-600 dark:hover:bg-amber-500/20 dark:hover:text-amber-400"
-                    >
-                        <SafeIcon name="Package" className="h-4 w-4" />
-                        <span>Stok</span>
-                        {stockData && stockData.summary.current_balance !== undefined && (
-                            <Badge variant="secondary" className={`ml-1 h-5 min-w-5 rounded-full px-1.5 text-xs font-medium ${activeTab === 'stock' ? 'bg-white/20 text-white' : 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'}`}>
-                                {stockData.summary.current_balance}
-                            </Badge>
-                        )}
-                    </TabsTrigger>
-                </TabsList>
+            {/* Tabs - Horizontal scroll on mobile */}
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-3 sm:space-y-4">
+                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <TabsList className="inline-flex h-auto gap-1 rounded-xl sm:rounded-2xl glass-card p-1.5 sm:p-2 shadow-lg min-w-max mb-2">
+                        <TabsTrigger
+                            value="sales"
+                            className="relative flex items-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 hover:text-primary"
+                        >
+                            <SafeIcon name="ShoppingCart" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span>Penjualan</span>
+                            {salesData && salesData.summary.total_orders > 0 && (
+                                <Badge variant="secondary" className={`ml-0.5 h-4 sm:h-5 min-w-4 sm:min-w-5 rounded-full px-1 sm:px-1.5 text-[10px] sm:text-xs font-medium ${activeTab === 'sales' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'}`}>
+                                    {salesData.summary.total_orders}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="pangkalan"
+                            className="relative flex items-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-accent/80 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-accent/10 hover:text-accent"
+                        >
+                            <SafeIcon name="Store" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span>Pangkalan</span>
+                            {totalPangkalan > 0 && (
+                                <Badge variant="secondary" className={`ml-0.5 h-4 sm:h-5 min-w-4 sm:min-w-5 rounded-full px-1 sm:px-1.5 text-[10px] sm:text-xs font-medium ${activeTab === 'pangkalan' ? 'bg-white/20 text-white' : 'bg-accent/10 text-accent'}`}>
+                                    {totalPangkalan}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="stock"
+                            className="relative flex items-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-amber-500/10 hover:text-amber-600"
+                        >
+                            <SafeIcon name="Package" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span>Stok</span>
+                            {stockData && stockData.summary.current_balance !== undefined && (
+                                <Badge variant="secondary" className={`ml-0.5 h-4 sm:h-5 min-w-4 sm:min-w-5 rounded-full px-1 sm:px-1.5 text-[10px] sm:text-xs font-medium ${activeTab === 'stock' ? 'bg-white/20 text-white' : 'bg-amber-500/10 text-amber-600'}`}>
+                                    {stockData.summary.current_balance}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
                 {/* Sales Tab */}
-                <TabsContent value="sales" className="space-y-4">
+                <TabsContent value="sales" className="space-y-3 sm:space-y-4">
                     {/* Summary Cards - 5 columns with fixed height */}
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                         <Tilt3DCard className="glass-card rounded-2xl overflow-hidden animate-slideInBlur stagger-1 card-hover-glow h-[120px]">

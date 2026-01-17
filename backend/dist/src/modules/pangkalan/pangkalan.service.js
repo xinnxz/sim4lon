@@ -67,7 +67,7 @@ let PangkalanService = class PangkalanService {
                 { pic_name: { contains: search, mode: 'insensitive' } },
             ];
         }
-        const [pangkalans, total, totalActive, totalInactive] = await Promise.all([
+        const [pangkalans, total, totalActive, totalInactive, alokasiSum] = await Promise.all([
             this.prisma.pangkalans.findMany({
                 where,
                 skip,
@@ -92,6 +92,10 @@ let PangkalanService = class PangkalanService {
             this.prisma.pangkalans.count({ where }),
             this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: true } }),
             this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: false } }),
+            this.prisma.pangkalans.aggregate({
+                where: { deleted_at: null, is_active: true },
+                _sum: { alokasi_bulanan: true },
+            }),
         ]);
         return {
             data: pangkalans,
@@ -103,6 +107,7 @@ let PangkalanService = class PangkalanService {
                 totalActive,
                 totalInactive,
                 totalAll: totalActive + totalInactive,
+                totalAlokasi: alokasiSum._sum.alokasi_bulanan || 0,
             },
         };
     }

@@ -37,7 +37,7 @@ export class PangkalanService {
         }
 
         // Get data, filtered count, and stats counts in parallel
-        const [pangkalans, total, totalActive, totalInactive] = await Promise.all([
+        const [pangkalans, total, totalActive, totalInactive, alokasiSum] = await Promise.all([
             this.prisma.pangkalans.findMany({
                 where,
                 skip,
@@ -65,6 +65,11 @@ export class PangkalanService {
             this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: true } }),
             // Get total inactive pangkalans (ignoring current filter)
             this.prisma.pangkalans.count({ where: { deleted_at: null, is_active: false } }),
+            // Get total alokasi from active pangkalans
+            this.prisma.pangkalans.aggregate({
+                where: { deleted_at: null, is_active: true },
+                _sum: { alokasi_bulanan: true },
+            }),
         ]);
 
         return {
@@ -78,6 +83,7 @@ export class PangkalanService {
                 totalActive,
                 totalInactive,
                 totalAll: totalActive + totalInactive,
+                totalAlokasi: alokasiSum._sum.alokasi_bulanan || 0,
             },
         };
     }
