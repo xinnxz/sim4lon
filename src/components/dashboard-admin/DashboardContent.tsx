@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
+import WelcomePopup from '@/components/common/WelcomePopup'
 import CreateOrderButton from './CreateOrderButton'
 import DashboardKPICards from './DashboardKPICards'
 import DSSAlertSection from './DSSAlertSection'
@@ -36,6 +37,9 @@ function FloatingParticles() {
 export default function DashboardContent() {
   return (
     <div id="is6jwg" className="relative flex-1 space-y-8 p-4 sm:p-6 lg:p-8 mesh-gradient-bg min-h-screen overflow-hidden">
+      {/* Fun Welcome Popup - shows once per session */}
+      <WelcomePopup />
+
       {/* Floating Particles Background Decoration */}
       <FloatingParticles />
 
