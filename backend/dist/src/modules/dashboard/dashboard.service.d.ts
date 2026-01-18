@@ -48,7 +48,7 @@ export declare class DashboardService {
             orderCount: number;
         }[];
     }>;
-    getTopPangkalan(): Promise<{
+    getTopPangkalan(limit?: number): Promise<{
         data: {
             name: string;
             value: number;

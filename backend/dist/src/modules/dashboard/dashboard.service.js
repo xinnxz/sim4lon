@@ -288,7 +288,8 @@ let DashboardService = class DashboardService {
         }
         return { data: result };
     }
-    async getTopPangkalan() {
+    async getTopPangkalan(limit = 3) {
+        const safeLimit = Math.min(Math.max(limit, 1), 100);
         const pangkalanOrders = await this.prisma.client.orders.groupBy({
             by: ['pangkalan_id'],
             _count: {
@@ -299,7 +300,7 @@ let DashboardService = class DashboardService {
                     id: 'desc',
                 },
             },
-            take: 3,
+            take: safeLimit,
         });
         const result = await Promise.all(pangkalanOrders.map(async (item) => {
             const pangkalan = await this.prisma.client.pangkalans.findUnique({

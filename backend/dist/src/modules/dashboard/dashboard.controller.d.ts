@@ -45,7 +45,7 @@ export declare class DashboardController {
             orderCount: number;
         }[];
     }>;
-    getTopPangkalan(): Promise<{
+    getTopPangkalan(limit?: string): Promise<{
         data: {
             name: string;
             value: number;

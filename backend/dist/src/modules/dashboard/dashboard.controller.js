@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardController = void 0;
 const common_1 = require("@nestjs/common");
@@ -30,8 +33,9 @@ let DashboardController = class DashboardController {
     async getProfitChart() {
         return this.dashboardService.getProfitChart();
     }
-    async getTopPangkalan() {
-        return this.dashboardService.getTopPangkalan();
+    async getTopPangkalan(limit) {
+        const numLimit = parseInt(limit || '3', 10);
+        return this.dashboardService.getTopPangkalan(isNaN(numLimit) ? 3 : numLimit);
     }
     async getStockConsumption() {
         return this.dashboardService.getStockConsumption();
@@ -76,8 +80,9 @@ __decorate([
 ], DashboardController.prototype, "getProfitChart", null);
 __decorate([
     (0, common_1.Get)('top-pangkalan'),
+    __param(0, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DashboardController.prototype, "getTopPangkalan", null);
 __decorate([

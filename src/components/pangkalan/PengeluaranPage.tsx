@@ -36,12 +36,17 @@ import { toast } from 'sonner'
 const CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string; gradient: string }[] = [
     { value: 'OPERASIONAL', label: 'Operasional', icon: 'Settings', color: 'bg-violet-500', gradient: 'from-violet-500 to-violet-600' },
     { value: 'TRANSPORT', label: 'Transport', icon: 'Truck', color: 'bg-orange-500', gradient: 'from-orange-500 to-orange-600' },
-    { value: 'MAINTENANCE', label: 'Maintenance', icon: 'Wrench', color: 'bg-cyan-500', gradient: 'from-cyan-500 to-cyan-600' },
     { value: 'SEWA', label: 'Sewa', icon: 'Home', color: 'bg-pink-500', gradient: 'from-pink-500 to-pink-600' },
     { value: 'LISTRIK', label: 'Listrik/Air', icon: 'Zap', color: 'bg-yellow-500', gradient: 'from-yellow-500 to-amber-600' },
     { value: 'GAJI', label: 'Gaji', icon: 'Users', color: 'bg-blue-500', gradient: 'from-blue-500 to-blue-600' },
     { value: 'LAINNYA', label: 'Lain-lain', icon: 'MoreHorizontal', color: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600' },
 ]
+
+// Map legacy categories to valid ones
+const LEGACY_CATEGORY_MAP: Record<string, ExpenseCategory> = {
+    'maintenance': 'OPERASIONAL',
+    'lain-lain': 'LAINNYA',
+}
 
 export default function PengeluaranPage() {
     const [expenses, setExpenses] = useState<Expense[]>([])
@@ -161,17 +166,52 @@ export default function PengeluaranPage() {
         })
     }
 
-    const getCategoryLabel = (cat: string) => CATEGORIES.find(c => c.value === cat)?.label || cat
-    const getCategoryColor = (cat: string) => CATEGORIES.find(c => c.value === cat)?.color || 'bg-gray-500'
-    const getCategoryGradient = (cat: string) => CATEGORIES.find(c => c.value === cat)?.gradient || 'from-gray-500 to-gray-600'
-    const getCategoryIcon = (cat: string) => CATEGORIES.find(c => c.value === cat)?.icon || 'Circle'
+    // Case-insensitive category matching for legacy data
+    const findCategory = (cat: string) => {
+        const catLower = cat?.toLowerCase()
+        // Check legacy map first
+        const mappedValue = LEGACY_CATEGORY_MAP[catLower]
+        if (mappedValue) {
+            return CATEGORIES.find(c => c.value === mappedValue)
+        }
+        // Then try direct match
+        return CATEGORIES.find(c =>
+            c.value.toLowerCase() === catLower ||
+            c.label.toLowerCase() === catLower
+        )
+    }
+    const getCCategory = (cat: string) => findCategory(cat) || CATEGORIES.find(c => c.value === 'OPERASIONAL')!
 
-    // Calculate summary
+    const getCategoryLabel = (cat: string) => findCategory(cat)?.label || cat
+    const getCategoryColor = (cat: string) => getCCategory(cat).color
+    const getCategoryGradient = (cat: string) => getCCategory(cat).gradient
+    const getCategoryIcon = (cat: string) => getCCategory(cat).icon
+
+    // Calculate summary - group by normalized category
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
-    const expensesByCategory = CATEGORIES.map(cat => ({
-        ...cat,
-        total: expenses.filter(e => e.category === cat.value).reduce((sum, e) => sum + Number(e.amount), 0),
-        count: expenses.filter(e => e.category === cat.value).length,
+
+    // Build custom category breakdown for legacy data
+    const categoryMap = new Map<string, { total: number; count: number; label: string; icon: string; gradient: string; color: string }>()
+    expenses.forEach(e => {
+        const cat = getCCategory(e.category)
+        const existing = categoryMap.get(cat.value)
+        if (existing) {
+            existing.total += Number(e.amount)
+            existing.count += 1
+        } else {
+            categoryMap.set(cat.value, {
+                total: Number(e.amount),
+                count: 1,
+                label: cat.label,
+                icon: cat.icon,
+                gradient: cat.gradient,
+                color: cat.color,
+            })
+        }
+    })
+    const expensesByCategory = Array.from(categoryMap.entries()).map(([value, data]) => ({
+        value,
+        ...data,
     })).filter(cat => cat.total > 0)
 
     if (isLoading && expenses.length === 0) {

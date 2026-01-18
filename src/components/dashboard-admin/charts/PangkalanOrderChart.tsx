@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import SafeIcon from '@/components/common/SafeIcon'
-import { dashboardApi, pangkalanApi } from '@/lib/api'
+import { dashboardApi } from '@/lib/api'
 
 interface ChartDataPoint {
   name: string
@@ -118,19 +118,12 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
     if (allRankings.length === 0) {
       setIsLoadingMore(true)
       try {
-        // Fetch all pangkalan with order counts
-        const response = await pangkalanApi.getAll(1, 100) // Get up to 100 pangkalan
-        // Sort by order count (if available) or just show all
-        const sorted = response.data
-          .filter((p: any) => p._count?.orders > 0)
-          .map((p: any) => ({
-            name: p.name,
-            value: p._count?.orders || 0,
-          }))
-          .sort((a: any, b: any) => b.value - a.value)
+        // Fetch all pangkalan with order counts using same API as card for consistency
+        const response = await dashboardApi.getTopPangkalan(100) // Get all rankings
 
-        const total = sorted.reduce((sum: number, item: any) => sum + item.value, 0)
-        const withPercentage = sorted.map((item: any) => ({
+        // Calculate percentages
+        const total = response.data.reduce((sum: number, item: any) => sum + item.value, 0)
+        const withPercentage = response.data.map((item: any) => ({
           ...item,
           percentage: total > 0 ? ((item.value / total) * 100).toFixed(1) : '0'
         }))

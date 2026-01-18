@@ -15,7 +15,7 @@
  * GET /api/dashboard/activities - Recent activities
  */
 
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -69,13 +69,15 @@ export class DashboardController {
     }
 
     /**
-     * GET /api/dashboard/top-pangkalan
+     * GET /api/dashboard/top-pangkalan?limit=3
      * 
-     * Top 5 pangkalan dengan order terbanyak untuk pie chart
+     * Top pangkalan dengan order terbanyak untuk pie chart
+     * @param limit - default 3, max 100
      */
     @Get('top-pangkalan')
-    async getTopPangkalan() {
-        return this.dashboardService.getTopPangkalan();
+    async getTopPangkalan(@Query('limit') limit?: string) {
+        const numLimit = parseInt(limit || '3', 10);
+        return this.dashboardService.getTopPangkalan(isNaN(numLimit) ? 3 : numLimit);
     }
 
     /**

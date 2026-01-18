@@ -1387,10 +1387,11 @@ export const dashboardApi = {
     },
 
     /**
-     * Get top 5 pangkalan by order count
+     * Get top pangkalan by order count
+     * @param limit - Number of top pangkalan to return (default 3, max 100)
      */
-    async getTopPangkalan(): Promise<TopPangkalanData> {
-        return apiRequest('/dashboard/top-pangkalan');
+    async getTopPangkalan(limit: number = 3): Promise<TopPangkalanData> {
+        return apiRequest(`/dashboard/top-pangkalan?limit=${limit}`);
     },
 
     /**
@@ -2140,7 +2141,7 @@ export const agenOrdersApi = {
 // EXPENSE API (Pangkalan Dashboard)
 // ============================================================
 
-export type ExpenseCategory = 'OPERASIONAL' | 'TRANSPORT' | 'MAINTENANCE' | 'SEWA' | 'LISTRIK' | 'GAJI' | 'LAINNYA';
+export type ExpenseCategory = 'OPERASIONAL' | 'TRANSPORT' | 'SEWA' | 'LISTRIK' | 'GAJI' | 'LAINNYA';
 
 export interface Expense {
     id: string;

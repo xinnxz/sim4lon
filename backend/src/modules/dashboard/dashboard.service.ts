@@ -423,11 +423,14 @@ export class DashboardService {
     }
 
     /**
-     * Get top 5 pangkalan by order count
+     * Get top pangkalan by order count
      * 
      * Data format untuk pie chart
+     * @param limit - Number of top pangkalan to return (default 3, max 100)
      */
-    async getTopPangkalan() {
+    async getTopPangkalan(limit: number = 3) {
+        const safeLimit = Math.min(Math.max(limit, 1), 100); // Clamp between 1-100
+
         const pangkalanOrders = await this.prisma.client.orders.groupBy({
             by: ['pangkalan_id'],
             _count: {
@@ -438,7 +441,7 @@ export class DashboardService {
                     id: 'desc',
                 },
             },
-            take: 3,
+            take: safeLimit,
         });
 
         // Get pangkalan names
