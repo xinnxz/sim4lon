@@ -71,8 +71,8 @@ function ReorderPointCard({ data }: { data: ReorderPointData }) {
     };
 
     return (
-        <Card className="bg-card shadow-lg rounded-2xl border-0 overflow-hidden">
-            <CardHeader className="pb-3 border-b">
+        <Card className="bg-card shadow-lg rounded-2xl border-0 overflow-hidden h-[520px] flex flex-col">
+            <CardHeader className="pb-3 border-b shrink-0">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
@@ -97,7 +97,7 @@ function ReorderPointCard({ data }: { data: ReorderPointData }) {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-4 space-y-3 max-h-[350px] overflow-y-auto">
+            <CardContent className="p-4 space-y-3 flex-1 overflow-y-auto scrollbar-hide">
                 {data.data.map((item: ReorderPointItem) => (
                     <div
                         key={item.productId}
@@ -193,8 +193,8 @@ function SalesTrendCard({ data }: { data: SalesTrendData }) {
     };
 
     return (
-        <Card className="bg-card shadow-lg rounded-2xl border-0 overflow-hidden">
-            <CardHeader className="pb-3 border-b">
+        <Card className="bg-card shadow-lg rounded-2xl border-0 overflow-hidden h-[520px] flex flex-col">
+            <CardHeader className="pb-3 border-b shrink-0">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
@@ -213,7 +213,7 @@ function SalesTrendCard({ data }: { data: SalesTrendData }) {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-4 space-y-4">
+            <CardContent className="p-4 space-y-4 flex-1 overflow-y-auto scrollbar-hide">
                 {/* Insights */}
                 <div className="space-y-2">
                     {data.insights.map((insight, index) => (
@@ -249,6 +249,9 @@ function SalesTrendCard({ data }: { data: SalesTrendData }) {
                                 name="Rata-rata Penjualan"
                                 fill="#8b5cf6"
                                 radius={[4, 4, 0, 0]}
+                                isAnimationActive={true}
+                                animationDuration={800}
+                                animationEasing="ease-out"
                             />
                         </BarChart>
                     </ResponsiveContainer>
@@ -388,8 +391,16 @@ export default function DSSAdvancedSection() {
 
             {/* Cards Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {reorderData && <ReorderPointCard data={reorderData} />}
-                {trendData && <SalesTrendCard data={trendData} />}
+                {reorderData && (
+                    <div className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+                        <ReorderPointCard data={reorderData} />
+                    </div>
+                )}
+                {trendData && (
+                    <div className="animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+                        <SalesTrendCard data={trendData} />
+                    </div>
+                )}
             </div>
 
             {/* Footer */}

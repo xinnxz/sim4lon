@@ -490,7 +490,7 @@ export default function UserListPage() {
                             <Badge
                               className={
                                 user.is_active
-                                  ? 'bg-gradient-to-r from-primary-600/90 to-primary-500/90 text-white shadow-sm'
+                                  ? 'bg-gradient-to-r from-emerald-600/90 to-emerald-500/90 text-white shadow-sm'
                                   : 'bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/50 text-white shadow-sm'
                               }
                             >

@@ -412,88 +412,146 @@ export default function DetailEditPangkalanContent() {
         isLoading={isDeleting}
       />
 
-      {/* Reset Password Modal */}
-      <Dialog open={showResetPasswordModal} onOpenChange={(open) => {
-        setShowResetPasswordModal(open)
-        if (!open) setNewPassword(null) // Reset password when closing
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <SafeIcon name="KeyRound" className="h-5 w-5 text-amber-600" />
-              Reset Password Akun Pangkalan
-            </DialogTitle>
-            <DialogDescription>
-              {newPassword
-                ? 'Password berhasil direset. Salin dan berikan ke pangkalan.'
-                : `Apakah Anda yakin ingin reset password untuk akun "${pangkalan?.users?.[0]?.email}"?`
-              }
-            </DialogDescription>
-          </DialogHeader>
-
-          {newPassword ? (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm font-medium text-green-800 mb-2">Password Baru:</p>
-                <div className="flex items-center gap-2">
-                  <Input
-                    readOnly
-                    value={newPassword}
-                    className="font-mono bg-white"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(newPassword)
-                      toast.success('Password disalin!')
-                    }}
-                  >
-                    <SafeIcon name="Copy" className="h-4 w-4" />
-                  </Button>
+      {/* Reset Password Modal - Modern Enterprise Design */}
+      {showResetPasswordModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 rounded-lg p-2">
+                  <SafeIcon name="Shield" className="h-6 w-6 text-white" />
                 </div>
-                <p className="text-xs text-green-600 mt-2">
-                  ⚠️ Simpan password ini, tidak akan bisa dilihat lagi!
-                </p>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Reset Password</h2>
+                  <p className="text-sm text-amber-100">{pangkalan?.name}</p>
+                </div>
               </div>
-              <DialogFooter>
-                <Button onClick={() => {
-                  setShowResetPasswordModal(false)
-                  setNewPassword(null)
-                }}>
-                  Tutup
-                </Button>
-              </DialogFooter>
             </div>
-          ) : (
-            <DialogFooter className="gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowResetPasswordModal(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                className="bg-amber-600 hover:bg-amber-700"
-                onClick={handleResetPassword}
-                disabled={isResettingPassword}
-              >
-                {isResettingPassword ? (
-                  <>
-                    <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
-                    Mereset...
-                  </>
-                ) : (
-                  <>
-                    <SafeIcon name="KeyRound" className="mr-2 h-4 w-4" />
-                    Reset Password
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
+
+            {/* Content */}
+            <div className="p-6">
+              {!newPassword ? (
+                <div className="space-y-4">
+                  {/* Security Info */}
+                  <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-100">
+                    <SafeIcon name="Info" className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">Password akan direset</p>
+                      <p className="text-gray-600 dark:text-gray-400">Sistem akan generate password baru untuk akun <span className="font-mono font-semibold">{pangkalan?.users?.[0]?.email}</span>. Password lama tidak dapat dipulihkan.</p>
+                    </div>
+                  </div>
+
+                  {/* Steps */}
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Langkah selanjutnya:</p>
+                    <div className="grid gap-2">
+                      <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-medium">1</span>
+                        Klik "Generate Password"
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-medium">2</span>
+                        Copy password yang muncul
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-medium">3</span>
+                        Berikan ke pangkalan melalui WhatsApp
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Success State */}
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="bg-green-500 rounded-full p-1">
+                      <SafeIcon name="Check" className="h-4 w-4 text-white" />
+                    </div>
+                    <p className="text-sm font-medium text-green-800">Password berhasil direset!</p>
+                  </div>
+
+                  {/* Password Display */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password Baru</label>
+                    <div className="relative">
+                      <div className="flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg font-mono text-lg tracking-wider">
+                        <span className="flex-1 select-all break-all">{newPassword}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(newPassword)
+                            toast.success('Password disalin ke clipboard!')
+                          }}
+                          className="bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-700 dark:hover:bg-gray-600"
+                        >
+                          <SafeIcon name="Copy" className="h-4 w-4 mr-1" />
+                          Copy
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Warning */}
+                  <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                    <SafeIcon name="AlertTriangle" className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                    <p className="text-sm text-amber-800">
+                      <strong>Penting:</strong> Salin password ini sekarang. Setelah modal ditutup, password tidak akan ditampilkan lagi.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-4 bg-gray-50 dark:bg-gray-900/50 flex gap-3 justify-end">
+              {!newPassword ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowResetPasswordModal(false)}
+                    disabled={isResettingPassword}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="button"
+                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                    onClick={handleResetPassword}
+                    disabled={isResettingPassword}
+                  >
+                    {isResettingPassword ? (
+                      <>
+                        <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <SafeIcon name="Key" className="mr-2 h-4 w-4" />
+                        Generate Password
+                      </>
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  className="bg-green-600 hover:bg-green-700 text-white px-8"
+                  onClick={() => {
+                    setShowResetPasswordModal(false)
+                    setNewPassword(null)
+                  }}
+                >
+                  <SafeIcon name="Check" className="mr-2 h-4 w-4" />
+                  Selesai
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

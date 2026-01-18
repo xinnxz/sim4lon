@@ -36,7 +36,7 @@ function FloatingParticles() {
 
 export default function DashboardContent() {
   return (
-    <div id="is6jwg" className="relative flex-1 space-y-8 p-4 sm:p-6 lg:p-8 mesh-gradient-bg min-h-screen overflow-hidden">
+    <div id="is6jwg" className="relative flex-1 space-y-6 p-4 pt-2 sm:p-6 sm:pt-3 lg:p-8 lg:pt-4 mesh-gradient-bg min-h-screen overflow-hidden">
       {/* Fun Welcome Popup - shows once per session */}
       <WelcomePopup />
 
@@ -117,7 +117,7 @@ export default function DashboardContent() {
                   <CardDescription id="ico6v7" className="text-xs sm:text-sm">Konsumsi stok per hari minggu ini</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-4">
-                  <div className="w-full h-64 sm:h-72">
+                  <div className="w-full h-80 sm:h-96">
                     <StockChart isVisible={isVisible} />
                   </div>
                 </CardContent>
@@ -159,7 +159,7 @@ export default function DashboardContent() {
                     <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                     <CardTitle className="text-lg font-semibold">Top Pangkalan</CardTitle>
                   </div>
-                  <CardDescription className="text-xs sm:text-sm">3 pangkalan dengan order terbanyak</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">3 pangkalan dengan pendapatan tertinggi</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 p-4 pt-4 flex flex-col">
                   <div className="w-full flex-1 min-h-[240px]">

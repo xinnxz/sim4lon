@@ -54,7 +54,7 @@ export default function DriverListPage() {
   const [totalPages, setTotalPages] = useState(1)
   // Stats counts (dari backend - selalu menampilkan total sebenarnya)
   const [aktivCount, setAktivCount] = useState(0)
-  const [nonaktifCount, setNonaktifCount] = useState(0)
+  const [busyCount, setBusyCount] = useState(0)
 
   // State untuk filter dan search
   const [searchTerm, setSearchTerm] = useState('')
@@ -139,7 +139,9 @@ export default function DriverListPage() {
       setTotalPages(response.meta.totalPages)
       // Set stats from backend meta (true totals, not affected by filter)
       setAktivCount(response.meta.totalActive || 0)
-      setNonaktifCount(response.meta.totalInactive || 0)
+      // Count busy drivers from response data
+      const busyDrivers = response.data.filter(d => d.is_busy).length
+      setBusyCount(busyDrivers)
     } catch (error) {
       console.error('Failed to fetch drivers:', error)
       toast.error('Gagal memuat data driver')
@@ -301,12 +303,12 @@ export default function DriverListPage() {
               <Card className="border-0 glass-card animate-fadeInUp h-full" style={{ animationDelay: '0.2s' }}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-rose-500/10 dark:bg-rose-500/15">
-                      <SafeIcon name="XCircle" className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                    <div className="p-2.5 rounded-xl bg-orange-500/10 dark:bg-orange-500/15">
+                      <SafeIcon name="Truck" className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Nonaktif</p>
-                      <p className="text-2xl font-bold text-rose-600 dark:text-rose-400"><AnimatedNumber value={nonaktifCount} delay={300} /></p>
+                      <p className="text-xs text-muted-foreground">Sedang Mengantar</p>
+                      <p className="text-2xl font-bold text-orange-600 dark:text-orange-400"><AnimatedNumber value={busyCount} delay={300} /></p>
                     </div>
                   </div>
                 </CardContent>
@@ -402,6 +404,7 @@ export default function DriverListPage() {
                     <SortableHeader field="phone" align="center">Telepon</SortableHeader>
                     <SortableHeader field="vehicle_id" align="center">Kendaraan</SortableHeader>
                     <SortableHeader field="note">Catatan</SortableHeader>
+                    <TableHead className="font-semibold text-muted-foreground text-center">Pengiriman</TableHead>
                     <SortableHeader field="is_active" align="center">Status</SortableHeader>
                     <TableHead className="text-center font-semibold text-slate-700">Aksi</TableHead>
                   </TableRow>
@@ -417,6 +420,22 @@ export default function DriverListPage() {
                         <TableCell className="text-center text-foreground">{driver.phone || '-'}</TableCell>
                         <TableCell className="text-center text-foreground">{driver.vehicle_id || '-'}</TableCell>
                         <TableCell className="max-w-xs truncate text-foreground/80">{driver.note || '-'}</TableCell>
+                        {/* Delivery Status - Enterprise Style */}
+                        <TableCell className="text-center">
+                          {driver.is_busy ? (
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-orange-500/15 to-amber-500/15 border border-orange-200/50 dark:border-orange-700/50">
+                              <SafeIcon name="Truck" className="h-3.5 w-3.5 text-orange-500 animate-bounce" style={{ animationDuration: '1.5s' }} />
+                              <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">
+                                {driver.active_order?.code || 'Mengantar'}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-700/50">
+                              <SafeIcon name="CircleCheck" className="h-3.5 w-3.5 text-emerald-500" />
+                              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Tersedia</span>
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="text-center">
                           <Badge
                             className={
@@ -473,7 +492,7 @@ export default function DriverListPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-12">
+                      <TableCell colSpan={8} className="text-center py-12">
                         <div className="flex flex-col items-center gap-3">
                           <img
                             src="/images/illustrations/delivery-truck.png"

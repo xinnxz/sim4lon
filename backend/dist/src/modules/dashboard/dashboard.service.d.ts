@@ -52,6 +52,7 @@ export declare class DashboardService {
         data: {
             name: string;
             value: number;
+            totalAmount: number;
         }[];
     }>;
     getStockConsumption(): Promise<{

@@ -11,7 +11,9 @@
 
 export interface Kabupaten {
     id: string
-    name: string
+    name: string          // Full official name (e.g., "Kabupaten Cianjur")
+    displayName: string   // Clean display name (e.g., "Cianjur")
+    type: 'kabupaten' | 'kota'   // Type for auto-prefix
     kecamatan: string[]
 }
 
@@ -23,6 +25,8 @@ export const KABUPATEN_DATA: Kabupaten[] = [
     {
         id: 'cianjur',
         name: 'Kabupaten Cianjur',
+        displayName: 'Cianjur',
+        type: 'kabupaten',
         kecamatan: [
             'Agrabinta',
             'Bojongpicung',
@@ -61,6 +65,8 @@ export const KABUPATEN_DATA: Kabupaten[] = [
     {
         id: 'sukabumi',
         name: 'Kabupaten Sukabumi',
+        displayName: 'Sukabumi',
+        type: 'kabupaten',
         kecamatan: [
             'Cicurug',
             'Cidahu',
@@ -93,6 +99,8 @@ export const KABUPATEN_DATA: Kabupaten[] = [
     {
         id: 'bandung',
         name: 'Kabupaten Bandung',
+        displayName: 'Bandung',
+        type: 'kabupaten',
         kecamatan: [
             'Arjasari',
             'Baleendah',
@@ -143,6 +151,14 @@ export function getKecamatanByKabupaten(kabupatenId: string): string[] {
 export function getKabupatenName(kabupatenId: string): string {
     const kabupaten = KABUPATEN_DATA.find(k => k.id === kabupatenId)
     return kabupaten?.name || kabupatenId
+}
+
+/**
+ * Helper: Get kabupaten display name (clean, without prefix)
+ */
+export function getKabupatenDisplayName(kabupatenId: string): string {
+    const kabupaten = KABUPATEN_DATA.find(k => k.id === kabupatenId)
+    return kabupaten?.displayName || kabupatenId
 }
 
 /**

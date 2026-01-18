@@ -1,10 +1,16 @@
 /**
- * PangkalanOrderChart - Chart Top 3 Pangkalan dengan Data Real dari API
+ * PangkalanRevenueChart - Chart Top 3 Pangkalan berdasarkan Pendapatan
  * 
  * PENJELASAN:
- * Chart ini menampilkan top 3 pangkalan berdasarkan jumlah order.
+ * Chart ini menampilkan top 3 pangkalan berdasarkan total pendapatan (revenue).
  * Data diambil dari API /dashboard/top-pangkalan
- * Includes button to view full ranking in modal
+ * Menggunakan data consumer_orders untuk konsistensi dengan Laporan Pangkalan
+ * 
+ * Features:
+ * - Donut chart dengan animasi smooth
+ * - Tooltip profesional menampilkan pendapatan dan transaksi
+ * - Modal untuk melihat ranking lengkap
+ * - Format currency Indonesia
  */
 
 import { useState, useEffect } from 'react'
@@ -23,48 +29,92 @@ import { dashboardApi } from '@/lib/api'
 
 interface ChartDataPoint {
   name: string
-  value: number
+  value: number           // Transaction count
+  totalAmount: number     // Revenue in Rupiah
   index?: number
   percentage?: string
 }
 
-// 3 warna untuk 3 pangkalan
+// Gradient colors untuk 3 pangkalan teratas - Professional palette
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b']
 
+/**
+ * Format currency ke Rupiah
+ */
+const formatCurrency = (value: number): string => {
+  if (value >= 1000000) {
+    return `Rp ${(value / 1000000).toFixed(1)}jt`
+  }
+  if (value >= 1000) {
+    return `Rp ${(value / 1000).toFixed(0)}rb`
+  }
+  return `Rp ${value.toLocaleString('id-ID')}`
+}
+
+const formatCurrencyFull = (value: number): string => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(value)
+}
+
+/**
+ * Custom Tooltip - Tampilan profesional
+ */
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload
-    const index = payload[0].payload.index ?? 0
+    const data = payload[0].payload as ChartDataPoint
+    const index = data.index ?? 0
 
-    // Determine ranking badge color
+    // Ranking badge styling
     const getRankBadge = (idx: number) => {
-      if (idx === 0) return { text: '🥇 #1', color: 'text-yellow-600 bg-yellow-100' }
-      if (idx === 1) return { text: '🥈 #2', color: 'text-gray-600 bg-gray-100' }
-      if (idx === 2) return { text: '🥉 #3', color: 'text-amber-600 bg-amber-100' }
-      return { text: `#${idx + 1}`, color: 'text-muted-foreground bg-muted' }
+      if (idx === 0) return { emoji: '🥇', text: 'Peringkat 1', color: 'text-yellow-600 bg-yellow-50 border-yellow-200' }
+      if (idx === 1) return { emoji: '🥈', text: 'Peringkat 2', color: 'text-gray-600 bg-gray-50 border-gray-200' }
+      if (idx === 2) return { emoji: '🥉', text: 'Peringkat 3', color: 'text-amber-600 bg-amber-50 border-amber-200' }
+      return { emoji: '📊', text: `Peringkat ${idx + 1}`, color: 'text-muted-foreground bg-muted border-border' }
     }
 
     const rankBadge = getRankBadge(index)
 
     return (
-      <div className="bg-background border border-border rounded-lg shadow-lg p-4 backdrop-blur-sm min-w-[200px]">
-        {/* Ranking Badge */}
-        <div className="flex items-center justify-between mb-2 pb-2 border-b">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rankBadge.color}`}>
-            {rankBadge.text}
+      <div className="bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-xl p-4 min-w-[220px]">
+        {/* Header with rank badge */}
+        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
+          <span className={`text-xs px-2 py-1 rounded-lg font-medium border ${rankBadge.color}`}>
+            {rankBadge.emoji} {rankBadge.text}
           </span>
-          <span className="text-sm font-bold text-primary">{data.percentage}%</span>
         </div>
 
         {/* Nama Pangkalan */}
-        <p className="text-sm font-bold text-foreground mb-2 truncate max-w-[180px]" title={data.name}>
+        <p className="text-sm font-bold text-foreground mb-3 truncate" title={data.name}>
           {data.name}
         </p>
 
-        {/* Jumlah Pesanan */}
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Total Pesanan:</span>
-          <span className="text-sm font-bold text-green-600">{data.value} pesanan</span>
+        {/* Stats Grid */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <SafeIcon name="Wallet" className="h-3 w-3" />
+              Pendapatan
+            </span>
+            <span className="text-sm font-bold text-green-600">
+              {formatCurrencyFull(data.totalAmount)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <SafeIcon name="ShoppingCart" className="h-3 w-3" />
+              Transaksi
+            </span>
+            <span className="text-sm font-semibold text-foreground">
+              {data.value} penjualan
+            </span>
+          </div>
+          <div className="flex justify-between items-center pt-1 border-t border-border/50 mt-1">
+            <span className="text-xs text-muted-foreground">Kontribusi</span>
+            <span className="text-sm font-bold text-primary">{data.percentage}%</span>
+          </div>
         </div>
       </div>
     )
@@ -90,12 +140,12 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
         setIsLoading(true)
         const response = await dashboardApi.getTopPangkalan()
 
-        // Calculate percentages and add index for ranking
-        const totalValue = response.data.reduce((sum, item) => sum + item.value, 0)
-        const processedData = response.data.map((item, index) => ({
+        // Calculate percentages based on totalAmount (revenue)
+        const totalRevenue = response.data.reduce((sum, item: any) => sum + (item.totalAmount || 0), 0)
+        const processedData = response.data.map((item: any, index) => ({
           ...item,
           index,
-          percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
+          percentage: totalRevenue > 0 ? ((item.totalAmount / totalRevenue) * 100).toFixed(1) : '0'
         }))
 
         setData(processedData)
@@ -118,14 +168,14 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
     if (allRankings.length === 0) {
       setIsLoadingMore(true)
       try {
-        // Fetch all pangkalan with order counts using same API as card for consistency
         const response = await dashboardApi.getTopPangkalan(100) // Get all rankings
 
-        // Calculate percentages
-        const total = response.data.reduce((sum: number, item: any) => sum + item.value, 0)
-        const withPercentage = response.data.map((item: any) => ({
+        // Calculate percentages based on totalAmount
+        const totalRevenue = response.data.reduce((sum: number, item: any) => sum + (item.totalAmount || 0), 0)
+        const withPercentage = response.data.map((item: any, index) => ({
           ...item,
-          percentage: total > 0 ? ((item.value / total) * 100).toFixed(1) : '0'
+          index,
+          percentage: totalRevenue > 0 ? ((item.totalAmount / totalRevenue) * 100).toFixed(1) : '0'
         }))
 
         setAllRankings(withPercentage)
@@ -141,7 +191,10 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
   if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground text-sm">Memuat data...</div>
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+          Memuat data...
+        </div>
       </div>
     )
   }
@@ -150,7 +203,10 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="text-destructive text-sm">{error}</div>
+        <div className="text-destructive text-sm flex items-center gap-2">
+          <SafeIcon name="AlertCircle" className="h-4 w-4" />
+          {error}
+        </div>
       </div>
     )
   }
@@ -177,7 +233,7 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
               innerRadius="40%"
               outerRadius="70%"
               paddingAngle={4}
-              dataKey="value"
+              dataKey="totalAmount"
               labelLine={false}
               isAnimationActive={isVisible}
               animationBegin={0}
@@ -188,7 +244,7 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
-                  style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' }}
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}
                 />
               ))}
             </Pie>
@@ -198,19 +254,24 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
       </div>
 
       {/* Custom Legend - Below Chart */}
-      <div className="flex flex-col gap-1.5 pt-2 pb-2">
+      <div className="flex flex-col gap-2 pt-3 pb-2">
         {data.map((item, index) => (
-          <div key={item.name} className="flex items-center gap-2 text-xs">
+          <div key={item.name} className="flex items-center gap-2.5 text-sm">
             <div
-              className="w-2.5 h-2.5 rounded-sm shrink-0"
+              className="w-3 h-3 rounded-full shrink-0 shadow-sm"
               style={{ backgroundColor: COLORS[index % COLORS.length] }}
             />
-            <span className="flex-1 truncate text-muted-foreground" title={item.name}>
+            <span className="flex-1 truncate text-foreground font-medium" title={item.name}>
               {item.name}
             </span>
-            <span className="font-semibold text-foreground shrink-0">
-              {item.percentage}%
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs text-muted-foreground">
+                {formatCurrency(item.totalAmount)}
+              </span>
+              <span className="font-bold text-primary text-sm">
+                {item.percentage}%
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -221,21 +282,24 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
           <Button
             variant="outline"
             size="sm"
-            className="w-full text-xs"
+            className="w-full text-xs mt-1 hover:bg-primary/5 hover:border-primary/30"
             onClick={handleOpenModal}
           >
-            <SafeIcon name="BarChart3" className="h-3.5 w-3.5 mr-1.5" />
+            <SafeIcon name="TrendingUp" className="h-3.5 w-3.5 mr-1.5" />
             Lihat Semua Ranking
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle>Ranking Semua Pangkalan</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <SafeIcon name="Award" className="h-5 w-5 text-primary" />
+              Ranking Pangkalan
+            </DialogTitle>
             <DialogDescription>
-              Berdasarkan jumlah pesanan
+              Berdasarkan total pendapatan penjualan
             </DialogDescription>
           </DialogHeader>
-          <div className="overflow-y-auto max-h-[50vh] pr-2">
+          <div className="overflow-y-auto max-h-[55vh] pr-2 -mr-2">
             {isLoadingMore ? (
               <div className="flex items-center justify-center py-8">
                 <SafeIcon name="Loader2" className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -245,20 +309,32 @@ export default function PangkalanOrderChart({ isVisible = true }: PangkalanOrder
                 {allRankings.map((item, index) => (
                   <div
                     key={item.name}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${index < 3 ? 'bg-gradient-to-r from-muted/80 to-transparent' : 'hover:bg-muted/50'
+                      }`}
                   >
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${index === 0 ? 'bg-yellow-500 text-white' :
-                      index === 1 ? 'bg-gray-400 text-white' :
-                        index === 2 ? 'bg-amber-600 text-white' :
-                          'bg-muted text-muted-foreground'
+                    {/* Rank badge */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
+                        index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
+                          index === 2 ? 'bg-gradient-to-br from-amber-500 to-amber-700 text-white' :
+                            'bg-muted text-muted-foreground'
                       }`}>
                       {index + 1}
                     </div>
+
+                    {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.value} pesanan</p>
+                      <p className="text-sm font-semibold truncate">{item.name}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{item.value} transaksi</span>
+                        <span>•</span>
+                        <span className="font-semibold text-green-600">
+                          {formatCurrencyFull(item.totalAmount)}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-sm font-semibold text-primary shrink-0">
+
+                    {/* Percentage */}
+                    <span className="text-sm font-bold text-primary shrink-0">
                       {item.percentage}%
                     </span>
                   </div>

@@ -97,6 +97,8 @@ interface TambahPangkalanFormProps {
 export default function TambahPangkalanForm({ onSuccess, isModal = false }: TambahPangkalanFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedKabupaten, setSelectedKabupaten] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const form = useForm<PangkalanFormValues>({
     resolver: zodResolver(pangkalanSchema),
@@ -183,22 +185,16 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
 
       {/* Form Card */}
       <Card className={isModal ? 'border-0 shadow-none' : 'shadow-card'}>
-        <CardHeader className={isModal ? 'px-0 pt-0' : ''}>
-          <CardTitle>Informasi Pangkalan</CardTitle>
-          <CardDescription>
-            Isi semua field yang diperlukan untuk mendaftarkan pangkalan baru
-          </CardDescription>
-        </CardHeader>
         <CardContent className={isModal ? 'px-0' : ''}>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className={isModal ? 'space-y-3' : 'space-y-6'}>
               {/* Nama Pangkalan */}
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Nama Pangkalan *</FormLabel>
+                    <FormLabel>Nama Pangkalan *</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Contoh: Pangkalan Maju Jaya"
@@ -206,9 +202,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                         disabled={isSubmitting}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Nama resmi pangkalan LPG
-                    </FormDescription>
+                    {!isModal && <FormDescription>Nama resmi pangkalan LPG</FormDescription>}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -220,18 +214,16 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Alamat Lengkap *</FormLabel>
+                    <FormLabel>Alamat Lengkap *</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Contoh: Jl. Merdeka No. 123, Kelurahan Sukamaju"
                         {...field}
                         disabled={isSubmitting}
-                        rows={3}
+                        rows={isModal ? 2 : 3}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Alamat lengkap pangkalan
-                    </FormDescription>
+                    {!isModal && <FormDescription>Alamat lengkap pangkalan</FormDescription>}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -245,7 +237,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                   name="kabupaten"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-semibold">Kabupaten *</FormLabel>
+                      <FormLabel>Kabupaten *</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value)
@@ -264,7 +256,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                         <SelectContent>
                           {KABUPATEN_DATA.map((kab) => (
                             <SelectItem key={kab.id} value={kab.id}>
-                              {kab.name}
+                              {kab.displayName}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -280,7 +272,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                   name="kecamatan"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-semibold">Kecamatan *</FormLabel>
+                      <FormLabel>Kecamatan *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -305,100 +297,93 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                 />
               </div>
 
-              {/* PIC Name */}
-              <FormField
-                control={form.control}
-                name="pic_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Nama PIC *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: Budi Santoso"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Nama penanggung jawab pangkalan
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* PIC Name + Phone - Grid in modal */}
+              <div className={isModal ? 'grid gap-3 sm:grid-cols-2' : 'space-y-6'}>
+                <FormField
+                  control={form.control}
+                  name="pic_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama PIC *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Contoh: Budi Santoso"
+                          {...field}
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      {!isModal && <FormDescription>Nama penanggung jawab pangkalan</FormDescription>}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Telepon */}
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Nomor Telepon *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: 081234567890"
-                        {...field}
-                        disabled={isSubmitting}
-                        type="tel"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Nomor telepon yang dapat dihubungi
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nomor Telepon *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Contoh: 081234567890"
+                          {...field}
+                          disabled={isSubmitting}
+                          type="tel"
+                        />
+                      </FormControl>
+                      {!isModal && <FormDescription>Nomor telepon yang dapat dihubungi</FormDescription>}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
+              {/* Kapasitas + Alokasi - Grid */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="capacity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kapasitas (Opsional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Contoh: 500"
+                          {...field}
+                          disabled={isSubmitting}
+                          type="number"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                        />
+                      </FormControl>
+                      {!isModal && <FormDescription>Kapasitas penyimpanan LPG dalam unit</FormDescription>}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Kapasitas */}
-              <FormField
-                control={form.control}
-                name="capacity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Kapasitas (Opsional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: 500"
-                        {...field}
-                        disabled={isSubmitting}
-                        type="number"
-                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Kapasitas penyimpanan LPG dalam unit
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Alokasi Bulanan */}
-              <FormField
-                control={form.control}
-                name="alokasi_bulanan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">Alokasi Bulanan (Opsional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: 500"
-                        {...field}
-                        disabled={isSubmitting}
-                        type="number"
-                        min={0}
-                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Jumlah alokasi tabung LPG (3kg) per bulan
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="alokasi_bulanan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alokasi Bulanan (Opsional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Contoh: 500"
+                          {...field}
+                          disabled={isSubmitting}
+                          type="number"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                        />
+                      </FormControl>
+                      {!isModal && <FormDescription>Jumlah alokasi tabung LPG (3kg) per bulan</FormDescription>}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               {/* Catatan */}
               <FormField
@@ -406,40 +391,40 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                 name="note"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Catatan (Opsional)</FormLabel>
+                    <FormLabel>Catatan (Opsional)</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Contoh: Lokasi strategis, akses jalan mudah"
                         {...field}
                         disabled={isSubmitting}
-                        rows={2}
+                        rows={isModal ? 1 : 2}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Informasi tambahan tentang pangkalan
-                    </FormDescription>
+                    {!isModal && <FormDescription>Informasi tambahan tentang pangkalan</FormDescription>}
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
               {/* === Section Akun Login === */}
-              <div className="pt-6 mt-6 border-t">
-                <div className="flex items-center gap-2 mb-4">
-                  <SafeIcon name="Key" className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-semibold">Akun Login Pangkalan</h3>
+              <div className={isModal ? 'pt-3 mt-3 border-t' : 'pt-6 mt-6 border-t'}>
+                <div className="flex items-center gap-2 mb-2">
+                  <SafeIcon name="Key" className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold">Akun Login Pangkalan</h3>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Buat akun untuk login ke dashboard pangkalan. Email ini juga digunakan untuk invoice.
-                </p>
+                {!isModal && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Buat akun untuk login ke dashboard pangkalan. Email ini juga digunakan untuk invoice.
+                  </p>
+                )}
 
                 {/* Email Login */}
                 <FormField
                   control={form.control}
                   name="login_email"
                   render={({ field }) => (
-                    <FormItem className="mb-4">
-                      <FormLabel className="text-base font-semibold">Email Login *</FormLabel>
+                    <FormItem className="mb-3">
+                      <FormLabel>Email Login *</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Contoh: pangkalan@email.com"
@@ -448,29 +433,38 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                           type="email"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Email untuk login ke dashboard pangkalan
-                      </FormDescription>
+                      {!isModal && <FormDescription>Email untuk login ke dashboard pangkalan</FormDescription>}
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
                 {/* Password */}
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="login_password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-semibold">Password *</FormLabel>
+                        <FormLabel>Password *</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Minimal 6 karakter"
-                            {...field}
-                            disabled={isSubmitting}
-                            type="password"
-                          />
+                          <div className="relative">
+                            <Input
+                              placeholder="Minimal 6 karakter"
+                              {...field}
+                              disabled={isSubmitting}
+                              type={showPassword ? 'text' : 'password'}
+                              className="pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              tabIndex={-1}
+                            >
+                              <SafeIcon name={showPassword ? 'EyeOff' : 'Eye'} className="h-4 w-4" />
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -482,14 +476,25 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
                     name="confirm_password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-semibold">Konfirmasi Password *</FormLabel>
+                        <FormLabel>Konfirmasi Password *</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Ulangi password"
-                            {...field}
-                            disabled={isSubmitting}
-                            type="password"
-                          />
+                          <div className="relative">
+                            <Input
+                              placeholder="Ulangi password"
+                              {...field}
+                              disabled={isSubmitting}
+                              type={showConfirmPassword ? 'text' : 'password'}
+                              className="pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              tabIndex={-1}
+                            >
+                              <SafeIcon name={showConfirmPassword ? 'EyeOff' : 'Eye'} className="h-4 w-4" />
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -499,7 +504,7 @@ export default function TambahPangkalanForm({ onSuccess, isModal = false }: Tamb
               </div>
 
               {/* Form Actions */}
-              <div className="flex gap-3 pt-6 border-t">
+              <div className={`flex gap-3 ${isModal ? 'pt-3 border-t' : 'pt-6 border-t'}`}>
                 {!isModal && (
                   <Button
                     type="button"

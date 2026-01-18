@@ -423,42 +423,58 @@ export class DashboardService {
     }
 
     /**
-     * Get top pangkalan by order count
+     * Get top pangkalan by total revenue from consumer_orders (penjualan ke konsumen)
      * 
      * Data format untuk pie chart
      * @param limit - Number of top pangkalan to return (default 3, max 100)
+     * 
+     * CATATAN: Ranking berdasarkan consumer_orders untuk konsistensi dengan Laporan Pangkalan
+     * - consumer_orders = penjualan pangkalan ke konsumen akhir
+     * - Bukan dari orders (pesanan pangkalan dari SPBE)
      */
     async getTopPangkalan(limit: number = 3) {
         const safeLimit = Math.min(Math.max(limit, 1), 100); // Clamp between 1-100
 
-        const pangkalanOrders = await this.prisma.client.orders.groupBy({
+        // Get pangkalan with consumer order count and total revenue
+        const pangkalanConsumerOrders = await this.prisma.client.consumer_orders.groupBy({
             by: ['pangkalan_id'],
             _count: {
                 id: true,
             },
-            orderBy: {
-                _count: {
-                    id: 'desc',
-                },
+            _sum: {
+                total_amount: true,
             },
-            take: safeLimit,
+            orderBy: [
+                { _sum: { total_amount: 'desc' } }, // Primary: by total revenue
+                { _count: { id: 'desc' } },          // Secondary: by order count
+            ],
         });
 
-        // Get pangkalan names
+        // Get pangkalan names and build result
         const result = await Promise.all(
-            pangkalanOrders.map(async (item) => {
+            pangkalanConsumerOrders.map(async (item) => {
                 const pangkalan = await this.prisma.client.pangkalans.findUnique({
                     where: { id: item.pangkalan_id },
                     select: { name: true },
                 });
                 return {
                     name: pangkalan?.name || 'Unknown',
-                    value: item._count.id,
+                    value: item._count.id, // Consumer order count for display
+                    totalAmount: Number(item._sum.total_amount) || 0, // Revenue for sorting
                 };
             })
         );
 
-        return { data: result };
+        // Final sort to ensure consistency (by totalAmount desc, then by name asc)
+        result.sort((a, b) => {
+            if (b.totalAmount !== a.totalAmount) {
+                return b.totalAmount - a.totalAmount; // Higher revenue first
+            }
+            return a.name.localeCompare(b.name); // Alphabetical for same revenue
+        });
+
+        // Return limited results
+        return { data: result.slice(0, safeLimit) };
     }
 
     /**

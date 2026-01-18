@@ -145,7 +145,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <SafeIcon name="Lock" className="h-5 w-5 text-primary" />
-            Ubah Kata Sandi
+            Ubah Password
           </DialogTitle>
           <DialogDescription>
             Masukkan kata sandi lama dan baru Anda. Kata sandi harus minimal 8 karakter.
@@ -164,7 +164,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
           {/* Old Password Field */}
           <div className="space-y-2">
             <Label htmlFor="oldPassword" className="text-sm font-medium">
-              Kata Sandi Lama <span className="text-destructive">*</span>
+              Password Lama <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Input
@@ -201,7 +201,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
           {/* New Password Field */}
           <div className="space-y-2">
             <Label htmlFor="newPassword" className="text-sm font-medium">
-              Kata Sandi Baru <span className="text-destructive">*</span>
+              Password Baru <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Input
@@ -263,7 +263,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
           {/* Confirm Password Field */}
           <div className="space-y-2">
             <Label htmlFor="confirmPassword" className="text-sm font-medium">
-              Konfirmasi Kata Sandi <span className="text-destructive">*</span>
+              Konfirmasi Password <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Input
@@ -332,7 +332,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: ChangePasswo
               ) : (
                 <>
                   <SafeIcon name="Save" className="mr-2 h-4 w-4" />
-                  Simpan Kata Sandi
+                  Simpan Password
                 </>
               )}
             </Button>

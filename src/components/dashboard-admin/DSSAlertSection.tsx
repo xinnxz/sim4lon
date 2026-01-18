@@ -366,12 +366,12 @@ export default function DSSAlertSection() {
             {/* Health Score + Quick Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                 {/* Health Score - Takes 2 columns */}
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
                     <HealthScoreRing score={data.summary.overallHealthScore} />
                 </div>
 
                 {/* Quick Stats - Takes 3 columns */}
-                <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fadeInUp" style={{ animationDelay: '0.25s' }}>
                     <StatCard
                         label="Pending"
                         value={data.summary.pendingOrdersCount}
@@ -406,68 +406,72 @@ export default function DSSAlertSection() {
             {/* Alert Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Low Stock Alerts - Conditional based on settings */}
-                {showStockAlerts ? (
+                <div className="animate-fadeInUp" style={{ animationDelay: '0.35s' }}>
+                    {showStockAlerts ? (
+                        <AlertSectionCard
+                            title="Low Stock Alerts"
+                            icon="Package"
+                            iconBg="bg-amber-100 dark:bg-amber-500/20"
+                            iconColor="text-amber-600 dark:text-amber-400"
+                            count={data.lowStockAlerts.length}
+                            criticalCount={data.lowStockAlerts.filter(a => a.severity === 'critical').length}
+                            isEmpty={data.lowStockAlerts.length === 0}
+                            emptyMessage="Semua stok dalam kondisi aman"
+                        >
+                            {data.lowStockAlerts.map(alert => (
+                                <AlertItem
+                                    key={alert.id}
+                                    severity={alert.severity}
+                                    title={alert.name}
+                                    subtitle={`Stok: ${alert.currentStock} unit`}
+                                    badge={alert.severity === 'critical' ? 'Kritis' : 'Warning'}
+                                    recommendation={alert.recommendation}
+                                />
+                            ))}
+                        </AlertSectionCard>
+                    ) : (
+                        <Card className="bg-card dark:bg-card shadow-lg rounded-2xl border-0 overflow-hidden">
+                            <CardContent className="p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                                        <SafeIcon name="Package" className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                    <p className="font-semibold text-foreground">Low Stock Alerts</p>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground bg-muted/50 p-3 rounded-xl">
+                                    <SafeIcon name="EyeOff" className="w-5 h-5" />
+                                    <span className="text-sm">Notifikasi stok dinonaktifkan dari Pengaturan</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+
+                {/* Payment Overdue Alerts */}
+                <div className="animate-fadeInUp" style={{ animationDelay: '0.45s' }}>
                     <AlertSectionCard
-                        title="Low Stock Alerts"
-                        icon="Package"
-                        iconBg="bg-amber-100 dark:bg-amber-500/20"
-                        iconColor="text-amber-600 dark:text-amber-400"
-                        count={data.lowStockAlerts.length}
-                        criticalCount={data.lowStockAlerts.filter(a => a.severity === 'critical').length}
-                        isEmpty={data.lowStockAlerts.length === 0}
-                        emptyMessage="Semua stok dalam kondisi aman"
+                        title="Payment Overdue"
+                        icon="Wallet"
+                        iconBg="bg-red-100 dark:bg-red-500/20"
+                        iconColor="text-red-600 dark:text-red-400"
+                        count={data.paymentOverdueAlerts.length}
+                        criticalCount={data.paymentOverdueAlerts.filter(a => a.severity === 'critical').length}
+                        isEmpty={data.paymentOverdueAlerts.length === 0}
+                        emptyMessage="Tidak ada pembayaran terlambat"
                     >
-                        {data.lowStockAlerts.map(alert => (
+                        {data.paymentOverdueAlerts.map(alert => (
                             <AlertItem
-                                key={alert.id}
+                                key={alert.orderId}
                                 severity={alert.severity}
-                                title={alert.name}
-                                subtitle={`Stok: ${alert.currentStock} unit`}
-                                badge={alert.severity === 'critical' ? 'Kritis' : 'Warning'}
+                                title={alert.pangkalanName}
+                                subtitle={alert.orderCode}
+                                badge={`${alert.daysOverdue} hari`}
+                                detail={`Sisa: ${formatCurrency(alert.totalAmount - alert.amountPaid)}`}
                                 recommendation={alert.recommendation}
                             />
                         ))}
                     </AlertSectionCard>
-                ) : (
-                    <Card className="bg-card dark:bg-card shadow-lg rounded-2xl border-0 overflow-hidden">
-                        <CardContent className="p-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                                    <SafeIcon name="Package" className="w-5 h-5 text-muted-foreground" />
-                                </div>
-                                <p className="font-semibold text-foreground">Low Stock Alerts</p>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground bg-muted/50 p-3 rounded-xl">
-                                <SafeIcon name="EyeOff" className="w-5 h-5" />
-                                <span className="text-sm">Notifikasi stok dinonaktifkan dari Pengaturan</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Payment Overdue Alerts */}
-                <AlertSectionCard
-                    title="Payment Overdue"
-                    icon="Wallet"
-                    iconBg="bg-red-100 dark:bg-red-500/20"
-                    iconColor="text-red-600 dark:text-red-400"
-                    count={data.paymentOverdueAlerts.length}
-                    criticalCount={data.paymentOverdueAlerts.filter(a => a.severity === 'critical').length}
-                    isEmpty={data.paymentOverdueAlerts.length === 0}
-                    emptyMessage="Tidak ada pembayaran terlambat"
-                >
-                    {data.paymentOverdueAlerts.map(alert => (
-                        <AlertItem
-                            key={alert.orderId}
-                            severity={alert.severity}
-                            title={alert.pangkalanName}
-                            subtitle={alert.orderCode}
-                            badge={`${alert.daysOverdue} hari`}
-                            detail={`Sisa: ${formatCurrency(alert.totalAmount - alert.amountPaid)}`}
-                            recommendation={alert.recommendation}
-                        />
-                    ))}
-                </AlertSectionCard>
+                </div>
             </div>
 
             {/* Footer */}

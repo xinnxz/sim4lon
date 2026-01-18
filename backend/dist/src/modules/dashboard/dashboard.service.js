@@ -290,19 +290,20 @@ let DashboardService = class DashboardService {
     }
     async getTopPangkalan(limit = 3) {
         const safeLimit = Math.min(Math.max(limit, 1), 100);
-        const pangkalanOrders = await this.prisma.client.orders.groupBy({
+        const pangkalanConsumerOrders = await this.prisma.client.consumer_orders.groupBy({
             by: ['pangkalan_id'],
             _count: {
                 id: true,
             },
-            orderBy: {
-                _count: {
-                    id: 'desc',
-                },
+            _sum: {
+                total_amount: true,
             },
-            take: safeLimit,
+            orderBy: [
+                { _sum: { total_amount: 'desc' } },
+                { _count: { id: 'desc' } },
+            ],
         });
-        const result = await Promise.all(pangkalanOrders.map(async (item) => {
+        const result = await Promise.all(pangkalanConsumerOrders.map(async (item) => {
             const pangkalan = await this.prisma.client.pangkalans.findUnique({
                 where: { id: item.pangkalan_id },
                 select: { name: true },
@@ -310,9 +311,16 @@ let DashboardService = class DashboardService {
             return {
                 name: pangkalan?.name || 'Unknown',
                 value: item._count.id,
+                totalAmount: Number(item._sum.total_amount) || 0,
             };
         }));
-        return { data: result };
+        result.sort((a, b) => {
+            if (b.totalAmount !== a.totalAmount) {
+                return b.totalAmount - a.totalAmount;
+            }
+            return a.name.localeCompare(b.name);
+        });
+        return { data: result.slice(0, safeLimit) };
     }
     async getStockConsumption() {
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

@@ -308,7 +308,7 @@ export default function AddUserForm({ onClose }: AddUserFormProps) {
           {/* Password Field */}
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">
-              Kata Sandi <span className="text-destructive">*</span>
+              Password <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Input
@@ -346,7 +346,7 @@ export default function AddUserForm({ onClose }: AddUserFormProps) {
           {/* Confirm Password Field */}
           <div className="space-y-2">
             <Label htmlFor="confirmPassword" className="text-sm font-medium">
-              Konfirmasi Kata Sandi <span className="text-destructive">*</span>
+              Konfirmasi Password <span className="text-destructive">*</span>
             </Label>
             <Input
               id="confirmPassword"
