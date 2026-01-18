@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -782,7 +783,23 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
             </div>
 
             {/* ===== BREAKDOWN TABUNG BY TYPE ===== */}
-            {pangkalanData?.summary.tabung_by_type && (
+            {isLoading ? (
+                <div className="glass-card rounded-xl p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 w-40" />
+                    </div>
+                    <div className="grid grid-cols-5 gap-2 sm:gap-3">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="rounded-lg p-2 sm:p-3 text-center bg-muted/30">
+                                <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-1 rounded-lg" />
+                                <Skeleton className="h-6 w-12 mx-auto mb-1" />
+                                <Skeleton className="h-3 w-8 mx-auto" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : pangkalanData?.summary.tabung_by_type && (
                 <div className="glass-card rounded-xl p-3 sm:p-4">
                     <div className="flex items-center gap-2 mb-3">
                         <SafeIcon name="Package" className="h-4 w-4 text-primary" />
@@ -795,14 +812,16 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                             { label: '12kg', value: pangkalanData.summary.tabung_by_type.kg12, color: 'bg-amber-100 dark:bg-amber-900/30', image: '/images/products/lpg-12kg.png' },
                             { label: '50kg', value: pangkalanData.summary.tabung_by_type.kg50, color: 'bg-orange-100 dark:bg-orange-900/30', image: '/images/products/lpg-50kg.png' },
                             { label: '220gr', value: pangkalanData.summary.tabung_by_type.gr220, color: 'bg-purple-100 dark:bg-purple-900/30', image: '/images/products/bright-gas-220gr.png' },
-                        ].map((item) => (
+                        ].map((item, index) => (
                             <div key={item.label} className={`rounded-lg p-2 sm:p-3 text-center ${item.color}`}>
                                 <img
                                     src={item.image}
                                     alt={item.label}
                                     className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-1 object-contain"
                                 />
-                                <p className="text-lg sm:text-xl font-bold text-foreground">{item.value.toLocaleString('id-ID')}</p>
+                                <p className="text-lg sm:text-xl font-bold text-foreground">
+                                    <AnimatedNumber value={item.value} delay={index * 100} />
+                                </p>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground">{item.label}</p>
                             </div>
                         ))}
@@ -810,217 +829,274 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                 </div>
             )}
 
-            {/* ===== PIE CHART DISTRIBUTION ===== */}
-            {wilayahDistribution.length > 0 && (
-                <Card className="glass-card rounded-2xl overflow-hidden">
-                    <CardHeader className="pb-2 border-b border-border/50">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                            <CardTitle className="text-base sm:text-lg font-semibold">Distribusi per Kecamatan</CardTitle>
-                            <Badge variant="outline" className="ml-auto text-[10px] sm:text-xs">
-                                {activeSubTab === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}
-                            </Badge>
-                        </div>
-                        <CardDescription className="text-xs sm:text-sm">
-                            Distribusi tabung berdasarkan kecamatan
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4">
-                        <div className="h-[200px] sm:h-[250px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={wilayahDistribution}
-                                        dataKey="tabung"
-                                        nameKey="name"
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={80}
-                                        label={({ name, percent }) => `${name.replace('Kec. ', '').replace('Kab. ', '').replace('Kota ', '')} ${(percent * 100).toFixed(0)}%`}
-                                        labelLine={false}
-                                    >
-                                        {wilayahDistribution.map((_, index) => (
-                                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        formatter={(value: number) => [value.toLocaleString('id-ID'), 'Tabung']}
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-                                    />
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={36}
-                                        formatter={(value) => <span className="text-xs">{value}</span>}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+            {/* ===== PIE CHART + DISTRIBUTION CARDS LAYOUT (DESKTOP: SIDE-BY-SIDE) ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* LEFT: PIE CHART */}
+                {isLoading ? (
+                    <Card className="glass-card rounded-2xl overflow-hidden">
+                        <CardHeader className="pb-2 border-b border-border/50">
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="w-2 h-2 rounded-full" />
+                                <Skeleton className="h-5 w-40" />
+                                <Skeleton className="ml-auto h-5 w-16 rounded-full" />
+                            </div>
+                            <Skeleton className="h-4 w-56 mt-1" />
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="h-[220px] sm:h-[280px] flex items-center justify-center">
+                                <div className="relative">
+                                    {/* Circular skeleton for pie chart */}
+                                    <Skeleton className="w-32 h-32 sm:w-40 sm:h-40 rounded-full" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-background rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Legend skeleton */}
+                            <div className="flex flex-wrap justify-center gap-2 mt-2">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="flex items-center gap-1">
+                                        <Skeleton className="w-3 h-3 rounded" />
+                                        <Skeleton className="h-3 w-12" />
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                ) : wilayahDistribution.length > 0 && (
+                    <Card className="glass-card rounded-2xl overflow-hidden">
+                        <CardHeader className="pb-2 border-b border-border/50">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                <CardTitle className="text-base sm:text-lg font-semibold">Distribusi per Kecamatan</CardTitle>
+                                <Badge variant="outline" className="ml-auto text-[10px] sm:text-xs">
+                                    {activeSubTab === 'subsidi' ? 'Subsidi' : 'Non-Subsidi'}
+                                </Badge>
+                            </div>
+                            <CardDescription className="text-xs sm:text-sm">
+                                Distribusi tabung berdasarkan kecamatan
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="h-[220px] sm:h-[280px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={wilayahDistribution}
+                                            dataKey="tabung"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="45%"
+                                            outerRadius={60}
+                                            label={({ name, percent }) => `${name.replace('Kec. ', '').replace('Kab. ', '').replace('Kota ', '').slice(0, 8)}${name.length > 8 ? '..' : ''} ${(percent * 100).toFixed(0)}%`}
+                                            labelLine={true}
+                                            fontSize={10}
+                                        >
+                                            {wilayahDistribution.map((_, index) => (
+                                                <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            formatter={(value: number, name: string) => [value.toLocaleString('id-ID') + ' Tabung', name]}
+                                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                                        />
+                                        <Legend
+                                            verticalAlign="bottom"
+                                            height={36}
+                                            formatter={(value) => <span className="text-[10px] sm:text-xs">{value}</span>}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
-            {/* ===== SUB-TAB SPECIFIC CARDS ===== */}
-            {activeSubTab === 'subsidi' ? (
-                <div>
-                    <div className="hidden sm:flex items-center gap-2 mb-3">
-                        <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Distribusi Subsidi (3kg)</h3>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs dark:bg-green-900/30 dark:text-green-400 dark:border-green-700">Audit Focus</Badge>
-                    </div>
-                    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-1">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi Subsidi</p>
-                                        <p className="text-xl sm:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_orders_subsidi || 0} delay={100} />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Transaksi 3kg</p>
-                                    </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
-                                        <SafeIcon name="ShoppingBag" className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
+                {/* RIGHT: DISTRIBUTION CARDS */}
+                {isLoading ? (
+                    <Card className="glass-card rounded-2xl overflow-hidden h-full">
+                        <CardHeader className="pb-2 border-b border-border/50">
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="w-2 h-2 rounded-full" />
+                                <Skeleton className="h-5 w-36" />
+                                <Skeleton className="ml-auto h-5 w-16 rounded-full" />
                             </div>
-                        </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-2">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung Subsidi</p>
-                                        <p className="text-xl sm:text-3xl font-bold text-teal-600 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_tabung_subsidi || 0} delay={200} />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Tabung 3kg terdistribusi</p>
-                                        <p className="text-[10px] text-muted-foreground mt-0.5 sm:hidden">Terdistribusi</p>
+                            <Skeleton className="h-4 w-48 mt-1" />
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="grid gap-3 sm:gap-4 grid-cols-2">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <Skeleton className="h-3 w-16 mb-2" />
+                                                <Skeleton className="h-7 w-20 mb-1" />
+                                                <Skeleton className="h-3 w-12" />
+                                            </div>
+                                            <Skeleton className="h-10 w-10 rounded-lg" />
+                                        </div>
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted/30" />
                                     </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30">
-                                        <SafeIcon name="Package" className="h-4 w-4 sm:h-5 sm:w-5 text-teal-600 dark:text-teal-400" />
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
+                                ))}
                             </div>
-                        </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-3">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan Subsidi</p>
-                                        <p className="text-lg sm:text-2xl font-bold text-lime-600 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_revenue_subsidi || 0} delay={300} isCurrency />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Revenue 3kg</p>
-                                    </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-lime-100 to-lime-200 dark:from-lime-900/30 dark:to-lime-800/30">
-                                        <SafeIcon name="CircleDollarSign" className="h-4 w-4 sm:h-5 sm:w-5 text-lime-600 dark:text-lime-400" />
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-lime-300 via-lime-500 to-lime-300" />
+                        </CardContent>
+                    </Card>
+                ) : activeSubTab === 'subsidi' ? (
+                    <Card className="glass-card rounded-2xl overflow-hidden h-full">
+                        <CardHeader className="pb-2 border-b border-border/50">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                <CardTitle className="text-base sm:text-lg font-semibold">Distribusi Subsidi (3kg)</CardTitle>
+                                <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200 text-[10px] sm:text-xs dark:bg-green-900/30 dark:text-green-400 dark:border-green-700">Audit Focus</Badge>
                             </div>
-                        </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-4">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Konsumen Aktif</p>
-                                        <p className="text-xl sm:text-3xl font-bold text-purple-600 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.active_consumers || 0} delay={400} />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Pembeli subsidi</p>
+                            <CardDescription className="text-xs sm:text-sm">
+                                Ringkasan penyaluran LPG subsidi 3kg
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="grid gap-3 sm:gap-4 grid-cols-2">
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-green-600 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_orders_subsidi || 0} delay={100} />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Transaksi 3kg</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
+                                            <SafeIcon name="ShoppingBag" className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                                        </div>
                                     </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30">
-                                        <SafeIcon name="Users" className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
-                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-300 via-green-500 to-green-300" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
-                            </div>
-                        </Tilt3DCard>
-                    </div>
-                </div>
-            ) : (
-                <div>
-                    <div className="hidden sm:flex items-center gap-2 mb-3">
-                        <div className="w-3 h-3 rounded-full bg-amber-500" />
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">LPG Non-Subsidi</h3>
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700">Business</Badge>
-                    </div>
-                    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-1">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi Non-Subsidi</p>
-                                        <p className="text-xl sm:text-3xl font-bold text-amber-600 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_orders || 0} delay={100} />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Tabung Non-Subsidi</p>
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-teal-600 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_tabung_subsidi || 0} delay={200} />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Terdistribusi</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-900/30 dark:to-teal-800/30">
+                                            <SafeIcon name="Package" className="h-4 w-4 sm:h-5 sm:w-5 text-teal-600 dark:text-teal-400" />
+                                        </div>
                                     </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
-                                        <SafeIcon name="ShoppingBag" className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
-                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-300 via-teal-500 to-teal-300" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
-                            </div>
-                        </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-2">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung Non-Subsidi</p>
-                                        <p className="text-xl sm:text-3xl font-bold text-orange-600 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_tabung || 0} delay={200} />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Tabung terjual</p>
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan</p>
+                                            <p className="text-lg sm:text-xl font-bold text-lime-600 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_revenue_subsidi || 0} delay={300} isCurrency />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Revenue 3kg</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-lime-100 to-lime-200 dark:from-lime-900/30 dark:to-lime-800/30">
+                                            <SafeIcon name="CircleDollarSign" className="h-4 w-4 sm:h-5 sm:w-5 text-lime-600 dark:text-lime-400" />
+                                        </div>
                                     </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30">
-                                        <SafeIcon name="Flame" className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 dark:text-orange-400" />
-                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-lime-300 via-lime-500 to-lime-300" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
-                            </div>
-                        </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-3">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan Non-Subsidi</p>
-                                        <p className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1 sm:mt-2">
-                                            {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_revenue || 0} delay={300} isCurrency />}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Revenue non-3kg</p>
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Konsumen</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-purple-600 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.active_consumers || 0} delay={400} />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Pembeli subsidi</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30">
+                                            <SafeIcon name="Users" className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
+                                        </div>
                                     </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30">
-                                        <SafeIcon name="CircleDollarSign" className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 dark:text-yellow-400" />
-                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-300 via-purple-500 to-purple-300" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-300" />
                             </div>
-                        </Tilt3DCard>
-                        <Tilt3DCard className="glass-card rounded-xl sm:rounded-2xl overflow-hidden card-hover-glow animate-scaleIn stagger-4">
-                            <div className="p-3 sm:p-5 relative">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Pangkalan</p>
-                                        <p className="text-sm sm:text-lg font-bold text-primary mt-1 sm:mt-2 truncate max-w-[80px] sm:max-w-[120px]">
-                                            {isLoading ? '...' : (() => {
-                                                const sorted = [...(pangkalanData?.data || [])].sort((a, b) => b.total_nonsubsidi_tabung - a.total_nonsubsidi_tabung);
-                                                return sorted[0]?.name || '-';
-                                            })()}
-                                        </p>
-                                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Penjualan terbanyak</p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card className="glass-card rounded-2xl overflow-hidden h-full">
+                        <CardHeader className="pb-2 border-b border-border/50">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                <CardTitle className="text-base sm:text-lg font-semibold">LPG Non-Subsidi</CardTitle>
+                                <Badge variant="outline" className="ml-auto bg-amber-50 text-amber-700 border-amber-200 text-[10px] sm:text-xs dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700">Business</Badge>
+                            </div>
+                            <CardDescription className="text-xs sm:text-sm">
+                                Ringkasan penjualan LPG non-subsidi
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="grid gap-3 sm:gap-4 grid-cols-2">
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaksi</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-amber-600 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_orders || 0} delay={100} />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Non-Subsidi</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
+                                            <SafeIcon name="ShoppingBag" className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
+                                        </div>
                                     </div>
-                                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-900/30 dark:to-green-800/30">
-                                        <SafeIcon name="Trophy" className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-emerald-300 via-primary to-emerald-300" />
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tabung</p>
+                                            <p className="text-xl sm:text-2xl font-bold text-orange-600 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_tabung || 0} delay={200} />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Terjual</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30">
+                                            <SafeIcon name="Flame" className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 dark:text-orange-400" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-300 via-orange-500 to-orange-300" />
+                                </div>
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pendapatan</p>
+                                            <p className="text-lg sm:text-xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">
+                                                {isLoading ? '...' : <AnimatedNumber value={pangkalanData?.summary.total_nonsubsidi_revenue || 0} delay={300} isCurrency />}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Revenue</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30">
+                                            <SafeIcon name="CircleDollarSign" className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 dark:text-yellow-400" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-300" />
+                                </div>
+                                <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden p-3 sm:p-4 relative">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Pangkalan</p>
+                                            <p className="text-lg sm:text-xl font-bold text-red-600 mt-1 truncate max-w-[100px]">
+                                                {isLoading ? '...' : (filteredData[0]?.name?.split(' ').slice(0, 2).join(' ') || '-')}
+                                            </p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">Terbanyak</p>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30">
+                                            <SafeIcon name="Award" className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-300 via-red-500 to-red-300" />
+                                </div>
                             </div>
-                        </Tilt3DCard>
-                    </div>
-                </div>
-            )}
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
 
             {/* ===== FILTER BAR ===== */}
             <Card className="glass-card">

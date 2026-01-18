@@ -105,56 +105,56 @@ export default function AppearanceSettings() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Theme Selection */}
+        <div className="space-y-4">
+            {/* Theme Selection - Compact */}
             <Card className="border shadow-sm">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/10">
-                            <SafeIcon name="Palette" className="h-5 w-5 text-amber-600" />
+                <CardHeader className="pb-2 pt-3 px-3 sm:px-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-500/10">
+                            <SafeIcon name="Palette" className="h-4 w-4 text-amber-600" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Tema Aplikasi</CardTitle>
-                            <CardDescription>Pilih tampilan yang nyaman untuk mata Anda</CardDescription>
+                            <CardTitle className="text-sm sm:text-base">Tema Aplikasi</CardTitle>
+                            <CardDescription className="text-xs hidden sm:block">Pilih tampilan yang nyaman untuk mata Anda</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid gap-3 sm:grid-cols-3">
+                <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
+                    <div className="grid gap-2 grid-cols-3">
                         {themeOptions.map((option) => (
                             <button
                                 key={option.value}
                                 onClick={() => handleThemeChange(option.value as Theme)}
-                                className={`relative flex flex-col items-center gap-3 p-5 rounded-xl border-2 transition-all duration-300 hover:border-primary/50 hover:bg-muted/50 group
+                                className={`relative flex flex-col items-center gap-1.5 sm:gap-2 p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 hover:border-primary/50 hover:bg-muted/50
                   ${settings.theme === option.value
                                         ? 'border-primary bg-primary/5 shadow-sm'
                                         : 'border-muted-foreground/20'
                                     }`}
                             >
                                 {/* Theme Icon */}
-                                <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300
+                                <div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg transition-all duration-200
                   ${settings.theme === option.value
                                         ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary'
+                                        : 'bg-muted text-muted-foreground'
                                     }`}
                                 >
-                                    <SafeIcon name={option.icon} className="h-6 w-6" />
+                                    <SafeIcon name={option.icon} className="h-4 w-4 sm:h-5 sm:w-5" />
                                 </div>
 
                                 {/* Label */}
                                 <div className="text-center">
-                                    <p className={`font-medium ${settings.theme === option.value ? 'text-primary' : 'text-foreground'}`}>
+                                    <p className={`text-xs sm:text-sm font-medium ${settings.theme === option.value ? 'text-primary' : 'text-foreground'}`}>
                                         {option.label}
                                     </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block line-clamp-1">
                                         {option.description}
                                     </p>
                                 </div>
 
                                 {/* Check indicator */}
                                 {settings.theme === option.value && (
-                                    <div className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                        <SafeIcon name="Check" className="h-3 w-3" />
+                                    <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                        <SafeIcon name="Check" className="h-2.5 w-2.5" />
                                     </div>
                                 )}
                             </button>
@@ -163,35 +163,35 @@ export default function AppearanceSettings() {
                 </CardContent>
             </Card>
 
-            {/* Accent Color */}
+            {/* Accent Color - Compact Inline */}
             <Card className="border shadow-sm">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-500/10">
-                            <SafeIcon name="Brush" className="h-5 w-5 text-purple-600" />
+                <CardHeader className="pb-2 pt-3 px-3 sm:px-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-500/10">
+                            <SafeIcon name="Brush" className="h-4 w-4 text-purple-600" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Warna Aksen</CardTitle>
-                            <CardDescription>Pilih warna utama untuk tombol dan elemen interaktif</CardDescription>
+                            <CardTitle className="text-sm sm:text-base">Warna Aksen</CardTitle>
+                            <CardDescription className="text-xs hidden sm:block">Pilih warna utama untuk tombol dan elemen interaktif</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex flex-wrap gap-3">
+                <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
+                    <div className="flex flex-wrap gap-2">
                         {accentColors.map((color) => (
                             <button
                                 key={color.value}
                                 onClick={() => handleChange('accentColor', color.value)}
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg border-2 transition-all duration-200
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 transition-all duration-200
                   ${settings.accentColor === color.value
                                         ? 'border-primary bg-primary/5'
                                         : 'border-transparent bg-muted/50 hover:bg-muted'
                                     }`}
                             >
-                                <div className={`w-5 h-5 rounded-full ${color.color}`} />
-                                <span className="text-sm font-medium">{color.label}</span>
+                                <div className={`w-4 h-4 rounded-full ${color.color}`} />
+                                <span className="text-xs sm:text-sm font-medium">{color.label}</span>
                                 {settings.accentColor === color.value && (
-                                    <SafeIcon name="Check" className="h-4 w-4 text-primary" />
+                                    <SafeIcon name="Check" className="h-3.5 w-3.5 text-primary" />
                                 )}
                             </button>
                         ))}
@@ -199,43 +199,43 @@ export default function AppearanceSettings() {
                 </CardContent>
             </Card>
 
-            {/* Regional Settings */}
+            {/* Regional Settings - Compact */}
             <Card className="border shadow-sm">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-500/10">
-                            <SafeIcon name="Globe" className="h-5 w-5 text-cyan-600" />
+                <CardHeader className="pb-2 pt-3 px-3 sm:px-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-500/10">
+                            <SafeIcon name="Globe" className="h-4 w-4 text-cyan-600" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Regional</CardTitle>
-                            <CardDescription>Pengaturan bahasa dan format tanggal</CardDescription>
+                            <CardTitle className="text-sm sm:text-base">Regional</CardTitle>
+                            <CardDescription className="text-xs hidden sm:block">Pengaturan bahasa dan format tanggal</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="language" className="text-sm font-medium">Bahasa</Label>
+                <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
+                    <div className="grid gap-3 grid-cols-2">
+                        <div className="space-y-1">
+                            <Label htmlFor="language" className="text-xs font-medium">Bahasa</Label>
                             <Select value={settings.language} onValueChange={(v) => handleChange('language', v)}>
-                                <SelectTrigger id="language" className="h-10">
+                                <SelectTrigger id="language" className="h-8 text-xs sm:text-sm">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="id">🇮🇩 Bahasa Indonesia</SelectItem>
+                                    <SelectItem value="id">🇮🇩 Indonesia</SelectItem>
                                     <SelectItem value="en">🇺🇸 English</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="dateFormat" className="text-sm font-medium">Format Tanggal</Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="dateFormat" className="text-xs font-medium">Format Tanggal</Label>
                             <Select value={settings.dateFormat} onValueChange={(v) => handleChange('dateFormat', v)}>
-                                <SelectTrigger id="dateFormat" className="h-10">
+                                <SelectTrigger id="dateFormat" className="h-8 text-xs sm:text-sm">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (31/01/2026)</SelectItem>
-                                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (01/31/2026)</SelectItem>
-                                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (2026-01-31)</SelectItem>
+                                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -243,30 +243,32 @@ export default function AppearanceSettings() {
                 </CardContent>
             </Card>
 
-            {/* Save Button */}
-            <div className="flex justify-end gap-3 pt-2">
+            {/* Save Button - Compact */}
+            <div className="flex justify-end gap-2 pt-1">
                 <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setSettings(initialSettings)}
-                    className="gap-2"
+                    className="gap-1.5 h-8 text-xs"
                 >
-                    <SafeIcon name="RotateCcw" className="h-4 w-4" />
+                    <SafeIcon name="RotateCcw" className="h-3.5 w-3.5" />
                     Reset
                 </Button>
                 <Button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="gap-2 bg-primary hover:bg-primary/90 min-w-[140px]"
+                    size="sm"
+                    className="gap-1.5 h-8 text-xs bg-primary hover:bg-primary/90 min-w-[100px]"
                 >
                     {isSaving ? (
                         <>
-                            <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+                            <SafeIcon name="Loader2" className="h-3.5 w-3.5 animate-spin" />
                             Menyimpan...
                         </>
                     ) : (
                         <>
-                            <SafeIcon name="Save" className="h-4 w-4" />
-                            Simpan Tampilan
+                            <SafeIcon name="Save" className="h-3.5 w-3.5" />
+                            Simpan
                         </>
                     )}
                 </Button>

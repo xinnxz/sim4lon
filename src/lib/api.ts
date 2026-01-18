@@ -2140,7 +2140,7 @@ export const agenOrdersApi = {
 // EXPENSE API (Pangkalan Dashboard)
 // ============================================================
 
-export type ExpenseCategory = 'OPERASIONAL' | 'TRANSPORT' | 'SEWA' | 'LISTRIK' | 'GAJI' | 'LAINNYA';
+export type ExpenseCategory = 'OPERASIONAL' | 'TRANSPORT' | 'MAINTENANCE' | 'SEWA' | 'LISTRIK' | 'GAJI' | 'LAINNYA';
 
 export interface Expense {
     id: string;

@@ -36,10 +36,11 @@ import { toast } from 'sonner'
 const CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string; gradient: string }[] = [
     { value: 'OPERASIONAL', label: 'Operasional', icon: 'Settings', color: 'bg-violet-500', gradient: 'from-violet-500 to-violet-600' },
     { value: 'TRANSPORT', label: 'Transport', icon: 'Truck', color: 'bg-orange-500', gradient: 'from-orange-500 to-orange-600' },
+    { value: 'MAINTENANCE', label: 'Maintenance', icon: 'Wrench', color: 'bg-cyan-500', gradient: 'from-cyan-500 to-cyan-600' },
     { value: 'SEWA', label: 'Sewa', icon: 'Home', color: 'bg-pink-500', gradient: 'from-pink-500 to-pink-600' },
     { value: 'LISTRIK', label: 'Listrik/Air', icon: 'Zap', color: 'bg-yellow-500', gradient: 'from-yellow-500 to-amber-600' },
     { value: 'GAJI', label: 'Gaji', icon: 'Users', color: 'bg-blue-500', gradient: 'from-blue-500 to-blue-600' },
-    { value: 'LAINNYA', label: 'Lainnya', icon: 'MoreHorizontal', color: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600' },
+    { value: 'LAINNYA', label: 'Lain-lain', icon: 'MoreHorizontal', color: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600' },
 ]
 
 export default function PengeluaranPage() {
