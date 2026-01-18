@@ -26,6 +26,10 @@ interface PangkalanTabContentProps {
     dateRange: { start: string; end: string }
     isLoading: boolean
     onSummaryLoad?: (totalPangkalan: number) => void
+    exportRef?: React.MutableRefObject<{
+        exportAllPDF: () => Promise<void>
+        exportAllExcel: () => void
+    } | null>
 }
 
 const formatCurrency = (value: number) => {
@@ -53,7 +57,7 @@ const formatDate = (dateString: string) => {
 
 type SubTabType = 'subsidi' | 'nonsubsidi'
 
-export default function PangkalanTabContent({ dateRange, isLoading: initialLoading, onSummaryLoad }: PangkalanTabContentProps) {
+export default function PangkalanTabContent({ dateRange, isLoading: initialLoading, onSummaryLoad, exportRef }: PangkalanTabContentProps) {
     // Read sub-tab from URL hash or default to 'subsidi'
     const getInitialSubTab = (): SubTabType => {
         if (typeof window !== 'undefined') {
@@ -632,6 +636,16 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
         }
     }
 
+    // Expose export functions to parent via ref
+    useEffect(() => {
+        if (exportRef) {
+            exportRef.current = {
+                exportAllPDF: handleExportAllPDF,
+                exportAllExcel: handleExportAllExcel,
+            }
+        }
+    }, [pangkalanData])
+
     // Compute kecamatan distribution for pie chart
     const wilayahDistribution = useMemo(() => {
         if (!pangkalanData?.data) return []
@@ -759,59 +773,12 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                 </div>
             </div>
 
-            {/* ===== PERIOD BADGE + EXPORT & REFRESH (TOP) ===== */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            {/* ===== PERIOD BADGE ===== */}
+            <div className="flex items-center flex-wrap gap-2">
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700 text-xs">
                     <SafeIcon name="Calendar" className="h-3 w-3 mr-1" />
                     Periode: {getPeriodLabel()}
                 </Badge>
-                <div className="flex items-center gap-2">
-                    {/* Refresh Button */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRefresh}
-                        disabled={isLoading || isRefreshing}
-                        className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                        title="Refresh data"
-                    >
-                        <SafeIcon name="RefreshCw" className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    </Button>
-                    {/* Export Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={isLoading || !pangkalanData?.data?.length}
-                                className="h-8 text-xs border-primary/30 text-primary hover:bg-primary/10"
-                            >
-                                <SafeIcon name="Download" className="h-3.5 w-3.5 mr-1" />
-                                Export
-                                <SafeIcon name="ChevronDown" className="h-3 w-3 ml-1" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
-                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
-                                {activeSubTab === 'subsidi' ? '1. Subsidi PDF' : '1. Non-Subsidi PDF'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
-                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
-                                {activeSubTab === 'subsidi' ? '2. Subsidi Excel' : '2. Non-Subsidi Excel'}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleExportAllPDF} className="cursor-pointer">
-                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-blue-500" />
-                                3. Semua Data (PDF)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleExportAllExcel} className="cursor-pointer">
-                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-blue-500" />
-                                4. Semua Data (Excel)
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
             </div>
 
             {/* ===== BREAKDOWN TABUNG BY TYPE ===== */}
@@ -1097,6 +1064,31 @@ export default function PangkalanTabContent({ dateRange, isLoading: initialLoadi
                                 </SelectContent>
                             </Select>
                         </div>
+                        {/* Export Filtered Data - untuk export data sesuai tab aktif */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isLoading || !filteredData?.length}
+                                    className="h-8 text-xs gap-1 border-muted-foreground/30 text-muted-foreground hover:bg-muted/50"
+                                >
+                                    <SafeIcon name="Download" className="h-3.5 w-3.5" />
+                                    <span className="hidden sm:inline">Export</span>
+                                    <SafeIcon name="ChevronDown" className="h-3 w-3" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                    <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
+                                    {activeSubTab === 'subsidi' ? 'Subsidi PDF' : 'Non-Subsidi PDF'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                                    <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
+                                    {activeSubTab === 'subsidi' ? 'Subsidi Excel' : 'Non-Subsidi Excel'}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </CardContent>
             </Card>

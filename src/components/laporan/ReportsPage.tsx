@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -99,6 +99,12 @@ export default function ReportsPage() {
     const [customStart, setCustomStart] = useState('')
     const [customEnd, setCustomEnd] = useState('')
     const [isLoading, setIsLoading] = useState(true)
+
+    // Ref to access pangkalan export functions
+    const pangkalanExportRef = useRef<{
+        exportAllPDF: () => Promise<void>
+        exportAllExcel: () => void
+    } | null>(null)
 
     // Update URL hash when tab changes
     const handleTabChange = (value: string) => {
@@ -617,32 +623,51 @@ export default function ReportsPage() {
                         </Button>
 
                         {/* Export Dropdown - Inline with filters */}
-                        {activeTab !== 'pangkalan' && (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={isLoading}
-                                        className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                                    >
-                                        <SafeIcon name="Download" className="h-3.5 w-3.5" />
-                                        <span className="hidden sm:inline">Export</span>
-                                        <SafeIcon name="ChevronDown" className="h-3 w-3" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-40">
-                                    <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
-                                        <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
-                                        Export PDF
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
-                                        <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
-                                        Export Excel
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        )}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isLoading}
+                                    className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                                >
+                                    <SafeIcon name="Download" className="h-3.5 w-3.5" />
+                                    <span className="hidden sm:inline">Export</span>
+                                    <SafeIcon name="ChevronDown" className="h-3 w-3" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                                {activeTab === 'pangkalan' ? (
+                                    <>
+                                        <DropdownMenuItem
+                                            onClick={() => pangkalanExportRef.current?.exportAllPDF()}
+                                            className="cursor-pointer"
+                                        >
+                                            <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
+                                            Semua Data (PDF)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => pangkalanExportRef.current?.exportAllExcel()}
+                                            className="cursor-pointer"
+                                        >
+                                            <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
+                                            Semua Data (Excel)
+                                        </DropdownMenuItem>
+                                    </>
+                                ) : (
+                                    <>
+                                        <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                            <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-500" />
+                                            Export PDF
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer">
+                                            <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-500" />
+                                            Export Excel
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
 
                     {/* Custom date inputs */}
@@ -1181,6 +1206,7 @@ export default function ReportsPage() {
                         }
                         isLoading={isLoading}
                         onSummaryLoad={setTotalPangkalan}
+                        exportRef={pangkalanExportRef}
                     />
                 </TabsContent>
 
