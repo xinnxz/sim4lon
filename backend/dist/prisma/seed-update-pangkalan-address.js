@@ -7,21 +7,22 @@ const pool = new pg_1.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 const pangkalanAddressData = [
-    { code: '343262997904001', address: 'Jl. Cibareno No. 45', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343265997904001', address: 'Jl. Ciherang No. 12', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343265997904004', address: 'Jl. Kamuning No. 78', region: 'Cilaku, Kabupaten Cianjur' },
-    { code: '343265997904006', address: 'Jl. Cikopo No. 23', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343265997904003', address: 'Jl. Sukamakmur No. 56', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343265997904002', address: 'Jl. Sindangjaya No. 89', region: 'Karangtengah, Kabupaten Cianjur' },
-    { code: '343265997904007', address: 'Jl. Ciburial No. 34', region: 'Cilaku, Kabupaten Cianjur' },
-    { code: '343265997904008', address: 'Jl. Sukamaju No. 67', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343265997904005', address: 'Jl. Cikoneng No. 11', region: 'Cianjur, Kabupaten Cianjur' },
-    { code: '343265997904009', address: 'Jl. Pasirbaru No. 21', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343262999904001', address: 'Jl. Cirata No. 44', region: 'Pacet, Kabupaten Cianjur' },
-    { code: '343262999904002', address: 'Jl. Cipanas No. 99', region: 'Cipanas, Kabupaten Cianjur' },
-    { code: '343262999904003', address: 'Jl. Palasari No. 15', region: 'Cibeber, Kabupaten Cianjur' },
-    { code: '343262999904004', address: 'Jl. Sukanagara No. 32', region: 'Sukanagara, Kabupaten Cianjur' },
-    { code: '343262999904005', address: 'Jl. Cikalongkulon No. 88', region: 'Cikalongkulon, Kabupaten Cianjur' },
+    { code: '3432629979044010', address: 'Jl. Raya Merdeka No. 89', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343262997904001', address: 'Jl. Cibareno No. 45', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343265997904001', address: 'Jl. Ciherang No. 12', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343265997904004', address: 'Jl. Kamuning No. 78', region: 'Kec. Cilaku, Kabupaten Cianjur' },
+    { code: '343265997904006', address: 'Jl. Cikopo No. 23', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343265997904003', address: 'Jl. Sukamakmur No. 56', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343265997904002', address: 'Jl. Sindangjaya No. 89', region: 'Kec. Karangtengah, Kabupaten Cianjur' },
+    { code: '343265997904007', address: 'Jl. Ciburial No. 34', region: 'Kec. Cilaku, Kabupaten Cianjur' },
+    { code: '343265997904008', address: 'Jl. Sukamaju No. 67', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343265997904005', address: 'Jl. Cikoneng No. 11', region: 'Kec. Cianjur, Kabupaten Cianjur' },
+    { code: '343265997904009', address: 'Jl. Pasirbaru No. 21', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343262999904001', address: 'Jl. Cirata No. 44', region: 'Kec. Pacet, Kabupaten Cianjur' },
+    { code: '343262999904002', address: 'Jl. Cipanas No. 99', region: 'Kec. Cipanas, Kabupaten Cianjur' },
+    { code: '343262999904003', address: 'Jl. Palasari No. 15', region: 'Kec. Cibeber, Kabupaten Cianjur' },
+    { code: '343262999904004', address: 'Jl. Sukanagara No. 32', region: 'Kec. Sukanagara, Kabupaten Cianjur' },
+    { code: '343262999904005', address: 'Jl. Cikalongkulon No. 88', region: 'Kec. Cikalongkulon, Kabupaten Cianjur' },
 ];
 async function main() {
     console.log('🚀 Updating Pangkalan Address & Region...\n');
@@ -90,7 +91,7 @@ async function main() {
         const randomJalan = jalanList[Math.floor(Math.random() * jalanList.length)];
         const randomNo = Math.floor(Math.random() * 100) + 1;
         const newAddress = `${randomJalan} No. ${randomNo}`;
-        const newRegion = `${randomKec}, Kabupaten Cianjur`;
+        const newRegion = `Kec. ${randomKec}, Kabupaten Cianjur`;
         await prisma.pangkalans.update({
             where: { id: pangkalan.id },
             data: {

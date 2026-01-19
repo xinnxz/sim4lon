@@ -23,7 +23,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- 3. USER PANGKALAN (akun login untuk setiap pangkalan)
--- Password: pangkalan123 (hashed)
+-- Password: Pangkalan123 (hashed)
 -- ============================================
 DO $$
 DECLARE

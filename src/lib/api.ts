@@ -135,6 +135,8 @@ export interface UserProfile {
         name: string;
         address: string;
         phone: string | null;
+        region?: string | null;
+        pic_name?: string | null;
     } | null;
     created_at: string;
     updated_at: string;

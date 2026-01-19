@@ -131,7 +131,7 @@ async function main() {
     // ============================================================
     const hashedAdmin = await bcrypt.hash('admin123', 12);
     const hashedOperator = await bcrypt.hash('operator123', 12);
-    const hashedPangkalan = await bcrypt.hash('pangkalan123', 12);
+    const hashedPangkalan = await bcrypt.hash('Pangkalan123', 12);
 
     const admin = await prisma.users.upsert({
         where: { email: 'admin@agen.com' },
@@ -494,8 +494,8 @@ async function main() {
     console.log('   ──────────────────────────────────────');
     console.log('   Pangkalan Users (14 akun):');
     console.log('   Email: [4 digit terakhir kode]@pangkalan.com');
-    console.log('   Password: pangkalan123');
-    console.log('   Contoh: 4001@pangkalan.com / pangkalan123');
+    console.log('   Password: Pangkalan123');
+    console.log('   Contoh: 4001@pangkalan.com / Pangkalan123');
     console.log('   ──────────────────────────────────────');
 }
 

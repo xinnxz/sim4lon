@@ -521,7 +521,7 @@ export default function StokPangkalanPage() {
         // Generate message
         const lpgName = LPG_CONFIG[orderData.lpgType]?.name || orderData.lpgType
         const pangkalanName = profile?.pangkalans?.name || 'Pangkalan'
-        const message = `*🛢️ PESANAN LPG*
+        const message = `*PESANAN LPG*
 
 Dari: ${pangkalanName}
 Tipe: ${lpgName}
@@ -1090,100 +1090,6 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         <SafeIcon name="Send" className="h-4 w-4 mr-2" />
                                     )}
                                     {isSubmitting ? 'Menyimpan...' : 'Buat Pesanan'}
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                    {/* Terima Stok Button */}
-                    <Dialog open={isReceiveOpen} onOpenChange={setIsReceiveOpen}>
-                        <DialogTrigger asChild>
-                            {/* <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg shadow-green-500/25">
-                                <SafeIcon name="PackagePlus" className="h-4 w-4 mr-2" />
-                                Koreksi Stok
-                            </Button> */}
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                                        <SafeIcon name="PackagePlus" className="h-5 w-5 text-green-600" />
-                                    </div>
-                                    Koreksi Stok Manual
-                                </DialogTitle>
-                                <DialogDescription>
-                                    Catat penyesuaian stok (selisih opname atau sumber lain)
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                {/* Movement Type Selector */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Jenis Koreksi</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setReceiveData({ ...receiveData, movementType: 'IN' })}
-                                            className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'IN'
-                                                ? 'border-green-500 bg-green-50 text-green-700'
-                                                : 'border-slate-200 hover:border-slate-300'
-                                                }`}
-                                        >
-                                            <SafeIcon name="Plus" className="h-4 w-4" />
-                                            <span className="font-medium">Tambah</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setReceiveData({ ...receiveData, movementType: 'OUT' })}
-                                            className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'OUT'
-                                                ? 'border-red-500 bg-red-50 text-red-700'
-                                                : 'border-slate-200 hover:border-slate-300'
-                                                }`}
-                                        >
-                                            <SafeIcon name="Minus" className="h-4 w-4" />
-                                            <span className="font-medium">Kurangi</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Tipe LPG</label>
-                                    <Select value={receiveData.lpgType} onValueChange={(v) => setReceiveData({ ...receiveData, lpgType: v as LpgType })}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {activeLpgTypes.map(type => (
-                                                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Jumlah (tabung)</label>
-                                    <Input
-                                        type="number"
-                                        placeholder="Masukkan jumlah"
-                                        value={receiveData.qty || ''}
-                                        onChange={(e) => setReceiveData({ ...receiveData, qty: parseInt(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Catatan (opsional)</label>
-                                    <Input
-                                        placeholder="Contoh: Pengiriman dari Agen XYZ"
-                                        value={receiveData.note}
-                                        onChange={(e) => setReceiveData({ ...receiveData, note: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsReceiveOpen(false)}>Batal</Button>
-                                <Button onClick={handleReceiveStock} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
-                                    {isSubmitting ? (
-                                        <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                        <SafeIcon name="Check" className="h-4 w-4 mr-2" />
-                                    )}
-                                    Simpan
                                 </Button>
                             </DialogFooter>
                         </DialogContent>

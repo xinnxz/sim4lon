@@ -310,7 +310,7 @@ export default function LoginForm() {
 
                   {/* Password Info */}
                   <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-200">
-                    <span className="font-medium">Password:</span> admin123 / operator123 / pangkalan123
+                    <span className="font-medium">Password:</span> admin123 / operator123 / Pangkalan123
                   </p>
                 </div>
               </div>

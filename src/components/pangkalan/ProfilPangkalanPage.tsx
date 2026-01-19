@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import SafeIcon from '@/components/common/SafeIcon'
 import AvatarCropperModal from '@/components/profil-admin/AvatarCropperModal'
+import ChangePasswordModal from '@/components/profil-admin/ChangePasswordModal'
 import { authApi, uploadApi, type UserProfile } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -52,12 +53,6 @@ export default function ProfilPangkalanPage() {
 
     // Change password modal state
     const [showPasswordModal, setShowPasswordModal] = useState(false)
-    const [passwordForm, setPasswordForm] = useState({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-    })
-    const [isChangingPassword, setIsChangingPassword] = useState(false)
 
     useEffect(() => {
         fetchProfile()
@@ -159,40 +154,6 @@ export default function ProfilPangkalanPage() {
         }
     }
 
-    const handleChangePassword = async () => {
-        // Validation
-        if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-            toast.error('Semua field harus diisi')
-            return
-        }
-
-        if (passwordForm.newPassword.length < 6) {
-            toast.error('Password baru minimal 6 karakter')
-            return
-        }
-
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            toast.error('Konfirmasi password tidak cocok')
-            return
-        }
-
-        try {
-            setIsChangingPassword(true)
-            await authApi.changePassword({
-                oldPassword: passwordForm.oldPassword,
-                newPassword: passwordForm.newPassword,
-            })
-
-            toast.success('Password berhasil diubah')
-            setShowPasswordModal(false)
-            setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' })
-        } catch (error: any) {
-            toast.error(error.message || 'Gagal mengubah password')
-        } finally {
-            setIsChangingPassword(false)
-        }
-    }
-
     const getInitials = (name: string) => {
         return name
             .split(' ')
@@ -219,26 +180,39 @@ export default function ProfilPangkalanPage() {
     }
 
     return (
-        <div className="flex-1 space-y-6 p-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Profil</h1>
-                <p className="text-muted-foreground">Kelola informasi akun Anda</p>
+        <div className="flex-1 space-y-6 p-6 dashboard-gradient-bg min-h-screen">
+            {/* Page Header */}
+            <div className="space-y-1">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">
+                    Profil Saya
+                </h1>
+                <p className="text-muted-foreground">Kelola informasi akun dan pangkalan Anda</p>
             </div>
 
+            {/* Gradient Divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
             <div className="grid gap-6 md:grid-cols-2">
-                {/* User Profile Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Informasi Akun</CardTitle>
-                        <CardDescription>Data akun login Anda</CardDescription>
+                {/* User Profile Card - Modern Style */}
+                <Card className="glass-card border-0">
+                    <CardHeader className="bg-gradient-to-r from-emerald-600/10 to-emerald-400/5 rounded-t-lg border-b border-emerald-100/50 dark:border-emerald-900/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-emerald-500/10">
+                                <SafeIcon name="UserCircle" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg">Informasi Akun</CardTitle>
+                                <CardDescription>Data akun login Anda</CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="pt-6 space-y-6">
                         {/* Avatar */}
                         <div className="flex items-center gap-4">
-                            <div className="relative">
-                                <Avatar className="h-20 w-20">
+                            <div className="relative group">
+                                <Avatar className="h-20 w-20 ring-4 ring-emerald-100 dark:ring-emerald-900/50">
                                     <AvatarImage src={getAvatarUrl()} />
-                                    <AvatarFallback className="bg-blue-100 text-blue-700 text-xl">
+                                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-xl font-semibold">
                                         {profile ? getInitials(profile.name) : 'P'}
                                     </AvatarFallback>
                                 </Avatar>
@@ -249,7 +223,7 @@ export default function ProfilPangkalanPage() {
                                 )}
                                 {/* Only show camera button when editing */}
                                 {isEditing && (
-                                    <label className="absolute bottom-0 right-0 h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors">
+                                    <label className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center cursor-pointer hover:bg-emerald-700 transition-all shadow-lg hover:scale-110">
                                         <SafeIcon name="Camera" className="h-4 w-4 text-white" />
                                         <input
                                             ref={fileInputRef}
@@ -263,8 +237,12 @@ export default function ProfilPangkalanPage() {
                                 )}
                             </div>
                             <div>
-                                <p className="font-semibold">{profile?.name}</p>
+                                <p className="font-semibold text-lg">{profile?.name}</p>
                                 <p className="text-sm text-muted-foreground">{profile?.email}</p>
+                                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                    <SafeIcon name="Building2" className="h-3 w-3" />
+                                    Pangkalan
+                                </span>
                             </div>
                         </div>
 
@@ -273,26 +251,28 @@ export default function ProfilPangkalanPage() {
                         {isEditing ? (
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Nama</Label>
+                                    <Label htmlFor="name" className="text-sm font-medium">Nama</Label>
                                     <Input
                                         id="name"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder="Masukkan nama"
+                                        className="bg-background"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone">No. Telepon</Label>
+                                    <Label htmlFor="phone" className="text-sm font-medium">No. Telepon</Label>
                                     <Input
                                         id="phone"
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         placeholder="Contoh: 081234567890"
+                                        className="bg-background"
                                     />
                                 </div>
-                                <div className="flex gap-2">
-                                    <Button onClick={handleSave} disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
-                                        {isSubmitting ? <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                <div className="flex gap-2 pt-2">
+                                    <Button onClick={handleSave} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                        {isSubmitting ? <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" /> : <SafeIcon name="Save" className="mr-2 h-4 w-4" />}
                                         Simpan
                                     </Button>
                                     <Button variant="outline" onClick={() => {
@@ -310,24 +290,39 @@ export default function ProfilPangkalanPage() {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Nama</p>
-                                    <p className="font-medium">{profile?.name}</p>
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                        <SafeIcon name="User" className="h-4 w-4 text-gray-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Nama</p>
+                                        <p className="font-medium">{profile?.name}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Email</p>
-                                    <p className="font-medium">{profile?.email}</p>
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                        <SafeIcon name="Mail" className="h-4 w-4 text-gray-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Email</p>
+                                        <p className="font-medium">{profile?.email}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-muted-foreground">No. Telepon</p>
-                                    <p className="font-medium">{profile?.phone || '-'}</p>
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                        <SafeIcon name="Phone" className="h-4 w-4 text-gray-500" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">No. Telepon</p>
+                                        <p className="font-medium">{profile?.phone || '-'}</p>
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" onClick={() => setIsEditing(true)}>
+                                <div className="flex gap-2 pt-2">
+                                    <Button variant="outline" onClick={() => setIsEditing(true)} className="hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700">
                                         <SafeIcon name="Pencil" className="mr-2 h-4 w-4" />
                                         Edit Profil
                                     </Button>
-                                    <Button variant="outline" onClick={() => setShowPasswordModal(true)}>
+                                    <Button variant="outline" onClick={() => setShowPasswordModal(true)} className="hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700">
                                         <SafeIcon name="Lock" className="mr-2 h-4 w-4" />
                                         Ubah Password
                                     </Button>
@@ -337,30 +332,66 @@ export default function ProfilPangkalanPage() {
                     </CardContent>
                 </Card>
 
-                {/* Pangkalan Info Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Informasi Pangkalan</CardTitle>
-                        <CardDescription>Data pangkalan Anda</CardDescription>
+                {/* Pangkalan Info Card - Modern Style */}
+                <Card className="glass-card border-0">
+                    <CardHeader className="bg-gradient-to-r from-blue-600/10 to-blue-400/5 rounded-t-lg border-b border-blue-100/50 dark:border-blue-900/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-blue-500/10">
+                                <SafeIcon name="Store" className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg">Informasi Pangkalan</CardTitle>
+                                <CardDescription>Data pangkalan Anda</CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <p className="text-sm text-muted-foreground">Kode</p>
-                            <p className="font-medium">{profile?.pangkalans?.code || '-'}</p>
+                    <CardContent className="pt-6 space-y-4">
+                        {/* Kode Pangkalan */}
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                <SafeIcon name="Hash" className="h-4 w-4 text-gray-500" />
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Kode Pangkalan</p>
+                                <p className="font-mono font-semibold text-blue-600">{profile?.pangkalans?.code || '-'}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Nama Pangkalan</p>
-                            <p className="font-medium">{profile?.pangkalans?.name || '-'}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Alamat</p>
-                            <p className="font-medium">{profile?.pangkalans?.address || '-'}</p>
-                        </div>
-                        <Separator />
 
-                        <p className="text-xs text-muted-foreground">
-                            Untuk mengubah informasi pangkalan, silakan hubungi administrator.
-                        </p>
+                        {/* Nama Pangkalan */}
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                <SafeIcon name="Building2" className="h-4 w-4 text-gray-500" />
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Nama Pangkalan</p>
+                                <p className="font-semibold">{profile?.pangkalans?.name || '-'}</p>
+                            </div>
+                        </div>
+
+                        {/* Alamat Lengkap */}
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                                <SafeIcon name="MapPin" className="h-4 w-4 text-gray-500" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs text-muted-foreground">Alamat Lengkap</p>
+                                <p className="font-medium">{profile?.pangkalans?.address || '-'}</p>
+                                {profile?.pangkalans?.region && (
+                                    <p className="text-sm text-muted-foreground mt-0.5">
+                                        {profile.pangkalans.region}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <Separator className="my-2" />
+
+                        <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+                            <SafeIcon name="Info" className="h-4 w-4 text-amber-600 shrink-0" />
+                            <p className="text-xs text-amber-700 dark:text-amber-400">
+                                Untuk mengubah informasi pangkalan, silakan hubungi administrator.
+                            </p>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -373,65 +404,11 @@ export default function ProfilPangkalanPage() {
                 onCropComplete={handleCropComplete}
             />
 
-            {/* Change Password Modal */}
-            <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Ubah Password</DialogTitle>
-                        <DialogDescription>
-                            Masukkan password lama dan password baru Anda
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="oldPassword">Password Lama</Label>
-                            <Input
-                                id="oldPassword"
-                                type="password"
-                                value={passwordForm.oldPassword}
-                                onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                                placeholder="Masukkan password lama"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="newPassword">Password Baru</Label>
-                            <Input
-                                id="newPassword"
-                                type="password"
-                                value={passwordForm.newPassword}
-                                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                placeholder="Minimal 6 karakter"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">Konfirmasi Password Baru</Label>
-                            <Input
-                                id="confirmPassword"
-                                type="password"
-                                value={passwordForm.confirmPassword}
-                                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                placeholder="Ulangi password baru"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => {
-                            setShowPasswordModal(false)
-                            setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' })
-                        }}>
-                            Batal
-                        </Button>
-                        <Button
-                            onClick={handleChangePassword}
-                            disabled={isChangingPassword}
-                            className="bg-blue-600 hover:bg-blue-700"
-                        >
-                            {isChangingPassword && <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />}
-                            Ubah Password
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {/* Change Password Modal - Uses enterprise component from profil-admin */}
+            <ChangePasswordModal
+                open={showPasswordModal}
+                onOpenChange={setShowPasswordModal}
+            />
         </div>
     )
 }

@@ -166,6 +166,8 @@ export class AuthService {
                         name: true,
                         address: true,
                         phone: true,
+                        region: true,
+                        pic_name: true,
                     },
                 },
             },
