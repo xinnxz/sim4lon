@@ -147,20 +147,12 @@ export default function AdminHeader({
 
         // Fetch notification count
         const { notificationApi } = await import('@/lib/api')
-        const notifData = await notificationApi.getNotifications(20)
+        const notifData = await notificationApi.getNotifications(1, 20)
 
-        // Check if user has marked notifications as read before
-        const lastReadTime = localStorage.getItem(NOTIF_READ_KEY)
-        if (lastReadTime) {
-          const lastRead = new Date(lastReadTime)
-          // Count only notifications newer than last read time
-          const unreadCount = notifData.notifications.filter(
-            n => new Date(n.time) > lastRead
-          ).length
-          setNotificationCount(unreadCount)
-        } else {
-          setNotificationCount(notifData.unread_count)
-        }
+        // Use meta.pendingCount + stockAlertCount as unread indicator
+        // Backend now returns { data: [...], meta: { pending count, stockAlertCount, ... } }
+        const unreadCount = (notifData.meta?.pendingCount || 0) + (notifData.meta?.stockAlertCount || 0)
+        setNotificationCount(unreadCount)
       } catch (err) {
         // Jika gagal fetch, gunakan cached/default values
         console.error('Failed to fetch data:', err)

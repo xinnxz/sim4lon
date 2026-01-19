@@ -356,14 +356,20 @@ export const formatCurrencyExport = (value: number): string => {
 }
 
 /**
- * Format date for export
+ * Format date for export (dengan jam)
  */
 export const formatDateExport = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    const date = new Date(dateString)
+    const dateStr = date.toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'short',
         year: 'numeric'
     })
+    const timeStr = date.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit'
+    })
+    return `${dateStr}, ${timeStr}`
 }
 
 /**
