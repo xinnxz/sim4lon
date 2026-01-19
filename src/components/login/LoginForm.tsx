@@ -320,9 +320,25 @@ export default function LoginForm() {
       </Card>
 
       {/* Footer - All devices */}
-      <p className="text-center text-white/70 text-xs mt-6">
-        © 2026 SIM4LON. All rights reserved.
-      </p>
+      <div className="text-center mt-6">
+        {/* Powered by REONX */}
+        <div className="flex items-center justify-center">
+          <span className="text-white/50 text-sm">Powered by .</span>
+          <img
+            src="/logo-reonx.png"
+            alt="REONX"
+            className="h-8 sm:h-10 object-contain hover:opacity-100 transition-opacity"
+            style={{
+              filter: `
+                drop-shadow( -1px 1px 0px white)
+              `
+            }}
+          />
+        </div>
+        <p className="text-white/50 text-sm">
+          © 2026 SIM4LON. All rights reserved.
+        </p>
+      </div>
     </div>
   )
 }

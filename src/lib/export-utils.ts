@@ -375,7 +375,7 @@ export const formatDateExport = (dateString: string): string => {
 /**
  * Helper untuk membuat footer row untuk tabel export
  * @param label - Label untuk kolom pertama (misal: "TOTAL")
- * @param totals - Object dengan key column dan value total
+ * @param totals - Object dengan key  dan value total
  * @param firstColumnKey - Key dari kolom pertama untuk label
  */
 export const createFooterRow = (

@@ -176,6 +176,8 @@ export const authApi = {
     logout(): void {
         removeToken();
         if (typeof window !== 'undefined') {
+            // Clear welcome popup flag so it shows again on next login
+            sessionStorage.removeItem('sim4lon_welcome_shown');
             window.location.href = '/login';
         }
     },

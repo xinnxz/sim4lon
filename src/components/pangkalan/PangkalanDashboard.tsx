@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
+import WelcomePopup from '@/components/common/WelcomePopup'
 import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, lpgPricesApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory, type PangkalanLpgPrice } from '@/lib/api'
 import {
     AreaChart,
@@ -338,6 +339,8 @@ export default function PangkalanDashboard() {
 
     return (
         <div className="space-y-8 pb-8">
+            {/* Fun Welcome Popup - shows once per session */}
+            <WelcomePopup />
             {/* Header - Animated */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fadeInDown">
                 <div className="flex items-center gap-3">
