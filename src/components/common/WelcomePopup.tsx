@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { authApi, type UserProfile } from '@/lib/api'
@@ -103,13 +103,27 @@ export default function WelcomePopup({ forceShow = false }: WelcomePopupProps) {
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [personalizedMsg, setPersonalizedMsg] = useState<ReturnType<typeof getPersonalizedMessage> | null>(null)
 
+    // Ref to prevent duplicate calls from React Strict Mode or remounting
+    const hasInitialized = useRef(false)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
     useEffect(() => {
+        // Prevent duplicate initialization (React Strict Mode, remounting, etc.)
+        if (hasInitialized.current && !forceShow) {
+            return
+        }
+
         // Check if we already showed welcome this session
         const hasShownWelcome = sessionStorage.getItem('sim4lon_welcome_shown')
 
         if (hasShownWelcome && !forceShow) {
             return // Don't show again this session
         }
+
+        // Mark as initialized IMMEDIATELY to prevent race conditions
+        hasInitialized.current = true
+        // Set sessionStorage BEFORE the timeout to prevent duplicate calls
+        sessionStorage.setItem('sim4lon_welcome_shown', 'true')
 
         // Fetch user profile and show popup
         const showWelcome = async () => {
@@ -119,16 +133,25 @@ export default function WelcomePopup({ forceShow = false }: WelcomePopupProps) {
                 setPersonalizedMsg(getPersonalizedMessage(profileData))
 
                 // Small delay for better UX (let dashboard load first)
-                setTimeout(() => {
+                timeoutRef.current = setTimeout(() => {
                     setIsOpen(true)
-                    sessionStorage.setItem('sim4lon_welcome_shown', 'true')
                 }, 800)
             } catch (error) {
                 console.error('Failed to load profile for welcome:', error)
+                // Reset flag if failed so it can try again
+                hasInitialized.current = false
+                sessionStorage.removeItem('sim4lon_welcome_shown')
             }
         }
 
         showWelcome()
+
+        // Cleanup function to cancel timeout if component unmounts
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
     }, [forceShow])
 
     if (!profile || !personalizedMsg) return null
