@@ -199,9 +199,22 @@ export default function NotaPembayaranPage() {
   }
 
   const handlePrint = () => {
+    if (!data) return
+
     setIsPrinting(true)
+
+    // Set document title based on document type for correct PDF filename
+    const isNota = documentType === 'nota'
+    const docNumber = isNota
+      ? `NOTA-${data.orderCode.replace('ORD-', '')}`
+      : `INV-${data.orderCode.replace('ORD-', '')}`
+    const originalTitle = document.title
+    document.title = `${isNota ? 'Nota' : 'Invoice'}_${docNumber}_${data.customerName.replace(/\s+/g, '_')}`
+
     setTimeout(() => {
       window.print()
+      // Restore original title after print dialog
+      document.title = originalTitle
       setIsPrinting(false)
     }, 100)
   }
