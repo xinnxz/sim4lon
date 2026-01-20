@@ -356,7 +356,7 @@ export default function DetailEditPangkalanContent() {
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                <a href={`/detail-pesanan?id=${order.id}`}>
+                                <a href={`/detail-pesanan?code=${order.code}`}>
                                   <Button variant="ghost" size="sm">
                                     <SafeIcon name="Eye" className="h-4 w-4" />
                                   </Button>

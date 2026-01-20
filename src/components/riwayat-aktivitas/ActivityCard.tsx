@@ -24,7 +24,7 @@ interface ActivityCardProps {
 
 export default function ActivityCard({ activity, style }: ActivityCardProps) {
   const handleCardClick = () => {
-    window.location.href = `/detail-pesanan?id=${encodeURIComponent(activity.orderNumber)}`
+    window.location.href = `/detail-pesanan?code=${encodeURIComponent(activity.orderNumber)}`
   }
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {

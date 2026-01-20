@@ -59,6 +59,7 @@ interface UIOrder {
   total: number
   paymentMethod: string | null
   paidAmount: number
+  paymentProofUrl: string | null  // URL bukti transfer dari Supabase
   delivery: {
     status: string
     statusLabel: string
@@ -99,8 +100,9 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
     subtotal: (apiOrder as any).subtotal || apiOrder.total_amount,
     tax: (apiOrder as any).tax_amount || 0,
     total: apiOrder.total_amount,
-    paymentMethod: null,
-    paidAmount: 0,
+    paymentMethod: apiOrder.order_payment_details?.[0]?.payment_method || null,
+    paidAmount: apiOrder.order_payment_details?.[0]?.amount_paid || 0,
+    paymentProofUrl: apiOrder.order_payment_details?.[0]?.proof_url || null,
     delivery: {
       status: apiOrder.current_status === 'BATAL' ? 'cancelled'
         : apiOrder.drivers ? 'assigned' : 'not_scheduled',
@@ -253,7 +255,7 @@ export default function OrderDetailContent() {
 
   // Handlers
   const handlePaymentClick = () => {
-    window.location.href = `/catat-pembayaran?id=${order?.apiId}`
+    window.location.href = `/catat-pembayaran?code=${order?.id}`
   }
 
   const handlePaymentConfirmed = async () => {
@@ -268,7 +270,7 @@ export default function OrderDetailContent() {
       order.status === 'DIPROSES' ||
       order.status === 'SELESAI'
     const docType = isPaid ? 'nota' : 'invoice'
-    window.location.href = `/nota-pembayaran?id=${order.apiId}&type=${docType}`
+    window.location.href = `/nota-pembayaran?code=${order.id}&type=${docType}`
   }
 
   const handleSendWhatsApp = () => {
@@ -279,7 +281,7 @@ export default function OrderDetailContent() {
       order.status === 'DIPROSES' ||
       order.status === 'SELESAI'
     const docType = isPaid ? 'nota' : 'invoice'
-    window.location.href = `/nota-pembayaran?id=${order.apiId}&type=${docType}`
+    window.location.href = `/nota-pembayaran?code=${order.id}&type=${docType}`
   }
 
   const handleSelectDriver = async (driverId: string) => {
@@ -320,7 +322,7 @@ export default function OrderDetailContent() {
 
   const handleEditOrder = () => {
     if (order) {
-      window.location.href = `/buat-pesanan?id=${order.apiId}`
+      window.location.href = `/buat-pesanan?code=${order.id}`
     }
   }
 
@@ -417,6 +419,55 @@ export default function OrderDetailContent() {
 
           {/* Delivery Info */}
           <DeliveryInfoCard delivery={order.delivery} />
+
+          {/* Payment Proof - Show if exists */}
+          {order.paymentProofUrl && (
+            <Card className="glass-card overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <SafeIcon name="Receipt" className="h-4 w-4 text-primary" />
+                  Bukti Transfer
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {order.paymentProofUrl.endsWith('.pdf') ? (
+                  // PDF Link
+                  <a
+                    href={order.paymentProofUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                      <SafeIcon name="FileText" className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">Bukti Transfer (PDF)</p>
+                      <p className="text-xs text-muted-foreground truncate">{order.paymentProofUrl.split('/').pop()}</p>
+                    </div>
+                    <SafeIcon name="ExternalLink" className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </a>
+                ) : (
+                  // Image Preview
+                  <a
+                    href={order.paymentProofUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-lg overflow-hidden border hover:opacity-90 transition-opacity"
+                  >
+                    <img
+                      src={order.paymentProofUrl}
+                      alt="Bukti Transfer"
+                      className="w-full h-auto max-h-48 object-contain bg-slate-50 dark:bg-slate-900"
+                    />
+                  </a>
+                )}
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Klik untuk melihat ukuran penuh
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Actions Panel */}
           <OrderActionsPanel

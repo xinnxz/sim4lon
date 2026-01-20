@@ -218,6 +218,31 @@ export const uploadApi = {
 
         return data;
     },
+
+    /**
+     * Upload payment proof (transfer receipt) - max 5MB, images or PDF
+     */
+    async uploadPaymentProof(file: File): Promise<UploadResponse> {
+        const token = getToken();
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/upload/payment-proof`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Upload bukti transfer gagal');
+        }
+
+        return data;
+    },
 };
 
 // ============================================================

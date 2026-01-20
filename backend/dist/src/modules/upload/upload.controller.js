@@ -67,6 +67,22 @@ let UploadController = class UploadController {
             url: publicUrl,
         };
     }
+    async uploadPaymentProof(file) {
+        if (!file) {
+            throw new common_1.BadRequestException('File tidak ditemukan');
+        }
+        const timestamp = Date.now();
+        const random = Math.round(Math.random() * 1e9);
+        const ext = (0, path_1.extname)(file.originalname);
+        const filename = `payment-proof-${timestamp}-${random}${ext}`;
+        const publicUrl = await this.supabaseStorage.uploadFile(file.buffer, filename, file.mimetype);
+        console.log('Payment proof uploaded to Supabase:', filename);
+        return {
+            message: 'Bukti transfer berhasil diupload',
+            filename: filename,
+            url: publicUrl,
+        };
+    }
 };
 exports.UploadController = UploadController;
 __decorate([
@@ -99,6 +115,28 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadController.prototype, "uploadLogo", null);
+__decorate([
+    (0, common_1.Post)('payment-proof'),
+    (0, common_1.UseGuards)(guards_1.JwtAuthGuard),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.memoryStorage)(),
+        fileFilter: (req, file, callback) => {
+            if (!file.mimetype.match(/^(image\/(jpeg|png|webp)|application\/pdf)$/)) {
+                callback(new common_1.BadRequestException('File harus JPEG, PNG, WebP, atau PDF.'), false);
+            }
+            else {
+                callback(null, true);
+            }
+        },
+        limits: {
+            fileSize: 5 * 1024 * 1024,
+        },
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UploadController.prototype, "uploadPaymentProof", null);
 exports.UploadController = UploadController = __decorate([
     (0, common_1.Controller)('upload'),
     __metadata("design:paramtypes", [supabase_storage_service_1.SupabaseStorageService])

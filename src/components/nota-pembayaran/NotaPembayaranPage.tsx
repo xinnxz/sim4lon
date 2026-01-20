@@ -89,6 +89,7 @@ interface DocumentData {
   paymentMethod: string | null
   paymentDate: string | null
   amountPaid: number
+  paymentProofUrl: string | null  // URL bukti transfer dari Supabase
 }
 
 export default function NotaPembayaranPage() {
@@ -107,7 +108,7 @@ export default function NotaPembayaranPage() {
     if (typeof window === 'undefined') return
 
     const params = new URLSearchParams(window.location.search)
-    const orderId = params.get('id') || params.get('orderId')
+    const orderId = params.get('code') || params.get('id') || params.get('orderId')
     const type = params.get('type') as DocumentType
 
     if (type === 'invoice' || type === 'nota') {
@@ -184,7 +185,8 @@ export default function NotaPembayaranPage() {
         isPaid: isPaid,
         paymentMethod: payment?.payment_method || null,
         paymentDate: payment?.payment_date ? new Date(payment.payment_date).toLocaleDateString('id-ID') : null,
-        amountPaid: Number(payment?.amount_paid || 0)
+        amountPaid: Number(payment?.amount_paid || 0),
+        paymentProofUrl: payment?.proof_url || null
       })
 
       setError(null)
@@ -299,9 +301,9 @@ _SIM4LON - Sistem Manajemen LPG_`
           <Button
             onClick={() => {
               const params = new URLSearchParams(window.location.search)
-              const orderId = params.get('id') || params.get('orderId')
-              if (orderId) {
-                window.location.href = `/detail-pesanan?id=${orderId}`
+              const orderCode = params.get('code') || params.get('id') || params.get('orderId')
+              if (orderCode) {
+                window.location.href = `/detail-pesanan?code=${orderCode}`
               } else {
                 window.location.href = '/daftar-pesanan'
               }
@@ -518,6 +520,38 @@ _SIM4LON - Sistem Manajemen LPG_`
                 )}
               </div>
             </div>
+
+            {/* Payment Proof - Show if exists and is transfer payment */}
+            {isNota && data.paymentProofUrl && (
+              <div className="mt-8 pt-6 border-t dark:border-border/50 print:hidden">
+                <p className="text-sm font-medium text-muted-foreground mb-3">Bukti Transfer:</p>
+                {data.paymentProofUrl.endsWith('.pdf') ? (
+                  <a
+                    href={data.paymentProofUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors"
+                  >
+                    <SafeIcon name="FileText" className="h-5 w-5 text-red-600" />
+                    <span className="text-sm font-medium">Lihat Bukti Transfer (PDF)</span>
+                    <SafeIcon name="ExternalLink" className="h-4 w-4 text-muted-foreground" />
+                  </a>
+                ) : (
+                  <a
+                    href={data.paymentProofUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-fit"
+                  >
+                    <img
+                      src={data.paymentProofUrl}
+                      alt="Bukti Transfer"
+                      className="max-w-xs max-h-40 object-contain rounded-lg border hover:opacity-90 transition-opacity"
+                    />
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Footer */}
             <div className="mt-12 pt-6 border-t dark:border-border/50">

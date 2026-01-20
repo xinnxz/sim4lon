@@ -89,7 +89,7 @@ export default function PaymentRecordForm({
     // For transfer, require proof (either file or URL)
     if (paymentMethod === 'transfer') {
       if (!transferProof && !transferProofUrl.trim()) {
-        newErrors.transferProof = 'Bukti transfer harus diunggah atau masukkan URL'
+        newErrors.transferProof = 'Bukti transfer harus diunggah'
       }
     }
 
@@ -195,28 +195,49 @@ export default function PaymentRecordForm({
                   <div className="space-y-3">
                     {/* Image Preview Thumbnail */}
                     {imagePreview && (
-                      <div
-                        className="relative mx-auto max-w-xs cursor-pointer group"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setShowPreviewModal(true)
-                        }}
-                      >
-                        <img
-                          src={imagePreview}
-                          alt="Bukti transfer"
-                          className="w-full max-h-40 object-contain rounded-lg border shadow-sm group-hover:opacity-90 transition-opacity"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
-                          <SafeIcon name="ZoomIn" className="h-8 w-8 text-white" />
+                      <div className="relative mx-auto max-w-xs">
+                        <div
+                          className="cursor-pointer group"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setShowPreviewModal(true)
+                          }}
+                        >
+                          <img
+                            src={imagePreview}
+                            alt="Bukti transfer"
+                            className="w-full max-h-40 object-contain rounded-lg border shadow-sm group-hover:opacity-90 transition-opacity"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                            <SafeIcon name="ZoomIn" className="h-8 w-8 text-white" />
+                          </div>
                         </div>
+                        {/* Delete Button */}
+                        {!isPaymentSuccessful && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setTransferProof(null)
+                              setImagePreview(null)
+                              // Reset the file input
+                              const input = document.getElementById('transferProof') as HTMLInputElement
+                              if (input) input.value = ''
+                            }}
+                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-colors z-10"
+                            title="Hapus gambar"
+                          >
+                            <SafeIcon name="X" className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     )}
                     <div className="flex items-center justify-center gap-2">
                       <SafeIcon name="CheckCircle" className="h-5 w-5 text-primary" />
-                      <span className="text-sm font-medium">{transferProof.name}</span>
+                      <span className="text-sm font-medium truncate max-w-[200px]">{transferProof.name}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">Klik untuk ganti file</p>
+                    <p className="text-xs text-muted-foreground">Klik gambar untuk zoom • Klik area lain untuk ganti file</p>
                   </div>
                 ) : (
                   <div className={`space-y-2 ${isPaymentSuccessful ? 'opacity-60' : ''}`}>
@@ -237,25 +258,47 @@ export default function PaymentRecordForm({
             )}
           </div>
 
-          {/* Fullscreen Preview Modal */}
+          {/* Modern Lightbox Preview Modal */}
           {showPreviewModal && imagePreview && (
             <div
-              className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center"
               onClick={() => setShowPreviewModal(false)}
             >
-              <div className="relative max-w-3xl max-h-[90vh]">
+              {/* Backdrop with blur */}
+              <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+
+              {/* Modal Content */}
+              <div
+                className="relative z-10 max-w-4xl max-h-[90vh] mx-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Image */}
                 <img
                   src={imagePreview}
-                  alt="Bukti transfer (full)"
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg"
+                  alt="Bukti transfer"
+                  className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
                 />
+
+                {/* Close Button - Top Right */}
                 <button
                   onClick={() => setShowPreviewModal(false)}
-                  className="absolute -top-4 -right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100"
+                  className="absolute -top-3 -right-3 bg-white dark:bg-gray-800 rounded-full p-2 shadow-xl hover:scale-110 transition-transform"
                 >
-                  <SafeIcon name="X" className="h-5 w-5" />
+                  <SafeIcon name="X" className="h-5 w-5 text-gray-700 dark:text-gray-200" />
                 </button>
+
+                {/* Filename Badge */}
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-xl">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate max-w-[250px]">
+                    {transferProof?.name}
+                  </p>
+                </div>
               </div>
+
+              {/* Click anywhere hint */}
+              <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/60 text-sm">
+                Klik di luar gambar untuk menutup
+              </p>
             </div>
           )}
         </>
@@ -283,8 +326,8 @@ export default function PaymentRecordForm({
               variant="outline"
               onClick={() => {
                 const params = new URLSearchParams(window.location.search)
-                const id = params.get('orderId') || params.get('id')
-                window.location.href = id ? `/detail-pesanan?id=${id}` : '/daftar-pesanan'
+                const id = params.get('code') || params.get('orderId') || params.get('id')
+                window.location.href = id ? `/detail-pesanan?code=${id}` : '/daftar-pesanan'
               }}
               disabled={isSubmitting}
             >
@@ -315,8 +358,8 @@ export default function PaymentRecordForm({
               variant="outline"
               onClick={() => {
                 const params = new URLSearchParams(window.location.search)
-                const id = params.get('orderId') || params.get('id')
-                window.location.href = id ? `/detail-pesanan?id=${id}` : '/daftar-pesanan'
+                const id = params.get('code') || params.get('orderId') || params.get('id')
+                window.location.href = id ? `/detail-pesanan?code=${id}` : '/daftar-pesanan'
               }}
               className="flex-1"
             >
@@ -328,8 +371,8 @@ export default function PaymentRecordForm({
               onClick={() => {
                 // Get orderId from URL params
                 const params = new URLSearchParams(window.location.search)
-                const orderId = params.get('orderId') || params.get('id')
-                window.location.href = `/nota-pembayaran?id=${orderId}`
+                const orderId = params.get('code') || params.get('orderId') || params.get('id')
+                window.location.href = `/nota-pembayaran?code=${orderId}`
               }}
               className="flex-1 bg-primary hover:bg-primary/90"
             >

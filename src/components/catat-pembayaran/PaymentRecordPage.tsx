@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import {
   ordersApi,
   paymentApi,
+  uploadApi,
   type Order,
   type PaymentMethod,
   type CreatePaymentRecordDto
@@ -44,16 +45,18 @@ interface OrderData {
 
 export default function PaymentRecordPage() {
   const [order, setOrder] = useState<OrderData | null>(null)
-  const [orderId, setOrderId] = useState<string | null>(null)
+  const [orderId, setOrderId] = useState<string | null>(null)  // Could be code or UUID from URL
+  const [orderUuid, setOrderUuid] = useState<string | null>(null)  // Always UUID for API calls
+  const [orderCode, setOrderCode] = useState<string | null>(null)  // Always code for navigation
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentSuccessful, setPaymentSuccessful] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Get orderId from URL params
+  // Get orderId from URL params (could be code or UUID)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const id = params.get('orderId') || params.get('id')
+    const id = params.get('code') || params.get('orderId') || params.get('id')
     if (id) {
       setOrderId(id)
     } else {
@@ -71,6 +74,10 @@ export default function PaymentRecordPage() {
         setIsLoading(true)
         const apiOrder = await ordersApi.getById(orderId)
 
+        // Store UUID for API calls and code for navigation
+        setOrderUuid(apiOrder.id)  // UUID
+        setOrderCode(apiOrder.code || `ORD-${apiOrder.id.slice(0, 4).toUpperCase()}`)  // Code
+
         // Map API response ke OrderData format untuk form
         const totalQty = apiOrder.order_items.reduce((sum, item) => sum + item.qty, 0)
         const lpgTypes = [...new Set(apiOrder.order_items.map(item => item.label || item.lpg_type))].join(', ')
@@ -82,7 +89,7 @@ export default function PaymentRecordPage() {
         }))
 
         setOrder({
-          id: (apiOrder as any).code || apiOrder.id.substring(0, 12),
+          id: apiOrder.code || apiOrder.id.substring(0, 12),
           baseStation: apiOrder.pangkalans?.name || 'Unknown',
           lpgType: lpgTypes,
           quantity: totalQty,
@@ -105,6 +112,7 @@ export default function PaymentRecordPage() {
 
   /**
    * Handle payment submission
+   * FLOW: Upload bukti transfer ke Supabase → Simpan payment record dengan URL
    */
   const handleSubmit = async (data: {
     paymentMethod: string
@@ -112,33 +120,49 @@ export default function PaymentRecordPage() {
     transferProof: File | null
     notes: string
   }) => {
-    if (!orderId || !order) return
+    if (!orderUuid || !order) return
 
     setIsSubmitting(true)
     try {
-      // 1. Create payment record
+      let proofUrl: string | undefined = undefined
+
+      // 1. Upload bukti transfer ke Supabase jika ada
+      if (data.paymentMethod === 'transfer' && data.transferProof) {
+        try {
+          const uploadResult = await uploadApi.uploadPaymentProof(data.transferProof)
+          proofUrl = uploadResult.url
+          console.log('Payment proof uploaded:', proofUrl)
+        } catch (uploadErr: any) {
+          toast.error('Gagal upload bukti transfer', {
+            description: uploadErr.message || 'Coba lagi atau gunakan file yang lebih kecil'
+          })
+          setIsSubmitting(false)
+          return
+        }
+      }
+
+      // 2. Create payment record - use UUID for API
       const paymentDto: CreatePaymentRecordDto = {
-        order_id: orderId,
+        order_id: orderUuid,  // Must be UUID
         method: data.paymentMethod === 'cash' ? 'TUNAI' : 'TRANSFER',
         amount: data.amount,
-        // TODO: Upload file dan dapatkan URL jika ada transferProof
-        proof_url: data.transferProof ? `uploaded/${data.transferProof.name}` : undefined,
+        proof_url: proofUrl,  // URL dari Supabase Storage
         note: data.notes || undefined,
       }
 
       await paymentApi.createRecord(paymentDto)
 
-      // 2. Update order payment status to paid
-      await paymentApi.updateOrderPayment(orderId, {
+      // 3. Update order payment status to paid - use UUID for API
+      await paymentApi.updateOrderPayment(orderUuid, {
         is_paid: true,
         payment_method: paymentDto.method,
         amount_paid: data.amount,
-        proof_url: paymentDto.proof_url,
+        proof_url: proofUrl,
       })
 
-      // 3. Update order status to DIPROSES if currently MENUNGGU_PEMBAYARAN
+      // 4. Update order status to DIPROSES if currently MENUNGGU_PEMBAYARAN - use UUID for API
       if (order.status === 'MENUNGGU_PEMBAYARAN') {
-        await ordersApi.updateStatus(orderId, {
+        await ordersApi.updateStatus(orderUuid, {
           status: 'DIPROSES',
           note: 'Pembayaran diterima'
         })
@@ -152,7 +176,7 @@ export default function PaymentRecordPage() {
         action: {
           label: 'Lihat Nota',
           onClick: () => {
-            window.location.href = `/nota-pembayaran?id=${orderId}`
+            window.location.href = `/nota-pembayaran?code=${orderCode}`  // Use code for navigation
           },
         },
         duration: 5000,
@@ -206,11 +230,9 @@ export default function PaymentRecordPage() {
           variant="ghost"
           size="icon"
           onClick={() => {
-            // Read from URL directly to avoid hydration/state issues
-            const params = new URLSearchParams(window.location.search)
-            const id = params.get('orderId') || params.get('id')
-            if (id) {
-              window.location.href = `/detail-pesanan?id=${id}`
+            // Use orderCode state for proper navigation
+            if (orderCode) {
+              window.location.href = `/detail-pesanan?code=${orderCode}`
             } else {
               window.location.href = '/daftar-pesanan'
             }

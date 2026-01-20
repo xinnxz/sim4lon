@@ -8,13 +8,13 @@ Pengujian dilakukan untuk menjamin kualitas dan juga mengetahui kelemahan dari s
 
 Pengujian Black Box bertujuan untuk menguji fungsionalitas sistem tanpa memperhatikan struktur internal kode program. Fokus pengujian adalah pada input dan output yang dihasilkan oleh sistem.
 
-Ada 21 modul dan 151 test case pada metode pengujian black box ini. Diantaranya:
+Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 1. Login, 8 test case
 2. Dashboard, 10 test case
 3. Stok LPG, 6 test case
-4. Pesanan, 20 test case
-5. Pembayaran, 5 test case
+4. Pesanan, 21 test case
+5. Pembayaran, 11 test case
 6. Pangkalan, 7 test case
 7. Driver, 6 test case
 8. Laporan, 8 test case
@@ -105,27 +105,34 @@ Ada 21 modul dan 151 test case pada metode pengujian black box ini. Diantaranya:
 | 12 | Navigasi antar halaman menggunakan pagination | ![TC](figures/blackbox/pesanan-tc12.png) | Sistem akan menampilkan data pesanan sesuai halaman yang dipilih dan memperbarui informasi "Menampilkan X - Y dari Z data" | ![Hasil](figures/blackbox/pesanan-result12.png) | Valid |
 | 13 | Buat Pesanan dengan jumlah LPG melebihi stok yang tersedia | ![TC](figures/blackbox/pesanan-tc13.png) | Sistem akan menampilkan pesan error "Stok [nama produk] tidak mencukupi! Stok sekarang: [jumlah]" | ![Hasil](figures/blackbox/pesanan-result13.png) | Valid |
 | 14 | Buat Pesanan LPG 3kg melebihi alokasi bulanan pangkalan | ![TC](figures/blackbox/pesanan-tc14.png) | Sistem akan menampilkan pesan error "Melebihi alokasi bulanan! Sisa: [jumlah] tabung" | ![Hasil](figures/blackbox/pesanan-result14.png) | Valid |
-| 15 | Buat Pesanan untuk pangkalan yang tidak aktif | ![TC](figures/blackbox/pesanan-tc15.png) | Sistem akan menampilkan pesan error "Pangkalan tidak aktif. Tidak dapat membuat pesanan" | ![Hasil](figures/blackbox/pesanan-result15.png) | Valid |
+| 15 | Buat Pesanan untuk pangkalan yang tidak aktif (versi manual) | ![TC](figures/blackbox/pesanan-tc15.png) | Pada form manual, sistem tidak akan menampilkan pangkalan yang tidak aktif dalam daftar pilihan | ![Hasil](figures/blackbox/pesanan-result15.png) | Valid |
 | 16 | Assign driver yang sedang mengantar pesanan lain | ![TC](figures/blackbox/pesanan-tc16.png) | Sistem akan menampilkan pesan error "Supir [nama] sedang mengantar pesanan [kode]. Pilih supir lain" | ![Hasil](figures/blackbox/pesanan-result16.png) | Valid |
 | 17 | Mengubah status langsung dari DRAFT ke SELESAI (skip workflow) | ![TC](figures/blackbox/pesanan-tc17.png) | Sistem akan menampilkan pesan error "Tidak dapat mengubah status dari DRAFT ke SELESAI" | ![Hasil](figures/blackbox/pesanan-result17.png) | Valid |
 | 18 | Membatalkan pesanan yang sudah berstatus SELESAI | ![TC](figures/blackbox/pesanan-tc18.png) | Sistem akan menampilkan pesan error karena status SELESAI tidak dapat diubah ke status lain | ![Hasil](figures/blackbox/pesanan-result18.png) | Valid |
 | 19 | Akses halaman detail pesanan dengan kode yang tidak ada | ![TC](figures/blackbox/pesanan-tc19.png) | Sistem akan menampilkan pesan error "Order tidak ditemukan" atau halaman 404 | ![Hasil](figures/blackbox/pesanan-result19.png) | Valid |
 | 20 | Kombinasi filter status dan pencarian secara bersamaan | ![TC](figures/blackbox/pesanan-tc20.png) | Sistem akan menampilkan pesanan yang memenuhi KEDUA kriteria filter status dan kata kunci pencarian | ![Hasil](figures/blackbox/pesanan-result20.png) | Valid |
+| 21 | Buat Pesanan untuk pangkalan tidak aktif menggunakan Voice AI | ![TC](figures/blackbox/pesanan-tc21.png) | Pada voice order, sistem akan menampilkan pesan error "Anda menyebut [pangkalan] tapi sistem tidak menemukan pangkalan tersebut" | ![Hasil](figures/blackbox/pesanan-result21.png) | Valid |
 
 ---
 
 
 #### e. Pengujian Modul Pembayaran
 
-**Tabel 3.5** Pengujian Modul Pembayaran
+**Tabel 3.5** Pengujian Modul Pembayaran (Role: ADMIN/OPERATOR)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Mencatat pembayaran dengan jumlah sama dengan total pesanan | ![TC](figures/blackbox/pembayaran-tc1.png) | Status pembayaran berubah menjadi PAID | ![Hasil](figures/blackbox/pembayaran-result1.png) | Valid |
-| 2 | Mencatat pembayaran dengan jumlah kurang dari total | ![TC](figures/blackbox/pembayaran-tc2.png) | Status pembayaran PARTIAL, sisa hutang tercatat | ![Hasil](figures/blackbox/pembayaran-result2.png) | Valid |
-| 3 | Memilih metode pembayaran TUNAI | ![TC](figures/blackbox/pembayaran-tc3.png) | Pembayaran tercatat dengan metode tunai | ![Hasil](figures/blackbox/pembayaran-result3.png) | Valid |
-| 4 | Memilih metode TRANSFER dan upload bukti | ![TC](figures/blackbox/pembayaran-tc4.png) | Pembayaran tercatat dengan bukti transfer | ![Hasil](figures/blackbox/pembayaran-result4.png) | Valid |
-| 5 | Membuka menu Pembayaran | ![TC](figures/blackbox/pembayaran-tc5.png) | Sistem menampilkan semua record pembayaran | ![Hasil](figures/blackbox/pembayaran-result5.png) | Valid |
+| 1 | Membuka halaman Catat Pembayaran dari detail pesanan | ![TC](figures/blackbox/pembayaran-tc1.png) | Sistem akan menampilkan halaman pencatatan pembayaran dengan ringkasan pesanan di sidebar dan form metode pembayaran | ![Hasil](figures/blackbox/pembayaran-result1.png) | Valid |
+| 2 | Memilih metode pembayaran "Cash" dan menyimpan | ![TC](figures/blackbox/pembayaran-tc2.png) | Sistem akan menyimpan pembayaran, menampilkan notifikasi sukses dengan tombol "Lihat Nota", dan mengubah status pesanan menjadi "Diproses" | ![Hasil](figures/blackbox/pembayaran-result2.png) | Valid |
+| 3 | Memilih metode pembayaran "Cashless/Transfer" tanpa upload bukti | ![TC](figures/blackbox/pembayaran-tc3.png) | Sistem akan menampilkan pesan validasi error "Bukti transfer harus diunggah" | ![Hasil](figures/blackbox/pembayaran-result3.png) | Valid |
+| 4 | Memilih metode "Cashless" dan upload bukti transfer dengan format valid (JPG/PNG/PDF) | ![TC](figures/blackbox/pembayaran-tc4.png) | Sistem akan menampilkan preview thumbnail gambar, menyimpan pembayaran, dan redirect ke halaman invoice | ![Hasil](figures/blackbox/pembayaran-result4.png) | Valid |
+| 5 | Upload bukti transfer dengan format file tidak valid (selain JPG/PNG/PDF) | ![TC](figures/blackbox/pembayaran-tc5.png) | Sistem akan menampilkan pesan validasi error "Format file harus JPG, PNG, atau PDF" | ![Hasil](figures/blackbox/pembayaran-result5.png) | Valid |
+| 6 | Upload bukti transfer dengan ukuran file melebihi 5MB | ![TC](figures/blackbox/pembayaran-tc6.png) | Sistem akan menampilkan pesan validasi error "Ukuran file maksimal 5MB" | ![Hasil](figures/blackbox/pembayaran-result6.png) | Valid |
+| 7 | Mengklik preview thumbnail bukti transfer | ![TC](figures/blackbox/pembayaran-tc7.png) | Sistem akan menampilkan modal fullscreen preview gambar bukti transfer | ![Hasil](figures/blackbox/pembayaran-result7.png) | Valid |
+| 8 | Menyimpan pembayaran dengan catatan opsional | ![TC](figures/blackbox/pembayaran-tc8.png) | Sistem akan menyimpan pembayaran beserta catatan yang diinput pada field "Catatan" | ![Hasil](figures/blackbox/pembayaran-result8.png) | Valid |
+| 9 | Mengklik tombol "Lihat Invoice" setelah pembayaran berhasil | ![TC](figures/blackbox/pembayaran-tc9.png) | Sistem akan melakukan redirect ke halaman nota pembayaran dengan detail transaksi lengkap | ![Hasil](figures/blackbox/pembayaran-result9.png) | Valid |
+| 10 | Mencatat pembayaran untuk pesanan yang sudah lunas | ![TC](figures/blackbox/pembayaran-tc10.png) | Sistem akan menampilkan badge "Sudah Dibayar" dan menonaktifkan form input pembayaran | ![Hasil](figures/blackbox/pembayaran-result10.png) | Valid |
+| 11 | Melihat bukti transfer di halaman detail pesanan setelah pembayaran transfer berhasil | ![TC](figures/blackbox/pembayaran-tc11.png) | Sistem akan menampilkan card "Bukti Transfer" dengan preview gambar/link PDF yang dapat diklik untuk melihat ukuran penuh | ![Hasil](figures/blackbox/pembayaran-result11.png) | Valid |
 
 ---
 
@@ -384,8 +391,8 @@ Ada 21 modul dan 151 test case pada metode pengujian black box ini. Diantaranya:
 | 1 | Login | 8 | 8 | 0 | 100% |
 | 2 | Dashboard | 10 | 10 | 0 | 100% |
 | 3 | Stok LPG | 6 | 6 | 0 | 100% |
-| 4 | Pesanan | 20 | 20 | 0 | 100% |
-| 5 | Pembayaran | 5 | 5 | 0 | 100% |
+| 4 | Pesanan | 21 | 21 | 0 | 100% |
+| 5 | Pembayaran | 11 | 11 | 0 | 100% |
 | 6 | Pangkalan | 7 | 7 | 0 | 100% |
 | 7 | Driver | 6 | 6 | 0 | 100% |
 | 8 | Laporan | 8 | 8 | 0 | 100% |
@@ -402,13 +409,13 @@ Ada 21 modul dan 151 test case pada metode pengujian black box ini. Diantaranya:
 | 19 | User Management | 6 | 6 | 0 | 100% |
 | 20 | Dashboard Pangkalan | 5 | 5 | 0 | 100% |
 | 21 | Profil & Pengaturan | 5 | 5 | 0 | 100% |
-| **Total** | | **151** | **151** | **0** | **100%** |
+| **Total** | | **158** | **158** | **0** | **100%** |
 
 ### C. Kesimpulan Pengujian Black Box
 
 Berdasarkan hasil pengujian Black Box yang telah dilakukan terhadap sistem SIM4LON, dapat disimpulkan bahwa:
 
-1. Seluruh **151 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
+1. Seluruh **158 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
 
 2. Tingkat keberhasilan pengujian mencapai **100%**, yang menunjukkan bahwa fungsionalitas sistem berjalan dengan baik.
 

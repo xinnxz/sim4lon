@@ -466,8 +466,8 @@ PENTING:
                         issues.push({
                             type: 'pangkalan_mismatch',
                             field: 'pangkalan',
-                            message: `🏪 Anda menyebut "${mentionedName}" tapi sistem memilih "${parsedData.pangkalanName}"`,
-                            suggestion: `Pangkalan yang tersedia: ${pangkalanNames}. Coba ulangi dengan nama yang lebih jelas.`
+                            message: `🏪 Anda menyebut "${mentionedName}" tapi sistem tidak menemukan pangkalan "${mentionedName}"`,
+                            suggestion: `Pangkalan yang tersedia: ${pangkalanNames}. Coba ulangi.`
                         });
                     }
                 }

@@ -323,11 +323,11 @@ export default function LoginForm() {
       <div className="text-center mt-6">
         {/* Powered by REONX */}
         <div className="flex items-center justify-center">
-          <span className="text-white/50 text-sm">Powered by .</span>
+          <span className="text-white/50 text-sm"> Website Powered by .</span>
           <img
             src="/logo-reonx.png"
             alt="REONX"
-            className="h-8 sm:h-10 object-contain hover:opacity-100 transition-opacity"
+            className="h-8 sm:h-10 object-contain hover:opacity-100 transition-opacity opacity-70"
             style={{
               filter: `
                 drop-shadow( -1px 1px 0px white)

@@ -207,10 +207,10 @@ export default function CreateOrderForm() {
 
     fetchData()
 
-    // Check for edit mode
+    // Check for edit mode - support both ?id= and ?code= params
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
-      const orderId = params.get('id')
+      const orderId = params.get('code') || params.get('id')
       if (orderId) {
         setIsEditMode(true)
         setEditOrderId(orderId)
@@ -537,8 +537,8 @@ export default function CreateOrderForm() {
         toast.success('Pesanan berhasil dibuat!')
       }
 
-      // Redirect to order detail
-      window.location.href = `/detail-pesanan?id=${result.id}`
+      // Redirect to order detail using order code
+      window.location.href = `/detail-pesanan?code=${result.code}`
     } catch (error: any) {
       console.error('Failed to submit order:', error)
       toast.error(error.message || (isEditMode ? 'Gagal memperbarui pesanan' : 'Gagal membuat pesanan'))
@@ -552,7 +552,8 @@ export default function CreateOrderForm() {
    */
   const handleCancel = () => {
     if (isEditMode && editOrderId) {
-      window.location.href = `/detail-pesanan?id=${editOrderId}`
+      // editOrderId could be UUID or code, backend supports both
+      window.location.href = `/detail-pesanan?code=${editOrderId}`
     } else {
       window.location.href = '/daftar-pesanan'
     }

@@ -12,4 +12,9 @@ export declare class UploadController {
         filename: string;
         url: string;
     }>;
+    uploadPaymentProof(file: Express.Multer.File): Promise<{
+        message: string;
+        filename: string;
+        url: string;
+    }>;
 }
