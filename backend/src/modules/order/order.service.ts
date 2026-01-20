@@ -444,6 +444,9 @@ export class OrderService {
     async update(id: string, dto: UpdateOrderDto) {
         const existingOrder = await this.findOne(id);
 
+        // Use the actual UUID from the found order for all DB operations
+        const orderId = existingOrder.id;
+
         // Destructure items from dto, rest is basic fields
         const { items, ...orderData } = dto;
 
@@ -496,7 +499,7 @@ export class OrderService {
                 totalTax += itemTax;
 
                 return {
-                    order_id: id,
+                    order_id: orderId,  // Use UUID
                     lpg_type: mapStringToLpgType(item.lpg_type),
                     label: item.label,
                     price_per_unit: item.price_per_unit,
@@ -510,10 +513,10 @@ export class OrderService {
             const totalAmount = subtotal + totalTax;
 
             // Delete old items, create new items, update order (sequential)
-            await this.prisma.order_items.deleteMany({ where: { order_id: id } });
+            await this.prisma.order_items.deleteMany({ where: { order_id: orderId } });
             await this.prisma.order_items.createMany({ data: orderItemsData });
             await this.prisma.orders.update({
-                where: { id },
+                where: { id: orderId },
                 data: {
                     pangkalan_id: orderData.pangkalan_id,
                     driver_id: orderData.driver_id,
@@ -527,7 +530,7 @@ export class OrderService {
         } else {
             // No items update, just update basic fields
             await this.prisma.orders.update({
-                where: { id },
+                where: { id: orderId },
                 data: {
                     pangkalan_id: orderData.pangkalan_id,
                     driver_id: orderData.driver_id,
@@ -539,7 +542,7 @@ export class OrderService {
         }
 
         // Return updated order with all relations
-        return this.findOne(id);
+        return this.findOne(orderId);
     }
 
     async updateStatus(id: string, dto: UpdateOrderStatusDto, userId?: string) {

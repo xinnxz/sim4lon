@@ -339,6 +339,7 @@ let OrderService = class OrderService {
     }
     async update(id, dto) {
         const existingOrder = await this.findOne(id);
+        const orderId = existingOrder.id;
         const { items, ...orderData } = dto;
         if (orderData.driver_id && orderData.driver_id !== existingOrder.driver_id) {
             const driverBusyOrder = await this.prisma.orders.findFirst({
@@ -377,7 +378,7 @@ let OrderService = class OrderService {
                 subtotal += itemSubtotal;
                 totalTax += itemTax;
                 return {
-                    order_id: id,
+                    order_id: orderId,
                     lpg_type: mapStringToLpgType(item.lpg_type),
                     label: item.label,
                     price_per_unit: item.price_per_unit,
@@ -388,10 +389,10 @@ let OrderService = class OrderService {
                 };
             });
             const totalAmount = subtotal + totalTax;
-            await this.prisma.order_items.deleteMany({ where: { order_id: id } });
+            await this.prisma.order_items.deleteMany({ where: { order_id: orderId } });
             await this.prisma.order_items.createMany({ data: orderItemsData });
             await this.prisma.orders.update({
-                where: { id },
+                where: { id: orderId },
                 data: {
                     pangkalan_id: orderData.pangkalan_id,
                     driver_id: orderData.driver_id,
@@ -405,7 +406,7 @@ let OrderService = class OrderService {
         }
         else {
             await this.prisma.orders.update({
-                where: { id },
+                where: { id: orderId },
                 data: {
                     pangkalan_id: orderData.pangkalan_id,
                     driver_id: orderData.driver_id,
@@ -415,7 +416,7 @@ let OrderService = class OrderService {
                 },
             });
         }
-        return this.findOne(id);
+        return this.findOne(orderId);
     }
     async updateStatus(id, dto, userId) {
         const order = await this.findOne(id);
