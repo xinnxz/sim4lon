@@ -42,44 +42,78 @@ export default function PaymentRecordForm({
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Handle file selection (shared by input change and drag-drop)
+  const processFile = (file: File) => {
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+      setErrors(prev => ({
+        ...prev,
+        transferProof: 'Format file harus JPG, PNG, WebP, atau PDF'
+      }))
+      return
+    }
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({
+        ...prev,
+        transferProof: 'Ukuran file maksimal 5MB'
+      }))
+      return
+    }
+    setTransferProof(file)
+
+    // Create image preview if it's an image
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setImagePreview(null) // No preview for PDF
+    }
+
+    setErrors(prev => {
+      const newErrors = { ...prev }
+      delete newErrors.transferProof
+      return newErrors
+    })
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file type
-      if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
-        setErrors(prev => ({
-          ...prev,
-          transferProof: 'Format file harus JPG, PNG, atau PDF'
-        }))
-        return
-      }
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({
-          ...prev,
-          transferProof: 'Ukuran file maksimal 5MB'
-        }))
-        return
-      }
-      setTransferProof(file)
+      processFile(file)
+    }
+  }
 
-      // Create image preview if it's an image
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          setImagePreview(e.target?.result as string)
-        }
-        reader.readAsDataURL(file)
-      } else {
-        setImagePreview(null) // No preview for PDF
-      }
+  // Drag and Drop handlers
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!isPaymentSuccessful) {
+      setIsDragging(true)
+    }
+  }
 
-      setErrors(prev => {
-        const newErrors = { ...prev }
-        delete newErrors.transferProof
-        return newErrors
-      })
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    if (isPaymentSuccessful) return
+
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      processFile(file)
     }
   }
 
@@ -181,7 +215,15 @@ export default function PaymentRecordForm({
           <div className="border-t pt-6" />
           <div className="space-y-2">
             <Label htmlFor="transferProof" className="font-semibold">Bukti Transfer</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-secondary/50 transition-colors">
+            <div
+              className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${isDragging
+                ? 'border-primary bg-primary/10 scale-[1.02]'
+                : 'hover:bg-secondary/50'
+                } ${isPaymentSuccessful ? 'opacity-60 cursor-not-allowed' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <input
                 id="transferProof"
                 type="file"
@@ -243,8 +285,10 @@ export default function PaymentRecordForm({
                   <div className={`space-y-2 ${isPaymentSuccessful ? 'opacity-60' : ''}`}>
                     <SafeIcon name="Upload" className="h-8 w-8 mx-auto text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Klik untuk unggah bukti transfer</p>
-                      <p className="text-xs text-muted-foreground">JPG, PNG, atau PDF (Max 5MB)</p>
+                      <p className="text-sm font-medium">
+                        {isDragging ? 'Lepaskan file di sini...' : 'Seret file atau klik untuk unggah'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">JPG, PNG, WebP, atau PDF (Max 5MB)</p>
                     </div>
                   </div>
                 )}

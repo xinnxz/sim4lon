@@ -48,7 +48,7 @@ export default function OrderActionsPanel({
     const isInDelivery = orderStatus === 'in_delivery'
     const isCompleted = orderStatus === 'completed'
     const isCancelled = orderStatus === 'cancelled'
-    const canEdit = orderStatus === 'pending_payment' || orderStatus === 'created'
+    const canEdit = orderStatus === 'created'  // Only allow edit in DRAFT status
     const canCancel = !isCompleted && !isCancelled
     // Show complete button if driver is assigned OR status is already in_delivery
     const canComplete = (isDriverAssigned || isInDelivery) && !isCompleted && !isCancelled

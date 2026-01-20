@@ -28,12 +28,13 @@ let SupabaseStorageService = class SupabaseStorageService {
         this.supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseKey);
         console.log('✅ Supabase Storage connected');
     }
-    async uploadFile(fileBuffer, filename, mimetype) {
+    async uploadFile(fileBuffer, filename, mimetype, bucket) {
         if (!this.supabase) {
             throw new common_1.BadRequestException('Supabase not configured');
         }
+        const targetBucket = bucket || this.bucketName;
         const { data, error } = await this.supabase.storage
-            .from(this.bucketName)
+            .from(targetBucket)
             .upload(filename, fileBuffer, {
             contentType: mimetype,
             upsert: true,
@@ -43,7 +44,7 @@ let SupabaseStorageService = class SupabaseStorageService {
             throw new common_1.BadRequestException(`Upload gagal: ${error.message}`);
         }
         const { data: urlData } = this.supabase.storage
-            .from(this.bucketName)
+            .from(targetBucket)
             .getPublicUrl(filename);
         return urlData.publicUrl;
     }

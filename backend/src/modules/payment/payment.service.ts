@@ -99,7 +99,9 @@ export class PaymentService {
 
         // If linked to order, update order payment details
         if (dto.order_id) {
-            await this.prisma.order_payment_details.upsert({
+            console.log('createRecord upsert - proof_url being saved:', dto.proof_url);  // DEBUG
+
+            const upsertResult = await this.prisma.order_payment_details.upsert({
                 where: { order_id: dto.order_id },
                 create: {
                     order_id: dto.order_id,
@@ -114,14 +116,21 @@ export class PaymentService {
                         increment: dto.amount,
                     },
                     payment_date: new Date(),
+                    proof_url: dto.proof_url,  // Always update proof_url
+                    payment_method: dto.method,
                 },
             });
+
+            console.log('createRecord upsert result - proof_url:', upsertResult.proof_url);  // DEBUG
         }
 
         return record;
     }
 
     async updateOrderPayment(orderId: string, dto: UpdateOrderPaymentDto) {
+        console.log('updateOrderPayment called with:', { orderId, dto }); // DEBUG
+        console.log('proof_url from dto:', dto.proof_url); // DEBUG
+
         // Check if order exists
         const order = await this.prisma.orders.findUnique({
             where: { id: orderId },
@@ -143,7 +152,11 @@ export class PaymentService {
                 proof_url: dto.proof_url,
             },
             update: {
-                ...dto,
+                is_paid: dto.is_paid,
+                is_dp: dto.is_dp,
+                payment_method: dto.payment_method,
+                amount_paid: dto.amount_paid,
+                proof_url: dto.proof_url,
                 payment_date: dto.is_paid || dto.amount_paid ? new Date() : undefined,
                 updated_at: new Date(),
             },

@@ -157,11 +157,12 @@ export class UploadController {
         const ext = extname(file.originalname);
         const filename = `payment-proof-${timestamp}-${random}${ext}`;
 
-        // Upload to Supabase Storage
+        // Upload to Supabase Storage - use 'payment-proofs' bucket (NOT avatars)
         const publicUrl = await this.supabaseStorage.uploadFile(
             file.buffer,
             filename,
             file.mimetype,
+            'payment-proofs',  // Separate bucket for payment proofs
         );
 
         console.log('Payment proof uploaded to Supabase:', filename);

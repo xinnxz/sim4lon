@@ -240,9 +240,9 @@ PPN ${data.taxRate}%  : ${formatCurrency(data.taxAmount)}
 TOTAL    : ${formatCurrency(data.total)}
 \`\`\`
 
-${isNota ? '✅ *Status: LUNAS*' : '⏳ *Status: Belum Dibayar*'}
+${isNota ? '*Status: LUNAS*' : '*Status: Belum Dibayar*'}
 
-📄 *Lihat Dokumen:*
+*Lihat Dokumen:*
 ${docLink}
 
 _SIM4LON - Sistem Manajemen LPG_`

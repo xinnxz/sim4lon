@@ -75,7 +75,7 @@ let UploadController = class UploadController {
         const random = Math.round(Math.random() * 1e9);
         const ext = (0, path_1.extname)(file.originalname);
         const filename = `payment-proof-${timestamp}-${random}${ext}`;
-        const publicUrl = await this.supabaseStorage.uploadFile(file.buffer, filename, file.mimetype);
+        const publicUrl = await this.supabaseStorage.uploadFile(file.buffer, filename, file.mimetype, 'payment-proofs');
         console.log('Payment proof uploaded to Supabase:', filename);
         return {
             message: 'Bukti transfer berhasil diupload',

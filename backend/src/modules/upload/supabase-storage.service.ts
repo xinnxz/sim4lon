@@ -36,19 +36,23 @@ export class SupabaseStorageService {
      * @param file - File buffer dari multer
      * @param filename - Nama file unik
      * @param mimetype - MIME type file
+     * @param bucket - Optional bucket name (default: avatars)
      * @returns URL public file
      */
     async uploadFile(
         fileBuffer: Buffer,
         filename: string,
         mimetype: string,
+        bucket?: string,
     ): Promise<string> {
         if (!this.supabase) {
             throw new BadRequestException('Supabase not configured');
         }
 
+        const targetBucket = bucket || this.bucketName;
+
         const { data, error } = await this.supabase.storage
-            .from(this.bucketName)
+            .from(targetBucket)
             .upload(filename, fileBuffer, {
                 contentType: mimetype,
                 upsert: true, // Overwrite if exists
@@ -61,7 +65,7 @@ export class SupabaseStorageService {
 
         // Get public URL
         const { data: urlData } = this.supabase.storage
-            .from(this.bucketName)
+            .from(targetBucket)
             .getPublicUrl(filename);
 
         return urlData.publicUrl;
@@ -90,7 +94,7 @@ export class SupabaseStorageService {
      */
     extractFilenameFromUrl(url: string): string | null {
         if (!url) return null;
-        
+
         // URL format: https://xxx.supabase.co/storage/v1/object/public/avatars/filename.jpg
         const parts = url.split('/');
         return parts[parts.length - 1];

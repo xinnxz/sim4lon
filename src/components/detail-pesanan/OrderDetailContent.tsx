@@ -76,6 +76,11 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
   const statusInfo = STATUS_MAP[apiOrder.current_status] || { status: 'unknown', label: 'Unknown' }
   const createdAt = new Date(apiOrder.created_at)
 
+  // Handle both array and object format for order_payment_details
+  const paymentDetails = Array.isArray(apiOrder.order_payment_details)
+    ? apiOrder.order_payment_details[0]
+    : apiOrder.order_payment_details
+
   return {
     id: apiOrder.code || `ORD-${apiOrder.id.slice(0, 4).toUpperCase()}`,
     apiId: apiOrder.id,
@@ -100,9 +105,9 @@ function mapApiToUI(apiOrder: ApiOrder): UIOrder {
     subtotal: (apiOrder as any).subtotal || apiOrder.total_amount,
     tax: (apiOrder as any).tax_amount || 0,
     total: apiOrder.total_amount,
-    paymentMethod: apiOrder.order_payment_details?.[0]?.payment_method || null,
-    paidAmount: apiOrder.order_payment_details?.[0]?.amount_paid || 0,
-    paymentProofUrl: apiOrder.order_payment_details?.[0]?.proof_url || null,
+    paymentMethod: paymentDetails?.payment_method || null,
+    paidAmount: paymentDetails?.amount_paid || 0,
+    paymentProofUrl: paymentDetails?.proof_url || null,
     delivery: {
       status: apiOrder.current_status === 'BATAL' ? 'cancelled'
         : apiOrder.drivers ? 'assigned' : 'not_scheduled',
@@ -201,6 +206,11 @@ export default function OrderDetailContent() {
           ordersApi.getById(orderId),
           driversApi.getAll(1, 100, undefined, true)
         ])
+
+        // Debug: Log payment details
+        console.log('API Order:', apiOrder)
+        console.log('Payment Details:', apiOrder.order_payment_details)
+        console.log('Proof URL:', apiOrder.order_payment_details?.[0]?.proof_url)
 
         setOrder(mapApiToUI(apiOrder))
         setDrivers(driversRes.data)

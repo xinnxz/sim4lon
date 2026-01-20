@@ -4,7 +4,7 @@ export declare class SupabaseStorageService {
     private supabase;
     private bucketName;
     constructor(configService: ConfigService);
-    uploadFile(fileBuffer: Buffer, filename: string, mimetype: string): Promise<string>;
+    uploadFile(fileBuffer: Buffer, filename: string, mimetype: string, bucket?: string): Promise<string>;
     deleteFile(filename: string): Promise<void>;
     extractFilenameFromUrl(url: string): string | null;
 }
