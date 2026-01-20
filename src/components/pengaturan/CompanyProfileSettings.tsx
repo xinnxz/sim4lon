@@ -19,7 +19,7 @@ import { companyProfileApi, type CompanyProfile } from '@/lib/api'
  * - Kontak (telepon, email)
  * - PIC (Person In Charge)
  * - Logo perusahaan
- * - Nomor SPPBE
+ * - Nomor SPBE
  * - Wilayah/Region
  * 
  * Data disimpan di database via API /company-profile
@@ -32,6 +32,7 @@ interface ProfileFormData {
     email: string
     picName: string
     sppbeNumber: string
+    spbeSupplierName: string
     region: string
     logo: string | null
 }
@@ -43,6 +44,7 @@ const initialProfile: ProfileFormData = {
     email: '',
     picName: '',
     sppbeNumber: '',
+    spbeSupplierName: '',
     region: '',
     logo: null
 }
@@ -71,6 +73,7 @@ export default function CompanyProfileSettings() {
                 email: data.email || '',
                 picName: data.pic_name || '',
                 sppbeNumber: data.sppbe_number || '',
+                spbeSupplierName: data.spbe_supplier_name || '',
                 region: data.region || '',
                 logo: data.logo_url || null
             })
@@ -126,6 +129,7 @@ export default function CompanyProfileSettings() {
                 email: profile.email || undefined,
                 pic_name: profile.picName || undefined,
                 sppbe_number: profile.sppbeNumber || undefined,
+                spbe_supplier_name: profile.spbeSupplierName || undefined,
                 region: profile.region || undefined,
                 logo_url: profile.logo || undefined,
             })
@@ -234,7 +238,7 @@ export default function CompanyProfileSettings() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="sppbeNumber" className="text-sm font-medium">
-                                Nomor SPPBE/SIID
+                                Nomor SPBE/SIID
                             </Label>
                             <Input
                                 id="sppbeNumber"
@@ -245,6 +249,21 @@ export default function CompanyProfileSettings() {
                             />
                             <p className="text-xs text-muted-foreground">Nomor Surat Penunjukan / SIID To</p>
                         </div>
+                    </div>
+
+                    {/* SPBE Supplier Name */}
+                    <div className="space-y-2">
+                        <Label htmlFor="spbeSupplierName" className="text-sm font-medium">
+                            Nama Supplier SPBE
+                        </Label>
+                        <Input
+                            id="spbeSupplierName"
+                            value={profile.spbeSupplierName}
+                            onChange={(e) => handleChange('spbeSupplierName', e.target.value)}
+                            placeholder="PT. RENATA PUTRA SENTOSA"
+                            className="h-10"
+                        />
+                        <p className="text-xs text-muted-foreground">Nama perusahaan SPBE untuk sumber penerimaan stok</p>
                     </div>
 
                     {/* Address */}

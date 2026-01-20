@@ -8,19 +8,19 @@ Pengujian dilakukan untuk menjamin kualitas dan juga mengetahui kelemahan dari s
 
 Pengujian Black Box bertujuan untuk menguji fungsionalitas sistem tanpa memperhatikan struktur internal kode program. Fokus pengujian adalah pada input dan output yang dihasilkan oleh sistem.
 
-Ada 21 modul dan 143 test case pada metode pengujian black box ini. Diantaranya:
+Ada 21 modul dan 151 test case pada metode pengujian black box ini. Diantaranya:
 
 1. Login, 8 test case
 2. Dashboard, 10 test case
-3. Stok LPG, 9 test case
-4. Pesanan, 12 test case
+3. Stok LPG, 6 test case
+4. Pesanan, 20 test case
 5. Pembayaran, 5 test case
 6. Pangkalan, 7 test case
 7. Driver, 6 test case
 8. Laporan, 8 test case
 9. Konsumen Subsidi, 10 test case
 10. Penjualan Konsumen, 12 test case
-11. Stok Pangkalan, 5 test case
+11. Stok Pangkalan, 8 test case
 12. Produk LPG, 5 test case
 13. Notifikasi, 4 test case
 14. Perencanaan, 6 test case
@@ -72,42 +72,48 @@ Ada 21 modul dan 143 test case pada metode pengujian black box ini. Diantaranya:
 
 #### c. Pengujian Modul Stok LPG
 
-**Tabel 3.3** Pengujian Modul Stok LPG
+**Tabel 3.3** Pengujian Modul Stok LPG (Role: ADMIN/OPERATOR)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Stok LPG | ![TC](figures/blackbox/stok-tc1.png) | Sistem menampilkan card stok per tipe LPG (3kg, 5.5kg, 12kg, 50kg, 220gr) | ![Hasil](figures/blackbox/stok-result1.png) | Valid |
-| 2 | Membuka tab Riwayat pada menu Stok | ![TC](figures/blackbox/stok-tc2.png) | Sistem menampilkan daftar pergerakan stok dengan pagination | ![Hasil](figures/blackbox/stok-result2.png) | Valid |
-| 3 | Memilih filter LPG 3kg | ![TC](figures/blackbox/stok-tc3.png) | Sistem hanya menampilkan pergerakan stok LPG 3kg | ![Hasil](figures/blackbox/stok-result3.png) | Valid |
-| 4 | Memilih filter MASUK | ![TC](figures/blackbox/stok-tc4.png) | Sistem hanya menampilkan stok masuk | ![Hasil](figures/blackbox/stok-result4.png) | Valid |
-| 5 | Mengklik "Tambah Stok", memilih tipe LPG, mengisi jumlah 50, dan menyimpan | ![TC](figures/blackbox/stok-tc5.png) | Stok bertambah 50 unit dan riwayat tercatat sebagai MASUK | ![Hasil](figures/blackbox/stok-result5.png) | Valid |
-| 6 | Mengklik "Tambah Stok" dan mengisi jumlah 0 | ![TC](figures/blackbox/stok-tc6.png) | Sistem menampilkan validasi "Jumlah harus lebih dari 0" | ![Hasil](figures/blackbox/stok-result6.png) | Valid |
-| 7 | Mengklik "Tambah Stok" dan mengisi jumlah -10 | ![TC](figures/blackbox/stok-tc7.png) | Sistem menampilkan validasi "Jumlah tidak valid" | ![Hasil](figures/blackbox/stok-result7.png) | Valid |
-| 8 | Mengklik "Kurangi Stok" dan mengisi jumlah kurang dari stok tersedia | ![TC](figures/blackbox/stok-tc8.png) | Stok berkurang dan riwayat tercatat sebagai KELUAR | ![Hasil](figures/blackbox/stok-result8.png) | Valid |
-| 9 | Mengisi jumlah lebih dari stok yang tersedia | ![TC](figures/blackbox/stok-tc9.png) | Sistem menampilkan error "Stok tidak mencukupi" | ![Hasil](figures/blackbox/stok-result9.png) | Valid |
+| 1 | Membuka menu Stok LPG | ![TC](figures/blackbox/stok-tc1.png) | Sistem akan menampilkan halaman stok LPG dengan header yang berisi total unit, badge statistik (Subsidi, Non-Subsidi, Produk), dan card stok per tipe produk | ![Hasil](figures/blackbox/stok-result1.png) | Valid |
+| 2 | Melihat indikator status stok pada card produk | ![TC](figures/blackbox/stok-tc2.png) | Sistem akan menampilkan badge status (Aman/Perhatian/Kritis) pada setiap card produk sesuai dengan tingkat ketersediaan stok | ![Hasil](figures/blackbox/stok-result2.png) | Valid |
+| 3 | Mengklik tombol "Kelola" pada header halaman | ![TC](figures/blackbox/stok-tc3.png) | Sistem akan menampilkan modal kelola produk LPG yang berisi daftar produk dengan informasi harga, kategori, dan status aktif | ![Hasil](figures/blackbox/stok-result3.png) | Valid |
+| 4 | Mengklik tombol "Penerimaan" pada header halaman | ![TC](figures/blackbox/stok-tc4.png) | Sistem akan melakukan redirect ke halaman penerimaan stok untuk mencatat penerimaan DO dari SPBE | ![Hasil](figures/blackbox/stok-result4.png) | Valid |
+| 5 | Mengklik tombol "In/Out" pada header halaman | ![TC](figures/blackbox/stok-tc5.png) | Sistem akan melakukan redirect ke halaman rekonsiliasi stok harian yang menampilkan stok awal, masuk, keluar, dan akhir | ![Hasil](figures/blackbox/stok-result5.png) | Valid |
+| 6 | Melihat chart Tren Pemakaian Mingguan | ![TC](figures/blackbox/stok-tc6.png) | Sistem akan menampilkan grafik line chart yang menunjukkan pergerakan pemakaian stok 7 hari terakhir per tipe produk | ![Hasil](figures/blackbox/stok-result6.png) | Valid |
 
 ---
 
 #### d. Pengujian Modul Pesanan
 
-**Tabel 3.4** Pengujian Modul Pesanan
+**Tabel 3.4** Pengujian Modul Pesanan (Role: ADMIN/OPERATOR)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Pesanan | ![TC](figures/blackbox/pesanan-tc1.png) | Sistem menampilkan daftar pesanan dengan pagination | ![Hasil](figures/blackbox/pesanan-result1.png) | Valid |
-| 2 | Memilih filter status MENUNGGU_PEMBAYARAN | ![TC](figures/blackbox/pesanan-tc2.png) | Sistem hanya menampilkan pesanan dengan status tersebut | ![Hasil](figures/blackbox/pesanan-result2.png) | Valid |
-| 3 | Memilih filter pangkalan tertentu | ![TC](figures/blackbox/pesanan-tc3.png) | Sistem hanya menampilkan pesanan dari pangkalan tersebut | ![Hasil](figures/blackbox/pesanan-result3.png) | Valid |
-| 4 | Mengurutkan berdasarkan tanggal terbaru | ![TC](figures/blackbox/pesanan-tc4.png) | Pesanan terbaru ditampilkan di atas | ![Hasil](figures/blackbox/pesanan-result4.png) | Valid |
-| 5 | Mengklik salah satu pesanan | ![TC](figures/blackbox/pesanan-tc5.png) | Sistem menampilkan detail lengkap: items, total, timeline status | ![Hasil](figures/blackbox/pesanan-result5.png) | Valid |
-| 6 | Mengklik "Buat Pesanan", memilih pangkalan, menambah item LPG, dan menyimpan | ![TC](figures/blackbox/pesanan-tc6.png) | Pesanan tersimpan dengan status DRAFT | ![Hasil](figures/blackbox/pesanan-result6.png) | Valid |
-| 7 | Mengklik "Buat Pesanan" tanpa menambah item apapun | ![TC](figures/blackbox/pesanan-tc7.png) | Sistem menampilkan validasi "Minimal 1 item" | ![Hasil](figures/blackbox/pesanan-result7.png) | Valid |
-| 8 | Membuka pesanan DRAFT dan mengklik "Proses Pembayaran" | ![TC](figures/blackbox/pesanan-tc8.png) | Status berubah dan timeline terupdate | ![Hasil](figures/blackbox/pesanan-result8.png) | Valid |
-| 9 | Mengikuti alur status sampai SELESAI | ![TC](figures/blackbox/pesanan-tc9.png) | Status berubah sesuai workflow: DIPROSES → SIAP_KIRIM → DIKIRIM → SELESAI | ![Hasil](figures/blackbox/pesanan-result9.png) | Valid |
-| 10 | Mengklik "Batalkan" pada pesanan yang belum selesai | ![TC](figures/blackbox/pesanan-tc10.png) | Status berubah ke BATAL | ![Hasil](figures/blackbox/pesanan-result10.png) | Valid |
-| 11 | Membuka pesanan dengan status SELESAI | ![TC](figures/blackbox/pesanan-tc11.png) | Tombol update status tidak tersedia | ![Hasil](figures/blackbox/pesanan-result11.png) | Valid |
-| 12 | Mengklik tombol hapus dan konfirmasi | ![TC](figures/blackbox/pesanan-tc12.png) | Pesanan terhapus dari sistem | ![Hasil](figures/blackbox/pesanan-result12.png) | Valid |
+| 1 | Membuka menu Pesanan | ![TC](figures/blackbox/pesanan-tc1.png) | Sistem akan menampilkan halaman daftar pesanan dengan stats card (Total, Menunggu, Diproses, Dikirim, Selesai), tabel pesanan, dan fitur pencarian | ![Hasil](figures/blackbox/pesanan-result1.png) | Valid |
+| 2 | Menggunakan fitur pencarian pada kolom search | ![TC](figures/blackbox/pesanan-tc2.png) | Sistem akan memfilter tabel pesanan berdasarkan ID pesanan, nama pangkalan, atau jenis LPG yang dicari | ![Hasil](figures/blackbox/pesanan-result2.png) | Valid |
+| 3 | Memilih filter status pada dropdown | ![TC](figures/blackbox/pesanan-tc3.png) | Sistem akan menampilkan pesanan yang sesuai dengan status yang dipilih (Menunggu Pembayaran/Diproses/Dikirim/Selesai/Dibatalkan) | ![Hasil](figures/blackbox/pesanan-result3.png) | Valid |
+| 4 | Mengklik header kolom untuk mengurutkan data | ![TC](figures/blackbox/pesanan-tc4.png) | Sistem akan mengurutkan tabel berdasarkan kolom yang diklik (ID, Pangkalan, Total, Status, atau Tanggal) secara ascending/descending | ![Hasil](figures/blackbox/pesanan-result4.png) | Valid |
+| 5 | Mengklik tombol "Lihat" pada salah satu pesanan | ![TC](figures/blackbox/pesanan-tc5.png) | Sistem akan melakukan redirect ke halaman detail pesanan yang menampilkan informasi lengkap: items, total, timeline status, dan aksi yang tersedia | ![Hasil](figures/blackbox/pesanan-result5.png) | Valid |
+| 6 | Mengklik tombol "Buat Pesanan" pada header halaman | ![TC](figures/blackbox/pesanan-tc6.png) | Sistem akan melakukan redirect ke halaman pembuatan pesanan baru dengan form pemilihan pangkalan dan item LPG | ![Hasil](figures/blackbox/pesanan-result6.png) | Valid |
+| 7 | Mengisi form Buat Pesanan dengan data lengkap dan menyimpan | ![TC](figures/blackbox/pesanan-tc7.png) | Sistem akan menyimpan pesanan baru dan menampilkan notifikasi berhasil kemudian redirect ke halaman detail pesanan | ![Hasil](figures/blackbox/pesanan-result7.png) | Valid |
+| 8 | Mengklik "Simpan" pada form Buat Pesanan tanpa menambah item | ![TC](figures/blackbox/pesanan-tc8.png) | Sistem akan menampilkan pesan validasi error "Silakan tambahkan minimal satu item LPG" | ![Hasil](figures/blackbox/pesanan-result8.png) | Valid |
+| 9 | Mengubah status pesanan dari detail pesanan | ![TC](figures/blackbox/pesanan-tc9.png) | Sistem akan mengupdate status pesanan sesuai workflow (Diproses → Dikirim → Selesai) dan memperbarui timeline | ![Hasil](figures/blackbox/pesanan-result9.png) | Valid |
+| 10 | Mengklik tombol "Batalkan Pesanan" pada detail pesanan | ![TC](figures/blackbox/pesanan-tc10.png) | Sistem akan menampilkan dialog konfirmasi dan mengubah status pesanan menjadi "Dibatalkan" setelah dikonfirmasi | ![Hasil](figures/blackbox/pesanan-result10.png) | Valid |
+| 11 | Mengubah jumlah item per halaman pada pagination | ![TC](figures/blackbox/pesanan-tc11.png) | Sistem akan memperbarui tabel untuk menampilkan jumlah data sesuai pilihan (10/25/50) dan mereset ke halaman pertama | ![Hasil](figures/blackbox/pesanan-result11.png) | Valid |
+| 12 | Navigasi antar halaman menggunakan pagination | ![TC](figures/blackbox/pesanan-tc12.png) | Sistem akan menampilkan data pesanan sesuai halaman yang dipilih dan memperbarui informasi "Menampilkan X - Y dari Z data" | ![Hasil](figures/blackbox/pesanan-result12.png) | Valid |
+| 13 | Buat Pesanan dengan jumlah LPG melebihi stok yang tersedia | ![TC](figures/blackbox/pesanan-tc13.png) | Sistem akan menampilkan pesan error "Stok [nama produk] tidak mencukupi! Stok sekarang: [jumlah]" | ![Hasil](figures/blackbox/pesanan-result13.png) | Valid |
+| 14 | Buat Pesanan LPG 3kg melebihi alokasi bulanan pangkalan | ![TC](figures/blackbox/pesanan-tc14.png) | Sistem akan menampilkan pesan error "Melebihi alokasi bulanan! Sisa: [jumlah] tabung" | ![Hasil](figures/blackbox/pesanan-result14.png) | Valid |
+| 15 | Buat Pesanan untuk pangkalan yang tidak aktif | ![TC](figures/blackbox/pesanan-tc15.png) | Sistem akan menampilkan pesan error "Pangkalan tidak aktif. Tidak dapat membuat pesanan" | ![Hasil](figures/blackbox/pesanan-result15.png) | Valid |
+| 16 | Assign driver yang sedang mengantar pesanan lain | ![TC](figures/blackbox/pesanan-tc16.png) | Sistem akan menampilkan pesan error "Supir [nama] sedang mengantar pesanan [kode]. Pilih supir lain" | ![Hasil](figures/blackbox/pesanan-result16.png) | Valid |
+| 17 | Mengubah status langsung dari DRAFT ke SELESAI (skip workflow) | ![TC](figures/blackbox/pesanan-tc17.png) | Sistem akan menampilkan pesan error "Tidak dapat mengubah status dari DRAFT ke SELESAI" | ![Hasil](figures/blackbox/pesanan-result17.png) | Valid |
+| 18 | Membatalkan pesanan yang sudah berstatus SELESAI | ![TC](figures/blackbox/pesanan-tc18.png) | Sistem akan menampilkan pesan error karena status SELESAI tidak dapat diubah ke status lain | ![Hasil](figures/blackbox/pesanan-result18.png) | Valid |
+| 19 | Akses halaman detail pesanan dengan kode yang tidak ada | ![TC](figures/blackbox/pesanan-tc19.png) | Sistem akan menampilkan pesan error "Order tidak ditemukan" atau halaman 404 | ![Hasil](figures/blackbox/pesanan-result19.png) | Valid |
+| 20 | Kombinasi filter status dan pencarian secara bersamaan | ![TC](figures/blackbox/pesanan-tc20.png) | Sistem akan menampilkan pesanan yang memenuhi KEDUA kriteria filter status dan kata kunci pencarian | ![Hasil](figures/blackbox/pesanan-result20.png) | Valid |
 
 ---
+
 
 #### e. Pengujian Modul Pembayaran
 
@@ -221,7 +227,10 @@ Ada 21 modul dan 143 test case pada metode pengujian black box ini. Diantaranya:
 | 2 | Mengklik "Terima Stok" dan mengisi data penerimaan | ![TC](figures/blackbox/stok-pangkalan-tc2.png) | Stok bertambah dan movement tercatat | ![Hasil](figures/blackbox/stok-pangkalan-result2.png) | Valid |
 | 3 | Mengklik "Stock Opname" dan mengisi qty aktual | ![TC](figures/blackbox/stok-pangkalan-tc3.png) | Adjustment tercatat dengan selisih yang benar | ![Hasil](figures/blackbox/stok-pangkalan-result3.png) | Valid |
 | 4 | Mengubah warning dan critical level | ![TC](figures/blackbox/stok-pangkalan-tc4.png) | Alert levels terupdate | ![Hasil](figures/blackbox/stok-pangkalan-result4.png) | Valid |
-| 5 | Membuka tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc5.png) | Semua movement tercatat dengan timestamp | ![Hasil](figures/blackbox/stok-pangkalan-result5.png) | Valid |
+| 5 | Membuka tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc5.png) | Sistem menampilkan daftar pergerakan stok dengan pagination | ![Hasil](figures/blackbox/stok-pangkalan-result5.png) | Valid |
+| 6 | Memilih filter LPG 3kg pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc6.png) | Sistem hanya menampilkan pergerakan stok LPG 3kg | ![Hasil](figures/blackbox/stok-pangkalan-result6.png) | Valid |
+| 7 | Memilih filter tipe MASUK pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc7.png) | Sistem hanya menampilkan stok masuk | ![Hasil](figures/blackbox/stok-pangkalan-result7.png) | Valid |
+| 8 | Memilih filter tipe KELUAR pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc8.png) | Sistem hanya menampilkan stok keluar | ![Hasil](figures/blackbox/stok-pangkalan-result8.png) | Valid |
 
 ---
 
@@ -374,15 +383,15 @@ Ada 21 modul dan 143 test case pada metode pengujian black box ini. Diantaranya:
 |----|-------|------------------|----------|-------|------------------------|
 | 1 | Login | 8 | 8 | 0 | 100% |
 | 2 | Dashboard | 10 | 10 | 0 | 100% |
-| 3 | Stok LPG | 9 | 9 | 0 | 100% |
-| 4 | Pesanan | 12 | 12 | 0 | 100% |
+| 3 | Stok LPG | 6 | 6 | 0 | 100% |
+| 4 | Pesanan | 20 | 20 | 0 | 100% |
 | 5 | Pembayaran | 5 | 5 | 0 | 100% |
 | 6 | Pangkalan | 7 | 7 | 0 | 100% |
 | 7 | Driver | 6 | 6 | 0 | 100% |
 | 8 | Laporan | 8 | 8 | 0 | 100% |
 | 9 | Konsumen Subsidi | 10 | 10 | 0 | 100% |
 | 10 | Penjualan Konsumen | 12 | 12 | 0 | 100% |
-| 11 | Stok Pangkalan | 5 | 5 | 0 | 100% |
+| 11 | Stok Pangkalan | 8 | 8 | 0 | 100% |
 | 12 | Produk LPG | 5 | 5 | 0 | 100% |
 | 13 | Notifikasi | 4 | 4 | 0 | 100% |
 | 14 | Perencanaan | 6 | 6 | 0 | 100% |
@@ -393,13 +402,13 @@ Ada 21 modul dan 143 test case pada metode pengujian black box ini. Diantaranya:
 | 19 | User Management | 6 | 6 | 0 | 100% |
 | 20 | Dashboard Pangkalan | 5 | 5 | 0 | 100% |
 | 21 | Profil & Pengaturan | 5 | 5 | 0 | 100% |
-| **Total** | | **143** | **143** | **0** | **100%** |
+| **Total** | | **151** | **151** | **0** | **100%** |
 
 ### C. Kesimpulan Pengujian Black Box
 
 Berdasarkan hasil pengujian Black Box yang telah dilakukan terhadap sistem SIM4LON, dapat disimpulkan bahwa:
 
-1. Seluruh **143 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
+1. Seluruh **151 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
 
 2. Tingkat keberhasilan pengujian mencapai **100%**, yang menunjukkan bahwa fungsionalitas sistem berjalan dengan baik.
 

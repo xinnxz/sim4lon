@@ -135,7 +135,7 @@ export default function OrderListPage() {
     try {
       setIsLoading(true)
       const status = statusFilter === 'all' ? undefined : statusFilter as OrderStatus
-      const response = await ordersApi.getAll(currentPage, pageSize, status, pangkalanFilter || undefined, undefined, sortBy, sortOrder)
+      const response = await ordersApi.getAll(currentPage, pageSize, status, pangkalanFilter || undefined, undefined, sortBy, sortOrder, searchTerm || undefined)
 
       setOrders(response.data)
       setTotalOrders(response.meta.total)
@@ -264,16 +264,8 @@ export default function OrderListPage() {
     return order.order_items.reduce((sum, item) => sum + item.qty, 0)
   }
 
-  // Filter orders by search (client-side for now)
-  const filteredOrders = orders.filter(order => {
-    if (!searchTerm) return true
-    const term = searchTerm.toLowerCase()
-    return (
-      order.id.toLowerCase().includes(term) ||
-      order.pangkalans?.name.toLowerCase().includes(term) ||
-      order.order_items?.some(item => item.label.toLowerCase().includes(term))
-    )
-  })
+  // Search is now handled server-side - just use orders directly
+  const filteredOrders = orders
 
   return (
     <div className="flex-1 space-y-6 p-6 dashboard-gradient-bg min-h-screen">

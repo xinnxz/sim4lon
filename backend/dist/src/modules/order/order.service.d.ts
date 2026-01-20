@@ -6,7 +6,7 @@ export declare class OrderService {
     private prisma;
     private activityService;
     constructor(prisma: PrismaService, activityService: ActivityService);
-    findAll(page?: number, limit?: number, status?: status_pesanan, pangkalanId?: string, driverId?: string, sortBy?: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name', sortOrder?: 'asc' | 'desc'): Promise<{
+    findAll(page?: number, limit?: number, status?: status_pesanan, pangkalanId?: string, driverId?: string, sortBy?: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name', sortOrder?: 'asc' | 'desc', search?: string): Promise<{
         data: ({
             pangkalans: {
                 id: string;

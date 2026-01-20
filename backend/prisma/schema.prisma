@@ -543,6 +543,8 @@ model company_profile {
   pic_name             String?  @db.VarChar(255)
   /// Nomor SPPBE/SIID
   sppbe_number         String?  @db.VarChar(50)
+  /// Nama SPBE Supplier (sumber penerimaan stok)
+  spbe_supplier_name   String?  @db.VarChar(255)
   /// Wilayah/Region
   region               String?  @db.VarChar(255)
   /// Logo URL atau base64

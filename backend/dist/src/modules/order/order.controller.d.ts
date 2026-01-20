@@ -4,7 +4,7 @@ import { status_pesanan } from '@prisma/client';
 export declare class OrderController {
     private readonly orderService;
     constructor(orderService: OrderService);
-    findAll(page?: string, limit?: string, status?: status_pesanan, pangkalanId?: string, driverId?: string, sortBy?: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name', sortOrder?: 'asc' | 'desc'): Promise<{
+    findAll(page?: string, limit?: string, status?: status_pesanan, pangkalanId?: string, driverId?: string, sortBy?: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name', sortOrder?: 'asc' | 'desc', search?: string): Promise<{
         data: ({
             pangkalans: {
                 id: string;

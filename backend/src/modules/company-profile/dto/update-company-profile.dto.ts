@@ -31,6 +31,11 @@ export class UpdateCompanyProfileDto {
     @IsOptional()
     @IsString()
     @MaxLength(255)
+    spbe_supplier_name?: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(255)
     region?: string;
 
     @IsOptional()

@@ -5,6 +5,7 @@ export declare class UpdateCompanyProfileDto {
     email?: string;
     pic_name?: string;
     sppbe_number?: string;
+    spbe_supplier_name?: string;
     region?: string;
     logo_url?: string;
     ppn_rate?: number;

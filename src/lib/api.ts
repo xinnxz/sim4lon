@@ -421,6 +421,7 @@ export interface CompanyProfile {
     email?: string;
     pic_name?: string;
     sppbe_number?: string;
+    spbe_supplier_name?: string;
     region?: string;
     logo_url?: string;
     // App Settings
@@ -1548,7 +1549,7 @@ export interface OrdersResponse {
  */
 export const ordersApi = {
     /**
-     * Get all orders with pagination, filters, and sorting
+     * Get all orders with pagination, filters, sorting, and search
      */
     async getAll(
         page = 1,
@@ -1557,7 +1558,8 @@ export const ordersApi = {
         pangkalanId?: string,
         driverId?: string,
         sortBy: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name' = 'created_at',
-        sortOrder: 'asc' | 'desc' = 'desc'
+        sortOrder: 'asc' | 'desc' = 'desc',
+        search?: string
     ): Promise<OrdersResponse> {
         const params = new URLSearchParams({
             page: page.toString(),
@@ -1568,6 +1570,7 @@ export const ordersApi = {
         if (driverId) params.append('driver_id', driverId);
         params.append('sort_by', sortBy);
         params.append('sort_order', sortOrder);
+        if (search && search.trim()) params.append('search', search.trim());
 
         return apiRequest(`/orders?${params.toString()}`);
     },

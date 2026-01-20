@@ -13,6 +13,7 @@ export declare class CompanyProfileController {
         email: string | null;
         pic_name: string | null;
         sppbe_number: string | null;
+        spbe_supplier_name: string | null;
         region: string | null;
         logo_url: string | null;
         ppn_rate: import("@prisma/client/runtime/library").Decimal;
@@ -30,6 +31,7 @@ export declare class CompanyProfileController {
         email: string | null;
         pic_name: string | null;
         sppbe_number: string | null;
+        spbe_supplier_name: string | null;
         region: string | null;
         logo_url: string | null;
         ppn_rate: import("@prisma/client/runtime/library").Decimal;

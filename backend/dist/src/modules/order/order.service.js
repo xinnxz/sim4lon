@@ -21,7 +21,7 @@ let OrderService = class OrderService {
         this.prisma = prisma;
         this.activityService = activityService;
     }
-    async findAll(page = 1, limit = 10, status, pangkalanId, driverId, sortBy = 'created_at', sortOrder = 'desc') {
+    async findAll(page = 1, limit = 10, status, pangkalanId, driverId, sortBy = 'created_at', sortOrder = 'desc', search) {
         const skip = (page - 1) * limit;
         const where = { deleted_at: null };
         if (status)
@@ -30,6 +30,14 @@ let OrderService = class OrderService {
             where.pangkalan_id = pangkalanId;
         if (driverId)
             where.driver_id = driverId;
+        if (search && search.trim()) {
+            const searchTerm = search.trim();
+            where.OR = [
+                { code: { contains: searchTerm, mode: 'insensitive' } },
+                { pangkalans: { name: { contains: searchTerm, mode: 'insensitive' } } },
+                { order_items: { some: { label: { contains: searchTerm, mode: 'insensitive' } } } },
+            ];
+        }
         let orderBy;
         if (sortBy === 'pangkalan_name') {
             orderBy = { pangkalans: { name: sortOrder } };

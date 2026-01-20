@@ -18,6 +18,7 @@ class UpdateCompanyProfileDto {
     email;
     pic_name;
     sppbe_number;
+    spbe_supplier_name;
     region;
     logo_url;
     ppn_rate;
@@ -59,6 +60,12 @@ __decorate([
     (0, class_validator_1.MaxLength)(50),
     __metadata("design:type", String)
 ], UpdateCompanyProfileDto.prototype, "sppbe_number", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
+    __metadata("design:type", String)
+], UpdateCompanyProfileDto.prototype, "spbe_supplier_name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

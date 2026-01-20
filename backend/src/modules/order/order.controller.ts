@@ -18,6 +18,7 @@ export class OrderController {
         @Query('driver_id') driverId?: string,
         @Query('sort_by') sortBy?: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name',
         @Query('sort_order') sortOrder?: 'asc' | 'desc',
+        @Query('search') search?: string,
     ) {
         return this.orderService.findAll(
             page ? parseInt(page, 10) : 1,
@@ -27,6 +28,7 @@ export class OrderController {
             driverId,
             sortBy || 'created_at',
             sortOrder || 'desc',
+            search,
         );
     }
 

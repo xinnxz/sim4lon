@@ -20,6 +20,7 @@ export class OrderService {
         driverId?: string,
         sortBy: 'created_at' | 'total_amount' | 'code' | 'current_status' | 'pangkalan_name' = 'created_at',
         sortOrder: 'asc' | 'desc' = 'desc',
+        search?: string,
     ) {
         const skip = (page - 1) * limit;
 
@@ -27,6 +28,17 @@ export class OrderService {
         if (status) where.current_status = status;
         if (pangkalanId) where.pangkalan_id = pangkalanId;
         if (driverId) where.driver_id = driverId;
+
+        // SERVER-SIDE SEARCH: Filter by order code, pangkalan name, or item label
+        // Best practice: Search di backend untuk akurasi pagination
+        if (search && search.trim()) {
+            const searchTerm = search.trim();
+            where.OR = [
+                { code: { contains: searchTerm, mode: 'insensitive' } },
+                { pangkalans: { name: { contains: searchTerm, mode: 'insensitive' } } },
+                { order_items: { some: { label: { contains: searchTerm, mode: 'insensitive' } } } },
+            ];
+        }
 
         // Handle sorting - pangkalan_name requires nested relation sort
         let orderBy: any;

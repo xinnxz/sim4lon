@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import SafeIcon from '@/components/common/SafeIcon'
-import { penerimaanApi, lpgProductsApi, type PenerimaanStok, type PaginatedResponse, type LpgProduct } from '@/lib/api'
+import { penerimaanApi, lpgProductsApi, companyProfileApi, type PenerimaanStok, type PaginatedResponse, type LpgProduct } from '@/lib/api'
 import { toast } from 'sonner'
 import { exportToExcel, createFooterRow, type TableColumn } from '@/lib/export-utils'
 import jsPDF from 'jspdf'
@@ -265,6 +265,15 @@ export default function PenerimaanPage() {
 
         setIsSaving(true)
         try {
+            // Get supplier name from company profile
+            let sumberName = 'SPBE' // fallback
+            try {
+                const profile = await companyProfileApi.get()
+                sumberName = profile.spbe_supplier_name || 'SPBE'
+            } catch {
+                // Use fallback if profile fetch fails
+            }
+
             // Create one penerimaan per item (same SO/LO)
             for (const item of validItems) {
                 const product = products.find(p => p.id === item.lpg_product_id)
@@ -283,7 +292,7 @@ export default function PenerimaanPage() {
                     qty_pcs: qtyPcs,
                     qty_kg: qtyKg,
                     tanggal: headerData.tanggal,
-                    sumber: 'SPBE',
+                    sumber: sumberName,
                     lpg_product_id: item.lpg_product_id,
                 })
             }
