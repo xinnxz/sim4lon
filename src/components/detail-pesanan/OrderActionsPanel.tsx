@@ -45,10 +45,13 @@ export default function OrderActionsPanel({
     const isDraft = orderStatus === 'created'
     const isPending = orderStatus === 'pending_payment'
     const isConfirmed = orderStatus === 'payment_confirmed' || orderStatus === 'ready_to_ship'
+    const isInDelivery = orderStatus === 'in_delivery'
     const isCompleted = orderStatus === 'completed'
     const isCancelled = orderStatus === 'cancelled'
     const canEdit = orderStatus === 'pending_payment' || orderStatus === 'created'
     const canCancel = !isCompleted && !isCancelled
+    // Show complete button if driver is assigned OR status is already in_delivery
+    const canComplete = (isDriverAssigned || isInDelivery) && !isCompleted && !isCancelled
 
     return (
         <Card>
@@ -105,7 +108,7 @@ export default function OrderActionsPanel({
                 )}
 
                 {/* Complete Order */}
-                {isDriverAssigned && !isCompleted && !isCancelled && (
+                {canComplete && (
                     <Button
                         onClick={onCompleteOrder}
                         className="w-full bg-green-600 hover:bg-green-700"
