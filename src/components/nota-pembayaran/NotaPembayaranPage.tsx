@@ -347,7 +347,7 @@ _SIM4LON - Sistem Manajemen LPG_`
               </TabsTrigger>
               <TabsTrigger
                 value="nota"
-                className="gap-2 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                className={`gap-2 data-[state=active]:bg-green-500 data-[state=active]:text-white ${!data.isPaid ? 'cursor-not-allowed opacity-60' : ''}`}
                 disabled={!data.isPaid}
                 title={!data.isPaid ? 'Nota tersedia setelah pembayaran lunas' : ''}
               >

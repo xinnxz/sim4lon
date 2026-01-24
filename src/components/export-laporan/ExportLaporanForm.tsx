@@ -59,7 +59,7 @@ export default function ExportLaporanForm() {
     }
 
     if (new Date(startDate) > new Date(endDate)) {
-      toast.error('Tanggal mulai tidak boleh lebih besar dari tanggal akhir')
+      toast.error('Tanggal akhir harus setelah tanggal awal')
       return
     }
 

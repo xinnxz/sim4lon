@@ -267,9 +267,22 @@ export default function ReportsPage() {
     }
 
     const handleCustomDateApply = () => {
-        if (customStart && customEnd) {
-            fetchReports()
+        // Validate that both dates are provided
+        if (!customStart || !customEnd) {
+            toast.error('Silakan isi tanggal awal dan tanggal akhir')
+            return
         }
+
+        // Validate that end date is after start date
+        const startDate = new Date(customStart)
+        const endDate = new Date(customEnd)
+
+        if (endDate < startDate) {
+            toast.error('Tanggal akhir harus setelah tanggal awal')
+            return
+        }
+
+        fetchReports()
     }
 
     const statusLabels: Record<string, string> = {
@@ -390,6 +403,16 @@ export default function ReportsPage() {
     }
 
     const handleExportPDF = async () => {
+        // Check for empty data
+        if (activeTab === 'sales' && (!salesData?.data || salesData.data.length === 0)) {
+            toast.error('Tidak ada data untuk periode yang dipilih')
+            return
+        }
+        if (activeTab === 'stock' && (!stockData?.data || stockData.data.length === 0)) {
+            toast.error('Tidak ada data untuk periode yang dipilih')
+            return
+        }
+
         try {
             const tabTitles = { sales: 'Penjualan', payments: 'Pembayaran', stock: 'Stok' }
             const title = `Laporan ${tabTitles[activeTab as keyof typeof tabTitles]}`
@@ -473,6 +496,16 @@ export default function ReportsPage() {
     }
 
     const handleExportExcel = () => {
+        // Check for empty data
+        if (activeTab === 'sales' && (!salesData?.data || salesData.data.length === 0)) {
+            toast.error('Tidak ada data untuk periode yang dipilih')
+            return
+        }
+        if (activeTab === 'stock' && (!stockData?.data || stockData.data.length === 0)) {
+            toast.error('Tidak ada data untuk periode yang dipilih')
+            return
+        }
+
         try {
             const tabTitles = { sales: 'Penjualan', payments: 'Pembayaran', stock: 'Stok' }
             const title = `Laporan ${tabTitles[activeTab as keyof typeof tabTitles]}`

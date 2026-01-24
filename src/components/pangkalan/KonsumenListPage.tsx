@@ -34,9 +34,38 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import SafeIcon from '@/components/common/SafeIcon'
-import { consumersApi, type Consumer, type ConsumerType } from '@/lib/api'
+import { consumersApi, consumerOrdersApi, type Consumer, type ConsumerType, type ConsumerOrder } from '@/lib/api'
 import { toast } from 'sonner'
+
+// LPG Product Images Mapping
+const LPG_IMAGES: Record<string, string> = {
+    'kg3': '/images/products/lpg-3kg.png',
+    '3kg': '/images/products/lpg-3kg.png',
+    'kg5': '/images/products/lpg-5kg.png',
+    '5kg': '/images/products/lpg-5kg.png',
+    'kg12': '/images/products/lpg-12kg.png',
+    '12kg': '/images/products/lpg-12kg.png',
+    'kg50': '/images/products/lpg-50kg.png',
+    '50kg': '/images/products/lpg-50kg.png',
+    'bright_gas': '/images/products/bright-gas.png',
+    'brightgas': '/images/products/bright-gas.png',
+}
+
+const getLpgImage = (lpgType: string): string => {
+    const normalized = lpgType?.toLowerCase().replace(/[^a-z0-9]/g, '')
+    return LPG_IMAGES[normalized] || LPG_IMAGES[lpgType?.toLowerCase()] || '/images/products/lpg-3kg.png'
+}
 
 export default function KonsumenListPage() {
     const [consumers, setConsumers] = useState<Consumer[]>([])
@@ -58,6 +87,9 @@ export default function KonsumenListPage() {
         note: '',
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    // State for delete confirmation modal
+    const [deleteConfirmConsumer, setDeleteConfirmConsumer] = useState<Consumer | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
     // Stats from API - untuk menampilkan jumlah yang benar
     const [stats, setStats] = useState({
         total: 0,
@@ -67,6 +99,15 @@ export default function KonsumenListPage() {
         warung: 0,
         withNik: 0,
     })
+    // State for purchase history view
+    const [historyConsumer, setHistoryConsumer] = useState<Consumer | null>(null)
+    const [historyData, setHistoryData] = useState<ConsumerOrder[]>([])
+    const [historyLoading, setHistoryLoading] = useState(false)
+    const [historyLoadingMore, setHistoryLoadingMore] = useState(false)
+    const [historyStats, setHistoryStats] = useState({ totalQty: 0, totalAmount: 0, totalTransactions: 0 })
+    const [historyPage, setHistoryPage] = useState(1)
+    const [historyHasMore, setHistoryHasMore] = useState(false)
+    const HISTORY_PAGE_SIZE = 20
 
     // Preserve scroll position when dialog opens/closes
     // Note: modal={false} on Dialog prevents scroll lock, but we keep this as backup
@@ -155,6 +196,16 @@ export default function KonsumenListPage() {
             toast.error('Nama konsumen wajib diisi')
             return
         }
+        // Validate NIK is required
+        if (!formData.nik) {
+            toast.error('NIK wajib diisi')
+            return
+        }
+        // Validate KK is required
+        if (!formData.kk) {
+            toast.error('Nomor KK wajib diisi')
+            return
+        }
         // Validate NIK/KK if provided
         if (formData.nik && formData.nik.length !== 16) {
             toast.error('NIK harus 16 digit')
@@ -194,16 +245,103 @@ export default function KonsumenListPage() {
         }
     }
 
-    const handleDelete = async (consumer: Consumer) => {
-        if (!confirm(`Hapus konsumen "${consumer.name}"?`)) return
+    const handleDelete = async () => {
+        if (!deleteConfirmConsumer) return
 
         try {
-            await consumersApi.delete(consumer.id)
+            setIsDeleting(true)
+            await consumersApi.delete(deleteConfirmConsumer.id)
             toast.success('Konsumen berhasil dihapus', { duration: 4000 })
+            setDeleteConfirmConsumer(null)
             // Silent refresh to preserve scroll position
             fetchConsumers(true)
         } catch (error: any) {
             toast.error(error.message || 'Gagal menghapus konsumen', { duration: 5000 })
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
+    // Fetch purchase history for a consumer (initial load)
+    const fetchConsumerHistory = async (consumer: Consumer) => {
+        setHistoryConsumer(consumer)
+        setHistoryLoading(true)
+        setHistoryData([])
+        setHistoryPage(1)
+        setHistoryStats({ totalQty: 0, totalAmount: 0, totalTransactions: 0 })
+
+        try {
+            // First, get first page of data
+            const response = await consumerOrdersApi.getAll(1, HISTORY_PAGE_SIZE, { consumerId: consumer.id })
+            const orders = response.data || []
+            const meta = response.meta
+
+            setHistoryData(orders)
+            setHistoryHasMore(meta.page < meta.totalPages)
+
+            // Set total transactions from meta
+            setHistoryStats(prev => ({ ...prev, totalTransactions: meta.total }))
+
+            // Calculate totals from displayed orders (will be updated as more pages load)
+            // For accurate totals, we sum from all loaded data
+            const totals = orders.reduce((acc, order) => ({
+                totalQty: acc.totalQty + order.qty,
+                totalAmount: acc.totalAmount + Number(order.total_amount),
+                totalTransactions: meta.total  // Use server's total count
+            }), { totalQty: 0, totalAmount: 0, totalTransactions: meta.total })
+
+            // If there are more pages, fetch remaining data in background for accurate stats
+            if (meta.totalPages > 1) {
+                // Fetch all remaining pages for accurate totals
+                const allPagesPromises = []
+                for (let p = 2; p <= meta.totalPages; p++) {
+                    allPagesPromises.push(consumerOrdersApi.getAll(p, HISTORY_PAGE_SIZE, { consumerId: consumer.id }))
+                }
+
+                const allPagesResults = await Promise.all(allPagesPromises)
+                const allOrders = [...orders]
+                allPagesResults.forEach(res => {
+                    allOrders.push(...(res.data || []))
+                })
+
+                // Calculate complete totals
+                const completeTotals = allOrders.reduce((acc, order) => ({
+                    totalQty: acc.totalQty + order.qty,
+                    totalAmount: acc.totalAmount + Number(order.total_amount),
+                    totalTransactions: meta.total
+                }), { totalQty: 0, totalAmount: 0, totalTransactions: meta.total })
+
+                setHistoryStats(completeTotals)
+            } else {
+                setHistoryStats(totals)
+            }
+        } catch (error: any) {
+            toast.error('Gagal memuat riwayat pembelian')
+            setHistoryConsumer(null)
+        } finally {
+            setHistoryLoading(false)
+        }
+    }
+
+    // Load more history data (pagination)
+    const loadMoreHistory = async () => {
+        if (!historyConsumer || historyLoadingMore || !historyHasMore) return
+
+        setHistoryLoadingMore(true)
+        const nextPage = historyPage + 1
+
+        try {
+            const response = await consumerOrdersApi.getAll(nextPage, HISTORY_PAGE_SIZE, { consumerId: historyConsumer.id })
+            const newOrders = response.data || []
+            const meta = response.meta
+
+            setHistoryData(prev => [...prev, ...newOrders])
+            setHistoryPage(nextPage)
+            setHistoryHasMore(meta.page < meta.totalPages)
+        } catch (error: any) {
+            toast.error('Gagal memuat data lebih lanjut')
+        } finally {
+            setHistoryLoadingMore(false)
         }
     }
 
@@ -330,7 +468,9 @@ export default function KonsumenListPage() {
                                 {/* NIK & KK - Stacked on mobile, side-by-side on tablet+ */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="nik">NIK (16 digit) (Opsional)</Label>
+                                        <Label htmlFor="nik">
+                                            NIK (16 digit) <span className="text-red-500">*</span>
+                                        </Label>
                                         <Input
                                             id="nik"
                                             value={formData.nik}
@@ -341,7 +481,9 @@ export default function KonsumenListPage() {
                                         <p className="text-xs text-slate-400">{formData.nik.length}/16 digit</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="kk">No. KK (16 digit) (Opsional)</Label>
+                                        <Label htmlFor="kk">
+                                            No. KK (16 digit) <span className="text-red-500">*</span>
+                                        </Label>
                                         <Input
                                             id="kk"
                                             value={formData.kk}
@@ -557,7 +699,8 @@ export default function KonsumenListPage() {
                             {consumers.map((consumer, index) => (
                                 <div
                                     key={consumer.id}
-                                    className={`p-3 sm:p-4 hover:bg-blue-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
+                                    onClick={() => fetchConsumerHistory(consumer)}
+                                    className={`p-3 sm:p-4 hover:bg-blue-50/50 transition-colors cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
                                     {/* Mobile-first: Stack vertically on small screens */}
                                     <div className="flex items-start gap-3">
@@ -578,8 +721,8 @@ export default function KonsumenListPage() {
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <p className="font-semibold text-slate-900 text-sm sm:text-base truncate max-w-[140px] sm:max-w-none">{consumer.name}</p>
                                                 <Badge variant="outline" className={`text-[10px] sm:text-xs shrink-0 ${consumer.consumer_type === 'WARUNG'
-                                                        ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                                        : 'bg-blue-50 text-blue-700 border-blue-200'
+                                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                    : 'bg-blue-50 text-blue-700 border-blue-200'
                                                     }`}>
                                                     {consumer.consumer_type === 'WARUNG' ? 'Warung' : 'RT'}
                                                 </Badge>
@@ -621,7 +764,7 @@ export default function KonsumenListPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => handleOpenDialog(consumer)}
+                                                onClick={(e) => { e.stopPropagation(); handleOpenDialog(consumer); }}
                                                 className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 p-0"
                                             >
                                                 <SafeIcon name="Pencil" className="h-4 w-4" />
@@ -629,7 +772,7 @@ export default function KonsumenListPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => handleDelete(consumer)}
+                                                onClick={(e) => { e.stopPropagation(); setDeleteConfirmConsumer(consumer); }}
                                                 className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
                                             >
                                                 <SafeIcon name="Trash2" className="h-4 w-4" />
@@ -671,6 +814,191 @@ export default function KonsumenListPage() {
                     </Button>
                 </div>
             )}
+
+            {/* Purchase History Sheet */}
+            <Sheet open={!!historyConsumer} onOpenChange={(open) => !open && setHistoryConsumer(null)}>
+                <SheetContent side="right" className="w-full sm:max-w-[500px] overflow-y-auto p-0">
+                    {/* Header */}
+                    <div className="sticky top-0 z-10 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-5">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                <SafeIcon name="History" className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold">Riwayat Pembelian</h2>
+                                <p className="text-green-100 text-sm">{historyConsumer?.name}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Summary Stats */}
+                    <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white rounded-xl p-4 shadow-sm">
+                                <p className="text-xs text-slate-500 uppercase font-medium">Total Volume</p>
+                                <p className="text-2xl font-bold text-green-600">{historyStats.totalQty.toLocaleString('id-ID')}</p>
+                                <p className="text-xs text-slate-400">tabung</p>
+                            </div>
+                            <div className="bg-white rounded-xl p-4 shadow-sm">
+                                <p className="text-xs text-slate-500 uppercase font-medium">Total Pembelian</p>
+                                <p className="text-xl font-bold text-slate-900">
+                                    Rp {historyStats.totalAmount.toLocaleString('id-ID')}
+                                </p>
+                                <p className="text-xs text-slate-400">{historyStats.totalTransactions.toLocaleString('id-ID')} transaksi</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Transaction List */}
+                    <div className="px-6 py-4">
+                        <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                            <SafeIcon name="Receipt" className="h-4 w-4" />
+                            Daftar Transaksi
+                        </h3>
+
+                        {historyLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-green-500" />
+                            </div>
+                        ) : historyData.length === 0 ? (
+                            <div className="text-center py-12">
+                                <SafeIcon name="ShoppingBag" className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                <p className="text-slate-500">Belum ada riwayat pembelian</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {historyData.map((order) => (
+                                    <div key={order.id} className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
+                                        <div className="flex items-start gap-3">
+                                            {/* Product Image */}
+                                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 p-1 flex-shrink-0 border border-slate-200">
+                                                <img
+                                                    src={getLpgImage(order.lpg_type || '')}
+                                                    alt={order.lpg_type || 'LPG'}
+                                                    className="w-full h-full object-contain"
+                                                    onError={(e) => { e.currentTarget.src = '/images/products/lpg-3kg.png' }}
+                                                />
+                                            </div>
+
+                                            {/* Details */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <Badge className="bg-green-100 text-green-700 text-xs mb-1">
+                                                            {order.lpg_type?.toUpperCase() || 'LPG'}
+                                                        </Badge>
+                                                        <p className="text-sm font-semibold text-slate-900">
+                                                            {order.qty} tabung × Rp {Number(order.price_per_unit).toLocaleString('id-ID')}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-lg font-bold text-green-600 whitespace-nowrap">
+                                                        Rp {Number(order.total_amount).toLocaleString('id-ID')}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-xs text-slate-500 mt-2">
+                                                    <span className="flex items-center gap-1">
+                                                        <SafeIcon name="Calendar" className="h-3 w-3" />
+                                                        {new Date(order.sale_date).toLocaleDateString('id-ID', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <Badge variant="outline" className={`text-[10px] ${order.payment_status === 'LUNAS'
+                                                        ? 'bg-green-50 text-green-700 border-green-200'
+                                                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                        }`}>
+                                                        {order.payment_status}
+                                                    </Badge>
+                                                </div>
+                                                {order.note && (
+                                                    <p className="text-xs text-slate-400 mt-2 italic">"{order.note}"</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Load More Button */}
+                        {historyHasMore && !historyLoading && (
+                            <div className="pt-4">
+                                <Button
+                                    variant="outline"
+                                    className="w-full rounded-xl"
+                                    onClick={loadMoreHistory}
+                                    disabled={historyLoadingMore}
+                                >
+                                    {historyLoadingMore ? (
+                                        <>
+                                            <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                                            Memuat...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <SafeIcon name="ChevronDown" className="h-4 w-4 mr-2" />
+                                            Muat Lebih Banyak ({historyStats.totalTransactions - historyData.length} lagi)
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Showing count */}
+                        {historyData.length > 0 && (
+                            <p className="text-xs text-center text-slate-400 pt-4">
+                                Menampilkan {historyData.length} dari {historyStats.totalTransactions} transaksi
+                            </p>
+                        )}
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Delete Confirmation Modal */}
+            <AlertDialog open={!!deleteConfirmConsumer} onOpenChange={(open) => !open && setDeleteConfirmConsumer(null)}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <SafeIcon name="AlertTriangle" className="h-6 w-6 text-red-600" />
+                            </div>
+                            <AlertDialogTitle className="text-lg font-semibold">
+                                Hapus Konsumen?
+                            </AlertDialogTitle>
+                        </div>
+                        <AlertDialogDescription className="text-slate-600">
+                            Apakah Anda yakin ingin menghapus konsumen <strong className="text-slate-900">{deleteConfirmConsumer?.name}</strong>?
+                            Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="gap-2 sm:gap-0">
+                        <AlertDialogCancel
+                            disabled={isDeleting}
+                            className="rounded-xl"
+                        >
+                            Batal
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="rounded-xl bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                                    Menghapus...
+                                </>
+                            ) : (
+                                <>
+                                    <SafeIcon name="Trash2" className="h-4 w-4 mr-2" />
+                                    Hapus
+                                </>
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

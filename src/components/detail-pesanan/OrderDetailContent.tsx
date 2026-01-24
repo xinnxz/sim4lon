@@ -283,15 +283,62 @@ export default function OrderDetailContent() {
     window.location.href = `/nota-pembayaran?code=${order.id}&type=${docType}`
   }
 
-  const handleSendWhatsApp = () => {
+  // Generate WhatsApp message and open
+  const generateWhatsAppMessage = (docType: 'invoice' | 'nota') => {
     if (!order) return
-    // Redirect to nota page for WhatsApp share
-    // If not paid, only allow invoice (not nota)
-    const isPaid = order.status === 'payment_confirmed' ||
-      order.status === 'DIPROSES' ||
-      order.status === 'SELESAI'
-    const docType = isPaid ? 'nota' : 'invoice'
-    window.location.href = `/nota-pembayaran?code=${order.id}&type=${docType}`
+
+    const isNota = docType === 'nota'
+    const docTitle = isNota ? 'NOTA PEMBAYARAN' : 'INVOICE'
+    const docNumber = isNota
+      ? `NOTA-${order.id.replace('ORD-', '')}`
+      : `INV-${order.id.replace('ORD-', '')}`
+
+    // Format items list
+    const itemLines = order.items.map(item =>
+      `• ${item.type} x${item.quantity} = Rp ${item.subtotal.toLocaleString('id-ID')}`
+    ).join('\n')
+
+    // Get document link
+    const docLink = `${window.location.origin}/nota-pembayaran?code=${order.id}&type=${docType}`
+
+    // Build clean message
+    const message = `*${docTitle}*
+
+\`No: ${order.id}\`
+\`Tgl: ${order.createdDate}\`
+
+*Kepada:*
+${order.customer.name}
+${order.customer.address}
+
+*Item Pesanan:*
+${itemLines}
+
+\`\`\`
+SUBTOTAL : Rp ${order.subtotal.toLocaleString('id-ID')}
+PPN      : Rp ${order.tax.toLocaleString('id-ID')}
+TOTAL    : Rp ${order.total.toLocaleString('id-ID')}
+\`\`\`
+
+${isNota ? '*Status: LUNAS*' : '*Status: Belum Dibayar*'}
+
+*Lihat Dokumen:*
+${docLink}
+
+_SIM4LON - Sistem Manajemen LPG_`
+
+    // Open WhatsApp
+    const phone = order.customer.contactPhone?.replace(/\D/g, '') || ''
+    const whatsappUrl = `https://wa.me/62${phone.startsWith('0') ? phone.slice(1) : phone}?text=${encodeURIComponent(message)}`
+    window.open(whatsappUrl, '_blank')
+  }
+
+  const handleSendInvoiceWA = () => {
+    generateWhatsAppMessage('invoice')
+  }
+
+  const handleSendNotaWA = () => {
+    generateWhatsAppMessage('nota')
   }
 
   const handleSelectDriver = async (driverId: string) => {
@@ -485,7 +532,8 @@ export default function OrderDetailContent() {
             onPaymentClick={handlePaymentClick}
             onPaymentConfirmed={handlePaymentConfirmed}
             onPrintInvoice={handlePrintInvoice}
-            onSendWhatsApp={handleSendWhatsApp}
+            onSendInvoiceWA={handleSendInvoiceWA}
+            onSendNotaWA={handleSendNotaWA}
             onDriverAssignClick={() => setIsDriverModalOpen(true)}
             onCompleteOrder={handleCompleteOrder}
             onEditOrder={handleEditOrder}
@@ -493,6 +541,7 @@ export default function OrderDetailContent() {
             onConfirmOrder={handleConfirmOrder}
             isPaymentConfirmed={order.status === 'payment_confirmed'}
             isDriverAssigned={order.delivery.driver !== null}
+            isPaid={order.status === 'payment_confirmed' || order.status === 'DIPROSES' || order.status === 'SELESAI'}
           />
         </div>
       </div>

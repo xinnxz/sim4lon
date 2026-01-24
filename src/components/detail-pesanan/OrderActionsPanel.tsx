@@ -11,6 +11,12 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import SafeIcon from '@/components/common/SafeIcon'
 
 interface OrderActionsPanelProps {
@@ -18,7 +24,8 @@ interface OrderActionsPanelProps {
     onPaymentClick?: () => void
     onPaymentConfirmed?: () => void
     onPrintInvoice: () => void
-    onSendWhatsApp: () => void
+    onSendInvoiceWA: () => void
+    onSendNotaWA?: () => void
     onDriverAssignClick?: () => void
     onCompleteOrder?: () => void
     onEditOrder?: () => void
@@ -26,6 +33,7 @@ interface OrderActionsPanelProps {
     onConfirmOrder?: () => void
     isPaymentConfirmed?: boolean
     isDriverAssigned?: boolean
+    isPaid?: boolean
 }
 
 export default function OrderActionsPanel({
@@ -33,7 +41,8 @@ export default function OrderActionsPanel({
     onPaymentClick,
     onPaymentConfirmed,
     onPrintInvoice,
-    onSendWhatsApp,
+    onSendInvoiceWA,
+    onSendNotaWA,
     onDriverAssignClick,
     onCompleteOrder,
     onEditOrder,
@@ -41,6 +50,7 @@ export default function OrderActionsPanel({
     onConfirmOrder,
     isPaymentConfirmed = false,
     isDriverAssigned = false,
+    isPaid = false,
 }: OrderActionsPanelProps) {
     const isDraft = orderStatus === 'created'
     const isPending = orderStatus === 'pending_payment'
@@ -140,14 +150,36 @@ export default function OrderActionsPanel({
                         <SafeIcon name="Printer" className="mr-2 h-4 w-4" />
                         Cetak Invoice/Nota
                     </Button>
-                    <Button
-                        onClick={onSendWhatsApp}
-                        variant="outline"
-                        className="w-full"
-                    >
-                        <SafeIcon name="MessageCircle" className="mr-2 h-4 w-4" />
-                        Share via WA
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="w-full"
+                            >
+                                <SafeIcon name="MessageCircle" className="mr-2 h-4 w-4" />
+                                Share via WA
+                                <SafeIcon name="ChevronDown" className="ml-2 h-3 w-3" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={onSendInvoiceWA}>
+                                <SafeIcon name="FileText" className="mr-2 h-4 w-4 text-amber-500" />
+                                Share Invoice
+                            </DropdownMenuItem>
+                            {isPaid && onSendNotaWA && (
+                                <DropdownMenuItem onClick={onSendNotaWA}>
+                                    <SafeIcon name="Receipt" className="mr-2 h-4 w-4 text-green-500" />
+                                    Share Nota
+                                </DropdownMenuItem>
+                            )}
+                            {!isPaid && (
+                                <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
+                                    <SafeIcon name="Lock" className="mr-2 h-4 w-4" />
+                                    Nota (Belum Lunas)
+                                </DropdownMenuItem>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
                 {/* Cancel Order */}

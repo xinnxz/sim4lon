@@ -252,6 +252,21 @@ export default function LaporanPangkalanPage() {
 
     // Handle custom date apply
     const handleApplyCustomDate = () => {
+        // Validate that both dates are provided
+        if (!customStartDate || !customEndDate) {
+            toast.error('Silakan isi tanggal awal dan tanggal akhir')
+            return
+        }
+
+        // Validate that end date is after start date
+        const startDate = new Date(customStartDate)
+        const endDate = new Date(customEndDate)
+
+        if (endDate < startDate) {
+            toast.error('Tanggal akhir harus setelah tanggal awal')
+            return
+        }
+
         setSelectedPeriod('custom')
     }
 
@@ -389,7 +404,7 @@ export default function LaporanPangkalanPage() {
     // Export to Excel - Always exports CURRENT MONTH data with proper number/date formats
     const handleExportExcel = useCallback(() => {
         if (allSales.length === 0) {
-            toast.error('Tidak ada data untuk di-export')
+            toast.error('Tidak ada data untuk periode yang dipilih')
             return
         }
 
@@ -532,7 +547,7 @@ export default function LaporanPangkalanPage() {
     // Export to PDF - Always exports CURRENT MONTH data with Rp currency format
     const handleExportPDF = useCallback(() => {
         if (allSales.length === 0) {
-            toast.error('Tidak ada data untuk di-export')
+            toast.error('Tidak ada data untuk periode yang dipilih')
             return
         }
 

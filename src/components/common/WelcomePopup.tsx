@@ -48,7 +48,7 @@ const getPersonalizedMessage = (profile: UserProfile) => {
         case 'OPERATOR':
             return {
                 greeting: `${timeEmoji} ${timeGreeting}, ${firstName}!`,
-                message: 'Yuk, semangat kerja hari ini! Ada pesanan menunggu diproses! 🚀',
+                message: 'Yuk, semangat kerja hari ini! Ada pesanan banyak nih!',
                 emoji: '💪',
                 color: 'from-blue-500 to-cyan-600',
                 tip: 'Quick tip: Gunakan voice order untuk input pesanan lebih cepat!'
@@ -58,10 +58,10 @@ const getPersonalizedMessage = (profile: UserProfile) => {
             const pangkalanName = profile.pangkalans?.name || 'Pangkalan Anda'
             return {
                 greeting: `${timeEmoji} ${timeGreeting}, ${firstName}!`,
-                message: `Dashboard ${pangkalanName} siap! Pantau stok dan catat penjualan! 📊`,
+                message: `Dashboard ${pangkalanName} siap! Pantau stok dan catat penjualan!`,
                 emoji: '🏪',
                 color: 'from-orange-500 to-amber-600',
-                tip: 'Cek laporan harian untuk monitor keuntungan Anda!'
+                tip: 'Cek laporan harian untuk monitor keuntungan kamu!'
             }
 
         default:

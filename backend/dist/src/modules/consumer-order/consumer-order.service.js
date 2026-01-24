@@ -189,7 +189,8 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
         }
     }
     async update(id, pangkalanId, dto) {
-        await this.findOne(id, pangkalanId);
+        this.logger.log(`[UPDATE] Starting - orderId: ${id}, pangkalanId: ${pangkalanId}`);
+        const existing = await this.findOne(id, pangkalanId);
         if (dto.consumer_id) {
             const consumer = await this.prisma.consumers.findFirst({
                 where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
@@ -198,12 +199,12 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
                 throw new common_1.NotFoundException('Pelanggan tidak ditemukan');
             }
         }
-        const existing = await this.prisma.consumer_orders.findUnique({
-            where: { id },
-        });
-        const qty = dto.qty ?? existing.qty;
+        const oldQty = existing.qty;
+        const newQty = dto.qty ?? oldQty;
+        const qtyDelta = newQty - oldQty;
         const pricePerUnit = dto.price_per_unit ?? Number(existing.price_per_unit);
-        const totalAmount = qty * pricePerUnit;
+        const totalAmount = newQty * pricePerUnit;
+        this.logger.log(`[UPDATE] Qty change: ${oldQty} -> ${newQty} (delta: ${qtyDelta})`);
         const order = await this.prisma.consumer_orders.update({
             where: { id },
             data: {
@@ -226,14 +227,89 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
                 },
             },
         });
+        if (qtyDelta !== 0) {
+            try {
+                const lpgType = existing.lpg_type;
+                const existingStock = await this.prisma.pangkalan_stocks.findFirst({
+                    where: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: lpgType,
+                    },
+                });
+                if (existingStock) {
+                    const newStockQty = existingStock.qty - qtyDelta;
+                    await this.prisma.pangkalan_stocks.update({
+                        where: { id: existingStock.id },
+                        data: {
+                            qty: newStockQty < 0 ? 0 : newStockQty,
+                            updated_at: new Date(),
+                        },
+                    });
+                    this.logger.log(`[UPDATE] Stock adjusted: ${existingStock.qty} -> ${newStockQty} for ${lpgType}`);
+                }
+                const movementType = qtyDelta > 0 ? 'OUT' : 'IN';
+                const movementQty = Math.abs(qtyDelta);
+                await this.prisma.pangkalan_stock_movements.create({
+                    data: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: lpgType,
+                        movement_type: movementType,
+                        qty: movementQty,
+                        source: 'ADJUSTMENT',
+                        reference_id: order.id,
+                        note: `Edit penjualan ${existing.code}: qty ${oldQty} -> ${newQty}`,
+                    },
+                });
+                this.logger.log(`[UPDATE] Stock movement recorded: ${movementType} ${movementQty}`);
+            }
+            catch (stockError) {
+                this.logger.error(`[UPDATE] Stock adjustment error: ${stockError.message}`);
+            }
+        }
         return order;
     }
     async remove(id, pangkalanId) {
-        await this.findOne(id, pangkalanId);
+        this.logger.log(`[DELETE] Starting - orderId: ${id}, pangkalanId: ${pangkalanId}`);
+        const order = await this.findOne(id, pangkalanId);
+        try {
+            const lpgType = order.lpg_type;
+            const existingStock = await this.prisma.pangkalan_stocks.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    lpg_type: lpgType,
+                },
+            });
+            if (existingStock) {
+                const newStockQty = existingStock.qty + order.qty;
+                await this.prisma.pangkalan_stocks.update({
+                    where: { id: existingStock.id },
+                    data: {
+                        qty: newStockQty,
+                        updated_at: new Date(),
+                    },
+                });
+                this.logger.log(`[DELETE] Stock returned: ${existingStock.qty} -> ${newStockQty} for ${lpgType}`);
+            }
+            await this.prisma.pangkalan_stock_movements.create({
+                data: {
+                    pangkalan_id: pangkalanId,
+                    lpg_type: lpgType,
+                    movement_type: 'IN',
+                    qty: order.qty,
+                    source: 'RETURN',
+                    reference_id: order.id,
+                    note: `Hapus penjualan ${order.code} - ${order.consumer_name || 'Walk-in'}`,
+                },
+            });
+            this.logger.log(`[DELETE] Stock movement recorded: IN ${order.qty}`);
+        }
+        catch (stockError) {
+            this.logger.error(`[DELETE] Stock return error: ${stockError.message}`);
+        }
         await this.prisma.consumer_orders.delete({
             where: { id },
         });
-        return { message: 'Pesanan berhasil dihapus' };
+        return { message: 'Pesanan berhasil dihapus dan stok dikembalikan' };
     }
     async getStats(pangkalanId, todayOnly = false) {
         const dateFilter = {};

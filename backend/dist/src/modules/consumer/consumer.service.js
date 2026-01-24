@@ -71,6 +71,28 @@ let ConsumerService = class ConsumerService {
         return consumer;
     }
     async create(pangkalanId, dto) {
+        if (dto.nik) {
+            const existingNik = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    nik: dto.nik
+                },
+            });
+            if (existingNik) {
+                throw new common_1.ForbiddenException('NIK sudah terdaftar');
+            }
+        }
+        if (dto.kk) {
+            const existingKk = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    kk: dto.kk
+                },
+            });
+            if (existingKk) {
+                throw new common_1.ForbiddenException('Nomor KK sudah terdaftar');
+            }
+        }
         const consumer = await this.prisma.consumers.create({
             data: {
                 pangkalan_id: pangkalanId,
@@ -87,6 +109,30 @@ let ConsumerService = class ConsumerService {
     }
     async update(id, pangkalanId, dto) {
         await this.findOne(id, pangkalanId);
+        if (dto.nik) {
+            const existingNik = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    nik: dto.nik,
+                    id: { not: id }
+                },
+            });
+            if (existingNik) {
+                throw new common_1.ForbiddenException('NIK sudah terdaftar');
+            }
+        }
+        if (dto.kk) {
+            const existingKk = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    kk: dto.kk,
+                    id: { not: id }
+                },
+            });
+            if (existingKk) {
+                throw new common_1.ForbiddenException('Nomor KK sudah terdaftar');
+            }
+        }
         const consumer = await this.prisma.consumers.update({
             where: { id },
             data: {

@@ -93,6 +93,32 @@ export class ConsumerService {
      * Menyimpan data konsumen baru termasuk consumer_type, nik, dan kk
      */
     async create(pangkalanId: string, dto: CreateConsumerDto) {
+        // Check if NIK is already registered
+        if (dto.nik) {
+            const existingNik = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    nik: dto.nik
+                },
+            });
+            if (existingNik) {
+                throw new ForbiddenException('NIK sudah terdaftar');
+            }
+        }
+
+        // Check if KK is already registered
+        if (dto.kk) {
+            const existingKk = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    kk: dto.kk
+                },
+            });
+            if (existingKk) {
+                throw new ForbiddenException('Nomor KK sudah terdaftar');
+            }
+        }
+
         const consumer = await this.prisma.consumers.create({
             data: {
                 pangkalan_id: pangkalanId,
@@ -116,6 +142,34 @@ export class ConsumerService {
     async update(id: string, pangkalanId: string, dto: UpdateConsumerDto) {
         // Verify ownership first
         await this.findOne(id, pangkalanId);
+
+        // Check if NIK is already registered by another consumer
+        if (dto.nik) {
+            const existingNik = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    nik: dto.nik,
+                    id: { not: id }  // Exclude current consumer
+                },
+            });
+            if (existingNik) {
+                throw new ForbiddenException('NIK sudah terdaftar');
+            }
+        }
+
+        // Check if KK is already registered by another consumer
+        if (dto.kk) {
+            const existingKk = await this.prisma.consumers.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    kk: dto.kk,
+                    id: { not: id }  // Exclude current consumer
+                },
+            });
+            if (existingKk) {
+                throw new ForbiddenException('Nomor KK sudah terdaftar');
+            }
+        }
 
         const consumer = await this.prisma.consumers.update({
             where: { id },

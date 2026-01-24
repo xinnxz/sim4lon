@@ -95,8 +95,11 @@ let AuthService = class AuthService {
         };
     }
     async login(dto) {
-        const user = await this.prisma.users.findUnique({
-            where: { email: dto.email },
+        const user = await this.prisma.users.findFirst({
+            where: {
+                email: dto.email,
+                deleted_at: null,
+            },
             include: {
                 pangkalans: {
                     select: {

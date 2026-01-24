@@ -8,29 +8,29 @@ Pengujian dilakukan untuk menjamin kualitas dan juga mengetahui kelemahan dari s
 
 Pengujian Black Box bertujuan untuk menguji fungsionalitas sistem tanpa memperhatikan struktur internal kode program. Fokus pengujian adalah pada input dan output yang dihasilkan oleh sistem.
 
-Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
+Ada 21 modul dan 192 test case pada metode pengujian black box ini. Diantaranya:
 
 1. Login, 8 test case
 2. Dashboard, 10 test case
 3. Stok LPG, 6 test case
 4. Pesanan, 21 test case
 5. Pembayaran, 11 test case
-6. Pangkalan, 7 test case
-7. Driver, 6 test case
-8. Laporan, 8 test case
-9. Konsumen Subsidi, 10 test case
-10. Penjualan Konsumen, 12 test case
-11. Stok Pangkalan, 8 test case
-12. Produk LPG, 5 test case
-13. Notifikasi, 4 test case
-14. Perencanaan, 6 test case
-15. Penyaluran, 5 test case
-16. Penerimaan, 5 test case
-17. In/Out Agen, 4 test case
-18. Pengeluaran, 6 test case
-19. User Management, 6 test case
-20. Dashboard Pangkalan, 5 test case
-21. Profil & Pengaturan, 5 test case
+6. Pangkalan, 10 test case
+7. Driver, 9 test case
+8. Laporan, 10 test case
+9. Konsumen Subsidi, 12 test case
+10. Penjualan Konsumen, 14 test case
+11. Stok Pangkalan, 10 test case
+12. Produk LPG, 7 test case
+13. Notifikasi, 6 test case
+14. Perencanaan, 8 test case
+15. Penyaluran, 7 test case
+16. Penerimaan, 7 test case
+17. In/Out Agen, 6 test case
+18. Pengeluaran, 8 test case
+19. User Management, 8 test case
+20. Dashboard Pangkalan, 7 test case
+21. Profil & Pengaturan, 8 test case
 
 ### A. Skenario Pengujian
 
@@ -138,49 +138,57 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 #### f. Pengujian Modul Pangkalan
 
-**Tabel 3.6** Pengujian Modul Pangkalan
+**Tabel 3.6** Pengujian Modul Pangkalan (Role: ADMIN/OPERATOR)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Pangkalan sebagai Admin | ![TC](figures/blackbox/pangkalan-tc1.png) | Sistem menampilkan daftar pangkalan dengan pagination | ![Hasil](figures/blackbox/pangkalan-result1.png) | Valid |
-| 2 | Mengklik "Tambah", mengisi data lengkap, dan menyimpan | ![TC](figures/blackbox/pangkalan-tc2.png) | Pangkalan tersimpan dengan kode auto-generate | ![Hasil](figures/blackbox/pangkalan-result2.png) | Valid |
-| 3 | Mengkosongkan field nama dan menyimpan | ![TC](figures/blackbox/pangkalan-tc3.png) | Sistem menampilkan validasi "Nama wajib diisi" | ![Hasil](figures/blackbox/pangkalan-result3.png) | Valid |
-| 4 | Mengklik edit, mengubah data, dan menyimpan | ![TC](figures/blackbox/pangkalan-tc4.png) | Data pangkalan terupdate | ![Hasil](figures/blackbox/pangkalan-result4.png) | Valid |
-| 5 | Mengklik hapus dan konfirmasi | ![TC](figures/blackbox/pangkalan-tc5.png) | Pangkalan terhapus (soft delete) | ![Hasil](figures/blackbox/pangkalan-result5.png) | Valid |
-| 6 | Mengetikkan keyword di search box | ![TC](figures/blackbox/pangkalan-tc6.png) | Hasil filter sesuai keyword | ![Hasil](figures/blackbox/pangkalan-result6.png) | Valid |
-| 7 | Memilih filter status | ![TC](figures/blackbox/pangkalan-tc7.png) | Hanya menampilkan pangkalan sesuai status | ![Hasil](figures/blackbox/pangkalan-result7.png) | Valid |
+| 1 | Membuka menu Pangkalan sebagai Admin | ![TC](figures/blackbox/pangkalan-tc1.png) | Sistem akan menampilkan daftar pangkalan dengan tabel yang berisi kolom Kode, Nama, Region, Status, dan Alokasi Bulanan, serta fitur pagination | ![Hasil](figures/blackbox/pangkalan-result1.png) | Valid |
+| 2 | Mengklik tombol "Tambah Pangkalan" dan mengisi data lengkap | ![TC](figures/blackbox/pangkalan-tc2.png) | Sistem akan menyimpan pangkalan baru dengan kode auto-generate (format: PGK-XXXX) dan menampilkan notifikasi berhasil | ![Hasil](figures/blackbox/pangkalan-result2.png) | Valid |
+| 3 | Mengkosongkan field "Nama" pada form dan menyimpan | ![TC](figures/blackbox/pangkalan-tc3.png) | Sistem akan menampilkan pesan validasi error "Nama pangkalan wajib diisi" | ![Hasil](figures/blackbox/pangkalan-result3.png) | Valid |
+| 4 | Mengklik tombol edit, mengubah data, dan menyimpan | ![TC](figures/blackbox/pangkalan-tc4.png) | Sistem akan mengupdate data pangkalan dan menampilkan notifikasi "Pangkalan berhasil diperbarui" | ![Hasil](figures/blackbox/pangkalan-result4.png) | Valid |
+| 5 | Mengklik tombol hapus dan mengkonfirmasi dialog | ![TC](figures/blackbox/pangkalan-tc5.png) | Sistem akan melakukan soft delete pangkalan (tidak muncul di daftar tapi data tetap ada di database) | ![Hasil](figures/blackbox/pangkalan-result5.png) | Valid |
+| 6 | Mengetikkan keyword pada search box | ![TC](figures/blackbox/pangkalan-tc6.png) | Sistem akan memfilter tabel berdasarkan nama pangkalan atau kode yang mengandung keyword | ![Hasil](figures/blackbox/pangkalan-result6.png) | Valid |
+| 7 | Memilih filter status "Aktif" atau "Tidak Aktif" | ![TC](figures/blackbox/pangkalan-tc7.png) | Sistem hanya akan menampilkan pangkalan sesuai status yang dipilih | ![Hasil](figures/blackbox/pangkalan-result7.png) | Valid |
+| 8 | Mengisi alokasi bulanan dengan nilai 0 atau negatif | ![TC](figures/blackbox/pangkalan-tc8.png) | Sistem akan menampilkan pesan validasi error "Alokasi harus lebih dari 0" | ![Hasil](figures/blackbox/pangkalan-result8.png) | Valid |
+| 9 | Mengklik detail pangkalan untuk melihat informasi lengkap | ![TC](figures/blackbox/pangkalan-tc9.png) | Sistem akan menampilkan halaman detail dengan info pangkalan, statistik pesanan, dan daftar konsumen terdaftar | ![Hasil](figures/blackbox/pangkalan-result9.png) | Valid |
+| 10 | Mengubah status pangkalan menjadi "Tidak Aktif" | ![TC](figures/blackbox/pangkalan-tc10.png) | Pangkalan tidak akan muncul di dropdown form "Buat Pesanan" dan tidak dapat membuat pesanan baru | ![Hasil](figures/blackbox/pangkalan-result10.png) | Valid |
 
 ---
 
 #### g. Pengujian Modul Driver
 
-**Tabel 3.7** Pengujian Modul Driver
+**Tabel 3.7** Pengujian Modul Driver (Role: ADMIN/OPERATOR)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Driver sebagai Admin | ![TC](figures/blackbox/driver-tc1.png) | Sistem menampilkan daftar driver | ![Hasil](figures/blackbox/driver-result1.png) | Valid |
-| 2 | Mengklik "Tambah", mengisi nama, telepon, nomor kendaraan | ![TC](figures/blackbox/driver-tc2.png) | Driver tersimpan dengan kode auto-generate | ![Hasil](figures/blackbox/driver-result2.png) | Valid |
-| 3 | Mengkosongkan field nama | ![TC](figures/blackbox/driver-tc3.png) | Sistem menampilkan validasi error | ![Hasil](figures/blackbox/driver-result3.png) | Valid |
-| 4 | Mengklik edit dan mengubah data | ![TC](figures/blackbox/driver-tc4.png) | Data driver terupdate | ![Hasil](figures/blackbox/driver-result4.png) | Valid |
-| 5 | Mengklik hapus dan konfirmasi | ![TC](figures/blackbox/driver-tc5.png) | Driver terhapus dari sistem | ![Hasil](figures/blackbox/driver-result5.png) | Valid |
-| 6 | Mengubah status menjadi nonaktif | ![TC](figures/blackbox/driver-tc6.png) | Driver tidak muncul di dropdown assign pesanan | ![Hasil](figures/blackbox/driver-result6.png) | Valid |
+| 1 | Membuka menu Driver sebagai Admin | ![TC](figures/blackbox/driver-tc1.png) | Sistem akan menampilkan daftar driver dengan kolom Kode, Nama, Telepon, Kendaraan, Status, dan badge status pengiriman | ![Hasil](figures/blackbox/driver-result1.png) | Valid |
+| 2 | Mengklik "Tambah Driver" dan mengisi nama, telepon, nomor kendaraan | ![TC](figures/blackbox/driver-tc2.png) | Sistem akan menyimpan driver dengan kode auto-generate (format: DRV-XXXX) dan menampilkan notifikasi berhasil | ![Hasil](figures/blackbox/driver-result2.png) | Valid |
+| 3 | Mengkosongkan field "Nama" pada form driver | ![TC](figures/blackbox/driver-tc3.png) | Sistem akan menampilkan pesan validasi error "Nama driver wajib diisi" | ![Hasil](figures/blackbox/driver-result3.png) | Valid |
+| 4 | Mengisi nomor telepon dengan format tidak valid | ![TC](figures/blackbox/driver-tc4.png) | Sistem akan menampilkan pesan validasi error "Format telepon tidak valid" | ![Hasil](figures/blackbox/driver-result4.png) | Valid |
+| 5 | Mengklik tombol edit dan mengubah data driver | ![TC](figures/blackbox/driver-tc5.png) | Sistem akan mengupdate data driver dan menampilkan notifikasi "Driver berhasil diperbarui" | ![Hasil](figures/blackbox/driver-result5.png) | Valid |
+| 6 | Mengklik tombol hapus dan mengkonfirmasi dialog | ![TC](figures/blackbox/driver-tc6.png) | Sistem akan menghapus driver dari sistem (soft delete) | ![Hasil](figures/blackbox/driver-result6.png) | Valid |
+| 7 | Mengubah status driver menjadi "Tidak Aktif" | ![TC](figures/blackbox/driver-tc7.png) | Driver tidak akan muncul di dropdown assign pesanan dan tidak dapat ditugaskan | ![Hasil](figures/blackbox/driver-result7.png) | Valid |
+| 8 | Assign driver yang sudah sedang mengantar pesanan lain | ![TC](figures/blackbox/driver-tc8.png) | Sistem akan menampilkan pesan error "Supir sedang mengantar pesanan [kode]. Pilih supir lain" | ![Hasil](figures/blackbox/driver-result8.png) | Valid |
+| 9 | Melihat riwayat pengiriman driver | ![TC](figures/blackbox/driver-tc9.png) | Sistem akan menampilkan daftar pesanan yang pernah diantar oleh driver tersebut dengan statistik performa | ![Hasil](figures/blackbox/driver-result9.png) | Valid |
 
 ---
 
 #### h. Pengujian Modul Laporan
 
-**Tabel 3.8** Pengujian Modul Laporan
+**Tabel 3.8** Pengujian Modul Laporan (Role: ADMIN/OPERATOR)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Memilih "Laporan Penjualan" dan set date range | ![TC](figures/blackbox/laporan-tc1.png) | Sistem menampilkan data penjualan sesuai periode | ![Hasil](figures/blackbox/laporan-result1.png) | Valid |
-| 2 | Mengklik tombol "Export PDF" | ![TC](figures/blackbox/laporan-tc2.png) | File PDF terdownload dengan header perusahaan | ![Hasil](figures/blackbox/laporan-result2.png) | Valid |
-| 3 | Mengklik tombol "Export Excel" | ![TC](figures/blackbox/laporan-tc3.png) | File XLSX terdownload dengan data lengkap | ![Hasil](figures/blackbox/laporan-result3.png) | Valid |
-| 4 | Mengklik tombol "Export Word" | ![TC](figures/blackbox/laporan-tc4.png) | File DOCX terdownload | ![Hasil](figures/blackbox/laporan-result4.png) | Valid |
-| 5 | Memilih "Laporan Stok" dan set date range | ![TC](figures/blackbox/laporan-tc5.png) | Sistem menampilkan data MASUK/KELUAR per produk | ![Hasil](figures/blackbox/laporan-result5.png) | Valid |
-| 6 | Memilih filter produk LPG 3kg | ![TC](figures/blackbox/laporan-tc6.png) | Hanya menampilkan data produk tersebut | ![Hasil](figures/blackbox/laporan-result6.png) | Valid |
-| 7 | Memilih "Laporan Pangkalan" | ![TC](figures/blackbox/laporan-tc7.png) | Sistem menampilkan performa per pangkalan | ![Hasil](figures/blackbox/laporan-result7.png) | Valid |
-| 8 | Mengklik pangkalan pada laporan | ![TC](figures/blackbox/laporan-tc8.png) | Sistem menampilkan daftar konsumen subsidi dengan NIK/KK | ![Hasil](figures/blackbox/laporan-result8.png) | Valid |
+| 1 | Memilih tab "Laporan Penjualan" dan mengatur date range | ![TC](figures/blackbox/laporan-tc1.png) | Sistem akan menampilkan data penjualan sesuai periode dengan breakdown per produk LPG dan total revenue | ![Hasil](figures/blackbox/laporan-result1.png) | Valid |
+| 2 | Mengklik tombol "Export PDF" pada laporan | ![TC](figures/blackbox/laporan-tc2.png) | Sistem akan generate dan download file PDF dengan header perusahaan dan format laporan profesional | ![Hasil](figures/blackbox/laporan-result2.png) | Valid |
+| 3 | Mengklik tombol "Export Excel" pada laporan | ![TC](figures/blackbox/laporan-tc3.png) | Sistem akan generate dan download file XLSX dengan data lengkap dan format tabel yang rapi | ![Hasil](figures/blackbox/laporan-result3.png) | Valid |
+| 4 | Mengklik tombol "Export Word" pada laporan | ![TC](figures/blackbox/laporan-tc4.png) | Sistem akan generate dan download file DOCX dengan format dokumen resmi | ![Hasil](figures/blackbox/laporan-result4.png) | Valid |
+| 5 | Memilih tab "Laporan Stok" dan mengatur date range | ![TC](figures/blackbox/laporan-tc5.png) | Sistem akan menampilkan pergerakan stok MASUK dan KELUAR per produk LPG dengan saldo akhir | ![Hasil](figures/blackbox/laporan-result5.png) | Valid |
+| 6 | Memilih filter produk tertentu (misal: LPG 3kg) | ![TC](figures/blackbox/laporan-tc6.png) | Sistem hanya akan menampilkan data untuk produk yang dipilih | ![Hasil](figures/blackbox/laporan-result6.png) | Valid |
+| 7 | Memilih tab "Laporan Pangkalan" untuk melihat performa | ![TC](figures/blackbox/laporan-tc7.png) | Sistem akan menampilkan ranking pangkalan berdasarkan volume pesanan, alokasi terpakai, dan status pembayaran | ![Hasil](figures/blackbox/laporan-result7.png) | Valid |
+| 8 | Mengklik nama pangkalan pada laporan untuk detail | ![TC](figures/blackbox/laporan-tc8.png) | Sistem akan menampilkan daftar konsumen subsidi dengan NIK/KK dan riwayat penjualan | ![Hasil](figures/blackbox/laporan-result8.png) | Valid |
+| 9 | Memilih date range dengan tanggal akhir sebelum tanggal awal | ![TC](figures/blackbox/laporan-tc9.png) | Sistem akan menampilkan pesan validasi error "Tanggal akhir harus setelah tanggal awal" | ![Hasil](figures/blackbox/laporan-result9.png) | Valid |
+| 10 | Menggenerate laporan untuk periode tanpa data | ![TC](figures/blackbox/laporan-tc10.png) | Sistem akan menampilkan pesan "Tidak ada data untuk periode yang dipilih" | ![Hasil](figures/blackbox/laporan-result10.png) | Valid |
 
 ---
 
@@ -190,16 +198,18 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Login sebagai Pangkalan dan membuka menu Konsumen | ![TC](figures/blackbox/konsumen-tc1.png) | Sistem hanya menampilkan konsumen milik pangkalan tersebut | ![Hasil](figures/blackbox/konsumen-result1.png) | Valid |
-| 2 | Mengisi data: Nama, NIK 16 digit, KK, Alamat, Type: RUMAH_TANGGA | ![TC](figures/blackbox/konsumen-tc2.png) | Konsumen tersimpan dengan data lengkap | ![Hasil](figures/blackbox/konsumen-result2.png) | Valid |
-| 3 | Mengisi data dengan type WARUNG | ![TC](figures/blackbox/konsumen-tc3.png) | Konsumen tersimpan sebagai warung | ![Hasil](figures/blackbox/konsumen-result3.png) | Valid |
-| 4 | Mengkosongkan field NIK | ![TC](figures/blackbox/konsumen-tc4.png) | Sistem menampilkan validasi "NIK wajib untuk subsidi" | ![Hasil](figures/blackbox/konsumen-result4.png) | Valid |
-| 5 | Mengisi NIK dengan kurang dari 16 digit | ![TC](figures/blackbox/konsumen-tc5.png) | Sistem menampilkan validasi "NIK harus 16 digit" | ![Hasil](figures/blackbox/konsumen-result5.png) | Valid |
-| 6 | Mengisi NIK yang sudah terdaftar | ![TC](figures/blackbox/konsumen-tc6.png) | Sistem menampilkan error "NIK sudah terdaftar" | ![Hasil](figures/blackbox/konsumen-result6.png) | Valid |
-| 7 | Mengklik edit dan mengubah alamat | ![TC](figures/blackbox/konsumen-tc7.png) | Data konsumen terupdate | ![Hasil](figures/blackbox/konsumen-result7.png) | Valid |
-| 8 | Mengklik hapus dan konfirmasi | ![TC](figures/blackbox/konsumen-tc8.png) | Konsumen terhapus dari sistem | ![Hasil](figures/blackbox/konsumen-result8.png) | Valid |
-| 9 | Mengetikkan nama di search box | ![TC](figures/blackbox/konsumen-tc9.png) | Hasil filter sesuai keyword | ![Hasil](figures/blackbox/konsumen-result9.png) | Valid |
-| 10 | Melihat dashboard konsumen | ![TC](figures/blackbox/konsumen-tc10.png) | Sistem menampilkan total dan breakdown by type | ![Hasil](figures/blackbox/konsumen-result10.png) | Valid |
+| 1 | Login sebagai Pangkalan dan membuka menu Konsumen | ![TC](figures/blackbox/konsumen-tc1.png) | Sistem hanya akan menampilkan konsumen yang terdaftar pada pangkalan tersebut (data isolation per tenant) | ![Hasil](figures/blackbox/konsumen-result1.png) | Valid |
+| 2 | Mengisi data konsumen lengkap: Nama, NIK 16 digit, No. KK, Alamat, Type: RUMAH_TANGGA | ![TC](figures/blackbox/konsumen-tc2.png) | Sistem akan menyimpan konsumen dengan status aktif dan menampilkan notifikasi berhasil | ![Hasil](figures/blackbox/konsumen-result2.png) | Valid |
+| 3 | Mengisi data konsumen dengan Type: WARUNG | ![TC](figures/blackbox/konsumen-tc3.png) | Sistem akan menyimpan konsumen sebagai tipe warung dengan badge yang berbeda | ![Hasil](figures/blackbox/konsumen-result3.png) | Valid |
+| 4 | Mengkosongkan field NIK pada form konsumen subsidi | ![TC](figures/blackbox/konsumen-tc4.png) | Sistem akan menampilkan pesan validasi error "NIK wajib diisi untuk konsumen subsidi" | ![Hasil](figures/blackbox/konsumen-result4.png) | Valid |
+| 5 | Mengisi NIK dengan kurang dari 16 digit | ![TC](figures/blackbox/konsumen-tc5.png) | Sistem akan menampilkan pesan validasi error "NIK harus terdiri dari 16 digit" | ![Hasil](figures/blackbox/konsumen-result5.png) | Valid |
+| 6 | Mengisi NIK yang sudah terdaftar di sistem | ![TC](figures/blackbox/konsumen-tc6.png) | Sistem akan menampilkan pesan error "NIK sudah terdaftar di pangkalan lain" | ![Hasil](figures/blackbox/konsumen-result6.png) | Valid |
+| 7 | Mengklik tombol edit dan mengubah alamat konsumen | ![TC](figures/blackbox/konsumen-tc7.png) | Sistem akan mengupdate data konsumen dan menampilkan notifikasi "Konsumen berhasil diperbarui" | ![Hasil](figures/blackbox/konsumen-result7.png) | Valid |
+| 8 | Mengklik tombol hapus dan mengkonfirmasi dialog | ![TC](figures/blackbox/konsumen-tc8.png) | Sistem akan menghapus konsumen dari sistem (soft delete) | ![Hasil](figures/blackbox/konsumen-result8.png) | Valid |
+| 9 | Mengetikkan nama atau NIK pada search box | ![TC](figures/blackbox/konsumen-tc9.png) | Sistem akan memfilter tabel berdasarkan nama atau NIK yang mengandung keyword | ![Hasil](figures/blackbox/konsumen-result9.png) | Valid |
+| 10 | Melihat statistik konsumen pada dashboard | ![TC](figures/blackbox/konsumen-tc10.png) | Sistem akan menampilkan total konsumen, breakdown by type (Rumah Tangga/Warung), dan grafik distribusi | ![Hasil](figures/blackbox/konsumen-result10.png) | Valid |
+| 11 | Mengisi NIK dengan karakter non-numerik | ![TC](figures/blackbox/konsumen-tc11.png) | Sistem akan menampilkan pesan validasi error "NIK hanya boleh berisi angka" | ![Hasil](figures/blackbox/konsumen-result11.png) | Valid |
+| 12 | Mengklik konsumen untuk melihat riwayat pembelian | ![TC](figures/blackbox/konsumen-tc12.png) | Sistem akan menampilkan daftar transaksi pembelian LPG konsumen tersebut dengan total volume | ![Hasil](figures/blackbox/konsumen-result12.png) | Valid |
 
 ---
 
@@ -209,18 +219,20 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Mengklik "Catat Penjualan", memilih konsumen, tipe LPG, qty, dan menyimpan | ![TC](figures/blackbox/penjualan-tc1.png) | Penjualan tercatat dan stok berkurang otomatis | ![Hasil](figures/blackbox/penjualan-result1.png) | Valid |
-| 2 | Memilih "Walk-in" dan mengisi nama pembeli umum | ![TC](figures/blackbox/penjualan-tc2.png) | Penjualan tercatat tanpa referensi konsumen | ![Hasil](figures/blackbox/penjualan-result2.png) | Valid |
-| 3 | Mengisi qty lebih dari stok tersedia | ![TC](figures/blackbox/penjualan-tc3.png) | Sistem menampilkan error "Stok tidak mencukupi" | ![Hasil](figures/blackbox/penjualan-result3.png) | Valid |
-| 4 | Mengisi qty dengan nilai 0 | ![TC](figures/blackbox/penjualan-tc4.png) | Sistem menampilkan validasi "Qty minimal 1" | ![Hasil](figures/blackbox/penjualan-result4.png) | Valid |
-| 5 | Membuka menu Penjualan | ![TC](figures/blackbox/penjualan-tc5.png) | Sistem menampilkan daftar penjualan dengan pagination | ![Hasil](figures/blackbox/penjualan-result5.png) | Valid |
-| 6 | Memilih date range | ![TC](figures/blackbox/penjualan-tc6.png) | Hasil filter sesuai periode | ![Hasil](figures/blackbox/penjualan-result6.png) | Valid |
-| 7 | Memilih konsumen tertentu | ![TC](figures/blackbox/penjualan-tc7.png) | Hanya menampilkan penjualan ke konsumen tersebut | ![Hasil](figures/blackbox/penjualan-result7.png) | Valid |
-| 8 | Mengklik edit dan mengubah qty | ![TC](figures/blackbox/penjualan-tc8.png) | Data terupdate dan stok adjusted | ![Hasil](figures/blackbox/penjualan-result8.png) | Valid |
-| 9 | Mengklik hapus dan konfirmasi | ![TC](figures/blackbox/penjualan-tc9.png) | Penjualan terhapus dan stok restored | ![Hasil](figures/blackbox/penjualan-result9.png) | Valid |
-| 10 | Melihat dashboard penjualan | ![TC](figures/blackbox/penjualan-tc10.png) | Sistem menampilkan total penjualan hari ini | ![Hasil](figures/blackbox/penjualan-result10.png) | Valid |
-| 11 | Mengklik icon microphone dan mengucapkan perintah | ![TC](figures/blackbox/penjualan-tc11.png) | Sistem mengenali dan menampilkan konfirmasi | ![Hasil](figures/blackbox/penjualan-result11.png) | Valid |
-| 12 | Mengucapkan perintah tidak jelas | ![TC](figures/blackbox/penjualan-tc12.png) | Sistem menampilkan pesan "Tidak dikenali, coba lagi" | ![Hasil](figures/blackbox/penjualan-result12.png) | Valid |
+| 1 | Mengklik "Catat Penjualan", memilih konsumen, tipe LPG, qty, dan menyimpan | ![TC](figures/blackbox/penjualan-tc1.png) | Sistem akan menyimpan transaksi penjualan dan secara otomatis mengurangi stok pangkalan | ![Hasil](figures/blackbox/penjualan-result1.png) | Valid |
+| 2 | Memilih "Walk-in" dan mengisi nama pembeli umum | ![TC](figures/blackbox/penjualan-tc2.png) | Sistem akan menyimpan penjualan tanpa referensi konsumen terdaftar (non-subsidi) | ![Hasil](figures/blackbox/penjualan-result2.png) | Valid |
+| 3 | Mengisi qty lebih dari stok yang tersedia | ![TC](figures/blackbox/penjualan-tc3.png) | Sistem akan menampilkan pesan error "Stok [produk] tidak mencukupi! Tersedia: [jumlah]" | ![Hasil](figures/blackbox/penjualan-result3.png) | Valid |
+| 4 | Mengisi qty dengan nilai 0 atau negatif | ![TC](figures/blackbox/penjualan-tc4.png) | Sistem akan menampilkan pesan validasi error "Jumlah minimal 1 tabung" | ![Hasil](figures/blackbox/penjualan-result4.png) | Valid |
+| 5 | Membuka menu "Riwayat Penjualan" | ![TC](figures/blackbox/penjualan-tc5.png) | Sistem akan menampilkan daftar penjualan dengan pagination dan kolom tanggal, konsumen, item, qty, total | ![Hasil](figures/blackbox/penjualan-result5.png) | Valid |
+| 6 | Memilih date range pada filter tanggal | ![TC](figures/blackbox/penjualan-tc6.png) | Sistem hanya akan menampilkan penjualan dalam periode yang dipilih | ![Hasil](figures/blackbox/penjualan-result6.png) | Valid |
+| 7 | Memilih konsumen tertentu pada filter dropdown | ![TC](figures/blackbox/penjualan-tc7.png) | Sistem hanya akan menampilkan penjualan ke konsumen tersebut | ![Hasil](figures/blackbox/penjualan-result7.png) | Valid |
+| 8 | Mengklik tombol edit dan mengubah qty penjualan | ![TC](figures/blackbox/penjualan-tc8.png) | Sistem akan mengupdate data dan melakukan adjustment stok otomatis | ![Hasil](figures/blackbox/penjualan-result8.png) | Valid |
+| 9 | Mengklik tombol hapus dan mengkonfirmasi dialog | ![TC](figures/blackbox/penjualan-tc9.png) | Sistem akan menghapus penjualan dan mengembalikan stok yang terjual | ![Hasil](figures/blackbox/penjualan-result9.png) | Valid |
+| 10 | Melihat statistik penjualan pada dashboard | ![TC](figures/blackbox/penjualan-tc10.png) | Sistem akan menampilkan total penjualan hari ini, chart trend, dan breakdown per produk | ![Hasil](figures/blackbox/penjualan-result10.png) | Valid |
+| 11 | Mengklik icon microphone dan mengucapkan perintah voice | ![TC](figures/blackbox/penjualan-tc11.png) | Sistem akan mengenali perintah suara dan menampilkan konfirmasi transaksi sebelum menyimpan | ![Hasil](figures/blackbox/penjualan-result11.png) | Valid |
+| 12 | Mengucapkan perintah voice yang tidak jelas atau tidak dikenali | ![TC](figures/blackbox/penjualan-tc12.png) | Sistem akan menampilkan pesan "Perintah tidak dikenali, silakan coba lagi" | ![Hasil](figures/blackbox/penjualan-result12.png) | Valid |
+| 13 | Catat penjualan LPG 3kg subsidi ke konsumen yang sudah mencapai kuota bulanan | ![TC](figures/blackbox/penjualan-tc13.png) | Sistem akan menampilkan pesan warning "Konsumen sudah mencapai kuota bulanan" | ![Hasil](figures/blackbox/penjualan-result13.png) | Valid |
+| 14 | Menjual LPG 3kg subsidi ke Walk-in (non-registered) | ![TC](figures/blackbox/penjualan-tc14.png) | Sistem akan menampilkan pesan warning bahwa LPG subsidi hanya untuk konsumen terdaftar | ![Hasil](figures/blackbox/penjualan-result14.png) | Valid |
 
 ---
 
@@ -230,14 +242,16 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Login sebagai Pangkalan dan membuka menu Stok | ![TC](figures/blackbox/stok-pangkalan-tc1.png) | Sistem menampilkan stok per tipe LPG untuk pangkalan tersebut | ![Hasil](figures/blackbox/stok-pangkalan-result1.png) | Valid |
-| 2 | Mengklik "Terima Stok" dan mengisi data penerimaan | ![TC](figures/blackbox/stok-pangkalan-tc2.png) | Stok bertambah dan movement tercatat | ![Hasil](figures/blackbox/stok-pangkalan-result2.png) | Valid |
-| 3 | Mengklik "Stock Opname" dan mengisi qty aktual | ![TC](figures/blackbox/stok-pangkalan-tc3.png) | Adjustment tercatat dengan selisih yang benar | ![Hasil](figures/blackbox/stok-pangkalan-result3.png) | Valid |
-| 4 | Mengubah warning dan critical level | ![TC](figures/blackbox/stok-pangkalan-tc4.png) | Alert levels terupdate | ![Hasil](figures/blackbox/stok-pangkalan-result4.png) | Valid |
-| 5 | Membuka tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc5.png) | Sistem menampilkan daftar pergerakan stok dengan pagination | ![Hasil](figures/blackbox/stok-pangkalan-result5.png) | Valid |
-| 6 | Memilih filter LPG 3kg pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc6.png) | Sistem hanya menampilkan pergerakan stok LPG 3kg | ![Hasil](figures/blackbox/stok-pangkalan-result6.png) | Valid |
-| 7 | Memilih filter tipe MASUK pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc7.png) | Sistem hanya menampilkan stok masuk | ![Hasil](figures/blackbox/stok-pangkalan-result7.png) | Valid |
-| 8 | Memilih filter tipe KELUAR pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc8.png) | Sistem hanya menampilkan stok keluar | ![Hasil](figures/blackbox/stok-pangkalan-result8.png) | Valid |
+| 1 | Login sebagai Pangkalan dan membuka menu Stok | ![TC](figures/blackbox/stok-pangkalan-tc1.png) | Sistem akan menampilkan card stok per tipe LPG dengan visualisasi level (normal/warning/critical) | ![Hasil](figures/blackbox/stok-pangkalan-result1.png) | Valid |
+| 2 | Mengklik "Terima Stok" dan mengisi data penerimaan | ![TC](figures/blackbox/stok-pangkalan-tc2.png) | Sistem akan menambah stok dan mencatat movement sebagai transaksi MASUK dengan timestamp | ![Hasil](figures/blackbox/stok-pangkalan-result2.png) | Valid |
+| 3 | Mengklik "Stock Opname" dan mengisi qty aktual | ![TC](figures/blackbox/stok-pangkalan-tc3.png) | Sistem akan mencatat adjustment stock dengan perhitungan selisih otomatis (surplus/defisit) | ![Hasil](figures/blackbox/stok-pangkalan-result3.png) | Valid |
+| 4 | Mengubah warning level dan critical level pada pengaturan | ![TC](figures/blackbox/stok-pangkalan-tc4.png) | Sistem akan memperbarui threshold alert dan menampilkan notifikasi sesuai level baru | ![Hasil](figures/blackbox/stok-pangkalan-result4.png) | Valid |
+| 5 | Membuka tab "Riwayat" untuk melihat pergerakan stok | ![TC](figures/blackbox/stok-pangkalan-tc5.png) | Sistem akan menampilkan daftar history dengan kolom tanggal, tipe, qty, keterangan, dan saldo | ![Hasil](figures/blackbox/stok-pangkalan-result5.png) | Valid |
+| 6 | Memilih filter produk LPG 3kg pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc6.png) | Sistem hanya akan menampilkan pergerakan stok untuk produk LPG 3kg | ![Hasil](figures/blackbox/stok-pangkalan-result6.png) | Valid |
+| 7 | Memilih filter tipe "MASUK" pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc7.png) | Sistem hanya akan menampilkan transaksi stok masuk | ![Hasil](figures/blackbox/stok-pangkalan-result7.png) | Valid |
+| 8 | Memilih filter tipe "KELUAR" pada tab Riwayat | ![TC](figures/blackbox/stok-pangkalan-tc8.png) | Sistem hanya akan menampilkan transaksi stok keluar | ![Hasil](figures/blackbox/stok-pangkalan-result8.png) | Valid |
+| 9 | Stok mencapai level warning (kuning) | ![TC](figures/blackbox/stok-pangkalan-tc9.png) | Sistem akan menampilkan card stok dengan indikator kuning dan badge "Stok Menipis" | ![Hasil](figures/blackbox/stok-pangkalan-result9.png) | Valid |
+| 10 | Stok mencapai level critical (merah) | ![TC](figures/blackbox/stok-pangkalan-tc10.png) | Sistem akan menampilkan card stok dengan indikator merah, badge "Stok Kritis", dan push notification | ![Hasil](figures/blackbox/stok-pangkalan-result10.png) | Valid |
 
 ---
 
@@ -247,24 +261,28 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Produk LPG | ![TC](figures/blackbox/produk-tc1.png) | Sistem menampilkan semua produk LPG | ![Hasil](figures/blackbox/produk-result1.png) | Valid |
-| 2 | Mengklik "Tambah", mengisi nama, ukuran, kategori, harga | ![TC](figures/blackbox/produk-tc2.png) | Produk tersimpan | ![Hasil](figures/blackbox/produk-result2.png) | Valid |
-| 3 | Mengklik edit dan mengubah harga | ![TC](figures/blackbox/produk-tc3.png) | Harga produk terupdate | ![Hasil](figures/blackbox/produk-result3.png) | Valid |
-| 4 | Mengubah status menjadi inactive | ![TC](figures/blackbox/produk-tc4.png) | Produk tidak muncul di form penjualan | ![Hasil](figures/blackbox/produk-result4.png) | Valid |
-| 5 | Membuka endpoint /with-stock | ![TC](figures/blackbox/produk-tc5.png) | Sistem menampilkan produk dengan qty stok | ![Hasil](figures/blackbox/produk-result5.png) | Valid |
+| 1 | Membuka menu Produk LPG sebagai Admin | ![TC](figures/blackbox/produk-tc1.png) | Sistem akan menampilkan daftar semua produk LPG dengan gambar, nama, ukuran, kategori, harga, dan status | ![Hasil](figures/blackbox/produk-result1.png) | Valid |
+| 2 | Mengklik "Tambah Produk" dan mengisi nama, ukuran, kategori (SUBSIDI/NON_SUBSIDI), harga | ![TC](figures/blackbox/produk-tc2.png) | Sistem akan menyimpan produk baru dan menampilkan notifikasi berhasil | ![Hasil](figures/blackbox/produk-result2.png) | Valid |
+| 3 | Mengklik tombol edit dan mengubah harga produk | ![TC](figures/blackbox/produk-tc3.png) | Sistem akan mengupdate harga produk dan harga baru akan berlaku untuk transaksi selanjutnya | ![Hasil](figures/blackbox/produk-result3.png) | Valid |
+| 4 | Mengubah status produk menjadi "Tidak Aktif" | ![TC](figures/blackbox/produk-tc4.png) | Produk tidak akan muncul di form penjualan dan form buat pesanan | ![Hasil](figures/blackbox/produk-result4.png) | Valid |
+| 5 | Mengakses endpoint /lpg-products/with-stock | ![TC](figures/blackbox/produk-tc5.png) | Sistem akan menampilkan daftar produk dengan informasi qty stok saat ini dari stock_histories | ![Hasil](figures/blackbox/produk-result5.png) | Valid |
+| 6 | Upload gambar produk dengan format tidak valid | ![TC](figures/blackbox/produk-tc6.png) | Sistem akan menampilkan pesan error "Format gambar harus JPG, PNG, atau WebP" | ![Hasil](figures/blackbox/produk-result6.png) | Valid |
+| 7 | Mengisi harga dengan nilai 0 atau negatif | ![TC](figures/blackbox/produk-tc7.png) | Sistem akan menampilkan pesan validasi error "Harga harus lebih dari 0" | ![Hasil](figures/blackbox/produk-result7.png) | Valid |
 
 ---
 
 #### m. Pengujian Modul Notifikasi
 
-**Tabel 3.13** Pengujian Modul Notifikasi
+**Tabel 3.13** Pengujian Modul Notifikasi (Role: ALL)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Mengklik icon bell pada header | ![TC](figures/blackbox/notifikasi-tc1.png) | Sistem menampilkan notifikasi terbaru | ![Hasil](figures/blackbox/notifikasi-result1.png) | Valid |
-| 2 | Terdapat notifikasi yang belum dibaca | ![TC](figures/blackbox/notifikasi-tc2.png) | Badge menampilkan jumlah notifikasi unread | ![Hasil](figures/blackbox/notifikasi-result2.png) | Valid |
-| 3 | Membuka halaman notifikasi dan scroll | ![TC](figures/blackbox/notifikasi-tc3.png) | Sistem load notifikasi berikutnya | ![Hasil](figures/blackbox/notifikasi-result3.png) | Valid |
-| 4 | Memilih filter type tertentu | ![TC](figures/blackbox/notifikasi-tc4.png) | Hanya menampilkan notifikasi sesuai type | ![Hasil](figures/blackbox/notifikasi-result4.png) | Valid |
+| 1 | Mengklik icon bell pada header aplikasi | ![TC](figures/blackbox/notifikasi-tc1.png) | Sistem akan menampilkan dropdown notifikasi terbaru dengan preview singkat dan timestamp | ![Hasil](figures/blackbox/notifikasi-result1.png) | Valid |
+| 2 | Terdapat notifikasi yang belum dibaca | ![TC](figures/blackbox/notifikasi-tc2.png) | Sistem akan menampilkan badge merah dengan jumlah notifikasi unread pada icon bell | ![Hasil](figures/blackbox/notifikasi-result2.png) | Valid |
+| 3 | Mengklik "Lihat Semua" dan scroll pada halaman notifikasi | ![TC](figures/blackbox/notifikasi-tc3.png) | Sistem akan melakukan infinite loading untuk memuat notifikasi berikutnya | ![Hasil](figures/blackbox/notifikasi-result3.png) | Valid |
+| 4 | Memilih filter tipe notifikasi (ORDER/STOCK/PAYMENT) | ![TC](figures/blackbox/notifikasi-tc4.png) | Sistem hanya akan menampilkan notifikasi sesuai tipe yang dipilih | ![Hasil](figures/blackbox/notifikasi-result4.png) | Valid |
+| 5 | Mengklik notifikasi untuk mark as read dan navigasi | ![TC](figures/blackbox/notifikasi-tc5.png) | Sistem akan menandai notifikasi sebagai read dan redirect ke halaman terkait | ![Hasil](figures/blackbox/notifikasi-result5.png) | Valid |
+| 6 | Mengklik "Tandai Semua Dibaca" | ![TC](figures/blackbox/notifikasi-tc6.png) | Sistem akan mengubah semua notifikasi menjadi read dan badge count menjadi 0 | ![Hasil](figures/blackbox/notifikasi-result6.png) | Valid |
 
 ---
 
@@ -274,12 +292,14 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Perencanaan | ![TC](figures/blackbox/perencanaan-tc1.png) | Sistem menampilkan daftar rencana distribusi bulanan | ![Hasil](figures/blackbox/perencanaan-result1.png) | Valid |
-| 2 | Mengklik "Input Perencanaan" dan mengisi target per pangkalan | ![TC](figures/blackbox/perencanaan-tc2.png) | Data perencanaan tersimpan | ![Hasil](figures/blackbox/perencanaan-result2.png) | Valid |
-| 3 | Mengklik "Generate Otomatis" untuk menghitung target berdasarkan histori | ![TC](figures/blackbox/perencanaan-tc3.png) | Sistem menghitung dan menampilkan rekomendasi target | ![Hasil](figures/blackbox/perencanaan-result3.png) | Valid |
-| 4 | Mengklik "Download PDF" pada halaman rekapitulasi | ![TC](figures/blackbox/perencanaan-tc4.png) | File PDF dengan format Pertamina terdownload | ![Hasil](figures/blackbox/perencanaan-result4.png) | Valid |
-| 5 | Mengklik "Download Excel" pada halaman rekapitulasi | ![TC](figures/blackbox/perencanaan-tc5.png) | File XLSX terdownload dengan data lengkap | ![Hasil](figures/blackbox/perencanaan-result5.png) | Valid |
-| 6 | Memilih filter bulan tertentu | ![TC](figures/blackbox/perencanaan-tc6.png) | Sistem menampilkan data sesuai bulan yang dipilih | ![Hasil](figures/blackbox/perencanaan-result6.png) | Valid |
+| 1 | Membuka menu Perencanaan sebagai Admin | ![TC](figures/blackbox/perencanaan-tc1.png) | Sistem akan menampilkan daftar rencana distribusi bulanan dengan target per pangkalan dan realisasi | ![Hasil](figures/blackbox/perencanaan-result1.png) | Valid |
+| 2 | Mengklik "Input Perencanaan" dan mengisi target distribusi per pangkalan | ![TC](figures/blackbox/perencanaan-tc2.png) | Sistem akan menyimpan data perencanaan dan menampilkan notifikasi berhasil | ![Hasil](figures/blackbox/perencanaan-result2.png) | Valid |
+| 3 | Mengklik "Generate Otomatis" untuk auto-calculate berdasarkan histori | ![TC](figures/blackbox/perencanaan-tc3.png) | Sistem akan menghitung target berdasarkan rata-rata penyaluran 3 bulan terakhir dan menampilkan rekomendasi | ![Hasil](figures/blackbox/perencanaan-result3.png) | Valid |
+| 4 | Mengklik "Download PDF" pada halaman rekapitulasi | ![TC](figures/blackbox/perencanaan-tc4.png) | Sistem akan generate file PDF dengan format Pertamina dan auto-download | ![Hasil](figures/blackbox/perencanaan-result4.png) | Valid |
+| 5 | Mengklik "Download Excel" pada halaman rekapitulasi | ![TC](figures/blackbox/perencanaan-tc5.png) | Sistem akan generate file XLSX dengan data lengkap per pangkalan | ![Hasil](figures/blackbox/perencanaan-result5.png) | Valid |
+| 6 | Memilih filter bulan tertentu pada dropdown | ![TC](figures/blackbox/perencanaan-tc6.png) | Sistem akan menampilkan data perencanaan sesuai bulan yang dipilih | ![Hasil](figures/blackbox/perencanaan-result6.png) | Valid |
+| 7 | Mengisi target dengan nilai 0 atau negatif | ![TC](figures/blackbox/perencanaan-tc7.png) | Sistem akan menampilkan pesan validasi error "Target harus lebih dari 0" | ![Hasil](figures/blackbox/perencanaan-result7.png) | Valid |
+| 8 | Melihat perbandingan target vs realisasi | ![TC](figures/blackbox/perencanaan-tc8.png) | Sistem akan menampilkan chart atau tabel dengan persentase pencapaian per pangkalan | ![Hasil](figures/blackbox/perencanaan-result8.png) | Valid |
 
 ---
 
@@ -289,11 +309,13 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Penyaluran | ![TC](figures/blackbox/penyaluran-tc1.png) | Sistem menampilkan daftar penyaluran harian | ![Hasil](figures/blackbox/penyaluran-result1.png) | Valid |
-| 2 | Mengklik "Penyaluran Manual" untuk input fakultatif | ![TC](figures/blackbox/penyaluran-tc2.png) | Form penyaluran fakultatif tampil | ![Hasil](figures/blackbox/penyaluran-result2.png) | Valid |
-| 3 | Mengisi form penyaluran fakultatif dengan data valid | ![TC](figures/blackbox/penyaluran-tc3.png) | Data penyaluran tersimpan dan stok berkurang | ![Hasil](figures/blackbox/penyaluran-result3.png) | Valid |
-| 4 | Mengklik "Download PDF" pada halaman penyaluran | ![TC](figures/blackbox/penyaluran-tc4.png) | File PDF dengan format Pertamina terdownload | ![Hasil](figures/blackbox/penyaluran-result4.png) | Valid |
-| 5 | Mengklik "Download Excel" pada halaman penyaluran | ![TC](figures/blackbox/penyaluran-tc5.png) | File XLSX terdownload dengan data lengkap | ![Hasil](figures/blackbox/penyaluran-result5.png) | Valid |
+| 1 | Membuka menu Penyaluran sebagai Admin | ![TC](figures/blackbox/penyaluran-tc1.png) | Sistem akan menampilkan daftar penyaluran harian dengan kolom tanggal, pangkalan, jumlah, dan status | ![Hasil](figures/blackbox/penyaluran-result1.png) | Valid |
+| 2 | Mengklik "Penyaluran Manual" untuk input penyaluran fakultatif | ![TC](figures/blackbox/penyaluran-tc2.png) | Sistem akan menampilkan form dengan dropdown pangkalan, produk, dan field jumlah | ![Hasil](figures/blackbox/penyaluran-result2.png) | Valid |
+| 3 | Mengisi form penyaluran fakultatif dengan data valid | ![TC](figures/blackbox/penyaluran-tc3.png) | Sistem akan menyimpan penyaluran dan secara otomatis mengurangi stok agen | ![Hasil](figures/blackbox/penyaluran-result3.png) | Valid |
+| 4 | Mengklik "Download PDF" pada halaman penyaluran | ![TC](figures/blackbox/penyaluran-tc4.png) | Sistem akan generate file PDF sesuai format Pertamina (DO/SPPBE) | ![Hasil](figures/blackbox/penyaluran-result4.png) | Valid |
+| 5 | Mengklik "Download Excel" pada halaman penyaluran | ![TC](figures/blackbox/penyaluran-tc5.png) | Sistem akan generate file XLSX dengan data lengkap termasuk timestamp | ![Hasil](figures/blackbox/penyaluran-result5.png) | Valid |
+| 6 | Mengisi jumlah penyaluran melebihi stok tersedia | ![TC](figures/blackbox/penyaluran-tc6.png) | Sistem akan menampilkan pesan error "Stok tidak mencukupi untuk penyaluran ini" | ![Hasil](figures/blackbox/penyaluran-result6.png) | Valid |
+| 7 | Mengisi jumlah penyaluran melebihi alokasi pangkalan | ![TC](figures/blackbox/penyaluran-tc7.png) | Sistem akan menampilkan warning "Melebihi alokasi bulanan pangkalan" | ![Hasil](figures/blackbox/penyaluran-result7.png) | Valid |
 
 ---
 
@@ -303,11 +325,13 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Penerimaan | ![TC](figures/blackbox/penerimaan-tc1.png) | Sistem menampilkan daftar penerimaan dari SPBE | ![Hasil](figures/blackbox/penerimaan-result1.png) | Valid |
-| 2 | Mengklik "Catat Penerimaan" dan mengisi nomor DO, jenis LPG, jumlah | ![TC](figures/blackbox/penerimaan-tc2.png) | Data penerimaan tersimpan dan stok bertambah | ![Hasil](figures/blackbox/penerimaan-result2.png) | Valid |
-| 3 | Mengisi jumlah 0 atau negatif pada form penerimaan | ![TC](figures/blackbox/penerimaan-tc3.png) | Sistem menampilkan validasi error | ![Hasil](figures/blackbox/penerimaan-result3.png) | Valid |
-| 4 | Mengklik "Download PDF" pada halaman penerimaan | ![TC](figures/blackbox/penerimaan-tc4.png) | File PDF terdownload dengan format Pertamina | ![Hasil](figures/blackbox/penerimaan-result4.png) | Valid |
-| 5 | Mengklik "Download Excel" pada halaman penerimaan | ![TC](figures/blackbox/penerimaan-tc5.png) | File XLSX terdownload dengan data lengkap | ![Hasil](figures/blackbox/penerimaan-result5.png) | Valid |
+| 1 | Membuka menu Penerimaan sebagai Admin | ![TC](figures/blackbox/penerimaan-tc1.png) | Sistem akan menampilkan daftar penerimaan dari SPBE dengan kolom tanggal, nomor DO, produk, jumlah | ![Hasil](figures/blackbox/penerimaan-result1.png) | Valid |
+| 2 | Mengklik "Catat Penerimaan" dan mengisi nomor DO, jenis LPG, jumlah | ![TC](figures/blackbox/penerimaan-tc2.png) | Sistem akan menyimpan data penerimaan dan secara otomatis menambah stok agen | ![Hasil](figures/blackbox/penerimaan-result2.png) | Valid |
+| 3 | Mengisi jumlah dengan nilai 0 atau negatif | ![TC](figures/blackbox/penerimaan-tc3.png) | Sistem akan menampilkan pesan validasi error "Jumlah harus lebih dari 0" | ![Hasil](figures/blackbox/penerimaan-result3.png) | Valid |
+| 4 | Mengklik "Download PDF" pada halaman penerimaan | ![TC](figures/blackbox/penerimaan-tc4.png) | Sistem akan generate file PDF dengan format Pertamina (BAST) | ![Hasil](figures/blackbox/penerimaan-result4.png) | Valid |
+| 5 | Mengklik "Download Excel" pada halaman penerimaan | ![TC](figures/blackbox/penerimaan-tc5.png) | Sistem akan generate file XLSX dengan data lengkap termasuk referensi DO | ![Hasil](figures/blackbox/penerimaan-result5.png) | Valid |
+| 6 | Mengisi nomor DO yang sudah terdaftar sebelumnya | ![TC](figures/blackbox/penerimaan-tc6.png) | Sistem akan menampilkan warning "Nomor DO sudah pernah dicatat" | ![Hasil](figures/blackbox/penerimaan-result6.png) | Valid |
+| 7 | Membatalkan penerimaan yang sudah tercatat | ![TC](figures/blackbox/penerimaan-tc7.png) | Sistem akan menghapus record dan mengurangi stok yang sudah ditambahkan | ![Hasil](figures/blackbox/penerimaan-result7.png) | Valid |
 
 ---
 
@@ -317,10 +341,12 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu In/Out Agen | ![TC](figures/blackbox/inout-tc1.png) | Sistem menampilkan rekonsiliasi stok harian | ![Hasil](figures/blackbox/inout-result1.png) | Valid |
-| 2 | Memilih tanggal tertentu pada filter | ![TC](figures/blackbox/inout-tc2.png) | Sistem menampilkan data stok awal, masuk, keluar, akhir per tanggal | ![Hasil](figures/blackbox/inout-result2.png) | Valid |
-| 3 | Terdapat selisih antara perhitungan dan stok aktual | ![TC](figures/blackbox/inout-tc3.png) | Sistem menampilkan warning selisih | ![Hasil](figures/blackbox/inout-result3.png) | Valid |
-| 4 | Mengklik "Download PDF" pada halaman In/Out | ![TC](figures/blackbox/inout-tc4.png) | File PDF terdownload | ![Hasil](figures/blackbox/inout-result4.png) | Valid |
+| 1 | Membuka menu In/Out Agen sebagai Admin | ![TC](figures/blackbox/inout-tc1.png) | Sistem akan menampilkan rekonsiliasi stok harian dengan kolom produk, stok awal, masuk, keluar, stok akhir | ![Hasil](figures/blackbox/inout-result1.png) | Valid |
+| 2 | Memilih tanggal tertentu pada filter date picker | ![TC](figures/blackbox/inout-tc2.png) | Sistem akan menampilkan data rekonsiliasi untuk tanggal yang dipilih | ![Hasil](figures/blackbox/inout-result2.png) | Valid |
+| 3 | Terdapat selisih antara stok perhitungan dan stok aktual | ![TC](figures/blackbox/inout-tc3.png) | Sistem akan menampilkan badge warning "Selisih: X tabung" dengan highlight merah | ![Hasil](figures/blackbox/inout-result3.png) | Valid |
+| 4 | Mengklik "Download PDF" pada halaman In/Out | ![TC](figures/blackbox/inout-tc4.png) | Sistem akan generate file PDF laporan rekonsiliasi harian | ![Hasil](figures/blackbox/inout-result4.png) | Valid |
+| 5 | Melihat detail breakdown per transaksi | ![TC](figures/blackbox/inout-tc5.png) | Sistem akan menampilkan daftar semua transaksi (penerimaan, penyaluran, penjualan) dengan referensi | ![Hasil](figures/blackbox/inout-result5.png) | Valid |
+| 6 | Stok akhir menunjukkan nilai negatif | ![TC](figures/blackbox/inout-tc6.png) | Sistem akan menampilkan alert kritikal "Stok negatif terdeteksi - perlu investigasi" | ![Hasil](figures/blackbox/inout-result6.png) | Valid |
 
 ---
 
@@ -330,12 +356,14 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Pengeluaran sebagai Pangkalan | ![TC](figures/blackbox/pengeluaran-tc1.png) | Sistem menampilkan daftar pengeluaran operasional | ![Hasil](figures/blackbox/pengeluaran-result1.png) | Valid |
-| 2 | Mengklik "Tambah Pengeluaran" dan memilih kategori, mengisi nominal | ![TC](figures/blackbox/pengeluaran-tc2.png) | Pengeluaran tersimpan dengan kategori yang benar | ![Hasil](figures/blackbox/pengeluaran-result2.png) | Valid |
-| 3 | Mengisi nominal 0 atau negatif | ![TC](figures/blackbox/pengeluaran-tc3.png) | Sistem menampilkan validasi error | ![Hasil](figures/blackbox/pengeluaran-result3.png) | Valid |
-| 4 | Mengklik edit dan mengubah nominal | ![TC](figures/blackbox/pengeluaran-tc4.png) | Data pengeluaran terupdate | ![Hasil](figures/blackbox/pengeluaran-result4.png) | Valid |
-| 5 | Mengklik hapus dan konfirmasi | ![TC](figures/blackbox/pengeluaran-tc5.png) | Pengeluaran terhapus dari sistem | ![Hasil](figures/blackbox/pengeluaran-result5.png) | Valid |
-| 6 | Memfilter pengeluaran berdasarkan kategori | ![TC](figures/blackbox/pengeluaran-tc6.png) | Hanya menampilkan pengeluaran sesuai kategori | ![Hasil](figures/blackbox/pengeluaran-result6.png) | Valid |
+| 1 | Membuka menu Pengeluaran sebagai Pangkalan | ![TC](figures/blackbox/pengeluaran-tc1.png) | Sistem akan menampilkan daftar pengeluaran operasional dengan kolom tanggal, kategori, nominal, keterangan | ![Hasil](figures/blackbox/pengeluaran-result1.png) | Valid |
+| 2 | Mengklik "Tambah Pengeluaran" dan memilih kategori, mengisi nominal | ![TC](figures/blackbox/pengeluaran-tc2.png) | Sistem akan menyimpan pengeluaran dengan kategori yang benar dan menampilkan notifikasi berhasil | ![Hasil](figures/blackbox/pengeluaran-result2.png) | Valid |
+| 3 | Mengisi nominal dengan nilai 0 atau negatif | ![TC](figures/blackbox/pengeluaran-tc3.png) | Sistem akan menampilkan pesan validasi error "Nominal harus lebih dari 0" | ![Hasil](figures/blackbox/pengeluaran-result3.png) | Valid |
+| 4 | Mengklik tombol edit dan mengubah nominal pengeluaran | ![TC](figures/blackbox/pengeluaran-tc4.png) | Sistem akan mengupdate data pengeluaran dan merefresh total | ![Hasil](figures/blackbox/pengeluaran-result4.png) | Valid |
+| 5 | Mengklik tombol hapus dan mengkonfirmasi dialog | ![TC](figures/blackbox/pengeluaran-tc5.png) | Sistem akan menghapus pengeluaran dari sistem dan mengurangi total | ![Hasil](figures/blackbox/pengeluaran-result5.png) | Valid |
+| 6 | Memilih filter kategori tertentu pada dropdown | ![TC](figures/blackbox/pengeluaran-tc6.png) | Sistem hanya akan menampilkan pengeluaran sesuai kategori yang dipilih | ![Hasil](figures/blackbox/pengeluaran-result6.png) | Valid |
+| 7 | Memilih date range pada filter periode | ![TC](figures/blackbox/pengeluaran-tc7.png) | Sistem akan menampilkan pengeluaran dalam periode yang dipilih dan total per kategori | ![Hasil](figures/blackbox/pengeluaran-result7.png) | Valid |
+| 8 | Melihat statistik pengeluaran bulanan | ![TC](figures/blackbox/pengeluaran-tc8.png) | Sistem akan menampilkan chart breakdown pengeluaran per kategori dengan persentase | ![Hasil](figures/blackbox/pengeluaran-result8.png) | Valid |
 
 ---
 
@@ -345,12 +373,14 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka menu Daftar Pengguna sebagai Admin | ![TC](figures/blackbox/user-tc1.png) | Sistem menampilkan daftar user dengan role dan status | ![Hasil](figures/blackbox/user-result1.png) | Valid |
-| 2 | Mengklik "Tambah User", mengisi nama, email, password, role | ![TC](figures/blackbox/user-tc2.png) | User tersimpan dan dapat login | ![Hasil](figures/blackbox/user-result2.png) | Valid |
-| 3 | Mengisi email yang sudah terdaftar | ![TC](figures/blackbox/user-tc3.png) | Sistem menampilkan error "Email sudah terdaftar" | ![Hasil](figures/blackbox/user-result3.png) | Valid |
-| 4 | Mengisi password kurang dari 8 karakter | ![TC](figures/blackbox/user-tc4.png) | Sistem menampilkan validasi "Password minimal 8 karakter" | ![Hasil](figures/blackbox/user-result4.png) | Valid |
-| 5 | Mengklik "Reset Password" pada user tertentu | ![TC](figures/blackbox/user-tc5.png) | Password baru digenerate dan ditampilkan | ![Hasil](figures/blackbox/user-result5.png) | Valid |
-| 6 | Mengubah status user menjadi nonaktif | ![TC](figures/blackbox/user-tc6.png) | User tidak dapat login | ![Hasil](figures/blackbox/user-result6.png) | Valid |
+| 1 | Membuka menu Daftar Pengguna sebagai Admin | ![TC](figures/blackbox/user-tc1.png) | Sistem akan menampilkan daftar user dengan kolom nama, email, role, status, dan tanggal bergabung | ![Hasil](figures/blackbox/user-result1.png) | Valid |
+| 2 | Mengklik "Tambah User" dan mengisi nama, email, password, role | ![TC](figures/blackbox/user-tc2.png) | Sistem akan menyimpan user baru dengan password terenkripsi dan user dapat login | ![Hasil](figures/blackbox/user-result2.png) | Valid |
+| 3 | Mengisi email yang sudah terdaftar di sistem | ![TC](figures/blackbox/user-tc3.png) | Sistem akan menampilkan pesan error "Email sudah terdaftar" | ![Hasil](figures/blackbox/user-result3.png) | Valid |
+| 4 | Mengisi password kurang dari 8 karakter | ![TC](figures/blackbox/user-tc4.png) | Sistem akan menampilkan pesan validasi error "Password minimal 8 karakter" | ![Hasil](figures/blackbox/user-result4.png) | Valid |
+| 5 | Mengklik "Reset Password" pada user tertentu | ![TC](figures/blackbox/user-tc5.png) | Sistem akan generate password baru secara random dan menampilkan di popup | ![Hasil](figures/blackbox/user-result5.png) | Valid |
+| 6 | Mengubah status user menjadi "Tidak Aktif" | ![TC](figures/blackbox/user-tc6.png) | User tidak akan dapat login dan mendapat pesan "Akun Anda telah dinonaktifkan" | ![Hasil](figures/blackbox/user-result6.png) | Valid |
+| 7 | Mengisi email dengan format tidak valid | ![TC](figures/blackbox/user-tc7.png) | Sistem akan menampilkan pesan validasi error "Format email tidak valid" | ![Hasil](figures/blackbox/user-result7.png) | Valid |
+| 8 | Menghapus user yang memiliki data transaksi | ![TC](figures/blackbox/user-tc8.png) | Sistem akan melakukan soft delete (user tidak muncul tapi data transaksi tetap ada) | ![Hasil](figures/blackbox/user-result8.png) | Valid |
 
 ---
 
@@ -360,25 +390,30 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Login sebagai Pangkalan dan melihat Dashboard | ![TC](figures/blackbox/dashboard-pangkalan-tc1.png) | Sistem menampilkan ringkasan stok dan penjualan | ![Hasil](figures/blackbox/dashboard-pangkalan-result1.png) | Valid |
-| 2 | Melihat chart penjualan harian pangkalan | ![TC](figures/blackbox/dashboard-pangkalan-tc2.png) | Sistem menampilkan trend penjualan 7 hari terakhir | ![Hasil](figures/blackbox/dashboard-pangkalan-result2.png) | Valid |
-| 3 | Melihat kartu ringkasan stok per tipe LPG | ![TC](figures/blackbox/dashboard-pangkalan-tc3.png) | Sistem menampilkan stok dengan visualisasi | ![Hasil](figures/blackbox/dashboard-pangkalan-result3.png) | Valid |
-| 4 | Terdapat produk dengan stok di bawah minimum | ![TC](figures/blackbox/dashboard-pangkalan-tc4.png) | Sistem menampilkan alert stok menipis | ![Hasil](figures/blackbox/dashboard-pangkalan-result4.png) | Valid |
-| 5 | Mengklik "Pesan ke Agen" pada quick action | ![TC](figures/blackbox/dashboard-pangkalan-tc5.png) | Modal pemesanan stok tampil | ![Hasil](figures/blackbox/dashboard-pangkalan-result5.png) | Valid |
+| 1 | Login sebagai Pangkalan dan melihat Dashboard | ![TC](figures/blackbox/dashboard-pangkalan-tc1.png) | Sistem akan menampilkan ringkasan stok per produk, total penjualan hari ini, dan quick stats | ![Hasil](figures/blackbox/dashboard-pangkalan-result1.png) | Valid |
+| 2 | Melihat chart penjualan harian pada dashboard | ![TC](figures/blackbox/dashboard-pangkalan-tc2.png) | Sistem akan menampilkan grafik trend penjualan 7 hari terakhir dengan breakdown per produk | ![Hasil](figures/blackbox/dashboard-pangkalan-result2.png) | Valid |
+| 3 | Melihat kartu ringkasan stok per tipe LPG | ![TC](figures/blackbox/dashboard-pangkalan-tc3.png) | Sistem akan menampilkan card stok dengan visualisasi level (progress bar) dan status indikator | ![Hasil](figures/blackbox/dashboard-pangkalan-result3.png) | Valid |
+| 4 | Terdapat produk dengan stok di bawah level minimum | ![TC](figures/blackbox/dashboard-pangkalan-tc4.png) | Sistem akan menampilkan alert banner "Stok [produk] menipis" dengan badge warning | ![Hasil](figures/blackbox/dashboard-pangkalan-result4.png) | Valid |
+| 5 | Mengklik "Pesan ke Agen" pada quick action | ![TC](figures/blackbox/dashboard-pangkalan-tc5.png) | Sistem akan menampilkan modal form pemesanan stok dengan dropdown produk dan field jumlah | ![Hasil](figures/blackbox/dashboard-pangkalan-result5.png) | Valid |
+| 6 | Melihat notifikasi pesanan masuk dari agen | ![TC](figures/blackbox/dashboard-pangkalan-tc6.png) | Sistem akan menampilkan badge notifikasi dengan preview pesanan terbaru | ![Hasil](figures/blackbox/dashboard-pangkalan-result6.png) | Valid |
+| 7 | Mengklik "Catat Penjualan" pada quick action | ![TC](figures/blackbox/dashboard-pangkalan-tc7.png) | Sistem akan redirect ke halaman catat penjualan dengan form siap diisi | ![Hasil](figures/blackbox/dashboard-pangkalan-result7.png) | Valid |
 
 ---
 
 #### u. Pengujian Modul Profil & Pengaturan
 
-**Tabel 3.21** Pengujian Modul Profil & Pengaturan
+**Tabel 3.21** Pengujian Modul Profil & Pengaturan (Role: ALL)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
-| 1 | Membuka halaman Profil dari menu user | ![TC](figures/blackbox/profil-tc1.png) | Sistem menampilkan informasi profil lengkap | ![Hasil](figures/blackbox/profil-result1.png) | Valid |
-| 2 | Mengklik "Edit Profil" dan mengubah nama | ![TC](figures/blackbox/profil-tc2.png) | Data profil terupdate | ![Hasil](figures/blackbox/profil-result2.png) | Valid |
-| 3 | Mengupload foto profil dan crop | ![TC](figures/blackbox/profil-tc3.png) | Foto profil terupdate di seluruh sistem | ![Hasil](figures/blackbox/profil-result3.png) | Valid |
-| 4 | Mengklik "Ubah Password" dengan password lama yang salah | ![TC](figures/blackbox/profil-tc4.png) | Sistem menampilkan error "Password lama salah" | ![Hasil](figures/blackbox/profil-result4.png) | Valid |
-| 5 | Mengklik "Ubah Password" dengan password baru yang valid | ![TC](figures/blackbox/profil-tc5.png) | Password berhasil diubah | ![Hasil](figures/blackbox/profil-result5.png) | Valid |
+| 1 | Membuka halaman Profil dari menu user dropdown | ![TC](figures/blackbox/profil-tc1.png) | Sistem akan menampilkan informasi profil lengkap: foto, nama, email, role, dan tanggal bergabung | ![Hasil](figures/blackbox/profil-result1.png) | Valid |
+| 2 | Mengklik "Edit Profil" dan mengubah nama | ![TC](figures/blackbox/profil-tc2.png) | Sistem akan mengupdate nama dan menampilkan perubahan di seluruh aplikasi (header, dll) | ![Hasil](figures/blackbox/profil-result2.png) | Valid |
+| 3 | Mengupload foto profil dengan format valid dan crop | ![TC](figures/blackbox/profil-tc3.png) | Sistem akan menyimpan foto dan menampilkan preview cropped di seluruh tempat yang menampilkan avatar | ![Hasil](figures/blackbox/profil-result3.png) | Valid |
+| 4 | Mengklik "Ubah Password" dengan password lama yang salah | ![TC](figures/blackbox/profil-tc4.png) | Sistem akan menampilkan pesan error "Password lama tidak sesuai" | ![Hasil](figures/blackbox/profil-result4.png) | Valid |
+| 5 | Mengklik "Ubah Password" dengan password baru yang valid | ![TC](figures/blackbox/profil-tc5.png) | Sistem akan mengupdate password dan user dapat login dengan password baru | ![Hasil](figures/blackbox/profil-result5.png) | Valid |
+| 6 | Upload foto profil dengan format tidak valid | ![TC](figures/blackbox/profil-tc6.png) | Sistem akan menampilkan pesan error "Format foto harus JPG, PNG, atau WebP" | ![Hasil](figures/blackbox/profil-result6.png) | Valid |
+| 7 | Upload foto profil dengan ukuran melebihi batas | ![TC](figures/blackbox/profil-tc7.png) | Sistem akan menampilkan pesan error "Ukuran foto maksimal 2MB" | ![Hasil](figures/blackbox/profil-result7.png) | Valid |
+| 8 | Mengubah password baru dengan konfirmasi yang tidak cocok | ![TC](figures/blackbox/profil-tc8.png) | Sistem akan menampilkan pesan error "Konfirmasi password tidak cocok" | ![Hasil](figures/blackbox/profil-result8.png) | Valid |
 
 ---
 
@@ -393,29 +428,29 @@ Ada 21 modul dan 158 test case pada metode pengujian black box ini. Diantaranya:
 | 3 | Stok LPG | 6 | 6 | 0 | 100% |
 | 4 | Pesanan | 21 | 21 | 0 | 100% |
 | 5 | Pembayaran | 11 | 11 | 0 | 100% |
-| 6 | Pangkalan | 7 | 7 | 0 | 100% |
-| 7 | Driver | 6 | 6 | 0 | 100% |
-| 8 | Laporan | 8 | 8 | 0 | 100% |
-| 9 | Konsumen Subsidi | 10 | 10 | 0 | 100% |
-| 10 | Penjualan Konsumen | 12 | 12 | 0 | 100% |
-| 11 | Stok Pangkalan | 8 | 8 | 0 | 100% |
-| 12 | Produk LPG | 5 | 5 | 0 | 100% |
-| 13 | Notifikasi | 4 | 4 | 0 | 100% |
-| 14 | Perencanaan | 6 | 6 | 0 | 100% |
-| 15 | Penyaluran | 5 | 5 | 0 | 100% |
-| 16 | Penerimaan | 5 | 5 | 0 | 100% |
-| 17 | In/Out Agen | 4 | 4 | 0 | 100% |
-| 18 | Pengeluaran | 6 | 6 | 0 | 100% |
-| 19 | User Management | 6 | 6 | 0 | 100% |
-| 20 | Dashboard Pangkalan | 5 | 5 | 0 | 100% |
-| 21 | Profil & Pengaturan | 5 | 5 | 0 | 100% |
-| **Total** | | **158** | **158** | **0** | **100%** |
+| 6 | Pangkalan | 10 | 10 | 0 | 100% |
+| 7 | Driver | 9 | 9 | 0 | 100% |
+| 8 | Laporan | 10 | 10 | 0 | 100% |
+| 9 | Konsumen Subsidi | 12 | 12 | 0 | 100% |
+| 10 | Penjualan Konsumen | 14 | 14 | 0 | 100% |
+| 11 | Stok Pangkalan | 10 | 10 | 0 | 100% |
+| 12 | Produk LPG | 7 | 7 | 0 | 100% |
+| 13 | Notifikasi | 6 | 6 | 0 | 100% |
+| 14 | Perencanaan | 8 | 8 | 0 | 100% |
+| 15 | Penyaluran | 7 | 7 | 0 | 100% |
+| 16 | Penerimaan | 7 | 7 | 0 | 100% |
+| 17 | In/Out Agen | 6 | 6 | 0 | 100% |
+| 18 | Pengeluaran | 8 | 8 | 0 | 100% |
+| 19 | User Management | 8 | 8 | 0 | 100% |
+| 20 | Dashboard Pangkalan | 7 | 7 | 0 | 100% |
+| 21 | Profil & Pengaturan | 8 | 8 | 0 | 100% |
+| **Total** | | **192** | **192** | **0** | **100%** |
 
 ### C. Kesimpulan Pengujian Black Box
 
 Berdasarkan hasil pengujian Black Box yang telah dilakukan terhadap sistem SIM4LON, dapat disimpulkan bahwa:
 
-1. Seluruh **158 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
+1. Seluruh **192 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
 
 2. Tingkat keberhasilan pengujian mencapai **100%**, yang menunjukkan bahwa fungsionalitas sistem berjalan dengan baik.
 

@@ -251,11 +251,13 @@ export class ConsumerOrderService {
     }
 
     /**
-     * Update consumer order
+     * Update consumer order with automatic stock adjustment
      */
     async update(id: string, pangkalanId: string, dto: UpdateConsumerOrderDto) {
-        // Verify ownership
-        await this.findOne(id, pangkalanId);
+        this.logger.log(`[UPDATE] Starting - orderId: ${id}, pangkalanId: ${pangkalanId}`);
+
+        // Verify ownership and get existing order
+        const existing = await this.findOne(id, pangkalanId);
 
         // If consumer_id updated, verify ownership
         if (dto.consumer_id) {
@@ -267,14 +269,16 @@ export class ConsumerOrderService {
             }
         }
 
-        // Recalculate total if qty or price changed
-        const existing = await this.prisma.consumer_orders.findUnique({
-            where: { id },
-        });
+        // Calculate qty delta for stock adjustment
+        const oldQty = existing.qty;
+        const newQty = dto.qty ?? oldQty;
+        const qtyDelta = newQty - oldQty; // Positive = need more stock, Negative = return to stock
 
-        const qty = dto.qty ?? existing!.qty;
-        const pricePerUnit = dto.price_per_unit ?? Number(existing!.price_per_unit);
-        const totalAmount = qty * pricePerUnit;
+        // Recalculate total if qty or price changed
+        const pricePerUnit = dto.price_per_unit ?? Number(existing.price_per_unit);
+        const totalAmount = newQty * pricePerUnit;
+
+        this.logger.log(`[UPDATE] Qty change: ${oldQty} -> ${newQty} (delta: ${qtyDelta})`);
 
         const order = await this.prisma.consumer_orders.update({
             where: { id },
@@ -299,21 +303,118 @@ export class ConsumerOrderService {
             },
         });
 
+        // ============================================
+        // STOCK ADJUSTMENT - When qty changes
+        // If qty increased: deduct more from stock
+        // If qty decreased: return to stock
+        // ============================================
+        if (qtyDelta !== 0) {
+            try {
+                const lpgType = existing.lpg_type;
+                const existingStock = await this.prisma.pangkalan_stocks.findFirst({
+                    where: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: lpgType,
+                    },
+                });
+
+                if (existingStock) {
+                    // Adjust stock: subtract delta (positive delta = less stock, negative delta = more stock)
+                    const newStockQty = existingStock.qty - qtyDelta;
+                    await this.prisma.pangkalan_stocks.update({
+                        where: { id: existingStock.id },
+                        data: {
+                            qty: newStockQty < 0 ? 0 : newStockQty,
+                            updated_at: new Date(),
+                        },
+                    });
+                    this.logger.log(`[UPDATE] Stock adjusted: ${existingStock.qty} -> ${newStockQty} for ${lpgType}`);
+                }
+
+                // Create stock movement record for audit trail
+                const movementType = qtyDelta > 0 ? 'OUT' : 'IN';
+                const movementQty = Math.abs(qtyDelta);
+                await this.prisma.pangkalan_stock_movements.create({
+                    data: {
+                        pangkalan_id: pangkalanId,
+                        lpg_type: lpgType,
+                        movement_type: movementType,
+                        qty: movementQty,
+                        source: 'ADJUSTMENT',
+                        reference_id: order.id,
+                        note: `Edit penjualan ${existing.code}: qty ${oldQty} -> ${newQty}`,
+                    },
+                });
+                this.logger.log(`[UPDATE] Stock movement recorded: ${movementType} ${movementQty}`);
+
+            } catch (stockError) {
+                this.logger.error(`[UPDATE] Stock adjustment error: ${stockError.message}`);
+                // Don't fail the update, log for manual review
+            }
+        }
+
         return order;
     }
 
     /**
-     * Delete consumer order
+     * Delete consumer order with stock return
      */
     async remove(id: string, pangkalanId: string) {
-        // Verify ownership
-        await this.findOne(id, pangkalanId);
+        this.logger.log(`[DELETE] Starting - orderId: ${id}, pangkalanId: ${pangkalanId}`);
+
+        // Verify ownership and get data before delete
+        const order = await this.findOne(id, pangkalanId);
+
+        // ============================================
+        // STOCK RETURN - When order is deleted
+        // Return the sold qty back to stock
+        // ============================================
+        try {
+            const lpgType = order.lpg_type;
+            const existingStock = await this.prisma.pangkalan_stocks.findFirst({
+                where: {
+                    pangkalan_id: pangkalanId,
+                    lpg_type: lpgType,
+                },
+            });
+
+            if (existingStock) {
+                // Return stock: add qty back
+                const newStockQty = existingStock.qty + order.qty;
+                await this.prisma.pangkalan_stocks.update({
+                    where: { id: existingStock.id },
+                    data: {
+                        qty: newStockQty,
+                        updated_at: new Date(),
+                    },
+                });
+                this.logger.log(`[DELETE] Stock returned: ${existingStock.qty} -> ${newStockQty} for ${lpgType}`);
+            }
+
+            // Create stock movement record for audit trail
+            await this.prisma.pangkalan_stock_movements.create({
+                data: {
+                    pangkalan_id: pangkalanId,
+                    lpg_type: lpgType,
+                    movement_type: 'IN',
+                    qty: order.qty,
+                    source: 'RETURN', // Sale deleted = return to stock
+                    reference_id: order.id, // ID will be kept in log even if record is deleted (optional: or use code)
+                    note: `Hapus penjualan ${order.code} - ${order.consumer_name || 'Walk-in'}`,
+                },
+            });
+            this.logger.log(`[DELETE] Stock movement recorded: IN ${order.qty}`);
+
+        } catch (stockError) {
+            this.logger.error(`[DELETE] Stock return error: ${stockError.message}`);
+            // Don't fail the delete, simply log warning
+        }
 
         await this.prisma.consumer_orders.delete({
             where: { id },
         });
 
-        return { message: 'Pesanan berhasil dihapus' };
+        return { message: 'Pesanan berhasil dihapus dan stok dikembalikan' };
     }
 
     /**

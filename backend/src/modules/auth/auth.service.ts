@@ -65,8 +65,12 @@ export class AuthService {
     async login(dto: LoginDto) {
 
         // Find user by email with pangkalan info
-        const user = await this.prisma.users.findUnique({
-            where: { email: dto.email },
+        // Note: findUnique doesn't support deleted_at filter, so we use findFirst
+        const user = await this.prisma.users.findFirst({
+            where: {
+                email: dto.email,
+                deleted_at: null,  // Exclude soft-deleted users
+            },
             include: {
                 pangkalans: {
                     select: {

@@ -13,7 +13,27 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import SafeIcon from '@/components/common/SafeIcon'
 import { consumerOrdersApi, type ConsumerOrder, type ConsumerOrderStats } from '@/lib/api'
 import { toast } from 'sonner'
@@ -77,6 +97,14 @@ export default function RiwayatPenjualanPage() {
     const [endDate, setEndDate] = useState('')
     const [lpgTypeFilter, setLpgTypeFilter] = useState('')
 
+    // Edit modal state
+    const [editingOrder, setEditingOrder] = useState<ConsumerOrder | null>(null)
+    const [editForm, setEditForm] = useState({ qty: 1, pricePerUnit: 0, note: '' })
+    const [isUpdating, setIsUpdating] = useState(false)
+
+    // Delete confirmation state
+    const [deletingOrder, setDeletingOrder] = useState<ConsumerOrder | null>(null)
+
     // Fetch stats only once on mount
     const fetchStats = async () => {
         try {
@@ -110,7 +138,18 @@ export default function RiwayatPenjualanPage() {
                 )
             }
             if (lpgTypeFilter) {
-                filteredData = filteredData.filter(o => o.lpg_type === lpgTypeFilter)
+                // Map equivalent LPG type formats
+                const LPG_EQUIVALENTS: Record<string, string[]> = {
+                    'kg3': ['kg3', '3kg'],
+                    'kg5': ['kg5', '5kg'],
+                    'kg12': ['kg12', '12kg'],
+                    'kg50': ['kg50', '50kg'],
+                    'gr220': ['gr220', '220gr', 'bright_gas', 'brightgas'],
+                }
+                const equivalents = LPG_EQUIVALENTS[lpgTypeFilter] || [lpgTypeFilter]
+                filteredData = filteredData.filter(o =>
+                    equivalents.includes(o.lpg_type?.toLowerCase() || '')
+                )
             }
 
             setOrders(filteredData)
@@ -174,15 +213,21 @@ export default function RiwayatPenjualanPage() {
         })
     }
 
-    const handleDelete = async (order: ConsumerOrder) => {
-        if (!confirm(`Hapus transaksi ${order.code}?`)) return
+    const handleDelete = (order: ConsumerOrder) => {
+        setDeletingOrder(order)
+    }
+
+    const confirmDelete = async () => {
+        if (!deletingOrder) return
 
         // Save scroll position
         const scrollPosition = window.scrollY
 
         try {
-            await consumerOrdersApi.delete(order.id)
-            toast.success('Transaksi dihapus', { duration: 4000 })
+            const result = await consumerOrdersApi.delete(deletingOrder.id)
+            // Show custom message if returned by backend (e.g. "stok dikembalikan")
+            toast.success(result.message || 'Transaksi dihapus', { duration: 4000 })
+            setDeletingOrder(null)
             await fetchOrders(false)
             fetchStats()
 
@@ -192,6 +237,54 @@ export default function RiwayatPenjualanPage() {
             })
         } catch (error: any) {
             toast.error(error.message || 'Gagal menghapus transaksi', { duration: 5000 })
+        }
+    }
+
+    // Open edit modal with order data
+    const openEditModal = (order: ConsumerOrder) => {
+        setEditingOrder(order)
+        setEditForm({
+            qty: order.qty,
+            pricePerUnit: Number(order.price_per_unit),
+            note: order.note || ''
+        })
+    }
+
+    // Handle update order
+    const handleUpdateOrder = async () => {
+        if (!editingOrder) return
+        if (editForm.qty < 1) {
+            toast.error('Jumlah minimal 1 tabung')
+            return
+        }
+
+        const scrollPosition = window.scrollY
+        setIsUpdating(true)
+
+        try {
+            await consumerOrdersApi.update(editingOrder.id, {
+                qty: editForm.qty,
+                price_per_unit: editForm.pricePerUnit,
+                note: editForm.note || undefined
+            })
+
+            const qtyDelta = editForm.qty - editingOrder.qty
+            const stockMsg = qtyDelta !== 0
+                ? ` (Stok ${qtyDelta > 0 ? 'dikurangi' : 'ditambah'} ${Math.abs(qtyDelta)} tabung)`
+                : ''
+
+            toast.success(`Transaksi berhasil diupdate${stockMsg}`, { duration: 4000 })
+            setEditingOrder(null)
+            await fetchOrders(false)
+            fetchStats()
+
+            requestAnimationFrame(() => {
+                window.scrollTo(0, scrollPosition)
+            })
+        } catch (error: any) {
+            toast.error(error.message || 'Gagal mengupdate transaksi', { duration: 5000 })
+        } finally {
+            setIsUpdating(false)
         }
     }
 
@@ -392,10 +485,11 @@ export default function RiwayatPenjualanPage() {
                             className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                         >
                             <option value="">Semua Tipe</option>
-                            <option value="3kg">3 kg</option>
-                            <option value="5kg">5.5 kg</option>
-                            <option value="12kg">12 kg</option>
-                            <option value="50kg">50 kg</option>
+                            <option value="kg3">3 kg</option>
+                            <option value="kg5">5.5 kg</option>
+                            <option value="kg12">12 kg</option>
+                            <option value="kg50">50 kg</option>
+                            <option value="gr220">Bright Gas 220gr</option>
                         </select>
 
                         {/* Clear Filters */}
@@ -517,7 +611,25 @@ export default function RiwayatPenjualanPage() {
                                                                 <span className="font-bold">{order.qty}</span> tabung
                                                             </span>
                                                         </div>
-                                                        <span className="font-bold text-sm sm:text-base text-blue-600">{formatCurrency(order.total_amount)}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-sm sm:text-base text-blue-600">{formatCurrency(order.total_amount)}</span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => openEditModal(order)}
+                                                                className="h-7 w-7 p-0 hover:bg-blue-100 rounded-lg"
+                                                            >
+                                                                <SafeIcon name="Pencil" className="h-3.5 w-3.5 text-blue-600" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDelete(order)}
+                                                                className="h-7 w-7 p-0 hover:bg-red-100 rounded-lg"
+                                                            >
+                                                                <SafeIcon name="Trash" className="h-3.5 w-3.5 text-red-600" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -573,10 +685,28 @@ export default function RiwayatPenjualanPage() {
                                                 <span className="font-bold text-slate-900">{formatCurrency(order.total_amount)}</span>
                                             </div>
 
-                                            {/* Time */}
-                                            <div className="text-right">
-                                                <p className="text-sm text-slate-700">{formatDate(order.sale_date)}</p>
-                                                <p className="text-xs text-slate-400">{formatTime(order.sale_date)}</p>
+                                            {/* Time + Actions */}
+                                            <div className="text-right flex items-center justify-end gap-2">
+                                                <div>
+                                                    <p className="text-sm text-slate-700">{formatDate(order.sale_date)}</p>
+                                                    <p className="text-xs text-slate-400">{formatTime(order.sale_date)}</p>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => openEditModal(order)}
+                                                    className="h-8 w-8 p-0 hover:bg-blue-100 rounded-lg"
+                                                >
+                                                    <SafeIcon name="Pencil" className="h-4 w-4 text-blue-600" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(order)}
+                                                    className="h-8 w-8 p-0 hover:bg-red-100 rounded-lg"
+                                                >
+                                                    <SafeIcon name="Trash" className="h-4 w-4 text-red-600" />
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
@@ -651,6 +781,178 @@ export default function RiwayatPenjualanPage() {
                     </div>
                 )}
             </div>
+            {/* Pagination end */}
+
+
+            {/* Edit Modal */}
+            <Dialog open={!!editingOrder} onOpenChange={(open) => !open && setEditingOrder(null)}>
+                <DialogContent className="max-w-md rounded-xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                <SafeIcon name="Pencil" className="h-5 w-5 text-blue-600" />
+                            </div>
+                            Edit Transaksi
+                        </DialogTitle>
+                        <DialogDescription>
+                            {editingOrder?.code} • {editingOrder && LPG_NAMES[editingOrder.lpg_type]}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                        {/* Customer Info */}
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <p className="text-sm text-slate-500">Pelanggan</p>
+                            <p className="font-semibold text-slate-900">
+                                {editingOrder?.consumers?.name || editingOrder?.consumer_name || 'Walk-in'}
+                            </p>
+                        </div>
+
+                        {/* Qty Input */}
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-qty" className="text-sm font-medium">
+                                Jumlah (tabung)
+                            </Label>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="h-10 w-10 rounded-xl"
+                                    onClick={() => setEditForm(prev => ({ ...prev, qty: Math.max(1, prev.qty - 1) }))}
+                                    disabled={editForm.qty <= 1}
+                                >
+                                    −
+                                </Button>
+                                <Input
+                                    id="edit-qty"
+                                    type="number"
+                                    min={1}
+                                    value={editForm.qty}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, qty: Math.max(1, parseInt(e.target.value) || 1) }))}
+                                    className="h-10 text-center font-bold text-lg rounded-xl flex-1"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="h-10 w-10 rounded-xl"
+                                    onClick={() => setEditForm(prev => ({ ...prev, qty: prev.qty + 1 }))}
+                                >
+                                    +
+                                </Button>
+                            </div>
+                            {/* Stock adjustment warning */}
+                            {editingOrder && editForm.qty !== editingOrder.qty && (
+                                <div className={`text-xs px-3 py-2 rounded-lg flex items-center gap-2 ${editForm.qty > editingOrder.qty
+                                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                    : 'bg-green-50 text-green-700 border border-green-200'
+                                    }`}>
+                                    <SafeIcon name={editForm.qty > editingOrder.qty ? 'ArrowDown' : 'ArrowUp'} className="h-3.5 w-3.5" />
+                                    Stok akan {editForm.qty > editingOrder.qty ? 'dikurangi' : 'ditambah'} {Math.abs(editForm.qty - editingOrder.qty)} tabung
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Price Input */}
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-price" className="text-sm font-medium">
+                                Harga per Unit (Rp)
+                            </Label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">Rp</span>
+                                <Input
+                                    id="edit-price"
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={editForm.pricePerUnit.toLocaleString('id-ID')}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '')
+                                        setEditForm(prev => ({ ...prev, pricePerUnit: parseInt(val) || 0 }))
+                                    }}
+                                    className="h-10 pl-10 rounded-xl"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Note Input */}
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-note" className="text-sm font-medium">
+                                Catatan (Opsional)
+                            </Label>
+                            <Input
+                                id="edit-note"
+                                value={editForm.note}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, note: e.target.value }))}
+                                placeholder="Tambahkan catatan..."
+                                className="h-10 rounded-xl"
+                            />
+                        </div>
+
+                        {/* Preview Total */}
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                            <p className="text-blue-100 text-xs font-medium">Total Baru</p>
+                            <p className="text-2xl font-bold">
+                                {formatCurrency(editForm.qty * editForm.pricePerUnit)}
+                            </p>
+                            <p className="text-blue-200 text-xs mt-1">
+                                {editForm.qty} × {formatCurrency(editForm.pricePerUnit)}
+                            </p>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setEditingOrder(null)}
+                            disabled={isUpdating}
+                            className="rounded-xl"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            onClick={handleUpdateOrder}
+                            disabled={isUpdating}
+                            className="rounded-xl bg-blue-600 hover:bg-blue-700"
+                        >
+                            {isUpdating ? (
+                                <><SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" /> Menyimpan...</>
+                            ) : (
+                                <><SafeIcon name="Save" className="h-4 w-4 mr-2" /> Simpan Perubahan</>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Alert */}
+            <AlertDialog open={!!deletingOrder} onOpenChange={(open) => !open && setDeletingOrder(null)}>
+                <AlertDialogContent className="rounded-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                            <SafeIcon name="AlertTriangle" className="h-5 w-5" />
+                            Hapus Transaksi?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Apakah Anda yakin ingin menghapus transaksi <strong>{deletingOrder?.code}</strong>?
+                            <br /><br />
+                            <div className="bg-orange-50 p-3 rounded-lg border border-orange-200 text-orange-800 text-sm flex items-start gap-2">
+                                <SafeIcon name="Info" className="h-4 w-4 mt-0.5 shrink-0" />
+                                <span>
+                                    Tindakan ini tidak dapat dibatalkan. Stok tabung sejumlah <strong>{deletingOrder?.qty} tabung</strong> akan dikembalikan ke stok pangkalan.
+                                </span>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                        >
+                            Hapus & Kembalikan Stok
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
