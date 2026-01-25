@@ -1942,9 +1942,13 @@ export const consumerOrdersApi = {
         return apiRequest(`/consumer-orders/${id}`);
     },
 
-    async getStats(todayOnly = false): Promise<ConsumerOrderStats> {
-        const params = todayOnly ? '?today=true' : '';
-        return apiRequest(`/consumer-orders/stats${params}`);
+    async getStats(options?: { todayOnly?: boolean; startDate?: string; endDate?: string }): Promise<ConsumerOrderStats> {
+        const params = new URLSearchParams();
+        if (options?.todayOnly) params.append('today', 'true');
+        if (options?.startDate) params.append('startDate', options.startDate);
+        if (options?.endDate) params.append('endDate', options.endDate);
+        const queryString = params.toString();
+        return apiRequest(`/consumer-orders/stats${queryString ? '?' + queryString : ''}`);
     },
 
     async getRecent(limit = 5): Promise<ConsumerOrder[]> {

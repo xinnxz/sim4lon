@@ -419,11 +419,27 @@ export class ConsumerOrderService {
 
     /**
      * Get sales stats for dashboard
+     * Supports:
+     * - todayOnly = true: filter to today's data
+     * - startDate/endDate: filter to custom date range (takes precedence over todayOnly)
      */
-    async getStats(pangkalanId: string, todayOnly = false) {
+    async getStats(pangkalanId: string, todayOnly = false, startDate?: string, endDate?: string) {
         // Build date filter
         const dateFilter: any = {};
-        if (todayOnly) {
+
+        // Date range takes priority over todayOnly
+        if (startDate || endDate) {
+            dateFilter.sale_date = {};
+            if (startDate) {
+                dateFilter.sale_date.gte = new Date(startDate);
+            }
+            if (endDate) {
+                // Add 1 day to include the end date fully
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
+                dateFilter.sale_date.lt = end;
+            }
+        } else if (todayOnly) {
             // Use WIB timezone for "today" calculation
             const today = todayWIB();
             const tomorrow = new Date(today);
@@ -468,9 +484,19 @@ export class ConsumerOrderService {
 
         const marginKotor = totalRevenue - totalModal;
 
-        // Get expenses for the period
+        // Get expenses for the period (matching the same date filter logic)
         const expenseFilter: any = { pangkalan_id: pangkalanId };
-        if (todayOnly) {
+        if (startDate || endDate) {
+            expenseFilter.expense_date = {};
+            if (startDate) {
+                expenseFilter.expense_date.gte = new Date(startDate);
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
+                expenseFilter.expense_date.lt = end;
+            }
+        } else if (todayOnly) {
             const today = todayWIB();  // Use WIB timezone
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);

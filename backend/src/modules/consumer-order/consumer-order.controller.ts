@@ -47,15 +47,18 @@ export class ConsumerOrderController {
     /**
      * Get sales stats for dashboard
      * GET /consumer-orders/stats?today=true
+     * GET /consumer-orders/stats?startDate=2026-01-01&endDate=2026-01-31
      */
     @Get('stats')
     getStats(
         @Req() req: any,
         @Query('today') today?: string,
+        @Query('startDate') startDate?: string,
+        @Query('endDate') endDate?: string,
     ) {
         const pangkalanId = req.user.pangkalan_id;
         const todayOnly = today === 'true';
-        return this.consumerOrderService.getStats(pangkalanId, todayOnly);
+        return this.consumerOrderService.getStats(pangkalanId, todayOnly, startDate, endDate);
     }
 
     /**

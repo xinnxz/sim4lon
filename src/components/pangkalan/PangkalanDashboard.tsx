@@ -168,6 +168,7 @@ const EXPENSE_CATEGORIES: Record<string, { label: string; color: string }> = {
 export default function PangkalanDashboard() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [stats, setStats] = useState<ConsumerOrderStats | null>(null)
+    const [monthlyStats, setMonthlyStats] = useState<ConsumerOrderStats | null>(null)
     const [recentSales, setRecentSales] = useState<ConsumerOrder[]>([])
     const [chartData, setChartData] = useState<ChartDataPoint[]>([])
     const [stockData, setStockData] = useState<Array<{ name: string; value: number; color: string }>>([])
@@ -201,8 +202,9 @@ export default function PangkalanDashboard() {
                 const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
                 const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
 
-                const [statsData, recentData, chartDataFromApi, stockResponse, expenseData, pricesData] = await Promise.all([
-                    consumerOrdersApi.getStats(true),
+                const [statsData, monthlyStatsData, recentData, chartDataFromApi, stockResponse, expenseData, pricesData] = await Promise.all([
+                    consumerOrdersApi.getStats({ todayOnly: true }),
+                    consumerOrdersApi.getStats({ startDate, endDate }),
                     consumerOrdersApi.getRecent(5),
                     consumerOrdersApi.getChartData(),
                     pangkalanStockApi.getStockLevels(),
@@ -211,6 +213,7 @@ export default function PangkalanDashboard() {
                 ])
 
                 setStats(statsData)
+                setMonthlyStats(monthlyStatsData)
                 setRecentSales(recentData)
                 if (chartDataFromApi && chartDataFromApi.length > 0) {
                     setChartData(chartDataFromApi)
@@ -686,7 +689,7 @@ export default function PangkalanDashboard() {
                                 </div>
                                 <span className="text-slate-700">Total Penjualan</span>
                             </div>
-                            <span className="text-xl font-bold text-blue-600">{formatCurrency(stats?.total_revenue || 0)}</span>
+                            <span className="text-xl font-bold text-blue-600">{formatCurrency(monthlyStats?.total_revenue || 0)}</span>
                         </div>
                         <div className="flex items-center justify-between p-3 rounded-xl bg-red-50 border border-red-100">
                             <div className="flex items-center gap-3">
@@ -695,7 +698,7 @@ export default function PangkalanDashboard() {
                                 </div>
                                 <span className="text-slate-700">Total Pengeluaran</span>
                             </div>
-                            <span className="text-xl font-bold text-red-600">-{formatCurrency(expenseSummary.total)}</span>
+                            <span className="text-xl font-bold text-red-600">-{formatCurrency(monthlyStats?.total_pengeluaran || 0)}</span>
                         </div>
                         <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
                             <div className="flex items-center gap-3">
@@ -704,7 +707,7 @@ export default function PangkalanDashboard() {
                                 </div>
                                 <span className="font-medium text-green-700">Laba Bersih</span>
                             </div>
-                            <span className="text-xl font-bold text-green-600">{formatCurrency(stats?.laba_bersih || 0)}</span>
+                            <span className="text-xl font-bold text-green-600">{formatCurrency(monthlyStats?.laba_bersih || 0)}</span>
                         </div>
                     </CardContent>
                 </Card>
