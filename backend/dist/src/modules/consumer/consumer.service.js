@@ -21,6 +21,7 @@ let ConsumerService = class ConsumerService {
         const skip = (page - 1) * limit;
         const where = {
             pangkalan_id: pangkalanId,
+            is_active: true,
         };
         if (search) {
             where.OR = [
@@ -160,22 +161,23 @@ let ConsumerService = class ConsumerService {
         return { message: 'Pelanggan berhasil dihapus' };
     }
     async getStats(pangkalanId) {
+        const baseWhere = { pangkalan_id: pangkalanId, is_active: true };
         const [total, active, rumahTangga, warung, withNik] = await Promise.all([
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId },
+                where: baseWhere,
             }),
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId, is_active: true },
+                where: baseWhere,
             }),
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId, consumer_type: 'RUMAH_TANGGA' },
+                where: { ...baseWhere, consumer_type: 'RUMAH_TANGGA' },
             }),
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId, consumer_type: 'WARUNG' },
+                where: { ...baseWhere, consumer_type: 'WARUNG' },
             }),
             this.prisma.consumers.count({
                 where: {
-                    pangkalan_id: pangkalanId,
+                    ...baseWhere,
                     nik: { not: null }
                 },
             }),

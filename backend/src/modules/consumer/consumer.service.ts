@@ -26,6 +26,7 @@ export class ConsumerService {
 
         const where: any = {
             pangkalan_id: pangkalanId,  // Filter by pangkalan (multi-tenant)
+            is_active: true,  // Only show active consumers (exclude soft-deleted)
         };
 
         if (search) {
@@ -217,25 +218,30 @@ export class ConsumerService {
      * Menghitung total, aktif, tidak aktif, dan per jenis (RUMAH_TANGGA/WARUNG)
      */
     async getStats(pangkalanId: string) {
+        // Only count active consumers for all stats (exclude soft-deleted)
+        const baseWhere = { pangkalan_id: pangkalanId, is_active: true };
+
         const [total, active, rumahTangga, warung, withNik] = await Promise.all([
+            // Total = active consumers only
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId },
+                where: baseWhere,
             }),
+            // Active count (same as total since we filter is_active)
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId, is_active: true },
+                where: baseWhere,
             }),
-            // Count by consumer_type RUMAH_TANGGA
+            // Count by consumer_type RUMAH_TANGGA (active only)
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId, consumer_type: 'RUMAH_TANGGA' },
+                where: { ...baseWhere, consumer_type: 'RUMAH_TANGGA' },
             }),
-            // Count by consumer_type WARUNG
+            // Count by consumer_type WARUNG (active only)
             this.prisma.consumers.count({
-                where: { pangkalan_id: pangkalanId, consumer_type: 'WARUNG' },
+                where: { ...baseWhere, consumer_type: 'WARUNG' },
             }),
-            // Count consumers with NIK verified
+            // Count consumers with NIK verified (active only)
             this.prisma.consumers.count({
                 where: {
-                    pangkalan_id: pangkalanId,
+                    ...baseWhere,
                     nik: { not: null }
                 },
             }),
