@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.Bvdpe0CJ.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.C7j8yK_x.js";
 /* empty css                              */
 import { renderers } from "../renderers.mjs";
 const $$404 = createComponent(($$result, $$props, $$slots) => renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { title: "404 - Halaman Tidak Ditemukan | SIM4LON", "data-astro-cid-zetdm5md": true }, { default: ($$result2) => renderTemplate`

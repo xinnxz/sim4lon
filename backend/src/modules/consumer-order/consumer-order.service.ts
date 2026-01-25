@@ -130,16 +130,29 @@ export class ConsumerOrderService {
             }
 
             // If consumer_id provided, verify ownership
+            let verifiedConsumer: any = null;
             if (dto.consumer_id) {
                 this.logger.log(`[CREATE] Verifying consumer_id: ${dto.consumer_id}`);
-                const consumer = await this.prisma.consumers.findFirst({
+                verifiedConsumer = await this.prisma.consumers.findFirst({
                     where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
                 });
-                if (!consumer) {
+                if (!verifiedConsumer) {
                     this.logger.warn('[CREATE] Consumer not found or not owned');
                     throw new NotFoundException('Pelanggan tidak ditemukan');
                 }
-                this.logger.log(`[CREATE] Consumer verified: ${consumer.name}`);
+                this.logger.log(`[CREATE] Consumer verified: ${verifiedConsumer.name}`);
+            }
+
+            // VALIDASI SUBSIDI: LPG 3kg hanya untuk konsumen terdaftar dengan NIK & KK
+            if (dto.lpg_type === 'kg3') {
+                if (!dto.consumer_id) {
+                    this.logger.warn('[CREATE] Subsidy validation failed - 3kg requires registered consumer');
+                    throw new BadRequestException('LPG 3kg Subsidi hanya untuk konsumen TERDAFTAR dengan NIK dan KK yang valid');
+                }
+                if (!verifiedConsumer?.nik || !verifiedConsumer?.kk) {
+                    this.logger.warn(`[CREATE] Subsidy validation failed - consumer ${verifiedConsumer?.name} missing NIK/KK`);
+                    throw new BadRequestException(`Konsumen "${verifiedConsumer?.name}" belum memiliki NIK dan KK. LPG 3kg Subsidi memerlukan data NIK dan KK yang lengkap.`);
+                }
             }
 
             // Generate order code with timestamp for guaranteed uniqueness

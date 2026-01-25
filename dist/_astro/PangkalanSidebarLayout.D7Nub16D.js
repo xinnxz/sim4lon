@@ -132,7 +132,7 @@ function PangkalanHeaderSimple() {
   return /* @__PURE__ */ jsx("header", { className: "sticky top-0 z-50 w-full h-14 sm:h-16 border-b bg-white dark:bg-slate-950 shadow-sm backdrop-blur-lg", children: /* @__PURE__ */ jsxs("div", { className: "flex h-full items-center px-3 sm:px-4 gap-2 sm:gap-4", children: [
     /* @__PURE__ */ jsx("div", { className: "hidden md:block", children: /* @__PURE__ */ jsx(MobileMenuButton, {}) }),
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 sm:gap-3", children: [
-      /* @__PURE__ */ jsx("a", { href: "/pangkalan", className: "cursor-pointer hover:opacity-80 transition-opacity duration-200", children: /* @__PURE__ */ jsx(
+      /* @__PURE__ */ jsx("a", { href: "/pangkalan/dashboard", className: "cursor-pointer hover:opacity-80 transition-opacity duration-200", children: /* @__PURE__ */ jsx(
         "img",
         {
           src: "/logo-pertamina-2.png",

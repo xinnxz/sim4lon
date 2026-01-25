@@ -1,8 +1,8 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate } from "../../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../../_astro/BaseLayout.Bvdpe0CJ.js";
-import { P as PangkalanSidebarLayout } from "../../_astro/PangkalanSidebarLayout.BvgbXP5u.js";
+import { $ as $$BaseLayout } from "../../_astro/BaseLayout.C7j8yK_x.js";
+import { P as PangkalanSidebarLayout } from "../../_astro/PangkalanSidebarLayout.D7Nub16D.js";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
 import { C as Card, b as CardHeader, d as CardTitle, a as CardContent, e as CardDescription } from "../../_astro/card.CnUj7wdc.js";

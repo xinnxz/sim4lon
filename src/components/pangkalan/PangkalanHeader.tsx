@@ -61,7 +61,7 @@ export default function PangkalanHeader() {
                 {/* Logo & Title - Responsive */}
                 <div className="flex items-center gap-2 sm:gap-3">
                     {/* Logo - clickable to go back to pangkalan dashboard */}
-                    <a href="/pangkalan" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
+                    <a href="/pangkalan/dashboard" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
                         <img
                             src="/logo-pertamina-2.png"
                             alt="Pertamina"

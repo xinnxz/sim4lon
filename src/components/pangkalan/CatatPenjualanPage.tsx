@@ -178,6 +178,22 @@ export default function CatatPenjualanPage() {
             return
         }
 
+        // VALIDASI SUBSIDI: LPG 3kg hanya untuk konsumen terdaftar dengan NIK & KK
+        if (lpgType === 'kg3') {
+            if (!selectedConsumer) {
+                toast.error('⚠️ LPG 3kg Subsidi hanya untuk konsumen TERDAFTAR!\n\nSilakan pilih konsumen dari daftar atau daftarkan konsumen baru dengan NIK dan KK.', {
+                    duration: 5000,
+                })
+                return
+            }
+            if (!selectedConsumer.nik || !selectedConsumer.kk) {
+                toast.error(`⚠️ Konsumen "${selectedConsumer.name}" belum lengkap!\n\nLPG 3kg Subsidi memerlukan NIK dan KK yang valid. Silakan lengkapi data konsumen terlebih dahulu.`, {
+                    duration: 5000,
+                })
+                return
+            }
+        }
+
         try {
             setIsSubmitting(true)
             await consumerOrdersApi.create({
@@ -496,20 +512,6 @@ export default function CatatPenjualanPage() {
                                 <SafeIcon name="Banknote" className="h-5 w-5 text-blue-600" />
                                 <span className="font-semibold text-blue-700">Bayar Tunai</span>
                             </div>
-
-                            {/* Subsidy Warning for Walk-in Customers */}
-                            {lpgType === 'kg3' && !selectedConsumer && (
-                                <div className="p-4 rounded-xl border-2 border-amber-400 bg-amber-50 flex items-start gap-3">
-                                    <SafeIcon name="AlertTriangle" className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="font-semibold text-amber-800 text-sm">Peringatan Subsidi</p>
-                                        <p className="text-amber-700 text-xs mt-1">
-                                            LPG 3 kg adalah produk subsidi pemerintah yang seharusnya hanya untuk konsumen terdaftar (bersubsidi).
-                                            Pastikan konsumen berhak menerima subsidi sebelum melanjutkan.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Total */}
                             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-center text-white shadow-lg">
