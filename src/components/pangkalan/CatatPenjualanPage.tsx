@@ -497,6 +497,20 @@ export default function CatatPenjualanPage() {
                                 <span className="font-semibold text-blue-700">Bayar Tunai</span>
                             </div>
 
+                            {/* Subsidy Warning for Walk-in Customers */}
+                            {lpgType === 'kg3' && !selectedConsumer && (
+                                <div className="p-4 rounded-xl border-2 border-amber-400 bg-amber-50 flex items-start gap-3">
+                                    <SafeIcon name="AlertTriangle" className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-semibold text-amber-800 text-sm">Peringatan Subsidi</p>
+                                        <p className="text-amber-700 text-xs mt-1">
+                                            LPG 3 kg adalah produk subsidi pemerintah yang seharusnya hanya untuk konsumen terdaftar (bersubsidi).
+                                            Pastikan konsumen berhak menerima subsidi sebelum melanjutkan.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Total */}
                             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-center text-white shadow-lg">
                                 <p className="text-blue-200 text-sm font-medium">Total Pembayaran</p>

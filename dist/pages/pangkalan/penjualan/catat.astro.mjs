@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate } from "../../../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../../../_astro/BaseLayout.C7j8yK_x.js";
+import { $ as $$BaseLayout } from "../../../_astro/BaseLayout.Bvdpe0CJ.js";
 import { P as PangkalanSidebarLayout } from "../../../_astro/PangkalanSidebarLayout.BvgbXP5u.js";
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -418,6 +418,13 @@ function CatatPenjualanPage() {
         /* @__PURE__ */ jsxs("div", { className: "p-4 rounded-xl border-2 border-blue-500 bg-blue-50 flex items-center justify-center gap-2", children: [
           /* @__PURE__ */ jsx(SafeIcon, { name: "Banknote", className: "h-5 w-5 text-blue-600" }),
           /* @__PURE__ */ jsx("span", { className: "font-semibold text-blue-700", children: "Bayar Tunai" })
+        ] }),
+        lpgType === "kg3" && !selectedConsumer && /* @__PURE__ */ jsxs("div", { className: "p-4 rounded-xl border-2 border-amber-400 bg-amber-50 flex items-start gap-3", children: [
+          /* @__PURE__ */ jsx(SafeIcon, { name: "AlertTriangle", className: "h-5 w-5 text-amber-600 shrink-0 mt-0.5" }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "font-semibold text-amber-800 text-sm", children: "Peringatan Subsidi" }),
+            /* @__PURE__ */ jsx("p", { className: "text-amber-700 text-xs mt-1", children: "LPG 3 kg adalah produk subsidi pemerintah yang seharusnya hanya untuk konsumen terdaftar (bersubsidi). Pastikan konsumen berhak menerima subsidi sebelum melanjutkan." })
+          ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-center text-white shadow-lg", children: [
           /* @__PURE__ */ jsx("p", { className: "text-blue-200 text-sm font-medium", children: "Total Pembayaran" }),
