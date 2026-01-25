@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate } from "../../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../../_astro/BaseLayout.C7j8yK_x.js";
+import { $ as $$BaseLayout } from "../../_astro/BaseLayout.C63pe5Ia.js";
 import { P as PangkalanSidebarLayout } from "../../_astro/PangkalanSidebarLayout.D7Nub16D.js";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { useState, useEffect, useMemo, useCallback } from "react";

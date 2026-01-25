@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate } from "../../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../../_astro/BaseLayout.C7j8yK_x.js";
+import { $ as $$BaseLayout } from "../../_astro/BaseLayout.C63pe5Ia.js";
 import { P as PangkalanSidebarLayout } from "../../_astro/PangkalanSidebarLayout.D7Nub16D.js";
 import { jsxs, jsx, Fragment } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
@@ -282,6 +282,7 @@ function StokPangkalanPage() {
   const [companyProfile, setCompanyProfile] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterType, setFilterType] = useState("all");
+  const [filterMovementType, setFilterMovementType] = useState("all");
   const itemsPerPage = 10;
   const [prices, setPrices] = useState([]);
   const [editedPrices, setEditedPrices] = useState({});
@@ -523,7 +524,12 @@ function StokPangkalanPage() {
       minute: "2-digit"
     });
   };
-  const filteredMovements = filterType === "all" ? movements : movements.filter((m) => normalizeType(m.lpg_type) === normalizeType(filterType));
+  const filteredMovements = movements.filter((m) => {
+    const typeMatch = filterType === "all" || normalizeType(m.lpg_type) === normalizeType(filterType);
+    const isIn = m.movement_type === "MASUK" || m.movement_type === "IN";
+    const movementMatch = filterMovementType === "all" || filterMovementType === "IN" && isIn || filterMovementType === "OUT" && !isIn;
+    return typeMatch && movementMatch;
+  });
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
   const paginatedMovements = filteredMovements.slice(
     (currentPage - 1) * itemsPerPage,
@@ -1177,8 +1183,19 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`;
               /* @__PURE__ */ jsx(SelectItem, { value: "kg50", children: "LPG 50 kg" })
             ] })
           ] }),
+          /* @__PURE__ */ jsxs(Select, { value: filterMovementType, onValueChange: (val) => {
+            setFilterMovementType(val);
+            setCurrentPage(1);
+          }, children: [
+            /* @__PURE__ */ jsx(SelectTrigger, { className: "w-full sm:w-[150px] rounded-xl", children: /* @__PURE__ */ jsx(SelectValue, { placeholder: "Semua Jenis" }) }),
+            /* @__PURE__ */ jsxs(SelectContent, { children: [
+              /* @__PURE__ */ jsx(SelectItem, { value: "all", children: "Semua Jenis" }),
+              /* @__PURE__ */ jsx(SelectItem, { value: "IN", children: "MASUK" }),
+              /* @__PURE__ */ jsx(SelectItem, { value: "OUT", children: "KELUAR" })
+            ] })
+          ] }),
           /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 sm:ml-auto", children: [
-            filterType !== "all" && /* @__PURE__ */ jsxs(Badge, { variant: "secondary", className: "text-xs", children: [
+            (filterType !== "all" || filterMovementType !== "all") && /* @__PURE__ */ jsxs(Badge, { variant: "secondary", className: "text-xs", children: [
               filteredMovements.length,
               " hasil"
             ] }),

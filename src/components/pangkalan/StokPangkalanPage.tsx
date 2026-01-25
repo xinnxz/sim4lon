@@ -114,6 +114,7 @@ export default function StokPangkalanPage() {
     // History pagination & filter
     const [currentPage, setCurrentPage] = useState(1)
     const [filterType, setFilterType] = useState<string>('all')
+    const [filterMovementType, setFilterMovementType] = useState<string>('all') // Filter MASUK/KELUAR
     const itemsPerPage = 10
 
     // Price management state
@@ -450,9 +451,16 @@ export default function StokPangkalanPage() {
     }
 
     // Pagination with client-side filtering backup
-    const filteredMovements = filterType === 'all'
-        ? movements
-        : movements.filter(m => normalizeType(m.lpg_type) === normalizeType(filterType))
+    const filteredMovements = movements.filter(m => {
+        // Filter by LPG type
+        const typeMatch = filterType === 'all' || normalizeType(m.lpg_type) === normalizeType(filterType)
+        // Filter by movement type (MASUK/KELUAR)
+        const isIn = m.movement_type === 'MASUK' || m.movement_type === 'IN'
+        const movementMatch = filterMovementType === 'all' ||
+            (filterMovementType === 'IN' && isIn) ||
+            (filterMovementType === 'OUT' && !isIn)
+        return typeMatch && movementMatch
+    })
     const totalPages = Math.ceil(filteredMovements.length / itemsPerPage)
     const paginatedMovements = filteredMovements.slice(
         (currentPage - 1) * itemsPerPage,
@@ -1350,8 +1358,18 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                         <SelectItem value="kg50">LPG 50 kg</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <Select value={filterMovementType} onValueChange={(val) => { setFilterMovementType(val); setCurrentPage(1); }}>
+                                    <SelectTrigger className="w-full sm:w-[150px] rounded-xl">
+                                        <SelectValue placeholder="Semua Jenis" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Semua Jenis</SelectItem>
+                                        <SelectItem value="IN">MASUK</SelectItem>
+                                        <SelectItem value="OUT">KELUAR</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <div className="flex items-center gap-2 sm:ml-auto">
-                                    {filterType !== 'all' && (
+                                    {(filterType !== 'all' || filterMovementType !== 'all') && (
                                         <Badge variant="secondary" className="text-xs">
                                             {filteredMovements.length} hasil
                                         </Badge>
