@@ -1067,7 +1067,29 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 <Button variant="outline" onClick={() => setIsOrderOpen(false)}>Batal</Button>
                                 <Button
                                     onClick={async () => {
-                                        // Save order to database
+                                        if (orderData.qty <= 0) {
+                                            toast.error('Jumlah harus lebih dari 0')
+                                            return
+                                        }
+
+                                        // PENTING: Buka WhatsApp DULU (sinkron) sebelum async call
+                                        // Ini mencegah popup blocker karena window.open harus dipanggil
+                                        // dalam event tick yang sama dengan klik user
+                                        if (companyProfile?.phone) {
+                                            let phoneNumber = companyProfile.phone.replace(/\D/g, '')
+                                            if (phoneNumber.startsWith('0')) {
+                                                phoneNumber = '62' + phoneNumber.substring(1)
+                                            } else if (!phoneNumber.startsWith('62')) {
+                                                phoneNumber = '62' + phoneNumber
+                                            }
+                                            const lpgName = LPG_CONFIG[orderData.lpgType]?.name || orderData.lpgType
+                                            const pangkalanName = profile?.pangkalans?.name || 'Pangkalan'
+                                            const message = `*PESANAN LPG*\n\nDari: ${pangkalanName}\nTipe: ${lpgName}\nJumlah: ${orderData.qty} tabung\n${orderData.note ? `Catatan: ${orderData.note}` : ''}\n\nMohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
+                                            const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+                                            window.open(waUrl, '_blank')
+                                        }
+
+                                        // Kemudian simpan ke database (async)
                                         try {
                                             setIsSubmitting(true)
                                             await agenOrdersApi.createOrder({
@@ -1077,14 +1099,10 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                             })
                                             toast.success('Pesanan berhasil dibuat!')
                                             await fetchAgenOrders()
-
-                                            // Also send WhatsApp if phone exists
-                                            if (companyProfile?.phone) {
-                                                handleOrderToAgen()
-                                            }
                                             setIsOrderOpen(false)
+                                            setOrderData({ lpgType: 'kg3' as LpgType, qty: 0, note: '' })
                                         } catch (error: any) {
-                                            toast.error(error.message || 'Gagal membuat pesanan')
+                                            toast.error(error.message || 'Gagal menyimpan pesanan ke database')
                                         } finally {
                                             setIsSubmitting(false)
                                         }

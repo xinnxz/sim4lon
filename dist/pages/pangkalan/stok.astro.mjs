@@ -540,37 +540,6 @@ function StokPangkalanPage() {
     if (stock.status === "RENDAH") return { label: "Menipis", color: "bg-orange-100 text-orange-700 border-orange-200" };
     return { label: "Aman", color: "bg-green-100 text-green-700 border-green-200" };
   };
-  const handleOrderToAgen = async () => {
-    if (orderData.qty <= 0) {
-      toast.error("Jumlah harus lebih dari 0");
-      return;
-    }
-    if (!companyProfile?.phone) {
-      toast.error("Nomor telepon Agen belum terdaftar. Hubungi admin untuk menambahkan data.");
-      return;
-    }
-    let phoneNumber = companyProfile.phone.replace(/\D/g, "");
-    if (phoneNumber.startsWith("0")) {
-      phoneNumber = "62" + phoneNumber.substring(1);
-    } else if (!phoneNumber.startsWith("62")) {
-      phoneNumber = "62" + phoneNumber;
-    }
-    const lpgName = LPG_CONFIG[orderData.lpgType]?.name || orderData.lpgType;
-    const pangkalanName = profile?.pangkalans?.name || "Pangkalan";
-    const message = `*PESANAN LPG*
-
-Dari: ${pangkalanName}
-Tipe: ${lpgName}
-Jumlah: ${orderData.qty} tabung
-${orderData.note ? `Catatan: ${orderData.note}` : ""}
-
-Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`;
-    const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank");
-    toast.success(`Membuka WhatsApp untuk menghubungi ${companyProfile.company_name}`);
-    setIsOrderOpen(false);
-    setOrderData({ lpgType: "3kg", qty: 0, note: "" });
-  };
   const handleExportExcel = () => {
     try {
       toast.loading("Generating Excel...", { id: "excel-export" });
@@ -946,6 +915,30 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`;
                 Button,
                 {
                   onClick: async () => {
+                    if (orderData.qty <= 0) {
+                      toast.error("Jumlah harus lebih dari 0");
+                      return;
+                    }
+                    if (companyProfile?.phone) {
+                      let phoneNumber = companyProfile.phone.replace(/\D/g, "");
+                      if (phoneNumber.startsWith("0")) {
+                        phoneNumber = "62" + phoneNumber.substring(1);
+                      } else if (!phoneNumber.startsWith("62")) {
+                        phoneNumber = "62" + phoneNumber;
+                      }
+                      const lpgName = LPG_CONFIG[orderData.lpgType]?.name || orderData.lpgType;
+                      const pangkalanName = profile?.pangkalans?.name || "Pangkalan";
+                      const message = `*PESANAN LPG*
+
+Dari: ${pangkalanName}
+Tipe: ${lpgName}
+Jumlah: ${orderData.qty} tabung
+${orderData.note ? `Catatan: ${orderData.note}` : ""}
+
+Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`;
+                      const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                      window.open(waUrl, "_blank");
+                    }
                     try {
                       setIsSubmitting(true);
                       await agenOrdersApi.createOrder({
@@ -955,12 +948,10 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`;
                       });
                       toast.success("Pesanan berhasil dibuat!");
                       await fetchAgenOrders();
-                      if (companyProfile?.phone) {
-                        handleOrderToAgen();
-                      }
                       setIsOrderOpen(false);
+                      setOrderData({ lpgType: "kg3", qty: 0, note: "" });
                     } catch (error) {
-                      toast.error(error.message || "Gagal membuat pesanan");
+                      toast.error(error.message || "Gagal menyimpan pesanan ke database");
                     } finally {
                       setIsSubmitting(false);
                     }
