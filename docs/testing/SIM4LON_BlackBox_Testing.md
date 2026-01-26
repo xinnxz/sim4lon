@@ -8,29 +8,30 @@ Pengujian dilakukan untuk menjamin kualitas dan juga mengetahui kelemahan dari s
 
 Pengujian Black Box bertujuan untuk menguji fungsionalitas sistem tanpa memperhatikan struktur internal kode program. Fokus pengujian adalah pada input dan output yang dihasilkan oleh sistem.
 
-Ada 21 modul dan 192 test case pada metode pengujian black box ini. Diantaranya:
+Ada 22 modul dan 181 test case pada metode pengujian black box ini. Diantaranya:
 
 1. Login, 8 test case
 2. Dashboard, 10 test case
 3. Stok LPG, 6 test case
-4. Pesanan, 21 test case
-5. Pembayaran, 11 test case
+4. Pesanan, 24 test case
+5. Pembayaran, 12 test case
 6. Pangkalan, 10 test case
-7. Driver, 9 test case
+7. Driver, 8 test case
 8. Laporan, 10 test case
 9. Konsumen Subsidi, 12 test case
-10. Penjualan Konsumen, 14 test case
-11. Stok Pangkalan, 10 test case
-12. Produk LPG, 7 test case
+10. Penjualan Konsumen, 13 test case
+11. Stok Pangkalan, 8 test case
+12. Produk LPG, 4 test case
 13. Notifikasi, 6 test case
-14. Perencanaan, 8 test case
+14. Perencanaan, 4 test case
 15. Penyaluran, 7 test case
-16. Penerimaan, 7 test case
-17. In/Out Agen, 6 test case
+16. Penerimaan, 4 test case
+17. In/Out Agen, 8 test case
 18. Pengeluaran, 8 test case
-19. User Management, 8 test case
-20. Dashboard Pangkalan, 7 test case
-21. Profil & Pengaturan, 8 test case
+19. User Management, 5 test case
+20. Dashboard Pangkalan, 8 test case
+21. Profil, 8 test case
+22. Pengaturan, 6 test case
 
 ### A. Skenario Pengujian
 
@@ -400,9 +401,9 @@ Ada 21 modul dan 192 test case pada metode pengujian black box ini. Diantaranya:
 
 ---
 
-#### u. Pengujian Modul Profil & Pengaturan
+#### u. Pengujian Modul Profil
 
-**Tabel 3.21** Pengujian Modul Profil & Pengaturan (Role: ALL)
+**Tabel 3.21** Pengujian Modul Profil (Role: ALL)
 
 | No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
 |----|--------------------|-----------|-----------------------|-----------------|--------|
@@ -417,40 +418,56 @@ Ada 21 modul dan 192 test case pada metode pengujian black box ini. Diantaranya:
 
 ---
 
+#### v. Pengujian Modul Pengaturan
+
+**Tabel 3.22** Pengujian Modul Pengaturan (Role: ADMIN)
+
+| No | Skenario Pengujian | Test Case | Hasil yang Diharapkan | Hasil Pengujian | Status |
+|----|--------------------|-----------|-----------------------|-----------------|--------|
+| 1 | Membuka halaman Pengaturan sebagai Admin | ![TC](figures/blackbox/pengaturan-tc1.png) | Sistem akan menampilkan halaman pengaturan dengan opsi konfigurasi sistem | ![Hasil](figures/blackbox/pengaturan-result1.png) | Valid |
+| 2 | Mengubah pengaturan tema aplikasi (Light/Dark Mode) | ![TC](figures/blackbox/pengaturan-tc2.png) | Sistem akan mengubah tema tampilan sesuai pilihan dan menyimpan preferensi | ![Hasil](figures/blackbox/pengaturan-result2.png) | Valid |
+| 3 | Mengubah pengaturan bahasa aplikasi | ![TC](figures/blackbox/pengaturan-tc3.png) | Sistem akan mengubah bahasa tampilan sesuai pilihan (Indonesia/English) | ![Hasil](figures/blackbox/pengaturan-result3.png) | Valid |
+| 4 | Mengubah pengaturan notifikasi (On/Off) | ![TC](figures/blackbox/pengaturan-tc4.png) | Sistem akan mengaktifkan/menonaktifkan notifikasi sesuai preferensi user | ![Hasil](figures/blackbox/pengaturan-result4.png) | Valid |
+| 5 | Mengubah pengaturan batas stok kritis (threshold) | ![TC](figures/blackbox/pengaturan-tc5.png) | Sistem akan menyimpan nilai batas stok dan menampilkan alert ketika stok mencapai batas tersebut | ![Hasil](figures/blackbox/pengaturan-result5.png) | Valid |
+| 6 | Mengakses halaman Pengaturan sebagai non-Admin | ![TC](figures/blackbox/pengaturan-tc6.png) | Sistem akan menampilkan pesan "Akses ditolak" atau redirect ke halaman dashboard | ![Hasil](figures/blackbox/pengaturan-result6.png) | Valid |
+
+---
+
 ### B. Hasil Pengujian Black Box
 
-**Tabel 3.22** Ringkasan Hasil Pengujian Black Box
+**Tabel 3.23** Ringkasan Hasil Pengujian Black Box
 
 | No | Modul | Jumlah Test Case | Berhasil | Gagal | Persentase Keberhasilan |
 |----|-------|------------------|----------|-------|------------------------|
 | 1 | Login | 8 | 8 | 0 | 100% |
 | 2 | Dashboard | 10 | 10 | 0 | 100% |
 | 3 | Stok LPG | 6 | 6 | 0 | 100% |
-| 4 | Pesanan | 21 | 21 | 0 | 100% |
-| 5 | Pembayaran | 11 | 11 | 0 | 100% |
+| 4 | Pesanan | 24 | 24 | 0 | 100% |
+| 5 | Pembayaran | 12 | 12 | 0 | 100% |
 | 6 | Pangkalan | 10 | 10 | 0 | 100% |
-| 7 | Driver | 9 | 9 | 0 | 100% |
+| 7 | Driver | 8 | 8 | 0 | 100% |
 | 8 | Laporan | 10 | 10 | 0 | 100% |
 | 9 | Konsumen Subsidi | 12 | 12 | 0 | 100% |
-| 10 | Penjualan Konsumen | 14 | 14 | 0 | 100% |
-| 11 | Stok Pangkalan | 10 | 10 | 0 | 100% |
-| 12 | Produk LPG | 7 | 7 | 0 | 100% |
+| 10 | Penjualan Konsumen | 13 | 13 | 0 | 100% |
+| 11 | Stok Pangkalan | 8 | 8 | 0 | 100% |
+| 12 | Produk LPG | 4 | 4 | 0 | 100% |
 | 13 | Notifikasi | 6 | 6 | 0 | 100% |
-| 14 | Perencanaan | 8 | 8 | 0 | 100% |
+| 14 | Perencanaan | 4 | 4 | 0 | 100% |
 | 15 | Penyaluran | 7 | 7 | 0 | 100% |
-| 16 | Penerimaan | 7 | 7 | 0 | 100% |
-| 17 | In/Out Agen | 6 | 6 | 0 | 100% |
+| 16 | Penerimaan | 4 | 4 | 0 | 100% |
+| 17 | In/Out Agen | 8 | 8 | 0 | 100% |
 | 18 | Pengeluaran | 8 | 8 | 0 | 100% |
-| 19 | User Management | 8 | 8 | 0 | 100% |
-| 20 | Dashboard Pangkalan | 7 | 7 | 0 | 100% |
-| 21 | Profil & Pengaturan | 8 | 8 | 0 | 100% |
-| **Total** | | **192** | **192** | **0** | **100%** |
+| 19 | User Management | 5 | 5 | 0 | 100% |
+| 20 | Dashboard Pangkalan | 8 | 8 | 0 | 100% |
+| 21 | Profil | 8 | 8 | 0 | 100% |
+| 22 | Pengaturan | 6 | 6 | 0 | 100% |
+| **Total** | | **181** | **181** | **0** | **100%** |
 
 ### C. Kesimpulan Pengujian Black Box
 
 Berdasarkan hasil pengujian Black Box yang telah dilakukan terhadap sistem SIM4LON, dapat disimpulkan bahwa:
 
-1. Seluruh **192 test case** yang diujikan pada **21 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
+1. Seluruh **181 test case** yang diujikan pada **22 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
 
 2. Tingkat keberhasilan pengujian mencapai **100%**, yang menunjukkan bahwa fungsionalitas sistem berjalan dengan baik.
 

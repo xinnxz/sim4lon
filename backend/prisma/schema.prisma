@@ -557,6 +557,10 @@ model company_profile {
   invoice_prefix       String   @default("INV-") @db.VarChar(20)
   /// Order code prefix
   order_code_prefix    String   @default("ORD-") @db.VarChar(20)
+  /// Payment due days (default 7 days)
+  payment_due_days     Int      @default(7)
+  /// Minimum order quantity per order
+  min_order_quantity   Int      @default(1)
   created_at           DateTime @default(now()) @db.Timestamptz(6)
   updated_at           DateTime @default(now()) @db.Timestamptz(6)
 }

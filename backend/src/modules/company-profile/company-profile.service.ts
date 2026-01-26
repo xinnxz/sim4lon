@@ -60,11 +60,25 @@ export class CompanyProfileService {
                 },
             });
         } else {
-            // Create new with generated 6-digit ID
+            // Create new with generated 6-digit ID and default required values
             return this.prisma.company_profile.create({
                 data: {
                     id: this.generate6DigitId(),
-                    ...dto,
+                    company_name: dto.company_name || 'PT. MITRA SURYA NATASYA',
+                    address: dto.address || 'CHOBA RT.002 RW.006 DESA MAYAK',
+                    phone: dto.phone,
+                    email: dto.email,
+                    pic_name: dto.pic_name,
+                    sppbe_number: dto.sppbe_number,
+                    spbe_supplier_name: dto.spbe_supplier_name,
+                    region: dto.region,
+                    logo_url: dto.logo_url,
+                    ppn_rate: dto.ppn_rate,
+                    critical_stock_limit: dto.critical_stock_limit,
+                    invoice_prefix: dto.invoice_prefix,
+                    order_code_prefix: dto.order_code_prefix,
+                    payment_due_days: dto.payment_due_days,
+                    min_order_quantity: dto.min_order_quantity,
                 },
             });
         }

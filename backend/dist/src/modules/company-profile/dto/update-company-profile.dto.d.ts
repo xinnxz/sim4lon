@@ -1,6 +1,6 @@
 export declare class UpdateCompanyProfileDto {
-    company_name: string;
-    address: string;
+    company_name?: string;
+    address?: string;
     phone?: string;
     email?: string;
     pic_name?: string;
@@ -12,4 +12,6 @@ export declare class UpdateCompanyProfileDto {
     critical_stock_limit?: number;
     invoice_prefix?: string;
     order_code_prefix?: string;
+    payment_due_days?: number;
+    min_order_quantity?: number;
 }

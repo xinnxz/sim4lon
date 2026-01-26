@@ -25,14 +25,18 @@ class UpdateCompanyProfileDto {
     critical_stock_limit;
     invoice_prefix;
     order_code_prefix;
+    payment_due_days;
+    min_order_quantity;
 }
 exports.UpdateCompanyProfileDto = UpdateCompanyProfileDto;
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], UpdateCompanyProfileDto.prototype, "company_name", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateCompanyProfileDto.prototype, "address", void 0);
@@ -103,4 +107,18 @@ __decorate([
     (0, class_validator_1.MaxLength)(20),
     __metadata("design:type", String)
 ], UpdateCompanyProfileDto.prototype, "order_code_prefix", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(90),
+    __metadata("design:type", Number)
+], UpdateCompanyProfileDto.prototype, "payment_due_days", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
+    __metadata("design:type", Number)
+], UpdateCompanyProfileDto.prototype, "min_order_quantity", void 0);
 //# sourceMappingURL=update-company-profile.dto.js.map
