@@ -10,8 +10,10 @@ import { S as SafeIcon, I as Input, B as Button, t as expensesApi } from "../../
 import { L as Label } from "../../_astro/label.C1We_4rW.js";
 import { T as Textarea } from "../../_astro/textarea.F19kpFWl.js";
 import { D as Dialog, i as DialogTrigger, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, o as DialogFooter, B as Badge, P as ProtectedDashboard } from "../../_astro/ProtectedDashboard.igvMWLOj.js";
+import { S as Select, a as SelectTrigger, b as SelectValue, c as SelectContent, d as SelectItem } from "../../_astro/select.B8lpUjZQ.js";
 import { A as AlertDialog, a as AlertDialogContent, b as AlertDialogHeader, c as AlertDialogTitle, d as AlertDialogDescription, e as AlertDialogFooter, f as AlertDialogCancel, g as AlertDialogAction } from "../../_astro/alert-dialog.CFdgBlIH.js";
 import { toast } from "sonner";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import { renderers } from "../../renderers.mjs";
 const CATEGORIES = [
   { value: "OPERASIONAL", label: "Operasional", icon: "Settings", color: "bg-violet-500", gradient: "from-violet-500 to-violet-600" },
@@ -42,6 +44,7 @@ function PengeluaranPage() {
     const now = /* @__PURE__ */ new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
+  const [filterCategory, setFilterCategory] = useState("ALL");
   const fetchExpenses = async () => {
     try {
       setIsLoading(true);
@@ -171,10 +174,28 @@ function PengeluaranPage() {
       });
     }
   });
+  const filteredExpenses = filterCategory === "ALL" ? expenses : expenses.filter((e) => e.category === filterCategory);
+  filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const expensesByCategory = Array.from(categoryMap.entries()).map(([value, data]) => ({
     value,
+    name: data.label,
+    // Recharts uses 'name' by default
     ...data
-  })).filter((cat) => cat.total > 0);
+  })).filter((cat) => cat.total > 0).sort((a, b) => b.total - a.total);
+  const CHART_COLORS = {
+    "OPERASIONAL": "#8b5cf6",
+    // violet-500
+    "TRANSPORT": "#f97316",
+    // orange-500
+    "SEWA": "#ec4899",
+    // pink-500
+    "LISTRIK": "#eab308",
+    // yellow-500
+    "GAJI": "#3b82f6",
+    // blue-500
+    "LAINNYA": "#10b981"
+    // emerald-500
+  };
   if (isLoading && expenses.length === 0) {
     return /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center min-h-[500px]", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
       /* @__PURE__ */ jsxs("div", { className: "relative", children: [
@@ -206,6 +227,16 @@ function PengeluaranPage() {
             className: "w-[160px] rounded-xl"
           }
         ),
+        /* @__PURE__ */ jsxs(Select, { value: filterCategory, onValueChange: (v) => setFilterCategory(v), children: [
+          /* @__PURE__ */ jsx(SelectTrigger, { className: "w-[180px] rounded-xl bg-white dark:bg-slate-900 border-slate-200", children: /* @__PURE__ */ jsx(SelectValue, { placeholder: "Semua Kategori" }) }),
+          /* @__PURE__ */ jsxs(SelectContent, { children: [
+            /* @__PURE__ */ jsx(SelectItem, { value: "ALL", children: "Semua Kategori" }),
+            CATEGORIES.map((cat) => /* @__PURE__ */ jsx(SelectItem, { value: cat.value, children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsx("div", { className: `w-2 h-2 rounded-full ${cat.color}` }),
+              cat.label
+            ] }) }, cat.value))
+          ] })
+        ] }),
         /* @__PURE__ */ jsxs(Dialog, { open: isDialogOpen, onOpenChange: setIsDialogOpen, children: [
           /* @__PURE__ */ jsx(DialogTrigger, { asChild: true, children: /* @__PURE__ */ jsxs(
             Button,
@@ -330,24 +361,69 @@ function PengeluaranPage() {
     expensesByCategory.length > 0 && /* @__PURE__ */ jsxs(Card, { className: "bg-white shadow-lg rounded-2xl border-0 overflow-hidden", children: [
       /* @__PURE__ */ jsx(CardHeader, { className: "border-b border-slate-100 bg-slate-50/50", children: /* @__PURE__ */ jsxs(CardTitle, { className: "text-lg font-semibold text-slate-800 flex items-center gap-2", children: [
         /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center", children: /* @__PURE__ */ jsx(SafeIcon, { name: "PieChart", className: "h-4 w-4 text-purple-600" }) }),
-        "Breakdown Kategori"
+        "Statistik Pengeluaran"
       ] }) }),
-      /* @__PURE__ */ jsx(CardContent, { className: "p-6", children: /* @__PURE__ */ jsx("div", { className: "grid gap-3 sm:grid-cols-2 lg:grid-cols-3", children: expensesByCategory.map((cat) => {
-        const percentage = totalExpenses > 0 ? (cat.total / totalExpenses * 100).toFixed(1) : "0";
-        return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors", children: [
-          /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center flex-shrink-0`, children: /* @__PURE__ */ jsx(SafeIcon, { name: cat.icon, className: "h-5 w-5 text-white" }) }),
-          /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
-            /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-              /* @__PURE__ */ jsx("span", { className: "font-medium text-slate-900", children: cat.label }),
-              /* @__PURE__ */ jsxs(Badge, { variant: "secondary", className: "bg-slate-200", children: [
-                percentage,
-                "%"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 font-bold", children: formatCurrency(cat.total) })
+      /* @__PURE__ */ jsx(CardContent, { className: "p-6", children: /* @__PURE__ */ jsxs("div", { className: "grid lg:grid-cols-2 gap-8 items-center", children: [
+        /* @__PURE__ */ jsxs("div", { className: "h-[300px] w-full relative", children: [
+          /* @__PURE__ */ jsx(ResponsiveContainer, { width: "100%", height: "100%", children: /* @__PURE__ */ jsxs(PieChart, { children: [
+            /* @__PURE__ */ jsx(
+              Pie,
+              {
+                data: expensesByCategory,
+                cx: "50%",
+                cy: "50%",
+                innerRadius: 60,
+                outerRadius: 100,
+                paddingAngle: 5,
+                dataKey: "total",
+                children: expensesByCategory.map((entry, index) => /* @__PURE__ */ jsx(
+                  Cell,
+                  {
+                    fill: CHART_COLORS[entry.value] || "#cbd5e1",
+                    strokeWidth: 0
+                  },
+                  `cell-${index}`
+                ))
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              Tooltip,
+              {
+                formatter: (value) => [formatCurrency(value), "Jumlah"],
+                contentStyle: { borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }
+              }
+            ),
+            /* @__PURE__ */ jsx(Legend, { verticalAlign: "bottom", height: 36 })
+          ] }) }),
+          /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center pointer-events-none", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-sm text-slate-500 font-medium", children: "Total" }),
+            /* @__PURE__ */ jsx("span", { className: "text-xl font-bold text-slate-900", children: formatCurrency(totalExpenses) })
           ] })
-        ] }, cat.value);
-      }) }) })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "space-y-4", children: expensesByCategory.map((cat) => {
+          const percentage = totalExpenses > 0 ? (cat.total / totalExpenses * 100).toFixed(1) : "0";
+          return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors", children: [
+            /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center flex-shrink-0`, children: /* @__PURE__ */ jsx(SafeIcon, { name: cat.icon, className: "h-5 w-5 text-white" }) }),
+            /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+                /* @__PURE__ */ jsx("span", { className: "font-medium text-slate-900", children: cat.label }),
+                /* @__PURE__ */ jsxs(Badge, { variant: "secondary", className: "bg-white shadow-sm border", children: [
+                  percentage,
+                  "%"
+                ] })
+              ] }),
+              /* @__PURE__ */ jsx("div", { className: "mt-1 w-full bg-slate-200 rounded-full h-1.5 overflow-hidden", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: `h-full ${cat.color}`,
+                  style: { width: `${percentage}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 font-bold mt-1 text-right", children: formatCurrency(cat.total) })
+            ] })
+          ] }, cat.value);
+        }) })
+      ] }) })
     ] }),
     /* @__PURE__ */ jsxs(Card, { className: "bg-white shadow-lg rounded-2xl border-0 overflow-hidden", children: [
       /* @__PURE__ */ jsxs(CardHeader, { className: "border-b border-slate-100 bg-slate-50/50", children: [
@@ -365,7 +441,12 @@ function PengeluaranPage() {
           /* @__PURE__ */ jsx(SafeIcon, { name: "Plus", className: "h-4 w-4 mr-2" }),
           "Catat Pengeluaran Pertama"
         ] })
-      ] }) : /* @__PURE__ */ jsx("div", { className: "divide-y divide-slate-100", children: expenses.map((expense, index) => /* @__PURE__ */ jsx(
+      ] }) : filteredExpenses.length === 0 ? /* @__PURE__ */ jsxs("div", { className: "text-center py-16", children: [
+        /* @__PURE__ */ jsx(SafeIcon, { name: "Filter", className: "h-16 w-16 text-slate-300 mx-auto mb-4" }),
+        /* @__PURE__ */ jsx("h3", { className: "text-lg font-semibold text-slate-700 mb-2", children: "Tidak Ada Data" }),
+        /* @__PURE__ */ jsx("p", { className: "text-slate-400 mb-6", children: "Tidak ada pengeluaran pada kategori ini" }),
+        /* @__PURE__ */ jsx(Button, { onClick: () => setFilterCategory("ALL"), variant: "outline", children: "Hapus Filter" })
+      ] }) : /* @__PURE__ */ jsx("div", { className: "divide-y divide-slate-100", children: filteredExpenses.map((expense, index) => /* @__PURE__ */ jsx(
         "div",
         {
           className: `p-3 sm:p-4 hover:bg-red-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`,

@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
     Dialog,
     DialogContent,
@@ -41,6 +42,7 @@ import {
 import SafeIcon from '@/components/common/SafeIcon'
 import { expensesApi, type Expense, type ExpenseCategory } from '@/lib/api'
 import { toast } from 'sonner'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
 
 // Kategori dengan label, icon, dan color - Vibrant colors matching dashboard
 const CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string; gradient: string }[] = [
@@ -78,6 +80,7 @@ export default function PengeluaranPage() {
         const now = new Date()
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     })
+    const [filterCategory, setFilterCategory] = useState<ExpenseCategory | 'ALL'>('ALL')
 
     const fetchExpenses = async () => {
         try {
@@ -229,10 +232,40 @@ export default function PengeluaranPage() {
             })
         }
     })
+
+
+    // Filter expenses based on selected category
+    const filteredExpenses = filterCategory === 'ALL'
+        ? expenses
+        : expenses.filter(e => e.category === filterCategory)
+
+    // Calculate total for filtered view
+    const filteredTotal = filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0)
+
+    // For chart data - use ALL expenses for context, or filter? 
+    // Usually chart shows breakdown of CURRENT list if possible, or stays consistent.
+    // Let's make chart reflect current Month data (all categories) to show composition
+    // regardless of filter, OR we can show 100% if single category selected.
+    // Better: Chart always shows breakdown of ALL expenses in this month (for context)
+    // while the list shows filtered items.
+
+    // BUT user request says: "Sistem akan menampilkan chart pengeluaran per kategori dengan persentase"
+    // So let's use the categories data we already prepared map for.
     const expensesByCategory = Array.from(categoryMap.entries()).map(([value, data]) => ({
         value,
+        name: data.label, // Recharts uses 'name' by default
         ...data,
-    })).filter(cat => cat.total > 0)
+    })).filter(cat => cat.total > 0).sort((a, b) => b.total - a.total)
+
+    // Pre-defined colors matching tailwind classes for the chart
+    const CHART_COLORS = {
+        'OPERASIONAL': '#8b5cf6', // violet-500
+        'TRANSPORT': '#f97316',   // orange-500
+        'SEWA': '#ec4899',        // pink-500
+        'LISTRIK': '#eab308',     // yellow-500
+        'GAJI': '#3b82f6',        // blue-500
+        'LAINNYA': '#10b981',     // emerald-500
+    }
 
     if (isLoading && expenses.length === 0) {
         return (
@@ -272,6 +305,24 @@ export default function PengeluaranPage() {
                         onChange={(e) => setFilterMonth(e.target.value)}
                         className="w-[160px] rounded-xl"
                     />
+
+                    {/* Category Filter */}
+                    <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v as ExpenseCategory | 'ALL')}>
+                        <SelectTrigger className="w-[180px] rounded-xl bg-white dark:bg-slate-900 border-slate-200">
+                            <SelectValue placeholder="Semua Kategori" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">Semua Kategori</SelectItem>
+                            {CATEGORIES.map(cat => (
+                                <SelectItem key={cat.value} value={cat.value}>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-2 h-2 rounded-full ${cat.color}`} />
+                                        {cat.label}
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
                     {/* Add Button */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -424,7 +475,7 @@ export default function PengeluaranPage() {
                 ))}
             </div>
 
-            {/* Category Breakdown */}
+            {/* Category Breakdown Chart */}
             {expensesByCategory.length > 0 && (
                 <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
                     <CardHeader className="border-b border-slate-100 bg-slate-50/50">
@@ -432,28 +483,72 @@ export default function PengeluaranPage() {
                             <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
                                 <SafeIcon name="PieChart" className="h-4 w-4 text-purple-600" />
                             </div>
-                            Breakdown Kategori
+                            Statistik Pengeluaran
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            {expensesByCategory.map(cat => {
-                                const percentage = totalExpenses > 0 ? ((cat.total / totalExpenses) * 100).toFixed(1) : '0'
-                                return (
-                                    <div key={cat.value} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center flex-shrink-0`}>
-                                            <SafeIcon name={cat.icon} className="h-5 w-5 text-white" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between">
-                                                <span className="font-medium text-slate-900">{cat.label}</span>
-                                                <Badge variant="secondary" className="bg-slate-200">{percentage}%</Badge>
+                        <div className="grid lg:grid-cols-2 gap-8 items-center">
+                            {/* Chart */}
+                            <div className="h-[300px] w-full relative">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={expensesByCategory}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            paddingAngle={5}
+                                            dataKey="total"
+                                        >
+                                            {expensesByCategory.map((entry, index) => (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={CHART_COLORS[entry.value as keyof typeof CHART_COLORS] || '#cbd5e1'}
+                                                    strokeWidth={0}
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip
+                                            formatter={(value: number) => [formatCurrency(value), 'Jumlah']}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                        />
+                                        <Legend verticalAlign="bottom" height={36} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                {/* Center Text */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                    <span className="text-sm text-slate-500 font-medium">Total</span>
+                                    <span className="text-xl font-bold text-slate-900">{formatCurrency(totalExpenses)}</span>
+                                </div>
+                            </div>
+
+                            {/* Detail List */}
+                            <div className="space-y-4">
+                                {expensesByCategory.map(cat => {
+                                    const percentage = totalExpenses > 0 ? ((cat.total / totalExpenses) * 100).toFixed(1) : '0'
+                                    return (
+                                        <div key={cat.value} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center flex-shrink-0`}>
+                                                <SafeIcon name={cat.icon} className="h-5 w-5 text-white" />
                                             </div>
-                                            <p className="text-sm text-slate-500 font-bold">{formatCurrency(cat.total)}</p>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-medium text-slate-900">{cat.label}</span>
+                                                    <Badge variant="secondary" className="bg-white shadow-sm border">{percentage}%</Badge>
+                                                </div>
+                                                <div className="mt-1 w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                                    <div
+                                                        className={`h-full ${cat.color}`}
+                                                        style={{ width: `${percentage}%` }}
+                                                    />
+                                                </div>
+                                                <p className="text-sm text-slate-500 font-bold mt-1 text-right">{formatCurrency(cat.total)}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
+                                    )
+                                })}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -481,9 +576,18 @@ export default function PengeluaranPage() {
                                 Catat Pengeluaran Pertama
                             </Button>
                         </div>
+                    ) : filteredExpenses.length === 0 ? (
+                        <div className="text-center py-16">
+                            <SafeIcon name="Filter" className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold text-slate-700 mb-2">Tidak Ada Data</h3>
+                            <p className="text-slate-400 mb-6">Tidak ada pengeluaran pada kategori ini</p>
+                            <Button onClick={() => setFilterCategory('ALL')} variant="outline">
+                                Hapus Filter
+                            </Button>
+                        </div>
                     ) : (
                         <div className="divide-y divide-slate-100">
-                            {expenses.map((expense, index) => (
+                            {filteredExpenses.map((expense, index) => (
                                 <div
                                     key={expense.id}
                                     className={`p-3 sm:p-4 hover:bg-red-50/30 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
