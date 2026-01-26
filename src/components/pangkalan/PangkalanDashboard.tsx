@@ -16,9 +16,28 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
 import WelcomePopup from '@/components/common/WelcomePopup'
-import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, lpgPricesApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory, type PangkalanLpgPrice } from '@/lib/api'
+import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, lpgPricesApi, ordersApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory, type PangkalanLpgPrice } from '@/lib/api'
+import { toast } from 'sonner'
 import {
     AreaChart,
     Area,
@@ -175,7 +194,76 @@ export default function PangkalanDashboard() {
     const [totalStock, setTotalStock] = useState(0)
     const [expenseSummary, setExpenseSummary] = useState<{ total: number; byCategory: Array<{ name: string; value: number; color: string }> }>({ total: 0, byCategory: [] })
     const [isLoading, setIsLoading] = useState(true)
+
     const [error, setError] = useState<string | null>(null)
+
+    // Order Dialog State
+    const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false)
+    const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
+    const [orderForm, setOrderForm] = useState({
+        lpg_type: '3kg',
+        qty: '',
+        note: ''
+    })
+
+    const handleOrderSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!orderForm.qty || parseInt(orderForm.qty) <= 0) {
+            toast.error('Jumlah pesanan tidak valid')
+            return
+        }
+        if (!profile?.pangkalan_id && !profile?.pangkalans?.id) {
+            toast.error('Data pangkalan tidak ditemukan')
+            return
+        }
+
+        try {
+            setIsSubmittingOrder(true)
+            const pangkalanId = profile.pangkalan_id || profile.pangkalans?.id
+
+            // Calculate estimated price based on market (dummy logic or use previous)
+            // Ideally we fetch price from API. For now assume standard prices:
+            // 3kg: 15000 (beli), 12kg: 180000, etc.
+            // This is just for the ORDER RECORD. True price is set by Agen/Admin upon confirmation usually.
+            // But API requires it. Let's use a safe map.
+            const ESTIMATED_PRICES: Record<string, number> = {
+                '3kg': 15000,
+                '5.5kg': 85000,
+                '12kg': 180000,
+                '50kg': 750000,
+                '220gr': 15000
+            }
+            const normalizedType = orderForm.lpg_type.replace('kg', '').replace('gr', '')
+            // Simple mapping attempt
+            let price = 0
+            if (orderForm.lpg_type.includes('3kg')) price = 15000
+            else if (orderForm.lpg_type.includes('12kg')) price = 180000
+            else if (orderForm.lpg_type.includes('5.5kg')) price = 85000
+            else if (orderForm.lpg_type.includes('50kg')) price = 750000
+            else price = 20000 // default
+
+            await ordersApi.create({
+                pangkalan_id: pangkalanId!,
+                note: orderForm.note,
+                items: [{
+                    lpg_type: orderForm.lpg_type,
+                    label: lpgTypeConfig[orderForm.lpg_type]?.name || orderForm.lpg_type,
+                    qty: parseInt(orderForm.qty),
+                    price_per_unit: price
+                }]
+            })
+
+            toast.success('Pesanan berhasil dibuat! Menunggu konfirmasi Agen.')
+            setIsOrderDialogOpen(false)
+            setOrderForm({ lpg_type: '3kg', qty: '', note: '' })
+            // Optional: refresh dashboard data
+        } catch (error: any) {
+            console.error(error)
+            toast.error(error.message || 'Gagal membuat pesanan')
+        } finally {
+            setIsSubmittingOrder(false)
+        }
+    }
 
     // Hide footer during loading
     useEffect(() => {
@@ -357,13 +445,25 @@ export default function PangkalanDashboard() {
                     </div>
                 </div>
                 {/* Hidden on mobile - use bottom nav instead */}
-                <Button
-                    className="hidden sm:flex group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all active:scale-95"
-                    onClick={() => window.location.href = '/pangkalan/penjualan/catat'}
-                >
-                    <SafeIcon name="Plus" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
-                    Catat Penjualan
-                </Button>
+
+                <div className="flex items-center gap-3 hidden sm:flex">
+                    <Button
+                        variant="outline"
+                        className="group border-blue-200 hover:bg-blue-50 text-blue-600 hover:text-blue-700 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95"
+                        onClick={() => setIsOrderDialogOpen(true)}
+                        disabled={isSubmittingOrder}
+                    >
+                        <SafeIcon name="Truck" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:translate-x-1" />
+                        Pesan ke Agen
+                    </Button>
+                    <Button
+                        className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all active:scale-95"
+                        onClick={() => window.location.href = '/pangkalan/penjualan/catat'}
+                    >
+                        <SafeIcon name="Plus" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
+                        Catat Penjualan
+                    </Button>
+                </div>
             </div>
 
             {/* Stats Cards - Staggered Entry */}
@@ -790,6 +890,84 @@ export default function PangkalanDashboard() {
                     )}
                 </CardContent>
             </Card>
+
+
+            {/* Order Dialog */}
+            <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
+                <DialogContent className="sm:max-w-md rounded-2xl bg-white dark:bg-slate-900 border-none shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <SafeIcon name="Truck" className="h-5 w-5 text-blue-600" />
+                            </div>
+                            Pesan Stok ke Agen
+                        </DialogTitle>
+                        <DialogDescription>
+                            Buat pesanan baru ke agen Anda.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleOrderSubmit} className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="lpg_type">Jenis Produk</Label>
+                            <Select
+                                value={orderForm.lpg_type}
+                                onValueChange={(v) => setOrderForm({ ...orderForm, lpg_type: v })}
+                            >
+                                <SelectTrigger id="lpg_type" className="rounded-xl border-slate-200">
+                                    <SelectValue placeholder="Pilih produk" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="3kg">LPG 3 kg (Subsidi)</SelectItem>
+                                    <SelectItem value="5.5kg">Bright Gas 5.5 kg</SelectItem>
+                                    <SelectItem value="12kg">LPG 12 kg</SelectItem>
+                                    <SelectItem value="50kg">LPG 50 kg</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="qty">Jumlah Tabung</Label>
+                            <Input
+                                id="qty"
+                                type="number"
+                                min="1"
+                                placeholder="Contoh: 100"
+                                value={orderForm.qty}
+                                onChange={(e) => setOrderForm({ ...orderForm, qty: e.target.value })}
+                                className="rounded-xl border-slate-200"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="note">Catatan (Opsional)</Label>
+                            <Input
+                                id="note"
+                                placeholder="Pesan tambahan..."
+                                value={orderForm.note}
+                                onChange={(e) => setOrderForm({ ...orderForm, note: e.target.value })}
+                                className="rounded-xl border-slate-200"
+                            />
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="ghost" onClick={() => setIsOrderDialogOpen(false)} disabled={isSubmittingOrder}>
+                                Batal
+                            </Button>
+                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 rounded-xl text-white" disabled={isSubmittingOrder}>
+                                {isSubmittingOrder ? (
+                                    <>
+                                        <SafeIcon name="Loader2" className="mr-2 h-4 w-4 animate-spin" />
+                                        Memproses...
+                                    </>
+                                ) : (
+                                    <>
+                                        <SafeIcon name="Send" className="mr-2 h-4 w-4" />
+                                        Kirim Pesanan
+                                    </>
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
