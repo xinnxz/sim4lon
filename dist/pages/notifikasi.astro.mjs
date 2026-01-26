@@ -1,16 +1,16 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.BreR4teh.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
 import { jsxs, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
-import { n as notificationApi, S as SafeIcon, B as Button, m as agenPangkalanOrdersApi } from "../_astro/AuthGuard.71S_I7hh.js";
-import { B as Badge, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
+import { n as notificationApi, S as SafeIcon, B as Button, m as agenPangkalanOrdersApi } from "../_astro/AuthGuard.BLl0uVB7.js";
+import { B as Badge, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
 import { C as Card, a as CardContent, b as CardHeader, d as CardTitle, e as CardDescription } from "../_astro/card.CnUj7wdc.js";
 import { S as Select, a as SelectTrigger, b as SelectValue, c as SelectContent, d as SelectItem } from "../_astro/select.B8lpUjZQ.js";
 import { toast } from "sonner";
-import { A as AdminFooter } from "../_astro/AdminFooter.CHtO5w8Z.js";
+import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
 import { renderers } from "../renderers.mjs";
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100];
 function NotificationPageContent() {

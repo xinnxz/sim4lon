@@ -1,22 +1,22 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.BreR4teh.js";
-import { A as AdminFooter } from "../_astro/AdminFooter.CHtO5w8Z.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
+import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
 import { jsxs, jsx } from "react/jsx-runtime";
 import { useState, useMemo, useEffect } from "react";
 import { C as Card, a as CardContent, b as CardHeader, d as CardTitle } from "../_astro/card.CnUj7wdc.js";
-import { B as Button, S as SafeIcon, I as Input, g as penerimaanApi, l as lpgProductsApi, k as companyProfileApi } from "../_astro/AuthGuard.71S_I7hh.js";
+import { B as Button, S as SafeIcon, I as Input, g as penerimaanApi, l as lpgProductsApi, k as companyProfileApi } from "../_astro/AuthGuard.BLl0uVB7.js";
 import { L as Label } from "../_astro/label.C1We_4rW.js";
 import { S as Select, a as SelectTrigger, b as SelectValue, c as SelectContent, d as SelectItem } from "../_astro/select.B8lpUjZQ.js";
-import { e as DropdownMenu, f as DropdownMenuTrigger, g as DropdownMenuContent, h as DropdownMenuItem, B as Badge, D as Dialog, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
+import { e as DropdownMenu, f as DropdownMenuTrigger, g as DropdownMenuContent, h as DropdownMenuItem, B as Badge, D as Dialog, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
 import { toast } from "sonner";
 import { c as createFooterRow, a as exportToExcel } from "../_astro/export-utils.DDLmg-WW.js";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { p as pertaminaLogo } from "../_astro/logo-pertamina.CdNcSRGD.js";
-import { g as getAgenProfileFromAPI } from "../_astro/pertamina-export.BAvXOSis.js";
+import { g as getAgenProfileFromAPI } from "../_astro/pertamina-export.IMbMNiWv.js";
 import { P as PageHeader } from "../_astro/PageHeader.C8XdTn4w.js";
 import { renderers } from "../renderers.mjs";
 const loadImageAsBase64 = (url) => {
@@ -52,6 +52,7 @@ function PenerimaanPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [products, setProducts] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState({ so_exists: false, lo_exists: false });
   const getLocalDateString = () => {
     const now = /* @__PURE__ */ new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -106,6 +107,31 @@ function PenerimaanPage() {
       fetchProducts();
     }
   }, [showAddModal]);
+  useEffect(() => {
+    const checkDuplicates = async () => {
+      if (!showAddModal) return;
+      const shouldCheckSo = headerData.no_so.length === 10;
+      const shouldCheckLo = headerData.no_lo.length === 10;
+      if (!shouldCheckSo && !shouldCheckLo) {
+        setDuplicateWarning({ so_exists: false, lo_exists: false });
+        return;
+      }
+      try {
+        const result = await penerimaanApi.checkDuplicate(
+          shouldCheckSo ? headerData.no_so : void 0,
+          shouldCheckLo ? headerData.no_lo : void 0
+        );
+        setDuplicateWarning({
+          so_exists: result.so_exists,
+          lo_exists: result.lo_exists
+        });
+      } catch (error) {
+        console.error("Failed to check duplicate:", error);
+      }
+    };
+    const timer = setTimeout(checkDuplicates, 300);
+    return () => clearTimeout(timer);
+  }, [headerData.no_so, headerData.no_lo, showAddModal]);
   const monthOptions = useMemo(() => {
     const options = [];
     const now = /* @__PURE__ */ new Date();
@@ -618,6 +644,23 @@ function PenerimaanPage() {
                   className: "h-10"
                 }
               )
+            ] })
+          ] }),
+          (duplicateWarning.so_exists || duplicateWarning.lo_exists) && /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800", children: [
+            /* @__PURE__ */ jsx(SafeIcon, { name: "AlertTriangle", className: "h-5 w-5 text-amber-600 shrink-0 mt-0.5" }),
+            /* @__PURE__ */ jsxs("div", { className: "text-sm text-amber-700 dark:text-amber-400", children: [
+              /* @__PURE__ */ jsx("p", { className: "font-semibold", children: "Nomor DO sudah pernah dicatat!" }),
+              duplicateWarning.so_exists && /* @__PURE__ */ jsxs("p", { children: [
+                "• No. SO ",
+                /* @__PURE__ */ jsx("span", { className: "font-mono", children: headerData.no_so }),
+                " sudah ada di database"
+              ] }),
+              duplicateWarning.lo_exists && /* @__PURE__ */ jsxs("p", { children: [
+                "• No. LO ",
+                /* @__PURE__ */ jsx("span", { className: "font-mono", children: headerData.no_lo }),
+                " sudah ada di database"
+              ] }),
+              /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs opacity-75", children: "Pastikan nomor sudah benar sebelum menyimpan." })
             ] })
           ] })
         ] }),

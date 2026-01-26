@@ -1,15 +1,15 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.BreR4teh.js";
-import { A as AdminFooter } from "../_astro/AdminFooter.CHtO5w8Z.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
+import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
 import { C as Card, a as CardContent, b as CardHeader, d as CardTitle, e as CardDescription } from "../_astro/card.CnUj7wdc.js";
-import { j as Skeleton, A as Avatar, l as AvatarImage, k as AvatarFallback, B as Badge, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
-import { S as SafeIcon, B as Button, f as authApi } from "../_astro/AuthGuard.71S_I7hh.js";
-import { C as ChangePasswordModal } from "../_astro/ChangePasswordModal.-vmF2U3N.js";
+import { j as Skeleton, A as Avatar, l as AvatarImage, k as AvatarFallback, B as Badge, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
+import { S as SafeIcon, B as Button, f as authApi } from "../_astro/AuthGuard.BLl0uVB7.js";
+import { C as ChangePasswordModal } from "../_astro/ChangePasswordModal.DPvdZn0I.js";
 import { renderers } from "../renderers.mjs";
 const API_BASE_URL = "http://localhost:3000";
 const getAvatarUrl = (url) => {

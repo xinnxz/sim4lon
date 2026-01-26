@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
 import { C as Card, b as CardHeader, d as CardTitle, e as CardDescription, a as CardContent } from "../_astro/card.CnUj7wdc.js";
 import { renderers } from "../renderers.mjs";
 const $$Placeholder = createComponent(($$result, $$props, $$slots) => renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { title: "Halaman Dalam Pembangunan - SIM4LON" }, { default: ($$result2) => renderTemplate`

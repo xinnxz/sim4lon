@@ -1,17 +1,17 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.BreR4teh.js";
-import { A as AdminFooter } from "../_astro/AdminFooter.CHtO5w8Z.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
+import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useRef, useEffect } from "react";
-import { S as SafeIcon, B as Button, I as Input, f as authApi, u as uploadApi } from "../_astro/AuthGuard.71S_I7hh.js";
+import { S as SafeIcon, B as Button, I as Input, f as authApi, u as uploadApi } from "../_astro/AuthGuard.BLl0uVB7.js";
 import { L as Label } from "../_astro/label.C1We_4rW.js";
 import { C as Card, a as CardContent, b as CardHeader, d as CardTitle, e as CardDescription } from "../_astro/card.CnUj7wdc.js";
-import { j as Skeleton, A as Avatar, l as AvatarImage, k as AvatarFallback, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
+import { j as Skeleton, A as Avatar, l as AvatarImage, k as AvatarFallback, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
 import { toast } from "sonner";
-import { A as AvatarCropperModal } from "../_astro/AvatarCropperModal.DsjTzd58.js";
+import { A as AvatarCropperModal } from "../_astro/AvatarCropperModal.CBn04Gpa.js";
 import { renderers } from "../renderers.mjs";
 const API_BASE_URL = "http://localhost:3000";
 function EditProfilAdminForm() {

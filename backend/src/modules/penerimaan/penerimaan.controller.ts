@@ -15,6 +15,14 @@ export class PenerimaanController {
         return this.penerimaanService.findAll(query);
     }
 
+    @Get('check-duplicate')
+    checkDuplicate(
+        @Query('no_so') no_so?: string,
+        @Query('no_lo') no_lo?: string,
+    ) {
+        return this.penerimaanService.checkDuplicate(no_so, no_lo);
+    }
+
     @Get('in-out-agen')
     getInOutAgen(@Query('bulan') bulan: string) {
         return this.penerimaanService.getInOutAgen(bulan);

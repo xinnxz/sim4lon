@@ -1,18 +1,18 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.BreR4teh.js";
-import { A as AdminFooter } from "../_astro/AdminFooter.CHtO5w8Z.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
+import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
 import { jsxs, jsx, Fragment } from "react/jsx-runtime";
 import { useState, useEffect, useMemo } from "react";
-import { S as SafeIcon, I as Input, B as Button, b as usersApi } from "../_astro/AuthGuard.71S_I7hh.js";
+import { S as SafeIcon, I as Input, B as Button, b as usersApi } from "../_astro/AuthGuard.BLl0uVB7.js";
 import { C as Card, b as CardHeader, d as CardTitle, e as CardDescription, a as CardContent } from "../_astro/card.CnUj7wdc.js";
 import { T as Tilt3DCard } from "../_astro/Tilt3DCard.DHI-RZXC.js";
 import { T as Table, a as TableHeader, b as TableRow, c as TableHead, d as TableBody, e as TableCell } from "../_astro/table.OJLE4Veh.js";
-import { D as Dialog, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, B as Badge, e as DropdownMenu, f as DropdownMenuTrigger, g as DropdownMenuContent, h as DropdownMenuItem, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
+import { D as Dialog, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, B as Badge, e as DropdownMenu, f as DropdownMenuTrigger, g as DropdownMenuContent, h as DropdownMenuItem, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
 import { S as Select, a as SelectTrigger, b as SelectValue, c as SelectContent, d as SelectItem } from "../_astro/select.B8lpUjZQ.js";
-import { C as ConfirmationModal } from "../_astro/currency.CHcHKzei.js";
+import { C as ConfirmationModal } from "../_astro/currency.elwsAAlP.js";
 import { toast } from "sonner";
 import { L as Label } from "../_astro/label.C1We_4rW.js";
 import { A as Alert, a as AlertDescription } from "../_astro/alert.Cid2FoHJ.js";
@@ -872,7 +872,7 @@ function UserListPage() {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const { authApi } = await import("../_astro/AuthGuard.71S_I7hh.js").then((n) => n.D);
+        const { authApi } = await import("../_astro/AuthGuard.BLl0uVB7.js").then((n) => n.D);
         const profile = await authApi.getProfile();
         setCurrentUserId(profile.id);
       } catch (error) {

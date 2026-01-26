@@ -1,15 +1,15 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.BreR4teh.js";
-import { A as AdminFooter } from "../_astro/AdminFooter.CHtO5w8Z.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
+import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { C as Card, b as CardHeader, d as CardTitle, a as CardContent, e as CardDescription } from "../_astro/card.CnUj7wdc.js";
-import { S as SafeIcon, c as dashboardApi, B as Button, e as activityApi } from "../_astro/AuthGuard.71S_I7hh.js";
-import { B as Badge, D as Dialog, i as DialogTrigger, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, j as Skeleton, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
+import { S as SafeIcon, c as dashboardApi, B as Button, e as activityApi } from "../_astro/AuthGuard.BLl0uVB7.js";
+import { B as Badge, D as Dialog, i as DialogTrigger, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, j as Skeleton, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
 import { useState, useEffect, useRef } from "react";
-import { W as WelcomePopup } from "../_astro/WelcomePopup.dIpGv1MM.js";
+import { W as WelcomePopup } from "../_astro/WelcomePopup.oCvHzhic.js";
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, AreaChart, Area, Legend, Cell, PieChart, Pie } from "recharts";
 import { renderers } from "../renderers.mjs";
 function CreateOrderButton() {

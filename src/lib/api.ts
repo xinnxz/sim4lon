@@ -2724,6 +2724,18 @@ export const penerimaanApi = {
         return apiRequest(`/penerimaan/${id}`, { method: 'DELETE' });
     },
 
+    async checkDuplicate(no_so?: string, no_lo?: string): Promise<{
+        so_exists: boolean;
+        lo_exists: boolean;
+        so_records: { id: string; tanggal: string; nama_material: string }[];
+        lo_records: { id: string; tanggal: string; nama_material: string }[];
+    }> {
+        const params = new URLSearchParams();
+        if (no_so) params.append('no_so', no_so);
+        if (no_lo) params.append('no_lo', no_lo);
+        return apiRequest(`/penerimaan/check-duplicate?${params.toString()}`);
+    },
+
     async getInOutAgen(bulan: string): Promise<InOutAgenResponse> {
         return apiRequest(`/penerimaan/in-out-agen?bulan=${bulan}`);
     },

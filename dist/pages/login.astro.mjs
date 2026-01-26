@@ -1,10 +1,10 @@
 import { c as createComponent, r as renderComponent, b as renderScript, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
 import { jsxs, jsx, Fragment } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
-import { S as SafeIcon, I as Input, B as Button, i as isAuthenticated, f as authApi, h as removeToken, j as clearCachedProfile } from "../_astro/AuthGuard.71S_I7hh.js";
+import { S as SafeIcon, I as Input, B as Button, i as isAuthenticated, f as authApi, h as removeToken, j as clearCachedProfile } from "../_astro/AuthGuard.BLl0uVB7.js";
 import { L as Label } from "../_astro/label.C1We_4rW.js";
 import { C as Card, b as CardHeader, d as CardTitle, e as CardDescription, a as CardContent } from "../_astro/card.CnUj7wdc.js";
 import { A as Alert, a as AlertDescription } from "../_astro/alert.Cid2FoHJ.js";

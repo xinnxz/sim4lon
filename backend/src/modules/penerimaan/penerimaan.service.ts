@@ -128,7 +128,73 @@ export class PenerimaanService {
     }
 
     async delete(id: string) {
-        return this.prisma.penerimaan_stok.delete({ where: { id } });
+        // Get the penerimaan record first to find matching stock_histories
+        const penerimaan = await this.prisma.penerimaan_stok.findUnique({
+            where: { id },
+        });
+
+        if (!penerimaan) {
+            throw new Error('Penerimaan tidak ditemukan');
+        }
+
+        // Use transaction to delete both atomically
+        const result = await this.prisma.client.$transaction(async (tx) => {
+            // 1. Delete corresponding stock_histories entry
+            // Find by matching note pattern: "Penerimaan SPBE - SO: {no_so}, LO: {no_lo}"
+            await tx.stock_histories.deleteMany({
+                where: {
+                    note: {
+                        contains: `SO: ${penerimaan.no_so}, LO: ${penerimaan.no_lo}`,
+                    },
+                    movement_type: 'MASUK',
+                },
+            });
+
+            // 2. Delete penerimaan record
+            return tx.penerimaan_stok.delete({ where: { id } });
+        });
+
+        // Log activity
+        await this.activityService.logActivity('stock_cancel', 'Pembatalan Penerimaan', {
+            description: `Dibatalkan: ${penerimaan.qty_pcs} tabung ${penerimaan.nama_material}`,
+            detailNumeric: -penerimaan.qty_pcs,
+        });
+
+        return result;
+    }
+
+    /**
+     * Check if SO or LO number already exists
+     */
+    async checkDuplicate(no_so?: string, no_lo?: string) {
+        const result = {
+            so_exists: false,
+            lo_exists: false,
+            so_records: [] as { id: string; tanggal: Date; nama_material: string }[],
+            lo_records: [] as { id: string; tanggal: Date; nama_material: string }[],
+        };
+
+        if (no_so) {
+            const soRecords = await this.prisma.penerimaan_stok.findMany({
+                where: { no_so },
+                select: { id: true, tanggal: true, nama_material: true },
+                take: 5,
+            });
+            result.so_exists = soRecords.length > 0;
+            result.so_records = soRecords;
+        }
+
+        if (no_lo) {
+            const loRecords = await this.prisma.penerimaan_stok.findMany({
+                where: { no_lo },
+                select: { id: true, tanggal: true, nama_material: true },
+                take: 5,
+            });
+            result.lo_exists = loRecords.length > 0;
+            result.lo_records = loRecords;
+        }
+
+        return result;
     }
 
     /**

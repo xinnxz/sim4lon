@@ -1,16 +1,16 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from "../_astro/astro/server.mTvgDWEq.js";
 import "piccolore";
 import "html-escaper";
-import { $ as $$BaseLayout } from "../_astro/BaseLayout.C63pe5Ia.js";
-import { f as formatCurrency, A as AdminHeader } from "../_astro/currency.CHcHKzei.js";
+import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
+import { f as formatCurrency, A as AdminHeader } from "../_astro/currency.elwsAAlP.js";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
-import { o as ordersApi, a as paymentApi, k as companyProfileApi, S as SafeIcon, B as Button } from "../_astro/AuthGuard.71S_I7hh.js";
+import { o as ordersApi, a as paymentApi, k as companyProfileApi, S as SafeIcon, B as Button } from "../_astro/AuthGuard.BLl0uVB7.js";
 import { C as Card, a as CardContent } from "../_astro/card.CnUj7wdc.js";
-import { B as Badge, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.TvdlGC6x.js";
+import { B as Badge, S as Separator, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
 import { T as Tabs, a as TabsList, b as TabsTrigger } from "../_astro/tabs.DCLuprNz.js";
 import { toast } from "sonner";
-import { u as useAppSettings } from "../_astro/useAppSettings.B8L48MuF.js";
+import { u as useAppSettings } from "../_astro/useAppSettings.CMGuxe4k.js";
 import { renderers } from "../renderers.mjs";
 const getLpgImage = (label) => {
   if (!label) return null;
