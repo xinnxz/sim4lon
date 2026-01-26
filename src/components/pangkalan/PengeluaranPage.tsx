@@ -28,6 +28,16 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import SafeIcon from '@/components/common/SafeIcon'
 import { expensesApi, type Expense, type ExpenseCategory } from '@/lib/api'
 import { toast } from 'sonner'
@@ -53,6 +63,10 @@ export default function PengeluaranPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+    const [deleteConfirm, setDeleteConfirm] = useState<{
+        show: boolean;
+        expense: Expense | null;
+    }>({ show: false, expense: null })
     const [formData, setFormData] = useState({
         category: 'OPERASIONAL' as ExpenseCategory,
         amount: '',
@@ -138,13 +152,19 @@ export default function PengeluaranPage() {
         }
     }
 
-    const handleDelete = async (expense: Expense) => {
-        if (!confirm(`Hapus pengeluaran "${getCategoryLabel(expense.category)}" ${formatCurrency(expense.amount)}?`)) return
+    const handleDelete = (expense: Expense) => {
+        setDeleteConfirm({ show: true, expense })
+    }
+
+    const confirmDelete = async () => {
+        const expense = deleteConfirm.expense
+        if (!expense) return
 
         try {
             await expensesApi.delete(expense.id)
             toast.success('Pengeluaran berhasil dihapus')
             fetchExpenses()
+            setDeleteConfirm({ show: false, expense: null })
         } catch (error: any) {
             toast.error(error.message || 'Gagal menghapus pengeluaran')
         }
@@ -525,6 +545,56 @@ export default function PengeluaranPage() {
                     )}
                 </CardContent>
             </Card>
-        </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteConfirm.show} onOpenChange={(open) => !open && setDeleteConfirm({ show: false, expense: null })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <SafeIcon name="AlertTriangle" className="h-5 w-5 text-destructive" />
+                            Hapus Pengeluaran?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-3">
+                                <p>Apakah Anda yakin ingin menghapus pengeluaran ini?</p>
+                                {deleteConfirm.expense && (
+                                    <div className="p-3 bg-muted rounded-lg space-y-1 text-sm border border-border/50">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Kategori:</span>
+                                            <span className="font-medium">{getCategoryLabel(deleteConfirm.expense.category)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Jumlah:</span>
+                                            <span className="font-bold text-red-600">{formatCurrency(deleteConfirm.expense.amount)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Tanggal:</span>
+                                            <span>{formatDate(deleteConfirm.expense.expense_date)}</span>
+                                        </div>
+                                        {deleteConfirm.expense.description && (
+                                            <div className="pt-1 mt-1 border-t border-border/50">
+                                                <span className="text-muted-foreground block text-xs mb-0.5">Keterangan:</span>
+                                                <span className="italic text-slate-700">{deleteConfirm.expense.description}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                <p className="text-xs text-muted-foreground">Tindakan ini tidak dapat dibatalkan.</p>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-destructive hover:bg-destructive/90 transition-colors"
+                        >
+                            <SafeIcon name="Trash2" className="h-4 w-4 mr-2" />
+                            Ya, Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div >
     )
 }

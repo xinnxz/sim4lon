@@ -10,6 +10,7 @@ import { S as SafeIcon, I as Input, B as Button, t as expensesApi } from "../../
 import { L as Label } from "../../_astro/label.C1We_4rW.js";
 import { T as Textarea } from "../../_astro/textarea.F19kpFWl.js";
 import { D as Dialog, i as DialogTrigger, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, o as DialogFooter, B as Badge, P as ProtectedDashboard } from "../../_astro/ProtectedDashboard.igvMWLOj.js";
+import { A as AlertDialog, a as AlertDialogContent, b as AlertDialogHeader, c as AlertDialogTitle, d as AlertDialogDescription, e as AlertDialogFooter, f as AlertDialogCancel, g as AlertDialogAction } from "../../_astro/alert-dialog.CFdgBlIH.js";
 import { toast } from "sonner";
 import { renderers } from "../../renderers.mjs";
 const CATEGORIES = [
@@ -29,6 +30,7 @@ function PengeluaranPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, expense: null });
   const [formData, setFormData] = useState({
     category: "OPERASIONAL",
     amount: "",
@@ -107,12 +109,17 @@ function PengeluaranPage() {
       setIsSubmitting(false);
     }
   };
-  const handleDelete = async (expense) => {
-    if (!confirm(`Hapus pengeluaran "${getCategoryLabel(expense.category)}" ${formatCurrency(expense.amount)}?`)) return;
+  const handleDelete = (expense) => {
+    setDeleteConfirm({ show: true, expense });
+  };
+  const confirmDelete = async () => {
+    const expense = deleteConfirm.expense;
+    if (!expense) return;
     try {
       await expensesApi.delete(expense.id);
       toast.success("Pengeluaran berhasil dihapus");
       fetchExpenses();
+      setDeleteConfirm({ show: false, expense: null });
     } catch (error) {
       toast.error(error.message || "Gagal menghapus pengeluaran");
     }
@@ -399,7 +406,51 @@ function PengeluaranPage() {
         },
         expense.id
       )) }) })
-    ] })
+    ] }),
+    /* @__PURE__ */ jsx(AlertDialog, { open: deleteConfirm.show, onOpenChange: (open) => !open && setDeleteConfirm({ show: false, expense: null }), children: /* @__PURE__ */ jsxs(AlertDialogContent, { children: [
+      /* @__PURE__ */ jsxs(AlertDialogHeader, { children: [
+        /* @__PURE__ */ jsxs(AlertDialogTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx(SafeIcon, { name: "AlertTriangle", className: "h-5 w-5 text-destructive" }),
+          "Hapus Pengeluaran?"
+        ] }),
+        /* @__PURE__ */ jsx(AlertDialogDescription, { asChild: true, children: /* @__PURE__ */ jsxs("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ jsx("p", { children: "Apakah Anda yakin ingin menghapus pengeluaran ini?" }),
+          deleteConfirm.expense && /* @__PURE__ */ jsxs("div", { className: "p-3 bg-muted rounded-lg space-y-1 text-sm border border-border/50", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+              /* @__PURE__ */ jsx("span", { className: "text-muted-foreground", children: "Kategori:" }),
+              /* @__PURE__ */ jsx("span", { className: "font-medium", children: getCategoryLabel(deleteConfirm.expense.category) })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+              /* @__PURE__ */ jsx("span", { className: "text-muted-foreground", children: "Jumlah:" }),
+              /* @__PURE__ */ jsx("span", { className: "font-bold text-red-600", children: formatCurrency(deleteConfirm.expense.amount) })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+              /* @__PURE__ */ jsx("span", { className: "text-muted-foreground", children: "Tanggal:" }),
+              /* @__PURE__ */ jsx("span", { children: formatDate(deleteConfirm.expense.expense_date) })
+            ] }),
+            deleteConfirm.expense.description && /* @__PURE__ */ jsxs("div", { className: "pt-1 mt-1 border-t border-border/50", children: [
+              /* @__PURE__ */ jsx("span", { className: "text-muted-foreground block text-xs mb-0.5", children: "Keterangan:" }),
+              /* @__PURE__ */ jsx("span", { className: "italic text-slate-700", children: deleteConfirm.expense.description })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx("p", { className: "text-xs text-muted-foreground", children: "Tindakan ini tidak dapat dibatalkan." })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ jsxs(AlertDialogFooter, { children: [
+        /* @__PURE__ */ jsx(AlertDialogCancel, { children: "Batal" }),
+        /* @__PURE__ */ jsxs(
+          AlertDialogAction,
+          {
+            onClick: confirmDelete,
+            className: "bg-destructive hover:bg-destructive/90 transition-colors",
+            children: [
+              /* @__PURE__ */ jsx(SafeIcon, { name: "Trash2", className: "h-4 w-4 mr-2" }),
+              "Ya, Hapus"
+            ]
+          }
+        )
+      ] })
+    ] }) })
   ] });
 }
 const $$Pengeluaran = createComponent(($$result, $$props, $$slots) => renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { title: "Pengeluaran - SIM4LON Pangkalan" }, { default: ($$result2) => renderTemplate`
