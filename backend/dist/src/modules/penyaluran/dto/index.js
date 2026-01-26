@@ -16,6 +16,9 @@ class CreatePenyaluranDto {
     tanggal;
     jumlah;
     tipe_pembayaran;
+    lpg_type;
+    kondisi;
+    catatan;
 }
 exports.CreatePenyaluranDto = CreatePenyaluranDto;
 __decorate([
@@ -36,6 +39,21 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePenyaluranDto.prototype, "tipe_pembayaran", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePenyaluranDto.prototype, "lpg_type", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePenyaluranDto.prototype, "kondisi", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePenyaluranDto.prototype, "catatan", void 0);
 class UpdatePenyaluranDto {
     jumlah;
     tipe_pembayaran;

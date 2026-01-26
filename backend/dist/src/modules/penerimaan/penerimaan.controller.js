@@ -27,6 +27,9 @@ let PenerimaanController = class PenerimaanController {
     findAll(query) {
         return this.penerimaanService.findAll(query);
     }
+    checkDuplicate(no_so, no_lo) {
+        return this.penerimaanService.checkDuplicate(no_so, no_lo);
+    }
     getInOutAgen(bulan) {
         return this.penerimaanService.getInOutAgen(bulan);
     }
@@ -46,6 +49,14 @@ __decorate([
     __metadata("design:paramtypes", [dto_1.GetPenerimaanQueryDto]),
     __metadata("design:returntype", void 0)
 ], PenerimaanController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('check-duplicate'),
+    __param(0, (0, common_1.Query)('no_so')),
+    __param(1, (0, common_1.Query)('no_lo')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PenerimaanController.prototype, "checkDuplicate", null);
 __decorate([
     (0, common_1.Get)('in-out-agen'),
     __param(0, (0, common_1.Query)('bulan')),

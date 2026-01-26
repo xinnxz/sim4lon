@@ -28,10 +28,10 @@ let ConsumerOrderController = class ConsumerOrderController {
         const pangkalanId = req.user.pangkalan_id;
         return this.consumerOrderService.findAll(pangkalanId, page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 10, { startDate, endDate, paymentStatus, consumerId });
     }
-    getStats(req, today) {
+    getStats(req, today, startDate, endDate) {
         const pangkalanId = req.user.pangkalan_id;
         const todayOnly = today === 'true';
-        return this.consumerOrderService.getStats(pangkalanId, todayOnly);
+        return this.consumerOrderService.getStats(pangkalanId, todayOnly, startDate, endDate);
     }
     getRecentSales(req, limit) {
         const pangkalanId = req.user.pangkalan_id;
@@ -76,8 +76,10 @@ __decorate([
     (0, common_1.Get)('stats'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)('today')),
+    __param(2, (0, common_1.Query)('startDate')),
+    __param(3, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ConsumerOrderController.prototype, "getStats", null);
 __decorate([

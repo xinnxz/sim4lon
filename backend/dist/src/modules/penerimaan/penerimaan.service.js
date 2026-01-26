@@ -115,7 +115,55 @@ let PenerimaanService = class PenerimaanService {
         return result;
     }
     async delete(id) {
-        return this.prisma.penerimaan_stok.delete({ where: { id } });
+        const penerimaan = await this.prisma.penerimaan_stok.findUnique({
+            where: { id },
+        });
+        if (!penerimaan) {
+            throw new Error('Penerimaan tidak ditemukan');
+        }
+        const result = await this.prisma.client.$transaction(async (tx) => {
+            await tx.stock_histories.deleteMany({
+                where: {
+                    note: {
+                        contains: `SO: ${penerimaan.no_so}, LO: ${penerimaan.no_lo}`,
+                    },
+                    movement_type: 'MASUK',
+                },
+            });
+            return tx.penerimaan_stok.delete({ where: { id } });
+        });
+        await this.activityService.logActivity('stock_cancel', 'Pembatalan Penerimaan', {
+            description: `Dibatalkan: ${penerimaan.qty_pcs} tabung ${penerimaan.nama_material}`,
+            detailNumeric: -penerimaan.qty_pcs,
+        });
+        return result;
+    }
+    async checkDuplicate(no_so, no_lo) {
+        const result = {
+            so_exists: false,
+            lo_exists: false,
+            so_records: [],
+            lo_records: [],
+        };
+        if (no_so) {
+            const soRecords = await this.prisma.penerimaan_stok.findMany({
+                where: { no_so },
+                select: { id: true, tanggal: true, nama_material: true },
+                take: 5,
+            });
+            result.so_exists = soRecords.length > 0;
+            result.so_records = soRecords;
+        }
+        if (no_lo) {
+            const loRecords = await this.prisma.penerimaan_stok.findMany({
+                where: { no_lo },
+                select: { id: true, tanggal: true, nama_material: true },
+                take: 5,
+            });
+            result.lo_exists = loRecords.length > 0;
+            result.lo_records = loRecords;
+        }
+        return result;
     }
     async getInOutAgen(bulan) {
         const [year, month] = bulan.split('-').map(Number);

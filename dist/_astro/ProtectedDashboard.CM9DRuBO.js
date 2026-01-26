@@ -1,1 +1,0 @@
-import{j as jsxRuntimeExports}from"./jsx-runtime.mvtouYz0.js";import"./index.DcciWILN.js";import{A as AuthGuard}from"./AuthGuard.DSSjR5Ms.js";import"./api.B2u4qCXJ.js";function ProtectedDashboard({children,allowedRoles}){return jsxRuntimeExports.jsx(AuthGuard,{allowedRoles,children})}export{ProtectedDashboard as default};

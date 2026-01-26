@@ -3,6 +3,9 @@ export declare class CreatePenyaluranDto {
     tanggal: string;
     jumlah: number;
     tipe_pembayaran?: string;
+    lpg_type?: string;
+    kondisi?: string;
+    catatan?: string;
 }
 export declare class UpdatePenyaluranDto {
     jumlah?: number;

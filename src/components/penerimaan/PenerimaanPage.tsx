@@ -141,27 +141,26 @@ export default function PenerimaanPage() {
         }
     }, [showAddModal])
 
-    // Check for duplicate SO/LO when values change
+    // Check for duplicate LO when value changes (SO can be duplicate)
     useEffect(() => {
         const checkDuplicates = async () => {
             if (!showAddModal) return
 
-            // Only check when SO or LO is complete (10 digits)
-            const shouldCheckSo = headerData.no_so.length === 10
+            // Only check LO when complete (10 digits) - SO can be duplicate
             const shouldCheckLo = headerData.no_lo.length === 10
 
-            if (!shouldCheckSo && !shouldCheckLo) {
+            if (!shouldCheckLo) {
                 setDuplicateWarning({ so_exists: false, lo_exists: false })
                 return
             }
 
             try {
                 const result = await penerimaanApi.checkDuplicate(
-                    shouldCheckSo ? headerData.no_so : undefined,
-                    shouldCheckLo ? headerData.no_lo : undefined
+                    undefined, // SO tidak perlu dicek
+                    headerData.no_lo
                 )
                 setDuplicateWarning({
-                    so_exists: result.so_exists,
+                    so_exists: false, // Tidak cek SO
                     lo_exists: result.lo_exists,
                 })
             } catch (error) {
@@ -172,7 +171,7 @@ export default function PenerimaanPage() {
         // Debounce the check
         const timer = setTimeout(checkDuplicates, 300)
         return () => clearTimeout(timer)
-    }, [headerData.no_so, headerData.no_lo, showAddModal])
+    }, [headerData.no_lo, showAddModal])
 
     const monthOptions = useMemo(() => {
         const options = []
@@ -815,18 +814,13 @@ export default function PenerimaanPage() {
                                 </div>
                             </div>
 
-                            {/* Duplicate Warning */}
-                            {(duplicateWarning.so_exists || duplicateWarning.lo_exists) && (
+                            {/* Duplicate Warning - Only check LO */}
+                            {duplicateWarning.lo_exists && (
                                 <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                                     <SafeIcon name="AlertTriangle" className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                                     <div className="text-sm text-amber-700 dark:text-amber-400">
                                         <p className="font-semibold">Nomor DO sudah pernah dicatat!</p>
-                                        {duplicateWarning.so_exists && (
-                                            <p>• No. SO <span className="font-mono">{headerData.no_so}</span> sudah ada di database</p>
-                                        )}
-                                        {duplicateWarning.lo_exists && (
-                                            <p>• No. LO <span className="font-mono">{headerData.no_lo}</span> sudah ada di database</p>
-                                        )}
+                                        <p>No. LO <span className="font-mono font-bold">{headerData.no_lo}</span> sudah ada di database</p>
                                         <p className="mt-1 text-xs opacity-75">Pastikan nomor sudah benar sebelum menyimpan.</p>
                                     </div>
                                 </div>

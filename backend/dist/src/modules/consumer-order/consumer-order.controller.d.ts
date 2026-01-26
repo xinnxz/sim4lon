@@ -34,7 +34,7 @@ export declare class ConsumerOrderController {
             totalPages: number;
         };
     }>;
-    getStats(req: any, today?: string): Promise<{
+    getStats(req: any, today?: string, startDate?: string, endDate?: string): Promise<{
         total_orders: number;
         total_qty: number;
         total_revenue: number;

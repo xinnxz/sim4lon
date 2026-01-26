@@ -91,16 +91,27 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
                 this.logger.warn('[CREATE] Validation failed - no consumer_id or consumer_name');
                 throw new common_1.BadRequestException('Harus mengisi consumer_id atau consumer_name');
             }
+            let verifiedConsumer = null;
             if (dto.consumer_id) {
                 this.logger.log(`[CREATE] Verifying consumer_id: ${dto.consumer_id}`);
-                const consumer = await this.prisma.consumers.findFirst({
+                verifiedConsumer = await this.prisma.consumers.findFirst({
                     where: { id: dto.consumer_id, pangkalan_id: pangkalanId },
                 });
-                if (!consumer) {
+                if (!verifiedConsumer) {
                     this.logger.warn('[CREATE] Consumer not found or not owned');
                     throw new common_1.NotFoundException('Pelanggan tidak ditemukan');
                 }
-                this.logger.log(`[CREATE] Consumer verified: ${consumer.name}`);
+                this.logger.log(`[CREATE] Consumer verified: ${verifiedConsumer.name}`);
+            }
+            if (dto.lpg_type === 'kg3') {
+                if (!dto.consumer_id) {
+                    this.logger.warn('[CREATE] Subsidy validation failed - 3kg requires registered consumer');
+                    throw new common_1.BadRequestException('LPG 3kg Subsidi hanya untuk konsumen TERDAFTAR dengan NIK dan KK yang valid');
+                }
+                if (!verifiedConsumer?.nik || !verifiedConsumer?.kk) {
+                    this.logger.warn(`[CREATE] Subsidy validation failed - consumer ${verifiedConsumer?.name} missing NIK/KK`);
+                    throw new common_1.BadRequestException(`Konsumen "${verifiedConsumer?.name}" belum memiliki NIK dan KK. LPG 3kg Subsidi memerlukan data NIK dan KK yang lengkap.`);
+                }
             }
             const now = new Date();
             const datePart = now.toISOString().slice(2, 10).replace(/-/g, '');
@@ -311,9 +322,20 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
         });
         return { message: 'Pesanan berhasil dihapus dan stok dikembalikan' };
     }
-    async getStats(pangkalanId, todayOnly = false) {
+    async getStats(pangkalanId, todayOnly = false, startDate, endDate) {
         const dateFilter = {};
-        if (todayOnly) {
+        if (startDate || endDate) {
+            dateFilter.sale_date = {};
+            if (startDate) {
+                dateFilter.sale_date.gte = new Date(startDate);
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
+                dateFilter.sale_date.lt = end;
+            }
+        }
+        else if (todayOnly) {
             const today = (0, timezone_util_1.todayWIB)();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -348,7 +370,18 @@ let ConsumerOrderService = ConsumerOrderService_1 = class ConsumerOrderService {
         }
         const marginKotor = totalRevenue - totalModal;
         const expenseFilter = { pangkalan_id: pangkalanId };
-        if (todayOnly) {
+        if (startDate || endDate) {
+            expenseFilter.expense_date = {};
+            if (startDate) {
+                expenseFilter.expense_date.gte = new Date(startDate);
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
+                expenseFilter.expense_date.lt = end;
+            }
+        }
+        else if (todayOnly) {
             const today = (0, timezone_util_1.todayWIB)();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);

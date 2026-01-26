@@ -110,19 +110,20 @@ function PenerimaanPage() {
   useEffect(() => {
     const checkDuplicates = async () => {
       if (!showAddModal) return;
-      const shouldCheckSo = headerData.no_so.length === 10;
       const shouldCheckLo = headerData.no_lo.length === 10;
-      if (!shouldCheckSo && !shouldCheckLo) {
+      if (!shouldCheckLo) {
         setDuplicateWarning({ so_exists: false, lo_exists: false });
         return;
       }
       try {
         const result = await penerimaanApi.checkDuplicate(
-          shouldCheckSo ? headerData.no_so : void 0,
-          shouldCheckLo ? headerData.no_lo : void 0
+          void 0,
+          // SO tidak perlu dicek
+          headerData.no_lo
         );
         setDuplicateWarning({
-          so_exists: result.so_exists,
+          so_exists: false,
+          // Tidak cek SO
           lo_exists: result.lo_exists
         });
       } catch (error) {
@@ -131,7 +132,7 @@ function PenerimaanPage() {
     };
     const timer = setTimeout(checkDuplicates, 300);
     return () => clearTimeout(timer);
-  }, [headerData.no_so, headerData.no_lo, showAddModal]);
+  }, [headerData.no_lo, showAddModal]);
   const monthOptions = useMemo(() => {
     const options = [];
     const now = /* @__PURE__ */ new Date();
@@ -646,18 +647,13 @@ function PenerimaanPage() {
               )
             ] })
           ] }),
-          (duplicateWarning.so_exists || duplicateWarning.lo_exists) && /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800", children: [
+          duplicateWarning.lo_exists && /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800", children: [
             /* @__PURE__ */ jsx(SafeIcon, { name: "AlertTriangle", className: "h-5 w-5 text-amber-600 shrink-0 mt-0.5" }),
             /* @__PURE__ */ jsxs("div", { className: "text-sm text-amber-700 dark:text-amber-400", children: [
               /* @__PURE__ */ jsx("p", { className: "font-semibold", children: "Nomor DO sudah pernah dicatat!" }),
-              duplicateWarning.so_exists && /* @__PURE__ */ jsxs("p", { children: [
-                "• No. SO ",
-                /* @__PURE__ */ jsx("span", { className: "font-mono", children: headerData.no_so }),
-                " sudah ada di database"
-              ] }),
-              duplicateWarning.lo_exists && /* @__PURE__ */ jsxs("p", { children: [
-                "• No. LO ",
-                /* @__PURE__ */ jsx("span", { className: "font-mono", children: headerData.no_lo }),
+              /* @__PURE__ */ jsxs("p", { children: [
+                "No. LO ",
+                /* @__PURE__ */ jsx("span", { className: "font-mono font-bold", children: headerData.no_lo }),
                 " sudah ada di database"
               ] }),
               /* @__PURE__ */ jsx("p", { className: "mt-1 text-xs opacity-75", children: "Pastikan nomor sudah benar sebelum menyimpan." })

@@ -23,6 +23,20 @@ export declare class PenerimaanController {
             totalPages: number;
         };
     }>;
+    checkDuplicate(no_so?: string, no_lo?: string): Promise<{
+        so_exists: boolean;
+        lo_exists: boolean;
+        so_records: {
+            id: string;
+            tanggal: Date;
+            nama_material: string;
+        }[];
+        lo_records: {
+            id: string;
+            tanggal: Date;
+            nama_material: string;
+        }[];
+    }>;
     getInOutAgen(bulan: string): Promise<{
         bulan: string;
         days_in_month: number;

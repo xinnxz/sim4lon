@@ -122,7 +122,7 @@ export declare class ConsumerOrderService {
     remove(id: string, pangkalanId: string): Promise<{
         message: string;
     }>;
-    getStats(pangkalanId: string, todayOnly?: boolean): Promise<{
+    getStats(pangkalanId: string, todayOnly?: boolean, startDate?: string, endDate?: string): Promise<{
         total_orders: number;
         total_qty: number;
         total_revenue: number;
