@@ -14,6 +14,18 @@ export class CreatePenyaluranDto {
     @IsOptional()
     @IsString()
     tipe_pembayaran?: string;
+
+    @IsOptional()
+    @IsString()
+    lpg_type?: string;
+
+    @IsOptional()
+    @IsString()
+    kondisi?: string; // 'NORMAL' | 'FAKULTATIF'
+
+    @IsOptional()
+    @IsString()
+    catatan?: string;
 }
 
 export class UpdatePenyaluranDto {
