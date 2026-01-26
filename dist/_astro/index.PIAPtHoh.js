@@ -1,0 +1,1 @@
+import{g as getDefaultExportFromCjs}from"./index.DcciWILN.js";import{r as requireReactDom}from"./index.ubNQCTBn.js";var reactDomExports=requireReactDom();const ReactDOM=getDefaultExportFromCjs(reactDomExports);export{ReactDOM as R,reactDomExports as r};

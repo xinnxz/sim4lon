@@ -4,13 +4,14 @@ import "html-escaper";
 import { $ as $$BaseLayout } from "../_astro/BaseLayout.DMB591cw.js";
 import { A as AppSidebarLayout } from "../_astro/AppSidebarLayout.B0qA0Ni6.js";
 import { A as AdminFooter } from "../_astro/AdminFooter.DJv7CO6O.js";
-import { jsxs, jsx } from "react/jsx-runtime";
+import { jsxs, jsx, Fragment } from "react/jsx-runtime";
 import { useState, useMemo, useEffect } from "react";
 import { C as Card, a as CardContent, b as CardHeader, d as CardTitle } from "../_astro/card.CnUj7wdc.js";
 import { B as Button, S as SafeIcon, I as Input, g as penerimaanApi, l as lpgProductsApi, k as companyProfileApi } from "../_astro/AuthGuard.BLl0uVB7.js";
 import { L as Label } from "../_astro/label.C1We_4rW.js";
 import { S as Select, a as SelectTrigger, b as SelectValue, c as SelectContent, d as SelectItem } from "../_astro/select.B8lpUjZQ.js";
 import { e as DropdownMenu, f as DropdownMenuTrigger, g as DropdownMenuContent, h as DropdownMenuItem, B as Badge, D as Dialog, a as DialogContent, b as DialogHeader, c as DialogTitle, d as DialogDescription, P as ProtectedDashboard } from "../_astro/ProtectedDashboard.igvMWLOj.js";
+import { A as AlertDialog, a as AlertDialogContent, b as AlertDialogHeader, c as AlertDialogTitle, d as AlertDialogDescription, e as AlertDialogFooter, f as AlertDialogCancel, g as AlertDialogAction } from "../_astro/alert-dialog.CFdgBlIH.js";
 import { toast } from "sonner";
 import { c as createFooterRow, a as exportToExcel } from "../_astro/export-utils.DDLmg-WW.js";
 import jsPDF from "jspdf";
@@ -53,6 +54,8 @@ function PenerimaanPage() {
   const [products, setProducts] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [duplicateWarning, setDuplicateWarning] = useState({ so_exists: false, lo_exists: false });
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, item: null });
+  const [isDeleting, setIsDeleting] = useState(false);
   const getLocalDateString = () => {
     const now = /* @__PURE__ */ new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -189,6 +192,20 @@ function PenerimaanPage() {
       tanggal: getLocalDateString()
     });
     setItems([{ id: crypto.randomUUID(), lpg_product_id: "", qty_pcs: "" }]);
+  };
+  const handleDelete = async () => {
+    if (!deleteConfirm.item) return;
+    setIsDeleting(true);
+    try {
+      await penerimaanApi.delete(deleteConfirm.item.id);
+      toast.success(`Penerimaan berhasil dibatalkan. Stok telah dikurangi ${deleteConfirm.item.qty_pcs} tabung.`);
+      setDeleteConfirm({ show: false, item: null });
+      fetchData();
+    } catch (error) {
+      toast.error(error.message || "Gagal membatalkan penerimaan");
+    } finally {
+      setIsDeleting(false);
+    }
   };
   const addItem = () => {
     setItems([...items, { id: crypto.randomUUID(), lpg_product_id: "", qty_pcs: "" }]);
@@ -507,12 +524,13 @@ function PenerimaanPage() {
             /* @__PURE__ */ jsx("th", { className: "px-4 py-3 text-center font-medium cursor-pointer hover:bg-muted/80 transition-colors", onClick: () => handleSort("qty_kg"), children: /* @__PURE__ */ jsxs("span", { className: "flex items-center justify-center", children: [
               "Qty Kg",
               /* @__PURE__ */ jsx(SortIcon, { field: "qty_kg" })
-            ] }) })
+            ] }) }),
+            /* @__PURE__ */ jsx("th", { className: "px-4 py-3 text-center font-medium", children: "Aksi" })
           ] }) }),
-          /* @__PURE__ */ jsx("tbody", { children: isLoading ? /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsxs("td", { colSpan: 6, className: "text-center py-8", children: [
+          /* @__PURE__ */ jsx("tbody", { children: isLoading ? /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsxs("td", { colSpan: 7, className: "text-center py-8", children: [
             /* @__PURE__ */ jsx(SafeIcon, { name: "Loader2", className: "w-6 h-6 animate-spin mx-auto mb-2" }),
             /* @__PURE__ */ jsx("span", { className: "text-muted-foreground", children: "Memuat data..." })
-          ] }) }) : data?.data.length === 0 ? /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsx("td", { colSpan: 6, className: "text-center py-12", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3", children: [
+          ] }) }) : data?.data.length === 0 ? /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsx("td", { colSpan: 7, className: "text-center py-12", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3", children: [
             /* @__PURE__ */ jsx(
               "img",
               {
@@ -529,7 +547,18 @@ function PenerimaanPage() {
             /* @__PURE__ */ jsx("td", { className: "px-4 py-3 font-mono text-xs", children: item.no_lo }),
             /* @__PURE__ */ jsx("td", { className: "px-4 py-3", children: /* @__PURE__ */ jsx("span", { className: "text-blue-600 font-medium", children: item.nama_material }) }),
             /* @__PURE__ */ jsx("td", { className: "px-4 py-3 text-center font-bold", children: item.qty_pcs.toLocaleString() }),
-            /* @__PURE__ */ jsx("td", { className: "px-4 py-3 text-center text-muted-foreground", children: Number(item.qty_kg).toLocaleString() })
+            /* @__PURE__ */ jsx("td", { className: "px-4 py-3 text-center text-muted-foreground", children: Number(item.qty_kg).toLocaleString() }),
+            /* @__PURE__ */ jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsx(
+              Button,
+              {
+                variant: "ghost",
+                size: "sm",
+                className: "h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10",
+                onClick: () => setDeleteConfirm({ show: true, item }),
+                title: "Batalkan penerimaan",
+                children: /* @__PURE__ */ jsx(SafeIcon, { name: "Trash2", className: "h-4 w-4" })
+              }
+            ) })
           ] }, item.id)) })
         ] }) }),
         data && data.meta.totalPages > 1 && /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-4 py-3 border-t border-border/50", children: [
@@ -782,6 +811,65 @@ function PenerimaanPage() {
               "Simpan ",
               items.filter((i) => i.lpg_product_id && i.qty_pcs).length > 1 ? `(${items.filter((i) => i.lpg_product_id && i.qty_pcs).length} item)` : ""
             ]
+          }
+        )
+      ] })
+    ] }) }),
+    /* @__PURE__ */ jsx(AlertDialog, { open: deleteConfirm.show, onOpenChange: (open) => !open && setDeleteConfirm({ show: false, item: null }), children: /* @__PURE__ */ jsxs(AlertDialogContent, { children: [
+      /* @__PURE__ */ jsxs(AlertDialogHeader, { children: [
+        /* @__PURE__ */ jsxs(AlertDialogTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx(SafeIcon, { name: "AlertTriangle", className: "h-5 w-5 text-destructive" }),
+          "Batalkan Penerimaan?"
+        ] }),
+        /* @__PURE__ */ jsx(AlertDialogDescription, { asChild: true, children: /* @__PURE__ */ jsxs("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ jsx("p", { children: "Anda akan membatalkan penerimaan berikut:" }),
+          deleteConfirm.item && /* @__PURE__ */ jsxs("div", { className: "p-3 bg-muted rounded-lg space-y-1 text-sm", children: [
+            /* @__PURE__ */ jsxs("p", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "No. SO:" }),
+              " ",
+              /* @__PURE__ */ jsx("span", { className: "font-mono", children: deleteConfirm.item.no_so })
+            ] }),
+            /* @__PURE__ */ jsxs("p", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "No. LO:" }),
+              " ",
+              /* @__PURE__ */ jsx("span", { className: "font-mono", children: deleteConfirm.item.no_lo })
+            ] }),
+            /* @__PURE__ */ jsxs("p", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "Material:" }),
+              " ",
+              deleteConfirm.item.nama_material
+            ] }),
+            /* @__PURE__ */ jsxs("p", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "Jumlah:" }),
+              " ",
+              /* @__PURE__ */ jsxs("span", { className: "text-red-600 font-semibold", children: [
+                deleteConfirm.item.qty_pcs,
+                " tabung"
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs("p", { className: "text-destructive font-medium", children: [
+            "⚠️ Stok akan otomatis dikurangi ",
+            deleteConfirm.item?.qty_pcs || 0,
+            " tabung. Aksi ini tidak dapat dibatalkan!"
+          ] })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ jsxs(AlertDialogFooter, { children: [
+        /* @__PURE__ */ jsx(AlertDialogCancel, { disabled: isDeleting, children: "Batal" }),
+        /* @__PURE__ */ jsx(
+          AlertDialogAction,
+          {
+            onClick: handleDelete,
+            disabled: isDeleting,
+            className: "bg-destructive hover:bg-destructive/90",
+            children: isDeleting ? /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(SafeIcon, { name: "Loader2", className: "h-4 w-4 mr-2 animate-spin" }),
+              "Menghapus..."
+            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(SafeIcon, { name: "Trash2", className: "h-4 w-4 mr-2" }),
+              "Ya, Batalkan"
+            ] })
           }
         )
       ] })

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import {
     DropdownMenu,
@@ -74,6 +75,13 @@ export default function PenerimaanPage() {
         so_exists: boolean;
         lo_exists: boolean;
     }>({ so_exists: false, lo_exists: false })
+
+    // Delete confirmation state
+    const [deleteConfirm, setDeleteConfirm] = useState<{
+        show: boolean;
+        item: PenerimaanStok | null;
+    }>({ show: false, item: null })
+    const [isDeleting, setIsDeleting] = useState(false)
 
     // Form state - Multi-item support
     // Use local date format (not UTC) to prevent timezone issues
@@ -254,6 +262,23 @@ export default function PenerimaanPage() {
             tanggal: getLocalDateString(),
         })
         setItems([{ id: crypto.randomUUID(), lpg_product_id: '', qty_pcs: '' }])
+    }
+
+    // Handle delete/cancel penerimaan
+    const handleDelete = async () => {
+        if (!deleteConfirm.item) return
+
+        setIsDeleting(true)
+        try {
+            await penerimaanApi.delete(deleteConfirm.item.id)
+            toast.success(`Penerimaan berhasil dibatalkan. Stok telah dikurangi ${deleteConfirm.item.qty_pcs} tabung.`)
+            setDeleteConfirm({ show: false, item: null })
+            fetchData() // Refresh data
+        } catch (error: any) {
+            toast.error(error.message || 'Gagal membatalkan penerimaan')
+        } finally {
+            setIsDeleting(false)
+        }
     }
 
     // Add new empty item row
@@ -675,19 +700,20 @@ export default function PenerimaanPage() {
                                     <th className="px-4 py-3 text-center font-medium cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('qty_kg')}>
                                         <span className="flex items-center justify-center">Qty Kg<SortIcon field="qty_kg" /></span>
                                     </th>
+                                    <th className="px-4 py-3 text-center font-medium">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-8">
+                                        <td colSpan={7} className="text-center py-8">
                                             <SafeIcon name="Loader2" className="w-6 h-6 animate-spin mx-auto mb-2" />
                                             <span className="text-muted-foreground">Memuat data...</span>
                                         </td>
                                     </tr>
                                 ) : data?.data.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-12">
+                                        <td colSpan={7} className="text-center py-12">
                                             <div className="flex flex-col items-center gap-3">
                                                 <img
                                                     src="/images/illustrations/warehouse-lpg.png"
@@ -710,6 +736,17 @@ export default function PenerimaanPage() {
                                             </td>
                                             <td className="px-4 py-3 text-center font-bold">{item.qty_pcs.toLocaleString()}</td>
                                             <td className="px-4 py-3 text-center text-muted-foreground">{Number(item.qty_kg).toLocaleString()}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={() => setDeleteConfirm({ show: true, item })}
+                                                    title="Batalkan penerimaan"
+                                                >
+                                                    <SafeIcon name="Trash2" className="h-4 w-4" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
@@ -949,6 +986,54 @@ export default function PenerimaanPage() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteConfirm.show} onOpenChange={(open) => !open && setDeleteConfirm({ show: false, item: null })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <SafeIcon name="AlertTriangle" className="h-5 w-5 text-destructive" />
+                            Batalkan Penerimaan?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-3">
+                                <p>Anda akan membatalkan penerimaan berikut:</p>
+                                {deleteConfirm.item && (
+                                    <div className="p-3 bg-muted rounded-lg space-y-1 text-sm">
+                                        <p><strong>No. SO:</strong> <span className="font-mono">{deleteConfirm.item.no_so}</span></p>
+                                        <p><strong>No. LO:</strong> <span className="font-mono">{deleteConfirm.item.no_lo}</span></p>
+                                        <p><strong>Material:</strong> {deleteConfirm.item.nama_material}</p>
+                                        <p><strong>Jumlah:</strong> <span className="text-red-600 font-semibold">{deleteConfirm.item.qty_pcs} tabung</span></p>
+                                    </div>
+                                )}
+                                <p className="text-destructive font-medium">
+                                    ⚠️ Stok akan otomatis dikurangi {deleteConfirm.item?.qty_pcs || 0} tabung. Aksi ini tidak dapat dibatalkan!
+                                </p>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="bg-destructive hover:bg-destructive/90"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                                    Menghapus...
+                                </>
+                            ) : (
+                                <>
+                                    <SafeIcon name="Trash2" className="h-4 w-4 mr-2" />
+                                    Ya, Batalkan
+                                </>
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
