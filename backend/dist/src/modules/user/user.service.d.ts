@@ -7,14 +7,14 @@ export declare class UserService {
         data: {
             id: string;
             code: string;
-            created_at: Date;
-            updated_at: Date;
+            email: string;
             name: string;
             phone: string | null;
-            email: string;
             avatar_url: string | null;
             role: import("@prisma/client").$Enums.user_role;
             is_active: boolean;
+            created_at: Date;
+            updated_at: Date;
         }[];
         meta: {
             total: number;
@@ -30,34 +30,34 @@ export declare class UserService {
     findOne(id: string): Promise<{
         id: string;
         code: string;
-        created_at: Date;
-        updated_at: Date;
+        email: string;
         name: string;
         phone: string | null;
-        email: string;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;
         is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
     }>;
     create(dto: CreateUserDto): Promise<{
         id: string;
         code: string;
-        created_at: Date;
+        email: string;
         name: string;
         phone: string | null;
-        email: string;
         role: import("@prisma/client").$Enums.user_role;
         is_active: boolean;
+        created_at: Date;
     }>;
     update(id: string, dto: UpdateUserDto): Promise<{
         id: string;
-        updated_at: Date;
+        email: string;
         name: string;
         phone: string | null;
-        email: string;
         avatar_url: string | null;
         role: import("@prisma/client").$Enums.user_role;
         is_active: boolean;
+        updated_at: Date;
     }>;
     remove(id: string): Promise<{
         message: string;

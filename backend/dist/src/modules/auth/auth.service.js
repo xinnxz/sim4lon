@@ -58,8 +58,11 @@ let AuthService = class AuthService {
         this.activityService = activityService;
     }
     async register(dto) {
-        const existingUser = await this.prisma.users.findUnique({
-            where: { email: dto.email },
+        const existingUser = await this.prisma.users.findFirst({
+            where: {
+                email: dto.email,
+                deleted_at: null,
+            },
         });
         if (existingUser) {
             throw new common_1.ConflictException('Email sudah terdaftar');

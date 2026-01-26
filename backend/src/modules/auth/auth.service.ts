@@ -14,9 +14,12 @@ export class AuthService {
     ) { }
 
     async register(dto: RegisterDto) {
-        // Check if email already exists
-        const existingUser = await this.prisma.users.findUnique({
-            where: { email: dto.email },
+        // Check if email already exists (exclude soft-deleted users)
+        const existingUser = await this.prisma.users.findFirst({
+            where: {
+                email: dto.email,
+                deleted_at: null,  // Exclude soft-deleted users
+            },
         });
 
         if (existingUser) {
