@@ -105,7 +105,7 @@ export default function ProfilPangkalanPage() {
 
         // Validate file type
         if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
-            toast.error('Format gambar harus JPEG, PNG, atau WebP')
+            toast.error('Format foto harus JPG, PNG, atau WebP')
             return
         }
 
