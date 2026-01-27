@@ -7,6 +7,8 @@ export declare class CompanyProfileService {
     private generate6DigitId;
     getProfile(): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
         company_name: string;
         address: string;
         phone: string | null;
@@ -22,11 +24,11 @@ export declare class CompanyProfileService {
         order_code_prefix: string;
         payment_due_days: number;
         min_order_quantity: number;
-        created_at: Date;
-        updated_at: Date;
     }>;
     updateProfile(dto: UpdateCompanyProfileDto): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
         company_name: string;
         address: string;
         phone: string | null;
@@ -42,7 +44,5 @@ export declare class CompanyProfileService {
         order_code_prefix: string;
         payment_due_days: number;
         min_order_quantity: number;
-        created_at: Date;
-        updated_at: Date;
     }>;
 }

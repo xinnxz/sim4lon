@@ -8,7 +8,7 @@ Pengujian dilakukan untuk menjamin kualitas dan juga mengetahui kelemahan dari s
 
 Pengujian Black Box bertujuan untuk menguji fungsionalitas sistem tanpa memperhatikan struktur internal kode program. Fokus pengujian adalah pada input dan output yang dihasilkan oleh sistem.
 
-Ada 22 modul dan 181 test case pada metode pengujian black box ini. Diantaranya:
+Ada 22 modul dan 189 test case pada metode pengujian black box ini. Diantaranya:
 
 1. Login, 8 test case
 2. Dashboard, 10 test case
@@ -23,15 +23,15 @@ Ada 22 modul dan 181 test case pada metode pengujian black box ini. Diantaranya:
 11. Stok Pangkalan, 8 test case
 12. Produk LPG, 4 test case
 13. Notifikasi, 6 test case
-14. Perencanaan, 4 test case
-15. Penyaluran, 7 test case
-16. Penerimaan, 4 test case
-17. In/Out Agen, 8 test case
+14. Perencanaan, 6 test case
+15. Penyaluran, 4 test case
+16. Penerimaan, 7 test case
+17. In/Out Agen, 4 test case
 18. Pengeluaran, 8 test case
-19. User Management, 5 test case
-20. Dashboard Pangkalan, 8 test case
+19. User Management, 8 test case
+20. Dashboard Pangkalan, 5 test case
 21. Profil, 8 test case
-22. Pengaturan, 6 test case
+22. Pengaturan, 8 test case
 
 ### A. Skenario Pengujian
 
@@ -452,22 +452,22 @@ Ada 22 modul dan 181 test case pada metode pengujian black box ini. Diantaranya:
 | 11 | Stok Pangkalan | 8 | 8 | 0 | 100% |
 | 12 | Produk LPG | 4 | 4 | 0 | 100% |
 | 13 | Notifikasi | 6 | 6 | 0 | 100% |
-| 14 | Perencanaan | 4 | 4 | 0 | 100% |
-| 15 | Penyaluran | 7 | 7 | 0 | 100% |
-| 16 | Penerimaan | 4 | 4 | 0 | 100% |
-| 17 | In/Out Agen | 8 | 8 | 0 | 100% |
+| 14 | Perencanaan | 6 | 6 | 0 | 100% |
+| 15 | Penyaluran | 4 | 4 | 0 | 100% |
+| 16 | Penerimaan | 7 | 7 | 0 | 100% |
+| 17 | In/Out Agen | 4 | 4 | 0 | 100% |
 | 18 | Pengeluaran | 8 | 8 | 0 | 100% |
-| 19 | User Management | 5 | 5 | 0 | 100% |
-| 20 | Dashboard Pangkalan | 8 | 8 | 0 | 100% |
+| 19 | User Management | 8 | 8 | 0 | 100% |
+| 20 | Dashboard Pangkalan | 5 | 5 | 0 | 100% |
 | 21 | Profil | 8 | 8 | 0 | 100% |
-| 22 | Pengaturan | 6 | 6 | 0 | 100% |
-| **Total** | | **181** | **181** | **0** | **100%** |
+| 22 | Pengaturan | 8 | 8 | 0 | 100% |
+| **Total** | | **189** | **189** | **0** | **100%** |
 
 ### C. Kesimpulan Pengujian Black Box
 
 Berdasarkan hasil pengujian Black Box yang telah dilakukan terhadap sistem SIM4LON, dapat disimpulkan bahwa:
 
-1. Seluruh **181 test case** yang diujikan pada **22 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
+1. Seluruh **189 test case** yang diujikan pada **22 modul** sistem berhasil dijalankan dengan hasil sesuai yang diharapkan.
 
 2. Tingkat keberhasilan pengujian mencapai **100%**, yang menunjukkan bahwa fungsionalitas sistem berjalan dengan baik.
 
