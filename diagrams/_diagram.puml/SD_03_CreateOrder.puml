@@ -1,0 +1,89 @@
+@startuml SD_03_CreateOrder
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-03: CREATE ORDER\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "OrderPage" as OP
+control "OrderService" as OS
+database "pangkalans" as PangkalanDB
+database "orders" as OrdersDB
+database "order_items" as ItemsDB
+database "timeline_tracks" as TimelineDB
+
+== Menampilkan Form Pesanan ==
+
+Admin -> OP : 1: Buka halaman Buat Pesanan
+activate OP
+
+OP -> OS : 1.1: getPangkalanList()
+activate OS
+OS -> PangkalanDB : 1.1.1: SELECT * FROM pangkalans\nWHERE is_active = true
+activate PangkalanDB
+PangkalanDB --> OS : 1.1.1.1: pangkalanList
+deactivate PangkalanDB
+OS --> OP : 1.1.2: pangkalanList
+deactivate OS
+
+OP --> Admin : 1.2: Tampilkan form pesanan
+
+== Input Data Pesanan ==
+
+Admin -> OP : 2: Pilih pangkalan
+Admin -> OP : 3: Pilih jenis LPG & qty
+Admin -> OP : 4: Klik "Simpan"
+
+OP -> OS : 4.1: createOrder(orderDto)
+activate OS
+
+OS -> OS : 4.1.1: validateInput(orderDto)
+
+OS -> OrdersDB : 4.1.2: SELECT MAX(code) FROM orders
+activate OrdersDB
+OrdersDB --> OS : 4.1.2.1: lastCode "ORD-0099"
+deactivate OrdersDB
+
+OS -> OS : 4.1.3: generateNewCode()\n→ "ORD-0100"
+
+loop untuk setiap item
+    OS -> OS : 4.1.4: calculateSubtotal(qty, price)
+    OS -> OS : 4.1.5: checkTaxable(lpg_category)
+    OS -> OS : 4.1.6: calculateTax(12%)
+end
+
+OS -> OS : 4.1.7: calculateTotalAmount()
+
+OS -> OrdersDB : 4.1.8: INSERT INTO orders\n{code, pangkalan_id, status='DRAFT'}
+activate OrdersDB
+OrdersDB --> OS : 4.1.8.1: orderId
+deactivate OrdersDB
+
+OS -> ItemsDB : 4.1.9: INSERT INTO order_items\n{order_id, lpg_type, qty, price}
+activate ItemsDB
+ItemsDB --> OS : 4.1.9.1: created
+deactivate ItemsDB
+
+OS -> TimelineDB : 4.1.10: INSERT INTO timeline_tracks\n{order_id, status='DRAFT', desc='Pesanan dibuat'}
+activate TimelineDB
+TimelineDB --> OS : 4.1.10.1: created
+deactivate TimelineDB
+
+OS --> OP : 4.2: OrderModel
+deactivate OS
+
+OP --> Admin : 4.3: Tampilkan pesan sukses
+OP --> Admin : 4.4: Redirect ke detail pesanan
+
+deactivate OP
+
+note right of OS
+  <b>PPN 12%</b> hanya untuk
+  kategori NON_SUBSIDI
+end note
+
+@enduml

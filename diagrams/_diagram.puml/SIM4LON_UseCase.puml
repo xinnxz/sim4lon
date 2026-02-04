@@ -1,0 +1,95 @@
+@startuml SIM4LON_UseCase
+!theme plain
+skinparam backgroundColor #87CEEB
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #333333
+skinparam actorBackgroundColor #87CEEB
+skinparam actorBorderColor #333333
+skinparam packageBackgroundColor #87CEEB
+skinparam packageBorderColor #333333
+
+title SISTEM SIM4LON - DISTRIBUSI GAS LPG
+
+' ==================== ACTORS ====================
+left to right direction
+
+actor "Admin" as Admin
+actor "Pangkalan" as Pangkalan
+actor "Operator" as Operator
+
+' ==================== SYSTEM BOUNDARY ====================
+rectangle "SISTEM SIM4LON - DISTRIBUSI GAS LPG" {
+    
+    ' === USE CASES SEMUA AKTOR ===
+    usecase "Login" as UC1
+    usecase "Kelola Profil" as UC2
+    
+    ' === USE CASES ADMIN ONLY ===
+    usecase "Kelola Pengguna" as UC3
+    usecase "Kelola Supir" as UC4
+    usecase "Lihat Log Aktivitas" as UC5
+    usecase "Kelola Pangkalan" as UC6
+    usecase "Kelola Perencanaan" as UC7
+    
+    ' === USE CASES ADMIN + OPERATOR ===
+    usecase "Kelola Dashboard" as UC8
+    usecase "Kelola Stok" as UC9
+    usecase "Kelola Laporan" as UC10
+    
+    usecase "Kelola Pembayaran\n--\nextension points\nCetak Nota" as UC11
+    usecase "Cetak Nota" as UC12
+    
+    usecase "Update Status\n--\nextension points\nAssign Driver" as UC13
+    usecase "Assign Driver" as UC14
+    
+    usecase "Kelola Pesanan" as UC15
+    
+    ' === USE CASES PANGKALAN ONLY ===
+    usecase "Kelola Penjualan" as UC16
+    usecase "Kelola Konsumen" as UC17
+    usecase "Buat Order ke Agen" as UC18
+}
+
+' ==================== RELATIONSHIPS - ADMIN ====================
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC13
+Admin --> UC15
+
+' ==================== RELATIONSHIPS - OPERATOR ====================
+Operator --> UC1
+Operator --> UC2
+Operator --> UC8
+Operator --> UC9
+Operator --> UC10
+Operator --> UC11
+Operator --> UC13
+Operator --> UC15
+
+Operator --> UC12
+Operator --> UC14
+
+' ==================== RELATIONSHIPS - PANGKALAN ====================
+Pangkalan --> UC1
+Pangkalan --> UC2
+Pangkalan --> UC16
+Pangkalan --> UC17
+Pangkalan --> UC18
+
+' ==================== INCLUDE RELATIONSHIPS ====================
+UC13 ..> UC15 : <<Include>>
+
+' ==================== EXTEND RELATIONSHIPS ====================
+UC12 ..> UC11 : <<Extend>>
+UC14 ..> UC13 : <<Extend>>
+
+@enduml

@@ -1,0 +1,81 @@
+@startuml SD_01_Login
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-01: LOGIN\n<size:10>Sistem SIM4LON</size>
+
+actor "User" as User
+boundary "LoginPage" as LP
+control "AuthService" as AS
+database "users" as UsersDB
+database "activity_logs" as LogsDB
+
+== Menampilkan Halaman Login ==
+
+User -> LP : 1: Buka halaman Login
+activate LP
+LP --> User : 1.1: Tampilkan form login
+
+== Proses Login ==
+
+User -> LP : 2: Input email & password
+User -> LP : 3: Klik tombol "Login"
+
+LP -> AS : 3.1: login(email, password)
+activate AS
+
+AS -> UsersDB : 3.1.1: SELECT * FROM users\nWHERE email = ?
+activate UsersDB
+UsersDB --> AS : 3.1.1.1: userData
+deactivate UsersDB
+
+alt User tidak ditemukan
+    AS --> LP : 3.1.2: throw UnauthorizedException
+    LP --> User : 3.1.2.1: Tampilkan error\n"Email atau password salah"
+else User ditemukan
+    AS -> AS : 3.1.3: bcrypt.compare(password, hash)
+    
+    alt Password tidak cocok
+        AS --> LP : 3.1.4: throw UnauthorizedException
+        LP --> User : 3.1.4.1: Tampilkan error
+    else Password cocok
+        alt Akun tidak aktif
+            AS --> LP : 3.1.5: throw UnauthorizedException\n"Akun tidak aktif"
+            LP --> User : 3.1.5.1: Tampilkan error
+        else Akun aktif
+            AS -> AS : 3.1.6: generateSessionId()
+            
+            AS -> UsersDB : 3.1.7: UPDATE users\nSET session_id = ?
+            activate UsersDB
+            UsersDB --> AS : 3.1.7.1: Updated
+            deactivate UsersDB
+            
+            AS -> AS : 3.1.8: generateJwtToken(payload)
+            
+            AS -> LogsDB : 3.1.9: INSERT INTO activity_logs\n(type='user_login')
+            activate LogsDB
+            LogsDB --> AS : 3.1.9.1: Created
+            deactivate LogsDB
+            
+            AS --> LP : 3.2: {access_token, user}
+            deactivate AS
+            
+            LP -> LP : 3.3: saveToken(localStorage)
+            LP --> User : 3.4: Redirect ke Dashboard
+        end
+    end
+end
+
+deactivate LP
+
+note right of AS
+  <b>Single-Session Login</b>
+  session_id baru akan
+  invalidasi session lama
+end note
+
+@enduml

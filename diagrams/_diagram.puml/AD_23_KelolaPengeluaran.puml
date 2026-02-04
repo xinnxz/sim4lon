@@ -1,0 +1,81 @@
+@startuml AD_23_KelolaPengeluaran
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-23: Kelola Pengeluaran (Pangkalan)**\nSistem SIM4LON
+
+|Pangkalan|
+start
+:Buka halaman Pengeluaran;
+
+|Sistem|
+:Load daftar expenses\npangkalan ini;
+:Hitung total per kategori;
+:Tampilkan dengan filter\n(tanggal, kategori);
+
+|Pangkalan|
+:Pilih aksi;
+
+switch (Aksi?)
+case (Tambah Baru)
+    :Klik "Catat Pengeluaran";
+    
+    |Sistem|
+    :Tampilkan form expense;
+    
+    |Pangkalan|
+    :Pilih kategori\n(Operasional/Transport/dll);
+    :Masukkan jumlah (Rp);
+    :Isi deskripsi;
+    :Pilih tanggal;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Validasi input;
+    :Simpan data expense;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+
+case (Edit)
+    :Klik "Edit" pada expense;
+    
+    |Sistem|
+    :Load data expense;
+    :Tampilkan form edit;
+    
+    |Pangkalan|
+    :Ubah data yang diperlukan;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Update data expense;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+
+case (Hapus)
+    :Klik "Hapus" pada expense;
+    
+    |Sistem|
+    :Tampilkan konfirmasi;
+    
+    |Pangkalan|
+    :Konfirmasi hapus;
+    
+    |Sistem|
+    :Delete expense;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+
+endswitch
+
+:Refresh daftar;
+stop
+
+@enduml

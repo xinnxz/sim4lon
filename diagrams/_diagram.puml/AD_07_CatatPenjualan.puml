@@ -1,0 +1,64 @@
+@startuml AD_07_CatatPenjualan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-07: Catat Penjualan (Pangkalan)**\nSistem SIM4LON
+
+|Pangkalan|
+start
+:Buka halaman Penjualan;
+:Klik "Catat Penjualan";
+
+|Sistem|
+:Tampilkan form penjualan;
+:Load daftar konsumen\npangkalan ini;
+:Load stok & harga LPG;
+
+|Pangkalan|
+if (Konsumen terdaftar?) then (ya)
+    :Pilih konsumen dari daftar;
+else (tidak)
+    :Masukkan nama konsumen\n(walk-in);
+endif
+
+:Pilih jenis LPG;
+:Masukkan jumlah;
+
+|Sistem|
+:Cek ketersediaan stok;
+
+if (Stok mencukupi?) then (ya)
+    :Hitung total harga\n(qty x selling_price);
+    :Tampilkan total;
+    
+    |Pangkalan|
+    :Konfirmasi penjualan;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Generate kode penjualan\n(PORD-XXXX);
+    :Simpan consumer_order;
+    :Kurangi pangkalan_stocks;
+    :Buat pangkalan_stock_movement\n(KELUAR);
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+    :Refresh dashboard;
+    stop
+else (tidak)
+    |Pangkalan|
+    :Tampilkan error\n"Stok tidak mencukupi";
+    
+    note right
+    Stok saat ini: X
+    Jumlah diminta: Y
+    end note
+    
+    stop
+endif
+
+@enduml

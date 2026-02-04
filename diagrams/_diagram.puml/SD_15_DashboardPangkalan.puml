@@ -1,0 +1,80 @@
+@startuml SD_15_DashboardPangkalan
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-15: DASHBOARD PANGKALAN\n<size:10>Sistem SIM4LON</size>
+
+actor "Pangkalan" as User
+boundary "DashboardPage" as DP
+control "DashboardService" as DS
+database "consumer_orders" as SalesDB
+database "pangkalan_stocks" as StockDB
+database "expenses" as ExpensesDB
+
+== Load Dashboard Data ==
+
+User -> DP : 1: Buka Dashboard Pangkalan
+activate DP
+
+DP -> DS : 1.1: getDashboardData(pangkalanId)
+activate DS
+
+== Get Sales Stats ==
+
+DS -> SalesDB : 1.1.1: SELECT SUM(total_amount) as revenue,\nSUM(qty) as totalQty,\nCOUNT(*) as totalTrx\nFROM consumer_orders\nWHERE pangkalan_id = ?
+activate SalesDB
+SalesDB --> DS : 1.1.1.1: salesStats
+deactivate SalesDB
+
+DS -> SalesDB : 1.1.2: SELECT SUM(total_amount) as todayRevenue\nFROM consumer_orders\nWHERE pangkalan_id = ? AND DATE(sale_date) = TODAY
+activate SalesDB
+SalesDB --> DS : 1.1.2.1: todayStats
+deactivate SalesDB
+
+== Get Stock Status ==
+
+DS -> StockDB : 1.1.3: SELECT * FROM pangkalan_stocks\nWHERE pangkalan_id = ?
+activate StockDB
+StockDB --> DS : 1.1.3.1: stockList
+deactivate StockDB
+
+DS -> DS : 1.1.4: checkStockLevels()\n→ normal/warning/critical
+
+== Get Expenses ==
+
+DS -> ExpensesDB : 1.1.5: SELECT SUM(amount) as totalExpenses\nFROM expenses\nWHERE pangkalan_id = ? AND MONTH = current
+activate ExpensesDB
+ExpensesDB --> DS : 1.1.5.1: expenseData
+deactivate ExpensesDB
+
+== Get Chart Data ==
+
+DS -> SalesDB : 1.1.6: SELECT DATE(sale_date), SUM(total_amount)\nFROM consumer_orders\nWHERE pangkalan_id = ?\nGROUP BY DATE(sale_date)\nORDER BY sale_date DESC LIMIT 7
+activate SalesDB
+SalesDB --> DS : 1.1.6.1: chartData
+deactivate SalesDB
+
+== Get Recent Sales ==
+
+DS -> SalesDB : 1.1.7: SELECT * FROM consumer_orders\nWHERE pangkalan_id = ?\nORDER BY sale_date DESC LIMIT 5
+activate SalesDB
+SalesDB --> DS : 1.1.7.1: recentSales
+deactivate SalesDB
+
+DS -> DS : 1.1.8: calculateProfit(revenue - cost - expenses)
+
+DS --> DP : 1.2: {stats, stocks, chart, recentSales, profit}
+deactivate DS
+
+DP --> User : 1.3: Render dashboard cards
+DP --> User : 1.4: Render stock indicators
+DP --> User : 1.5: Render chart 7 hari
+DP --> User : 1.6: Render recent sales
+
+deactivate DP
+
+@enduml

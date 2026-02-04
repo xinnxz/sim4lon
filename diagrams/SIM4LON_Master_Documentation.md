@@ -73,7 +73,7 @@
 |--------------|--------|-----------|
 | Use Case | 1 | PlantUML |
 | Class Diagram | 1 | PlantUML |
-| ERD | 1 | PlantUML |
+| ERD | 1 | PlantUML | 
 | Activity Diagram | 25 | PlantUML |
 | Sequence Diagram | 18 | PlantUML |
 | State Machine | 4 | PlantUML |

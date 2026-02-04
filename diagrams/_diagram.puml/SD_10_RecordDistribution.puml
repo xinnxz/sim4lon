@@ -1,0 +1,89 @@
+@startuml SD_10_RecordDistribution
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-10: RECORD DISTRIBUTION (PENYALURAN)\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "PenyaluranPage" as PP
+control "PenyaluranService" as PS
+database "pangkalans" as PangkalanDB
+database "penyaluran_harian" as PenyaluranDB
+database "stock_histories" as HistoryDB
+
+== Menampilkan Grid Penyaluran ==
+
+Admin -> PP : 1: Buka halaman Penyaluran
+Admin -> PP : 2: Pilih bulan & tipe LPG
+activate PP
+
+PP -> PS : 2.1: getRekapitulasi(bulan, lpgType)
+activate PS
+
+PS -> PangkalanDB : 2.1.1: SELECT * FROM pangkalans\nWHERE is_active = true
+activate PangkalanDB
+PangkalanDB --> PS : 2.1.1.1: pangkalanList
+deactivate PangkalanDB
+
+PS -> PenyaluranDB : 2.1.2: SELECT * FROM penyaluran_harian\nWHERE bulan = ? AND lpg_type = ?
+activate PenyaluranDB
+PenyaluranDB --> PS : 2.1.2.1: existingData
+deactivate PenyaluranDB
+
+PS -> PS : 2.1.3: buildGrid(pangkalans, data)
+
+PS --> PP : 2.2: {grid: pangkalan × tanggal}
+deactivate PS
+
+PP --> Admin : 2.3: Tampilkan grid penyaluran
+
+== Input Data Penyaluran ==
+
+Admin -> PP : 3: Klik cell untuk input
+PP --> Admin : 3.1: Tampilkan form input
+
+Admin -> PP : 4: Input jumlah_normal
+Admin -> PP : 5: Input jumlah_fakultatif
+Admin -> PP : 6: Pilih tipe_pembayaran
+Admin -> PP : 7: Klik "Simpan"
+
+PP -> PS : 7.1: bulkUpdate(items[])
+activate PS
+
+loop untuk setiap item
+    PS -> PenyaluranDB : 7.1.1: SELECT * FROM penyaluran_harian\nWHERE pangkalan_id = ? AND tanggal = ?
+    activate PenyaluranDB
+    PenyaluranDB --> PS : 7.1.1.1: existing or null
+    deactivate PenyaluranDB
+    
+    alt Data sudah ada
+        PS -> PenyaluranDB : 7.1.2: UPDATE penyaluran_harian\nSET jumlah_normal = ?, jumlah_fakultatif = ?
+        activate PenyaluranDB
+        PenyaluranDB --> PS : 7.1.2.1: updated
+        deactivate PenyaluranDB
+    else Data belum ada
+        PS -> PenyaluranDB : 7.1.2: INSERT INTO penyaluran_harian
+        activate PenyaluranDB
+        PenyaluranDB --> PS : 7.1.2.1: created
+        deactivate PenyaluranDB
+    end
+    
+    PS -> HistoryDB : 7.1.3: INSERT INTO stock_histories\n{movement_type='KELUAR'}
+    activate HistoryDB
+    HistoryDB --> PS : 7.1.3.1: created
+    deactivate HistoryDB
+end
+
+PS --> PP : 7.2: {updatedCount}
+deactivate PS
+
+PP --> Admin : 7.3: Tampilkan pesan sukses
+PP --> Admin : 7.4: Refresh grid
+
+deactivate PP
+
+@enduml
