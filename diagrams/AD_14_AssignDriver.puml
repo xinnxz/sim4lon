@@ -3,8 +3,6 @@
 skinparam backgroundColor #f0f8ff
 skinparam ActivityBackgroundColor #87CEEB
 skinparam ActivityBorderColor #1565c0
-skinparam PartitionBackgroundColor #e3f2fd
-skinparam PartitionBorderColor #1565c0
 
 title **AD-14: Assign Driver**\nSistem SIM4LON
 
@@ -15,21 +13,34 @@ start
 
 |Sistem|
 :Load daftar driver aktif;
+:Cek status kesibukan driver;
 :Tampilkan modal pilih driver;
 
+note right
+  Driver dengan status
+  "Sedang Mengantar"
+  ditampilkan tapi disabled
+end note
+
 |User|
-:Pilih driver dari daftar;
-:Klik "Simpan";
+:Pilih driver yang tersedia;
 
 |Sistem|
-:Validasi driver tersedia;
-:Update driver_id pada pesanan;
-:Buat timeline track\n"Driver ditugaskan";
-:Log aktivitas;
-
-|User|
-:Tampilkan pesan sukses;
-:Refresh halaman detail;
-stop
+if (Driver sedang sibuk?) then (ya)
+    |User|
+    :Tampilkan badge "Mengantar";
+    :Tidak bisa dipilih;
+    stop
+else (tidak)
+    :Assign driver ke pesanan;
+    :Update status → DIKIRIM;
+    :Buat timeline track;
+    
+    |User|
+    :Tampilkan notifikasi sukses;
+    :Tutup modal;
+    :Refresh halaman detail;
+    stop
+endif
 
 @enduml

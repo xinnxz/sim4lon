@@ -3,8 +3,6 @@
 skinparam backgroundColor #f0f8ff
 skinparam ActivityBackgroundColor #87CEEB
 skinparam ActivityBorderColor #1565c0
-skinparam PartitionBackgroundColor #e3f2fd
-skinparam PartitionBorderColor #1565c0
 
 title **AD-04: Catat Pembayaran**\nSistem SIM4LON
 
@@ -15,12 +13,19 @@ start
 
 |Sistem|
 :Tampilkan form pembayaran;
-:Tampilkan sisa tagihan;
+:Tampilkan ringkasan pesanan;
 
 |User|
-:Pilih metode pembayaran\n(TUNAI/TRANSFER);
-:Masukkan jumlah bayar;
-:Upload bukti transfer\n(jika transfer);
+:Pilih metode pembayaran;
+
+switch (Metode?)
+case (TUNAI)
+    :Masukkan jumlah bayar;
+case (TRANSFER)
+    :Masukkan jumlah bayar;
+    :Upload bukti transfer;
+endswitch
+
 :Tambah catatan (opsional);
 :Klik "Simpan";
 
@@ -28,27 +33,22 @@ start
 :Validasi input;
 
 if (Input valid?) then (ya)
-    if (Jumlah >= Sisa tagihan?) then (ya)
-        :Set is_paid = true;
-        :Set payment_status = "PAID";
-    else (tidak)
-        :Set is_paid = false;
-        :Set is_dp = true;
-        :Set payment_status = "PARTIAL";
+    if (Metode = TRANSFER?) then (ya)
+        :Upload bukti ke Supabase Storage;
+        :Simpan URL bukti transfer;
     endif
     
     :Simpan payment record;
+    :Set is_paid = true;
     :Update order_payment_details;
-    :Log aktivitas\n"payment_recorded";
     
-    if (Pembayaran lunas AND status = MENUNGGU_PEMBAYARAN?) then (ya)
-        :Auto update status\nke DIPROSES;
-        :Buat timeline track;
+    if (Status = MENUNGGU_PEMBAYARAN?) then (ya)
+        :Auto update status → DIPROSES;
     endif
     
     |User|
-    :Tampilkan pesan sukses;
-    :Refresh halaman;
+    :Tampilkan notifikasi sukses;
+    :Redirect ke detail pesanan;
     stop
 else (tidak)
     |User|
