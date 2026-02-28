@@ -40,6 +40,8 @@ import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, lpgPricesAp
 import { LPG_CONFIG, LPG_IMAGES, EXPENSE_CATEGORIES, normalizeType } from '@/lib/lpg-config'
 import { formatCurrency, formatCurrencyShort, formatDate, formatTime } from '@/lib/format'
 import { toast } from 'sonner'
+import StockAlertBanner from '@/components/pangkalan/StockAlertBanner'
+import DailySummaryCard from '@/components/pangkalan/DailySummaryCard'
 import {
     AreaChart,
     Area,
@@ -150,6 +152,7 @@ export default function PangkalanDashboard() {
     const [recentSales, setRecentSales] = useState<ConsumerOrder[]>([])
     const [chartData, setChartData] = useState<ChartDataPoint[]>([])
     const [stockData, setStockData] = useState<Array<{ name: string; value: number; color: string }>>([])
+    const [rawStockLevels, setRawStockLevels] = useState<Array<{ lpg_type: string; qty: number }>>([])
     const [totalStock, setTotalStock] = useState(0)
     const [expenseSummary, setExpenseSummary] = useState<{ total: number; byCategory: Array<{ name: string; value: number; color: string }> }>({ total: 0, byCategory: [] })
     const [isLoading, setIsLoading] = useState(true)
@@ -283,6 +286,8 @@ export default function PangkalanDashboard() {
                     }))
                     setStockData(pieData)
                     setTotalStock(total)
+                    // Save raw stock levels for StockAlertBanner
+                    setRawStockLevels(activeStocks.map(s => ({ lpg_type: s.lpg_type, qty: s.qty })))
                 }
 
                 // Process expense data for pie chart
@@ -396,6 +401,37 @@ export default function PangkalanDashboard() {
                     </Button>
                 </div>
             </div>
+
+            {/* Stock Alert Banner — appears when stock is low */}
+            <StockAlertBanner
+                stockLevels={rawStockLevels}
+                onOrderStock={() => setIsOrderDialogOpen(true)}
+            />
+
+            {/* Daily Summary Card */}
+            {stats && (
+                <DailySummaryCard
+                    totalSales={stats.total_revenue || 0}
+                    transactionCount={stats.total_orders || 0}
+                    salesBreakdown={recentSales
+                        .filter(s => {
+                            const today = new Date().toISOString().split('T')[0]
+                            return s.sale_date?.startsWith(today)
+                        })
+                        .reduce((acc, s) => {
+                            const existing = acc.find(a => a.lpg_type === s.lpg_type)
+                            if (existing) {
+                                existing.qty += s.qty
+                                existing.total += s.total_amount
+                            } else {
+                                acc.push({ lpg_type: s.lpg_type, qty: s.qty, total: s.total_amount })
+                            }
+                            return acc
+                        }, [] as Array<{ lpg_type: string; qty: number; total: number }>)
+                    }
+                    totalExpenses={stats.total_pengeluaran || 0}
+                />
+            )}
 
             {/* Stats Cards - Staggered Entry */}
             <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
