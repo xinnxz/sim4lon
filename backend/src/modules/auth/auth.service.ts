@@ -76,125 +76,134 @@ export class AuthService {
      * 5. Auto-login (return JWT)
      */
     async registerPangkalan(dto: RegisterPangkalanDto) {
-        // Check if email already exists
-        const existingUser = await this.prisma.users.findFirst({
-            where: { email: dto.email, deleted_at: null },
-        });
-
-        if (existingUser) {
-            throw new ConflictException('Email sudah terdaftar');
-        }
-
-        const hashedPassword = await bcrypt.hash(dto.password, 10);
-
-        // Generate codes
-        const pangkalanCount = await this.prisma.pangkalans.count();
-        const pangkalanCode = `PKL-${String(pangkalanCount + 1).padStart(3, '0')}`;
-        const userCount = await this.prisma.users.count();
-        const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
-
-        // Trial period: 14 days
-        const trialExpiry = new Date();
-        trialExpiry.setDate(trialExpiry.getDate() + 14);
-
-        // Atomic transaction: create pangkalan + user + default prices
-        const result = await this.prisma.$transaction(async (tx: any) => {
-            // 1. Create pangkalan
-            const pangkalan = await tx.pangkalans.create({
-                data: {
-                    code: pangkalanCode,
-                    name: dto.pangkalan_name,
-                    address: dto.address,
-                    region: dto.region || null,
-                    pic_name: dto.owner_name,
-                    phone: dto.phone || null,
-                    email: dto.email,
-                    is_active: true,
-                },
-            });
-
-            // 2. Create user linked to pangkalan
-            const user = await tx.users.create({
-                data: {
-                    code: userCode,
-                    email: dto.email,
-                    password: hashedPassword,
-                    name: dto.owner_name,
-                    phone: dto.phone || null,
-                    role: 'PANGKALAN',
-                    pangkalan_id: pangkalan.id,
-                },
-            });
-
-            // 3. Setup default LPG price (3kg subsidi)
-            await tx.lpg_prices.create({
-                data: {
-                    pangkalan_id: pangkalan.id,
-                    lpg_type: 'kg3',
-                    cost_price: 13250,
-                    selling_price: 16000,
-                    is_active: true,
-                },
-            });
-
-            return { pangkalan, user };
-        }) as { pangkalan: any; user: any };
-
-        // 4. Create subscription (best-effort, outside transaction)
         try {
-            await (this.prisma as any).subscriptions.create({
-                data: {
-                    pangkalan_id: result.pangkalan.id,
-                    plan: 'FREE',
-                    status: 'TRIAL',
-                    expires_at: trialExpiry,
-                },
+            // Check if email already exists
+            const existingUser = await this.prisma.users.findFirst({
+                where: { email: dto.email, deleted_at: null },
             });
-        } catch (e) {
-            console.warn('Subscription creation skipped (table may not exist):', e);
-        }
 
-        // 5. Auto-login: generate JWT
-        const sessionId = `${result.user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+            if (existingUser) {
+                throw new ConflictException('Email sudah terdaftar');
+            }
 
-        await this.prisma.users.update({
-            where: { id: result.user.id },
-            data: { session_id: sessionId },
-        });
+            const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-        const payload = {
-            sub: result.user.id,
-            email: result.user.email,
-            role: result.user.role,
-            pangkalan_id: result.pangkalan.id,
-            session_id: sessionId,
-        };
+            // Generate unique codes
+            const pangkalanCount = await this.prisma.pangkalans.count();
+            const userCount = await this.prisma.users.count();
+            const ts = Date.now().toString(36); // short timestamp for uniqueness
+            const pangkalanCode = `PKL-${String(pangkalanCount + 1).padStart(3, '0')}-${ts}`;
+            const userCode = `USR-${String(userCount + 1).padStart(3, '0')}-${ts}`;
 
-        const accessToken = this.jwtService.sign(payload);
+            // Trial period: 14 days
+            const trialExpiry = new Date();
+            trialExpiry.setDate(trialExpiry.getDate() + 14);
 
-        // Log activity
-        await this.activityService.logActivity('system_create', 'Pangkalan Baru Terdaftar', {
-            userId: result.user.id,
-            description: `Pangkalan ${result.pangkalan.name} (${pangkalanCode}) didaftarkan oleh ${dto.owner_name}`,
-        });
+            // Atomic transaction: create pangkalan + user + default prices
+            const result = await this.prisma.$transaction(async (tx: any) => {
+                // 1. Create pangkalan
+                const pangkalan = await tx.pangkalans.create({
+                    data: {
+                        code: pangkalanCode,
+                        name: dto.pangkalan_name,
+                        address: dto.address,
+                        region: dto.region || null,
+                        pic_name: dto.owner_name,
+                        phone: dto.phone || null,
+                        email: dto.email,
+                        is_active: true,
+                    },
+                });
 
-        return {
-            message: 'Registrasi pangkalan berhasil! Selamat datang di SIM4LON 🎉',
-            access_token: accessToken,
-            user: {
-                id: result.user.id,
+                // 2. Create user linked to pangkalan
+                const user = await tx.users.create({
+                    data: {
+                        code: userCode,
+                        email: dto.email,
+                        password: hashedPassword,
+                        name: dto.owner_name,
+                        phone: dto.phone || null,
+                        role: 'PANGKALAN',
+                        pangkalan_id: pangkalan.id,
+                    },
+                });
+
+                // 3. Setup default LPG price (3kg subsidi)
+                await tx.lpg_prices.create({
+                    data: {
+                        pangkalan_id: pangkalan.id,
+                        lpg_type: 'kg3',
+                        cost_price: 13250,
+                        selling_price: 16000,
+                        is_active: true,
+                    },
+                });
+
+                return { pangkalan, user };
+            }) as { pangkalan: any; user: any };
+
+            // 4. Create subscription (best-effort, outside transaction)
+            try {
+                await (this.prisma as any).subscriptions.create({
+                    data: {
+                        pangkalan_id: result.pangkalan.id,
+                        plan: 'FREE',
+                        status: 'TRIAL',
+                        expires_at: trialExpiry,
+                    },
+                });
+            } catch (e) {
+                console.warn('Subscription creation skipped (table may not exist):', e);
+            }
+
+            // 5. Auto-login: generate JWT
+            const sessionId = `${result.user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+
+            await this.prisma.users.update({
+                where: { id: result.user.id },
+                data: { session_id: sessionId },
+            });
+
+            const payload = {
+                sub: result.user.id,
                 email: result.user.email,
-                name: result.user.name,
                 role: result.user.role,
                 pangkalan_id: result.pangkalan.id,
-                pangkalan: {
-                    id: result.pangkalan.id,
-                    code: result.pangkalan.code,
-                    name: result.pangkalan.name,
+                session_id: sessionId,
+            };
+
+            const accessToken = this.jwtService.sign(payload);
+
+            // Log activity
+            await this.activityService.logActivity('system_create', 'Pangkalan Baru Terdaftar', {
+                userId: result.user.id,
+                description: `Pangkalan ${result.pangkalan.name} (${pangkalanCode}) didaftarkan oleh ${dto.owner_name}`,
+            });
+
+            return {
+                message: 'Registrasi pangkalan berhasil! Selamat datang di SIM4LON 🎉',
+                access_token: accessToken,
+                user: {
+                    id: result.user.id,
+                    email: result.user.email,
+                    name: result.user.name,
+                    role: result.user.role,
+                    pangkalan_id: result.pangkalan.id,
+                    pangkalan: {
+                        id: result.pangkalan.id,
+                        code: result.pangkalan.code,
+                        name: result.pangkalan.name,
+                    },
                 },
-            },
-            trial_expires_at: trialExpiry.toISOString(),
-        };
+                trial_expires_at: trialExpiry.toISOString(),
+            };
+        } catch (error: any) {
+            console.error('=== REGISTER PANGKALAN ERROR ===');
+            console.error('Error:', error.message || error);
+            console.error('Stack:', error.stack);
+            // Temporary: return actual error for debugging
+            throw new ConflictException(`Registration failed: ${error.message || 'Unknown error'}`);
+        }
     }
 
     async login(dto: LoginDto) {
