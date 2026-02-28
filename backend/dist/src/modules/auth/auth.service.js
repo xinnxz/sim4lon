@@ -117,9 +117,9 @@ let AuthService = class AuthService {
                     code: pangkalanCode,
                     name: dto.pangkalan_name,
                     address: dto.address,
-                    region: dto.region,
+                    region: dto.region || null,
                     pic_name: dto.owner_name,
-                    phone: dto.phone,
+                    phone: dto.phone || null,
                     email: dto.email,
                     is_active: true,
                 },
@@ -130,17 +130,9 @@ let AuthService = class AuthService {
                     email: dto.email,
                     password: hashedPassword,
                     name: dto.owner_name,
-                    phone: dto.phone,
+                    phone: dto.phone || null,
                     role: 'PANGKALAN',
                     pangkalan_id: pangkalan.id,
-                },
-            });
-            await tx.subscriptions.create({
-                data: {
-                    pangkalan_id: pangkalan.id,
-                    plan: 'FREE',
-                    status: 'TRIAL',
-                    expires_at: trialExpiry,
                 },
             });
             await tx.lpg_prices.create({
@@ -154,6 +146,19 @@ let AuthService = class AuthService {
             });
             return { pangkalan, user };
         });
+        try {
+            await this.prisma.subscriptions.create({
+                data: {
+                    pangkalan_id: result.pangkalan.id,
+                    plan: 'FREE',
+                    status: 'TRIAL',
+                    expires_at: trialExpiry,
+                },
+            });
+        }
+        catch (e) {
+            console.warn('Subscription creation skipped (table may not exist):', e);
+        }
         const sessionId = `${result.user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
         await this.prisma.users.update({
             where: { id: result.user.id },

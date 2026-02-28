@@ -97,7 +97,7 @@ export class AuthService {
         const trialExpiry = new Date();
         trialExpiry.setDate(trialExpiry.getDate() + 14);
 
-        // Atomic transaction: create everything or nothing
+        // Atomic transaction: create pangkalan + user + default prices
         const result = await this.prisma.$transaction(async (tx: any) => {
             // 1. Create pangkalan
             const pangkalan = await tx.pangkalans.create({
@@ -105,9 +105,9 @@ export class AuthService {
                     code: pangkalanCode,
                     name: dto.pangkalan_name,
                     address: dto.address,
-                    region: dto.region,
+                    region: dto.region || null,
                     pic_name: dto.owner_name,
-                    phone: dto.phone,
+                    phone: dto.phone || null,
                     email: dto.email,
                     is_active: true,
                 },
@@ -120,24 +120,13 @@ export class AuthService {
                     email: dto.email,
                     password: hashedPassword,
                     name: dto.owner_name,
-                    phone: dto.phone,
+                    phone: dto.phone || null,
                     role: 'PANGKALAN',
                     pangkalan_id: pangkalan.id,
                 },
             });
 
-            // 3. Create FREE subscription (14-day trial)
-            // Note: Needs `prisma generate` after migration for type safety
-            await tx.subscriptions.create({
-                data: {
-                    pangkalan_id: pangkalan.id,
-                    plan: 'FREE',
-                    status: 'TRIAL',
-                    expires_at: trialExpiry,
-                },
-            });
-
-            // 4. Setup default LPG price (3kg subsidi)
+            // 3. Setup default LPG price (3kg subsidi)
             await tx.lpg_prices.create({
                 data: {
                     pangkalan_id: pangkalan.id,
@@ -150,6 +139,20 @@ export class AuthService {
 
             return { pangkalan, user };
         }) as { pangkalan: any; user: any };
+
+        // 4. Create subscription (best-effort, outside transaction)
+        try {
+            await (this.prisma as any).subscriptions.create({
+                data: {
+                    pangkalan_id: result.pangkalan.id,
+                    plan: 'FREE',
+                    status: 'TRIAL',
+                    expires_at: trialExpiry,
+                },
+            });
+        } catch (e) {
+            console.warn('Subscription creation skipped (table may not exist):', e);
+        }
 
         // 5. Auto-login: generate JWT
         const sessionId = `${result.user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
