@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, Put, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, UpdateProfileDto, ChangePasswordDto } from './dto';
+import { LoginDto, RegisterDto, RegisterPangkalanDto, UpdateProfileDto, ChangePasswordDto } from './dto';
 import { JwtAuthGuard } from './guards';
 import { CurrentUser, Public } from './decorators';
 
@@ -12,6 +12,12 @@ export class AuthController {
     @Post('register')
     register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
+    }
+
+    @Public()
+    @Post('register-pangkalan')
+    registerPangkalan(@Body() dto: RegisterPangkalanDto) {
+        return this.authService.registerPangkalan(dto);
     }
 
     @Public()
