@@ -19,27 +19,9 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import { consumerOrdersApi, consumersApi, lpgPricesApi, pangkalanStockApi, type Consumer, type PangkalanLpgPrice, type StockLevel } from '@/lib/api'
+import { LPG_DISPLAY, LPG_IMAGES, normalizeType } from '@/lib/lpg-config'
+import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
-
-// Static LPG display options (colors, display names)
-// IMPORTANT: stockType must match API toFrontendFormat output
-// API returns: 3kg, 5kg, 12kg, 50kg, gr220 (not 5.5kg or 220gr!)
-const LPG_DISPLAY = [
-    { value: 'kg3', dbType: 'kg3', stockType: '3kg', display: '3 kg', color: '#22C55E', bgClass: 'from-green-500 to-emerald-600', defaultPrice: 20000 },
-    { value: 'kg5', dbType: 'kg5', stockType: '5kg', display: '5.5 kg', color: '#ff82c5', bgClass: 'from-pink-400 to-pink-600', defaultPrice: 60000 },
-    { value: 'kg12', dbType: 'kg12', stockType: '12kg', display: '12 kg', color: '#3B82F6', bgClass: 'from-blue-500 to-indigo-600', defaultPrice: 180000 },
-    { value: 'kg50', dbType: 'kg50', stockType: '50kg', display: '50 kg', color: '#ef0e0e', bgClass: 'from-red-500 to-red-600', defaultPrice: 700000 },
-    { value: 'gr220', dbType: 'gr220', stockType: 'gr220', display: '220 gr', color: '#F59E0B', bgClass: 'from-amber-500 to-orange-600', defaultPrice: 22000 },
-]
-
-// LPG product images mapping (uses value/dbType as key)
-const LPG_IMAGES: Record<string, string> = {
-    'kg3': '/images/products/lpg-3kg.png',
-    'kg5': '/images/products/lpg-5kg.png',
-    'kg12': '/images/products/lpg-12kg.png',
-    'kg50': '/images/products/lpg-50kg.png',
-    'gr220': '/images/products/bright-gas-220gr.png',
-}
 
 export default function CatatPenjualanPage() {
     const [lpgType, setLpgType] = useState('kg3')
@@ -124,7 +106,7 @@ export default function CatatPenjualanPage() {
         setManualPrice(null)
     }, [lpgType])
 
-    const formatCurrency = (v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(v)
+    // formatCurrency imported from @/lib/format
 
     // Hold to increment/decrement (with stock limit)
     const startHold = useCallback((action: 'inc' | 'dec') => {
@@ -206,8 +188,9 @@ export default function CatatPenjualanPage() {
             })
 
             // Update local stock after successful sale
+            // Gunakan normalizeType untuk matching karena format API (3kg) beda dengan internal (kg3)
             setStockLevels(prev => prev.map(s =>
-                s.lpg_type === lpgType ? { ...s, qty: s.qty - qty } : s
+                normalizeType(s.lpg_type) === normalizeType(lpgType) ? { ...s, qty: s.qty - qty } : s
             ))
 
             setShowSuccess(true)

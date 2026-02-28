@@ -37,6 +37,8 @@ import {
 import SafeIcon from '@/components/common/SafeIcon'
 import WelcomePopup from '@/components/common/WelcomePopup'
 import { authApi, consumerOrdersApi, pangkalanStockApi, expensesApi, lpgPricesApi, ordersApi, type UserProfile, type ConsumerOrder, type ConsumerOrderStats, type ChartDataPoint, type Expense, type ExpenseCategory, type PangkalanLpgPrice } from '@/lib/api'
+import { LPG_CONFIG, LPG_IMAGES, EXPENSE_CATEGORIES, normalizeType } from '@/lib/lpg-config'
+import { formatCurrency, formatCurrencyShort, formatDate, formatTime } from '@/lib/format'
 import { toast } from 'sonner'
 import {
     AreaChart,
@@ -52,36 +54,11 @@ import {
     Legend,
 } from 'recharts'
 
-// LPG type config - support both formats (3kg from new standard, kg3 from legacy)
-const lpgTypeConfig: Record<string, { name: string; color: string }> = {
-    // Bright Gas 220gr
-    'gr220': { name: 'Bright Gas 220gr', color: '#FFA500' },
-    '220gr': { name: 'Bright Gas 220gr', color: '#FFA500' },
-    // Standard formats
-    '3kg': { name: '3 kg', color: '#22C55E' },
-    '5kg': { name: '5.5 kg', color: '#ff82c5ff' },
-    '12kg': { name: '12 kg', color: '#3B82F6' },
-    '50kg': { name: '50 kg', color: '#ef0e0eff' },
-    // Legacy format support
-    'kg3': { name: '3 kg', color: '#22C55E' },
-    'kg5': { name: '5.5 kg', color: '#ff82c5ff' },
-    'kg12': { name: '12 kg', color: '#3B82F6' },
-    'kg50': { name: '50 kg', color: '#ef0e0eff' },
-}
+// LPG_CONFIG, LPG_IMAGES imported from @/lib/lpg-config
+// Alias for backward compatibility in this file
+const lpgTypeConfig = LPG_CONFIG
 
-// LPG product images mapping
-const LPG_IMAGES: Record<string, string> = {
-    'gr220': '/images/products/bright-gas-220gr.png',
-    '220gr': '/images/products/bright-gas-220gr.png',
-    '3kg': '/images/products/lpg-3kg.png',
-    'kg3': '/images/products/lpg-3kg.png',
-    '5kg': '/images/products/lpg-5kg.png',
-    'kg5': '/images/products/lpg-5kg.png',
-    '12kg': '/images/products/lpg-12kg.png',
-    'kg12': '/images/products/lpg-12kg.png',
-    '50kg': '/images/products/lpg-50kg.png',
-    'kg50': '/images/products/lpg-50kg.png',
-}
+// LPG_IMAGES imported from @/lib/lpg-config
 
 // Custom tooltip component
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -164,25 +141,7 @@ const PieTooltip = ({ active, payload }: any) => {
 }
 
 
-// Expense categories config - Vibrant color palette for chart
-// Includes multiple case variations for legacy data compatibility
-const EXPENSE_CATEGORIES: Record<string, { label: string; color: string }> = {
-    // Standard categories (uppercase)
-    'OPERASIONAL': { label: 'Operasional', color: '#8B5CF6' },   // Purple
-    'TRANSPORT': { label: 'Transport', color: '#F97316' },       // Orange
-    'SEWA': { label: 'Sewa', color: '#EC4899' },                  // Pink
-    'LISTRIK': { label: 'Listrik/Air', color: '#EAB308' },        // Yellow
-    'GAJI': { label: 'Gaji', color: '#3B82F6' },                  // Blue
-    'LAINNYA': { label: 'Lainnya', color: '#10B981' },            // Emerald
-    // Legacy/alternative formats
-    'MAINTENANCE': { label: 'Maintenance', color: '#06B6D4' },    // Cyan
-    'Maintenance': { label: 'Maintenance', color: '#06B6D4' },
-    'maintenance': { label: 'Maintenance', color: '#06B6D4' },
-    'PERAWATAN': { label: 'Perawatan', color: '#14B8A6' },        // Teal
-    'LAIN-LAIN': { label: 'Lain-lain', color: '#6366F1' },        // Indigo
-    'Lain-lain': { label: 'Lain-lain', color: '#6366F1' },
-    'lain-lain': { label: 'Lain-lain', color: '#6366F1' },
-}
+// EXPENSE_CATEGORIES imported from @/lib/lpg-config
 
 export default function PangkalanDashboard() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -221,26 +180,10 @@ export default function PangkalanDashboard() {
             setIsSubmittingOrder(true)
             const pangkalanId = profile.pangkalan_id || profile.pangkalans?.id
 
-            // Calculate estimated price based on market (dummy logic or use previous)
-            // Ideally we fetch price from API. For now assume standard prices:
-            // 3kg: 15000 (beli), 12kg: 180000, etc.
-            // This is just for the ORDER RECORD. True price is set by Agen/Admin upon confirmation usually.
-            // But API requires it. Let's use a safe map.
-            const ESTIMATED_PRICES: Record<string, number> = {
-                '3kg': 15000,
-                '5.5kg': 85000,
-                '12kg': 180000,
-                '50kg': 750000,
-                '220gr': 15000
-            }
-            const normalizedType = orderForm.lpg_type.replace('kg', '').replace('gr', '')
-            // Simple mapping attempt
-            let price = 0
-            if (orderForm.lpg_type.includes('3kg')) price = 15000
-            else if (orderForm.lpg_type.includes('12kg')) price = 180000
-            else if (orderForm.lpg_type.includes('5.5kg')) price = 85000
-            else if (orderForm.lpg_type.includes('50kg')) price = 750000
-            else price = 20000 // default
+            // Ambil harga dari LPG_DISPLAY config (bukan hardcoded)
+            const { LPG_DISPLAY } = await import('@/lib/lpg-config')
+            const displayItem = LPG_DISPLAY.find(item => item.value === orderForm.lpg_type)
+            const price = displayItem?.defaultPrice || 20000
 
             await ordersApi.create({
                 pangkalan_id: pangkalanId!,
@@ -366,27 +309,15 @@ export default function PangkalanDashboard() {
         fetchData()
     }, [])
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(value)
-    }
+    // formatCurrency, formatCurrencyShort, formatDate, formatTime imported from @/lib/format
 
-    const formatCurrencyShort = (value: number) => {
-        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`
-        if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`
-        return value.toString()
-    }
+    // formatCurrencyShort imported from @/lib/format
 
-    const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
-    }
+    // formatDate imported from @/lib/format
 
-    const formatTime = (dateStr: string) => {
-        return new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-    }
+    // formatTime imported from @/lib/format
+
+
 
     // Prepare chart data with formatted dates
     const enhancedChartData = chartData.map(day => ({
