@@ -7,81 +7,95 @@ description: Panduan lengkap deploy SIM4LON ke Vercel + Railway
 ## Arsitektur Deployment
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│     VERCEL       │────▶│     RAILWAY      │────▶│   PostgreSQL     │
+│     VERCEL       │────▶│     RAILWAY      │────▶│   Supabase       │
 │   (Frontend)     │     │    (Backend)     │     │   (Database)     │
-│   Astro Static   │     │     NestJS       │     │                  │
+│   Astro Static   │     │     NestJS       │     │   PostgreSQL     │
 └──────────────────┘     └──────────────────┘     └──────────────────┘
 ```
 
+> ⚠️ Database sudah ada di **Supabase** → TIDAK perlu buat database di Railway.
+> Railway hanya untuk menjalankan **backend NestJS** saja.
+
 ---
 
-## PART 1: Deploy Backend ke Railway (DULU)
+## PART 1: Deploy Backend ke Railway
 
-### Step 1.1: Buat Akun Railway
+### Step 1.1: Buat Akun & Project Railway
 1. Buka https://railway.app
 2. Klik "Login" → pilih "Login with GitHub"
-3. Authorize Railway untuk akses GitHub Anda
+3. Klik **"New Project"**
+4. Pilih **"Deploy from GitHub repo"**
+5. Pilih repository: `xinnxz/sim4lon`
 
-### Step 1.2: Buat Project Baru
-1. Klik **"New Project"**
-2. Pilih **"Deploy from GitHub repo"**
-3. Pilih repository: `xinnxz/sim4lon`
-4. ⚠️ **PENTING**: Set **Root Directory** ke `backend`
+### Step 1.2: Set Root Directory
+1. Klik service yang baru dibuat → tab **"Settings"**
+2. Scroll ke bagian **"Source"**
+3. Set **Root Directory** → `backend`
 
-### Step 1.3: Tambahkan PostgreSQL Database
-1. Di dashboard project, klik **"+ New"** → **"Database"** → **"PostgreSQL"**
-2. Tunggu hingga database ter-provision (~30 detik)
-3. Klik database PostgreSQL → tab "Variables"
-4. Copy value dari `DATABASE_URL`
+> ⚠️ INI WAJIB! Tanpa ini Railway akan coba build seluruh repo (termasuk frontend) dan gagal.
 
-### Step 1.4: Set Environment Variables Backend
-Klik service backend → tab **"Variables"** → tambahkan:
+### Step 1.3: Set Environment Variables
+Klik tab **"Variables"** → tambahkan satu per satu:
 
 ```env
-DATABASE_URL=${{Postgres.DATABASE_URL}}
-JWT_SECRET=your-super-secret-key-min-32-chars
+DATABASE_URL=postgresql://postgres.xhjchmxthmqahgacymnb:M4t4h4r1123Kom@aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+SUPABASE_URL=https://xhjchmxthmqahgacymnb.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoamNobXh0aG1xYWhnYWN5bW5iIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTgyNDgzNywiZXhwIjoyMDgxNDAwODM3fQ.szRJT_dcIp7AKiFn9Ucjfr1gxVFXoo2Qb4a9h-REtcA
+GEMINI_API_KEY=AIzaSyAGKGkdq2CAaeCdVf5rlqwPdzCsBvj1NE0
+JWT_SECRET=sim4lon-jwt-secret-key-2024
 PORT=3000
 NODE_ENV=production
+CORS_ORIGIN=https://sim4lon.vercel.app
 ```
 
-> 💡 Tips: Gunakan `${{Postgres.DATABASE_URL}}` untuk auto-link ke database Railway
+> 💡 Penjelasan:
+> - `DATABASE_URL` → koneksi ke Supabase PostgreSQL
+> - `JWT_SECRET` → HARUS SAMA dengan yang di frontend
+> - `CORS_ORIGIN` → izinkan frontend Vercel akses API
+> - `PORT` → port NestJS (Railway butuh ini)
 
-### Step 1.5: Set Build & Start Commands
-Klik service backend → tab **"Settings"**:
+### Step 1.4: Pastikan Build & Start Command
+Di tab **"Settings"**, cek build/deploy commands:
 
 | Setting | Value |
 |---------|-------|
-| Root Directory | `backend` |
 | Build Command | `npm install && npx prisma generate && npm run build` |
 | Start Command | `npm run start:prod` |
 
-### Step 1.6: Deploy & Seed Database
-Setelah deploy berhasil, buka tab **"Shell"** dan jalankan:
-```bash
-npx prisma db push
-npx prisma db seed
-```
+> Biasanya Railway auto-detect dari `backend/railway.json`.
 
-### Step 1.7: Catat URL Backend
-Setelah deploy selesai, Railway akan memberikan URL seperti:
+### Step 1.5: Deploy & Generate Domain
+1. Deploy akan berjalan otomatis setelah settings disimpan
+2. Tunggu build selesai (~2-5 menit)
+3. Cek di **Logs** → pastikan muncul:
+   ```
+   🚀 SIM4LON Backend is running on: http://localhost:3000/api
+   ```
+4. Pergi ke **Settings** → **Networking/Domains** → klik **"Generate Domain"**
+5. Catat URL yang diberikan, contoh:
+   ```
+   sim4lon-production-8ed4.up.railway.app
+   ```
+
+### Step 1.6: Verifikasi Backend
+Buka di browser atau curl:
 ```
-https://sim4lon-backend-production.up.railway.app
+https://[URL-RAILWAY]/api/health
 ```
-**Simpan URL ini untuk digunakan di frontend!**
+Harus mengembalikan:
+```json
+{"status":"ok","timestamp":"...","service":"sim4lon-backend"}
+```
 
 ---
 
 ## PART 2: Deploy Frontend ke Vercel
 
-### Step 2.1: Buat Akun Vercel
-1. Buka https://vercel.com
-2. Klik "Sign Up" → pilih "Continue with GitHub"
-3. Authorize Vercel
-
-### Step 2.2: Import Project
-1. Klik **"Add New..."** → **"Project"**
-2. Pilih repository: `xinnxz/sim4lon`
-3. Set konfigurasi:
+### Step 2.1: Buat Akun & Import Project
+1. Buka https://vercel.com → Login dengan GitHub
+2. Klik **"Add New..."** → **"Project"**
+3. Pilih repository: `xinnxz/sim4lon`
+4. Set konfigurasi:
 
 | Setting | Value |
 |---------|-------|
@@ -90,86 +104,87 @@ https://sim4lon-backend-production.up.railway.app
 | Build Command | `npm run build` |
 | Output Directory | `dist` |
 
-### Step 2.3: Set Environment Variables
-Di halaman konfigurasi, tambahkan:
+### Step 2.2: Set Environment Variables
+Tambahkan di halaman konfigurasi Vercel:
 
 ```env
-PUBLIC_API_URL=https://sim4lon-backend-production.up.railway.app/api
+PUBLIC_API_URL=https://[URL-RAILWAY]/api
 ```
 
-> ⚠️ Ganti URL dengan URL backend Railway Anda dari Step 1.7
+> ⚠️ **FORMAT PENTING**: URL HARUS diakhiri dengan `/api`!
+> Contoh: `https://sim4lon-production-8ed4.up.railway.app/api`
 
-### Step 2.4: Deploy
-Klik **"Deploy"** dan tunggu proses selesai (~2-3 menit)
-
-### Step 2.5: Catat URL Frontend
-Vercel akan memberikan URL seperti:
-```
-https://sim4lon.vercel.app
-```
+### Step 2.3: Deploy
+Klik **"Deploy"** dan tunggu selesai (~2-3 menit).
 
 ---
 
-## PART 3: Konfigurasi CORS di Backend
+## PART 3: Test Login
 
-Setelah deploy, update backend untuk mengizinkan frontend Vercel:
+Buka https://sim4lon.vercel.app/login dan coba:
 
-1. Di Railway, buka service backend → **Variables**
-2. Tambahkan variable:
-```env
-CORS_ORIGIN=https://sim4lon.vercel.app
-```
-
-3. Backend akan auto-redeploy
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@agen.com` | `Admin123@` |
+| Operator | `operator@demo.com` | `Operator123` |
+| Pangkalan | `tes2@demo.com` | `Pangkalan123` |
 
 ---
 
-## PART 4: Setup Custom Domain (Opsional)
+## 🔄 GANTI AKUN RAILWAY (Jika Trial Habis)
 
-### Vercel (Frontend)
-1. Buka project → **Settings** → **Domains**
-2. Tambahkan domain: `sim4lon.yourdomain.com`
-3. Ikuti instruksi DNS settings
+Kalau Railway trial habis dan mau buat akun baru, cukup **3 langkah**:
 
-### Railway (Backend)
-1. Buka service → **Settings** → **Domains**
-2. Tambahkan: `api.sim4lon.yourdomain.com`
+### 1. Deploy Backend di Railway Baru
+- Ikuti **PART 1** di atas (Step 1.1 - 1.6)
+- Catat URL Railway yang baru
+
+### 2. Update PUBLIC_API_URL di Vercel
+1. Buka https://vercel.com → project sim4lon → **Settings** → **Environment Variables**
+2. Edit `PUBLIC_API_URL` → ganti ke URL Railway baru + `/api`
+   ```
+   https://[URL-RAILWAY-BARU]/api
+   ```
+3. Klik **Save**
+
+### 3. Redeploy Frontend
+1. Di Vercel, buka tab **"Deployments"**
+2. Klik titik tiga (**⋮**) di deployment terakhir → **"Redeploy"**
+3. Tunggu ~1-2 menit → test login
+
+> 💡 Database tetap aman di Supabase. Yang berubah HANYA URL backend.
 
 ---
 
 ## 🔧 TROUBLESHOOTING
 
-### Error: Database connection failed
-- Pastikan `DATABASE_URL` sudah di-link dengan benar
-- Coba restart service di Railway
-
-### Error: Build failed on Railway
-- Cek apakah `Root Directory` sudah diset ke `backend`
-- Pastikan semua dependencies di `package.json` benar
-
-### Error: CORS blocked
-- Tambahkan `CORS_ORIGIN` di backend dengan URL frontend
-
-### Error: Prisma client not generated
-- Pastikan build command include: `npx prisma generate`
+| Masalah | Solusi |
+|---------|--------|
+| "Failed to fetch" saat login | `PUBLIC_API_URL` belum diset/salah di Vercel, atau Railway mati |
+| Build gagal di Railway | Pastikan Root Directory = `backend` |
+| CORS error di console browser | Tambahkan `CORS_ORIGIN=https://sim4lon.vercel.app` di Railway |
+| Railway URL 404 | Pastikan sudah klik "Generate Domain" di Settings |
+| Login password salah | Database Supabase mungkin perlu di-seed ulang |
+| Perubahan env var tidak berlaku | HARUS **Redeploy** di Vercel setelah ubah env var |
 
 ---
 
 ## 📋 CHECKLIST DEPLOYMENT
 
 - [ ] Backend deployed ke Railway
-- [ ] PostgreSQL database created
-- [ ] Database seeded dengan data awal
-- [ ] Environment variables configured
+- [ ] Root Directory diset ke `backend`
+- [ ] Environment variables lengkap (8 variable)
+- [ ] Domain di-generate di Railway
+- [ ] Health check OK (`/api/health`)
 - [ ] Frontend deployed ke Vercel
-- [ ] PUBLIC_API_URL pointing to Railway backend
-- [ ] CORS configured
-- [ ] Test login & basic features
+- [ ] `PUBLIC_API_URL` pointing ke Railway URL + `/api`
+- [ ] Frontend sudah di-redeploy setelah update env var
+- [ ] Test login berhasil
 
 ---
 
-## 🔄 UPDATE DEPLOYMENT
+## 🔄 AUTO-UPDATE
 
-Setelah push ke GitHub, deployment akan **auto-update**:
+Setelah push ke GitHub, deployment akan auto-update:
 - Railway: Auto-deploy dalam ~2-3 menit
 - Vercel: Auto-deploy dalam ~1-2 menit
