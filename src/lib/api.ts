@@ -60,12 +60,30 @@ async function apiRequest<T>(
         (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+    } catch (networkError) {
+        // Network error (DNS gagal, server mati, tidak ada internet, dll)
+        throw new Error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+    }
 
-    const data = await response.json();
+    // Parse JSON response dengan aman
+    // Beberapa response mungkin kosong (204 No Content) atau bukan JSON
+    let data: any;
+    try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+        // Response bukan JSON yang valid (misalnya HTML error page)
+        if (!response.ok) {
+            throw new Error(`Server error (${response.status})`);
+        }
+        data = {};
+    }
 
     if (!response.ok) {
         // Handle 401 - redirect to login
