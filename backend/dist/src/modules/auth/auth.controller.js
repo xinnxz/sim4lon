@@ -26,6 +26,9 @@ let AuthController = class AuthController {
     register(dto) {
         return this.authService.register(dto);
     }
+    registerPangkalan(dto) {
+        return this.authService.registerPangkalan(dto);
+    }
     login(dto) {
         return this.authService.login(dto);
     }
@@ -48,6 +51,14 @@ __decorate([
     __metadata("design:paramtypes", [dto_1.RegisterDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "register", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('register-pangkalan'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [dto_1.RegisterPangkalanDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "registerPangkalan", null);
 __decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Post)('login'),

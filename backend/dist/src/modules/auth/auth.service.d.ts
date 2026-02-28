@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma';
-import { LoginDto, RegisterDto, UpdateProfileDto } from './dto';
+import { LoginDto, RegisterDto, RegisterPangkalanDto, UpdateProfileDto } from './dto';
 import { ActivityService } from '../activity/activity.service';
 export declare class AuthService {
     private prisma;
@@ -17,6 +17,23 @@ export declare class AuthService {
             email: string;
             role: import("@prisma/client").$Enums.user_role;
         };
+    }>;
+    registerPangkalan(dto: RegisterPangkalanDto): Promise<{
+        message: string;
+        access_token: string;
+        user: {
+            id: any;
+            email: any;
+            name: any;
+            role: any;
+            pangkalan_id: any;
+            pangkalan: {
+                id: any;
+                code: any;
+                name: any;
+            };
+        };
+        trial_expires_at: string;
     }>;
     login(dto: LoginDto): Promise<{
         message: string;

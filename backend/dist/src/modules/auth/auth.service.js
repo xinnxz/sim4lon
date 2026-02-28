@@ -97,6 +97,98 @@ let AuthService = class AuthService {
             user,
         };
     }
+    async registerPangkalan(dto) {
+        const existingUser = await this.prisma.users.findFirst({
+            where: { email: dto.email, deleted_at: null },
+        });
+        if (existingUser) {
+            throw new common_1.ConflictException('Email sudah terdaftar');
+        }
+        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const pangkalanCount = await this.prisma.pangkalans.count();
+        const pangkalanCode = `PKL-${String(pangkalanCount + 1).padStart(3, '0')}`;
+        const userCount = await this.prisma.users.count();
+        const userCode = `USR-${String(userCount + 1).padStart(3, '0')}`;
+        const trialExpiry = new Date();
+        trialExpiry.setDate(trialExpiry.getDate() + 14);
+        const result = await this.prisma.$transaction(async (tx) => {
+            const pangkalan = await tx.pangkalans.create({
+                data: {
+                    code: pangkalanCode,
+                    name: dto.pangkalan_name,
+                    address: dto.address,
+                    region: dto.region,
+                    pic_name: dto.owner_name,
+                    phone: dto.phone,
+                    email: dto.email,
+                    is_active: true,
+                },
+            });
+            const user = await tx.users.create({
+                data: {
+                    code: userCode,
+                    email: dto.email,
+                    password: hashedPassword,
+                    name: dto.owner_name,
+                    phone: dto.phone,
+                    role: 'PANGKALAN',
+                    pangkalan_id: pangkalan.id,
+                },
+            });
+            await tx.subscriptions.create({
+                data: {
+                    pangkalan_id: pangkalan.id,
+                    plan: 'FREE',
+                    status: 'TRIAL',
+                    expires_at: trialExpiry,
+                },
+            });
+            await tx.lpg_prices.create({
+                data: {
+                    pangkalan_id: pangkalan.id,
+                    lpg_type: 'kg3',
+                    cost_price: 13250,
+                    selling_price: 16000,
+                    is_active: true,
+                },
+            });
+            return { pangkalan, user };
+        });
+        const sessionId = `${result.user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+        await this.prisma.users.update({
+            where: { id: result.user.id },
+            data: { session_id: sessionId },
+        });
+        const payload = {
+            sub: result.user.id,
+            email: result.user.email,
+            role: result.user.role,
+            pangkalan_id: result.pangkalan.id,
+            session_id: sessionId,
+        };
+        const accessToken = this.jwtService.sign(payload);
+        await this.activityService.logActivity('system_create', 'Pangkalan Baru Terdaftar', {
+            userId: result.user.id,
+            description: `Pangkalan ${result.pangkalan.name} (${pangkalanCode}) didaftarkan oleh ${dto.owner_name}`,
+        });
+        return {
+            message: 'Registrasi pangkalan berhasil! Selamat datang di SIM4LON 🎉',
+            access_token: accessToken,
+            user: {
+                id: result.user.id,
+                email: result.user.email,
+                name: result.user.name,
+                role: result.user.role,
+                pangkalan_id: result.pangkalan.id,
+                pangkalan: {
+                    id: result.pangkalan.id,
+                    code: result.pangkalan.code,
+                    name: result.pangkalan.name,
+                },
+            },
+            trial_expires_at: trialExpiry.toISOString(),
+        };
+    }
     async login(dto) {
         const user = await this.prisma.users.findFirst({
             where: {

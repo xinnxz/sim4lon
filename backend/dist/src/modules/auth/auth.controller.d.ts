@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, UpdateProfileDto, ChangePasswordDto } from './dto';
+import { LoginDto, RegisterDto, RegisterPangkalanDto, UpdateProfileDto, ChangePasswordDto } from './dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
@@ -13,6 +13,23 @@ export declare class AuthController {
             email: string;
             role: import("@prisma/client").$Enums.user_role;
         };
+    }>;
+    registerPangkalan(dto: RegisterPangkalanDto): Promise<{
+        message: string;
+        access_token: string;
+        user: {
+            id: any;
+            email: any;
+            name: any;
+            role: any;
+            pangkalan_id: any;
+            pangkalan: {
+                id: any;
+                code: any;
+                name: any;
+            };
+        };
+        trial_expires_at: string;
     }>;
     login(dto: LoginDto): Promise<{
         message: string;
