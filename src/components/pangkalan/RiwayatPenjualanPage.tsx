@@ -77,7 +77,7 @@ export default function RiwayatPenjualanPage() {
     // Fetch stats only once on mount
     const fetchStats = async () => {
         try {
-            const statsData = await consumerOrdersApi.getStats(true)
+            const statsData = await consumerOrdersApi.getStats({ todayOnly: true })
             setStats(statsData)
         } catch (error) {
             console.error('Failed to fetch stats:', error)
