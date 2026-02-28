@@ -47,6 +47,7 @@ import {
 import SafeIcon from '@/components/common/SafeIcon'
 import { consumersApi, consumerOrdersApi, type Consumer, type ConsumerType, type ConsumerOrder } from '@/lib/api'
 import { toast } from 'sonner'
+import PageSkeleton from '@/components/common/PageSkeleton'
 
 // LPG Product Images Mapping
 const LPG_IMAGES: Record<string, string> = {
@@ -348,19 +349,7 @@ export default function KonsumenListPage() {
     // Stats sekarang diambil dari API (stats state), bukan dari data per halaman
 
     if (isLoading && consumers.length === 0) {
-        return (
-            <div className="flex items-center justify-center min-h-[500px]">
-                <div className="text-center">
-                    <div className="relative">
-                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <SafeIcon name="Users" className="h-6 w-6 text-blue-600" />
-                        </div>
-                    </div>
-                    <p className="text-slate-500 mt-4 font-medium">Memuat data konsumen...</p>
-                </div>
-            </div>
-        )
+        return <PageSkeleton variant="cards" statCards={4} rows={6} />
     }
 
     return (

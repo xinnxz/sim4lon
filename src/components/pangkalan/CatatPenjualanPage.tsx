@@ -22,6 +22,16 @@ import { consumerOrdersApi, consumersApi, lpgPricesApi, pangkalanStockApi, type 
 import { LPG_DISPLAY, LPG_IMAGES, normalizeType } from '@/lib/lpg-config'
 import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export default function CatatPenjualanPage() {
     const [lpgType, setLpgType] = useState('kg3')
@@ -32,6 +42,7 @@ export default function CatatPenjualanPage() {
     const [showDropdown, setShowDropdown] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false) // Confirmation dialog
     const [isLoading, setIsLoading] = useState(false)
     const [lpgPrices, setLpgPrices] = useState<PangkalanLpgPrice[]>([])
     const [manualPrice, setManualPrice] = useState<number | null>(null) // null = use default from API
@@ -175,6 +186,14 @@ export default function CatatPenjualanPage() {
                 return
             }
         }
+
+        // Tampilkan dialog konfirmasi
+        setShowConfirm(true)
+    }
+
+    // STEP 2: Actual submit setelah user konfirmasi
+    const handleConfirmSubmit = async () => {
+        setShowConfirm(false)
 
         try {
             setIsSubmitting(true)
@@ -512,13 +531,61 @@ export default function CatatPenjualanPage() {
                                 {isSubmitting ? (
                                     <><SafeIcon name="Loader2" className="mr-2 h-5 w-5 animate-spin" /> Menyimpan...</>
                                 ) : (
-                                    <><SafeIcon name="Save" className="mr-2 h-5 w-5" /> Simpan Penjualan</>
+                                    <><SafeIcon name="ShieldCheck" className="mr-2 h-5 w-5" /> Simpan Penjualan</>
                                 )}
                             </Button>
                         </CardContent>
                     </Card>
                 </div>
             </form>
+
+            {/* Confirmation Dialog */}
+            <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+                <AlertDialogContent className="max-w-sm rounded-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-lg">
+                            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                <SafeIcon name="ShieldCheck" className="h-5 w-5 text-blue-600" />
+                            </div>
+                            Konfirmasi Penjualan
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-3 mt-2">
+                                <p className="text-sm text-slate-500">Pastikan detail transaksi sudah benar:</p>
+                                <div className="p-4 bg-slate-50 rounded-xl space-y-2 border border-slate-200">
+                                    <div className="flex items-center gap-3 pb-2 border-b border-slate-200">
+                                        {LPG_IMAGES[lpgType] && (
+                                            <img src={LPG_IMAGES[lpgType]} alt={selectedLpg.display} className="w-10 h-10 object-contain" />
+                                        )}
+                                        <div>
+                                            <p className="font-semibold text-slate-900">LPG {selectedLpg.display}</p>
+                                            <p className="text-xs text-slate-500">{qty} tabung × {formatCurrency(currentPrice)}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500">Pembeli</span>
+                                        <span className="font-medium text-slate-900">{selectedConsumer?.name || consumerSearch || 'Walk-in'}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm pt-2 border-t border-slate-200">
+                                        <span className="text-slate-500 font-medium">Total</span>
+                                        <span className="font-bold text-lg text-blue-600">{formatCurrency(total)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="gap-2">
+                        <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleConfirmSubmit}
+                            className="rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                        >
+                            <SafeIcon name="Check" className="h-4 w-4 mr-2" />
+                            Ya, Simpan
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

@@ -39,6 +39,8 @@ import { consumerOrdersApi, type ConsumerOrder, type ConsumerOrderStats } from '
 import { LPG_CONFIG, LPG_IMAGES, normalizeType, getLpgName, getLpgColor } from '@/lib/lpg-config'
 import { formatCurrency, formatDate, formatTime } from '@/lib/format'
 import { toast } from 'sonner'
+import PageSkeleton from '@/components/common/PageSkeleton'
+import ErrorState from '@/components/common/ErrorState'
 
 // LPG_CONFIG, LPG_IMAGES, getLpgName, getLpgColor imported from @/lib/lpg-config
 
@@ -47,6 +49,7 @@ export default function RiwayatPenjualanPage() {
     const [stats, setStats] = useState<ConsumerOrderStats | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isPageLoading, setIsPageLoading] = useState(false) // For pagination
+    const [fetchError, setFetchError] = useState<string | null>(null)
     const [page, setPage] = useState(1)
     const [limit, setLimit] = useState(10) // Page size
     const [totalPages, setTotalPages] = useState(1)
@@ -112,6 +115,7 @@ export default function RiwayatPenjualanPage() {
             setTotal(ordersResponse.meta.total)
         } catch (error) {
             console.error('Failed to fetch orders:', error)
+            setFetchError('Gagal memuat data penjualan')
             toast.error('Gagal memuat data penjualan')
         } finally {
             setIsLoading(false)
@@ -245,19 +249,11 @@ export default function RiwayatPenjualanPage() {
     }
 
     if (isLoading && orders.length === 0) {
-        return (
-            <div className="flex items-center justify-center min-h-[500px]">
-                <div className="text-center">
-                    <div className="relative">
-                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <SafeIcon name="ShoppingBag" className="h-6 w-6 text-blue-600" />
-                        </div>
-                    </div>
-                    <p className="text-slate-500 mt-4 font-medium">Memuat data penjualan...</p>
-                </div>
-            </div>
-        )
+        return <PageSkeleton variant="table" statCards={4} rows={6} />
+    }
+
+    if (fetchError && orders.length === 0) {
+        return <ErrorState message={fetchError} onRetry={() => { setFetchError(null); fetchOrders(true) }} />
     }
 
     return (

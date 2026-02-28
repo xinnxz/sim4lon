@@ -43,6 +43,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import { expensesApi, type Expense, type ExpenseCategory } from '@/lib/api'
 import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
+import PageSkeleton from '@/components/common/PageSkeleton'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
 
 // Kategori dengan label, icon, dan color - Vibrant colors matching dashboard
@@ -263,19 +264,7 @@ export default function PengeluaranPage() {
     }
 
     if (isLoading && expenses.length === 0) {
-        return (
-            <div className="flex items-center justify-center min-h-[500px]">
-                <div className="text-center">
-                    <div className="relative">
-                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-red-200 border-t-red-600 mx-auto"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <SafeIcon name="Wallet" className="h-6 w-6 text-red-600" />
-                        </div>
-                    </div>
-                    <p className="text-slate-500 mt-4 font-medium">Memuat data pengeluaran...</p>
-                </div>
-            </div>
-        )
+        return <PageSkeleton variant="table" statCards={4} rows={5} showChart />
     }
 
     return (
