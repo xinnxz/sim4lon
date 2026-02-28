@@ -24,6 +24,7 @@ import PangkalanSidebar from '@/components/pangkalan/PangkalanSidebar'
 import PangkalanHeaderSimple from '@/components/pangkalan/PangkalanHeaderSimple'
 import FloatingVoiceWidgetPangkalan from '@/components/pangkalan/FloatingVoiceWidgetPangkalan'
 import PangkalanMobileNav from '@/components/pangkalan/PangkalanMobileNav'
+import OnboardingGuide from '@/components/pangkalan/OnboardingGuide'
 import QueryProvider from '@/components/providers/QueryProvider'
 import { ConfirmDialogProvider } from '@/components/common/ConfirmDialog'
 import AdminFooter from '@/components/common/AdminFooter'
@@ -108,6 +109,9 @@ export default function PangkalanSidebarLayout({ children }: PangkalanSidebarLay
 
                     {/* Voice Assistant Widget */}
                     <FloatingVoiceWidgetPangkalan />
+
+                    {/* Onboarding Guide - Shows once for new users */}
+                    <OnboardingGuide />
                 </SidebarProvider>
             </ConfirmDialogProvider>
         </QueryProvider>

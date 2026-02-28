@@ -22,6 +22,14 @@ const { title = 'Project', description = 'Built with Astro' } = Astro.props;
     <link rel="icon" type="image/png" sizes="16x16" href="/logo-sim4lon-transparant-v2.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/logo-sim4lon-transparant-v2.png" />
     
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="SIM4LON" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
     <!-- Theme & Accent Color Persistence Script -->
     <!-- Runs before render to prevent flash of unstyled content (FOUC) -->
     <script is:inline>
@@ -54,6 +62,17 @@ const { title = 'Project', description = 'Built with Astro' } = Astro.props;
   <body>
     <Toaster client:load />
     <slot />
+
+    <!-- Service Worker Registration -->
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('SW registered:', reg.scope))
+            .catch((err) => console.log('SW registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
 
