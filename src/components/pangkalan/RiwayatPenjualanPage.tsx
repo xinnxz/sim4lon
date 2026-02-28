@@ -41,6 +41,7 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/format'
 import { toast } from 'sonner'
 import PageSkeleton from '@/components/common/PageSkeleton'
 import ErrorState from '@/components/common/ErrorState'
+import NotaDigital from '@/components/pangkalan/NotaDigital'
 
 // LPG_CONFIG, LPG_IMAGES, getLpgName, getLpgColor imported from @/lib/lpg-config
 
@@ -69,6 +70,9 @@ export default function RiwayatPenjualanPage() {
 
     // Delete confirmation state
     const [deletingOrder, setDeletingOrder] = useState<ConsumerOrder | null>(null)
+
+    // Nota digital state for receipt reprint
+    const [notaOrder, setNotaOrder] = useState<ConsumerOrder | null>(null)
 
     // Fetch stats only once on mount
     const fetchStats = async () => {
@@ -554,6 +558,14 @@ export default function RiwayatPenjualanPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
+                                                                onClick={() => setNotaOrder(order)}
+                                                                className="h-7 w-7 p-0 hover:bg-blue-100 rounded-lg"
+                                                            >
+                                                                <SafeIcon name="Receipt" className="h-3.5 w-3.5 text-blue-600" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
                                                                 onClick={() => handleDelete(order)}
                                                                 className="h-7 w-7 p-0 hover:bg-red-100 rounded-lg"
                                                             >
@@ -628,6 +640,14 @@ export default function RiwayatPenjualanPage() {
                                                     className="h-8 w-8 p-0 hover:bg-blue-100 rounded-lg"
                                                 >
                                                     <SafeIcon name="Pencil" className="h-4 w-4 text-blue-600" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setNotaOrder(order)}
+                                                    className="h-8 w-8 p-0 hover:bg-emerald-100 rounded-lg"
+                                                >
+                                                    <SafeIcon name="Receipt" className="h-4 w-4 text-emerald-600" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
