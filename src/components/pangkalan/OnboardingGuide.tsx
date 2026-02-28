@@ -46,7 +46,7 @@ const STEPS: OnboardingStep[] = [
     {
         icon: 'Package',
         title: 'Kelola Stok',
-        description: 'Pantau stok LPG real-time di halaman Stok. Anda akan mendapat notifikasi saat stok menipis. Pesan ke agen langsung dari dashboard.',
+        description: 'Pantau stok LPG real-time di halaman Stok. Anda akan mendapat notifikasi saat stok menipis. Tambahkan stok secara manual kapan saja.',
         color: 'text-amber-600',
         gradient: 'from-amber-500 to-orange-600',
     },
@@ -167,10 +167,10 @@ export default function OnboardingGuide({ forceOpen = false, onClose }: Onboardi
                                 key={i}
                                 onClick={() => setCurrentStep(i)}
                                 className={`transition-all duration-300 rounded-full ${i === currentStep
-                                        ? `w-8 h-2 bg-gradient-to-r ${step.gradient}`
-                                        : i < currentStep
-                                            ? 'w-2 h-2 bg-slate-400'
-                                            : 'w-2 h-2 bg-slate-200'
+                                    ? `w-8 h-2 bg-gradient-to-r ${step.gradient}`
+                                    : i < currentStep
+                                        ? 'w-2 h-2 bg-slate-400'
+                                        : 'w-2 h-2 bg-slate-200'
                                     }`}
                             />
                         ))}

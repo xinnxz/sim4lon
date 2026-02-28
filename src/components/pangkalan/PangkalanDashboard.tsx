@@ -404,7 +404,7 @@ export default function PangkalanDashboard() {
             {/* Stock Alert Banner — appears when stock is low */}
             <StockAlertBanner
                 stockLevels={rawStockLevels}
-                onOrderStock={() => setIsOrderDialogOpen(true)}
+                onAddStock={() => window.location.href = '/pangkalan/stok'}
             />
 
             {/* Daily Summary Card */}
