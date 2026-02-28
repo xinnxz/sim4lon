@@ -903,6 +903,15 @@ export default function RiwayatPenjualanPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Nota Digital Dialog - for reprinting receipts */}
+            {notaOrder && (
+                <NotaDigital
+                    order={notaOrder}
+                    open={!!notaOrder}
+                    onClose={() => setNotaOrder(null)}
+                />
+            )}
         </div>
     )
 }
