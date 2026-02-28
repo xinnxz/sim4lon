@@ -36,49 +36,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import SafeIcon from '@/components/common/SafeIcon'
 import { consumerOrdersApi, type ConsumerOrder, type ConsumerOrderStats } from '@/lib/api'
+import { LPG_CONFIG, LPG_IMAGES, normalizeType, getLpgName, getLpgColor } from '@/lib/lpg-config'
+import { formatCurrency, formatDate, formatTime } from '@/lib/format'
 import { toast } from 'sonner'
 
-// LPG type names
-const LPG_NAMES: Record<string, string> = {
-    '3kg': '3 kg',
-    '5kg': '5.5 kg',
-    '12kg': '12 kg',
-    '50kg': '50 kg',
-    'kg3': '3 kg',
-    'kg5': '5.5 kg',
-    'kg12': '12 kg',
-    'kg50': '50 kg',
-    'gr220': 'Bright Gas 220gr',
-    '220gr': 'Bright Gas 220gr',
-}
-
-// LPG type colors
-const LPG_COLORS: Record<string, string> = {
-    '3kg': '#22C55E',
-    'kg3': '#22C55E',
-    '5kg': '#ff82c5',
-    'kg5': '#ff82c5',
-    '12kg': '#3B82F6',
-    'kg12': '#3B82F6',
-    '50kg': '#ef0e0e',
-    'kg50': '#ef0e0e',
-    'gr220': '#FFA500',
-    '220gr': '#FFA500',
-}
-
-// LPG product images
-const LPG_IMAGES: Record<string, string> = {
-    'gr220': '/images/products/bright-gas-220gr.png',
-    '220gr': '/images/products/bright-gas-220gr.png',
-    '3kg': '/images/products/lpg-3kg.png',
-    'kg3': '/images/products/lpg-3kg.png',
-    '5kg': '/images/products/lpg-5kg.png',
-    'kg5': '/images/products/lpg-5kg.png',
-    '12kg': '/images/products/lpg-12kg.png',
-    'kg12': '/images/products/lpg-12kg.png',
-    '50kg': '/images/products/lpg-50kg.png',
-    'kg50': '/images/products/lpg-50kg.png',
-}
+// LPG_CONFIG, LPG_IMAGES, getLpgName, getLpgColor imported from @/lib/lpg-config
 
 export default function RiwayatPenjualanPage() {
     const [orders, setOrders] = useState<ConsumerOrder[]>([])
@@ -138,17 +100,10 @@ export default function RiwayatPenjualanPage() {
                 )
             }
             if (lpgTypeFilter) {
-                // Map equivalent LPG type formats
-                const LPG_EQUIVALENTS: Record<string, string[]> = {
-                    'kg3': ['kg3', '3kg'],
-                    'kg5': ['kg5', '5kg'],
-                    'kg12': ['kg12', '12kg'],
-                    'kg50': ['kg50', '50kg'],
-                    'gr220': ['gr220', '220gr', 'bright_gas', 'brightgas'],
-                }
-                const equivalents = LPG_EQUIVALENTS[lpgTypeFilter] || [lpgTypeFilter]
+                // Gunakan normalizeType untuk matching cross-format
+                const normalizedFilter = normalizeType(lpgTypeFilter)
                 filteredData = filteredData.filter(o =>
-                    equivalents.includes(o.lpg_type?.toLowerCase() || '')
+                    normalizeType(o.lpg_type || '') === normalizedFilter
                 )
             }
 
@@ -190,28 +145,7 @@ export default function RiwayatPenjualanPage() {
         setPage(1)
     }, [debouncedSearch, startDate, endDate, lpgTypeFilter])
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(value)
-    }
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-        })
-    }
-
-    const formatTime = (dateString: string) => {
-        return new Date(dateString).toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-        })
-    }
+    // formatCurrency, formatDate, formatTime imported from @/lib/format
 
     const handleDelete = (order: ConsumerOrder) => {
         setDeletingOrder(order)
@@ -574,17 +508,17 @@ export default function RiwayatPenjualanPage() {
                                                 <div
                                                     className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center overflow-hidden"
                                                     style={{
-                                                        background: `linear-gradient(135deg, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}20, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}10)`
+                                                        background: `linear-gradient(135deg, ${getLpgColor(order.lpg_type)}20, ${getLpgColor(order.lpg_type)}10)`
                                                     }}
                                                 >
                                                     {LPG_IMAGES[order.lpg_type] ? (
                                                         <img
                                                             src={LPG_IMAGES[order.lpg_type]}
-                                                            alt={LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                            alt={getLpgName(order.lpg_type)}
                                                             className="w-8 h-8 object-contain"
                                                         />
                                                     ) : (
-                                                        <SafeIcon name="Cylinder" className="h-5 w-5" style={{ color: LPG_COLORS[order.lpg_type] || '#3B82F6' }} />
+                                                        <SafeIcon name="Cylinder" className="h-5 w-5" style={{ color: getLpgColor(order.lpg_type) }} />
                                                     )}
                                                 </div>
 
@@ -605,7 +539,7 @@ export default function RiwayatPenjualanPage() {
                                                     <div className="flex items-center justify-between mt-2 gap-2">
                                                         <div className="flex items-center gap-2">
                                                             <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] sm:text-xs px-1.5 py-0.5">
-                                                                {LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                                {getLpgName(order.lpg_type)}
                                                             </Badge>
                                                             <span className="text-xs sm:text-sm text-slate-600">
                                                                 <span className="font-bold">{order.qty}</span> tabung
@@ -655,21 +589,21 @@ export default function RiwayatPenjualanPage() {
                                                     <div
                                                         className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden"
                                                         style={{
-                                                            background: `linear-gradient(135deg, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}20, ${LPG_COLORS[order.lpg_type] || '#3B82F6'}10)`
+                                                            background: `linear-gradient(135deg, ${getLpgColor(order.lpg_type)}20, ${getLpgColor(order.lpg_type)}10)`
                                                         }}
                                                     >
                                                         {LPG_IMAGES[order.lpg_type] ? (
                                                             <img
                                                                 src={LPG_IMAGES[order.lpg_type]}
-                                                                alt={LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                                alt={getLpgName(order.lpg_type)}
                                                                 className="w-7 h-7 object-contain"
                                                             />
                                                         ) : (
-                                                            <SafeIcon name="Cylinder" className="h-4 w-4" style={{ color: LPG_COLORS[order.lpg_type] || '#3B82F6' }} />
+                                                            <SafeIcon name="Cylinder" className="h-4 w-4" style={{ color: getLpgColor(order.lpg_type) }} />
                                                         )}
                                                     </div>
                                                     <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                                                        {LPG_NAMES[order.lpg_type] || order.lpg_type}
+                                                        {getLpgName(order.lpg_type)}
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -795,7 +729,7 @@ export default function RiwayatPenjualanPage() {
                             Edit Transaksi
                         </DialogTitle>
                         <DialogDescription>
-                            {editingOrder?.code} • {editingOrder && LPG_NAMES[editingOrder.lpg_type]}
+                            {editingOrder?.code} • {editingOrder && getLpgName(editingOrder.lpg_type)}
                         </DialogDescription>
                     </DialogHeader>
 

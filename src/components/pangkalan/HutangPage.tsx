@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import { consumerOrdersApi, type ConsumerOrder } from '@/lib/api'
+import { formatCurrency, formatDate } from '@/lib/format'
 import { toast } from 'sonner'
 
 export default function HutangPage() {
@@ -51,21 +52,7 @@ export default function HutangPage() {
         }
     }
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(value)
-    }
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-        })
-    }
+    // formatCurrency and formatDate imported from @/lib/format
 
     if (isLoading) {
         return (

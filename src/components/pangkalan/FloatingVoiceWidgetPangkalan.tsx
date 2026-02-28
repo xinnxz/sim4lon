@@ -23,6 +23,8 @@ import { Badge } from '@/components/ui/badge'
 import SafeIcon from '@/components/common/SafeIcon'
 import { toast } from 'sonner'
 import { consumersApi, consumerOrdersApi, expensesApi, type Consumer, type LpgType, type ExpenseCategory } from '@/lib/api'
+import { LPG_CONFIG, LPG_IMAGES, getLpgName } from '@/lib/lpg-config'
+import { formatCurrency } from '@/lib/format'
 
 // ============= MULTI-COMMAND TYPES =============
 type CommandType = 'JUAL' | 'CEK_STOK' | 'PENGELUARAN'
@@ -79,20 +81,9 @@ const LPG_PRICES: Record<LpgType, number> = {
     '50kg': 650000,
 }
 
-const LPG_LABELS: Record<LpgType, string> = {
-    '3kg': 'LPG 3 kg',
-    '5kg': 'LPG 5 kg',
-    '12kg': 'LPG 12 kg',
-    '50kg': 'LPG 50 kg',
-}
+// LPG_LABELS replaced by getLpgName from @/lib/lpg-config
 
-// LPG product images mapping
-const LPG_IMAGES: Record<LpgType, string> = {
-    '3kg': '/images/products/lpg-3kg.png',
-    '5kg': '/images/products/lpg-5kg.png',
-    '12kg': '/images/products/lpg-12kg.png',
-    '50kg': '/images/products/lpg-50kg.png',
-}
+// LPG_IMAGES imported from @/lib/lpg-config
 
 // Expense category mapping (keyword -> category)
 const EXPENSE_KEYWORDS: Record<ExpenseCategory, string[]> = {
@@ -647,7 +638,7 @@ export default function FloatingVoiceWidgetPangkalan() {
             isNewConsumer,
             quantity,
             lpgType,
-            productLabel: LPG_LABELS[lpgType],
+            productLabel: getLpgName(lpgType),
             pricePerUnit: LPG_PRICES[lpgType]
         }
     }
@@ -769,13 +760,7 @@ export default function FloatingVoiceWidgetPangkalan() {
     // Calculate total
     const totalAmount = parsedSale ? parsedSale.quantity * parsedSale.pricePerUnit : 0
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
-        }).format(amount)
-    }
+    // formatCurrency imported from @/lib/format
 
     if (!isOpen) {
         return (
@@ -960,7 +945,7 @@ export default function FloatingVoiceWidgetPangkalan() {
                                         <SafeIcon name="Package" className="h-7 w-7 text-blue-600" />
                                     </div>
                                     <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                                        {parsedStock.lpgType === 'all' ? 'Stok Semua LPG' : `Stok ${LPG_LABELS[parsedStock.lpgType]}`}
+                                        {parsedStock.lpgType === 'all' ? 'Stok Semua LPG' : `Stok ${getLpgName(parsedStock.lpgType)}`}
                                     </h3>
                                 </div>
 
@@ -978,7 +963,7 @@ export default function FloatingVoiceWidgetPangkalan() {
                                                 isLow ? 'border-yellow-200 bg-yellow-50' :
                                                     'border-green-200 bg-green-50'
                                                 }`}>
-                                                <p className="text-xs text-zinc-500 mb-1">{LPG_LABELS[type]}</p>
+                                                <p className="text-xs text-zinc-500 mb-1">{getLpgName(type)}</p>
                                                 <p className={`text-2xl font-bold ${isCritical ? 'text-red-600' :
                                                     isLow ? 'text-yellow-600' :
                                                         'text-green-600'

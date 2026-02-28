@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import SafeIcon from '@/components/common/SafeIcon'
 import { expensesApi, type Expense, type ExpenseCategory } from '@/lib/api'
+import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
 
@@ -173,13 +174,7 @@ export default function PengeluaranPage() {
         }
     }
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(value)
-    }
+    // formatCurrency imported from @/lib/format
 
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('id-ID', {
