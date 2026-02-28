@@ -4,20 +4,7 @@ import RegisterPangkalanPage from '@/components/pangkalan/RegisterPangkalanPage'
 ---
 
 <BaseLayout title="Daftar Pangkalan - SIM4LON" description="Daftarkan pangkalan Anda dan mulai kelola penjualan LPG dengan SIM4LON.">
-  <div class="min-h-screen w-full flex items-center justify-center bg-login-pattern p-4 relative overflow-hidden">
-    {/* Animated background elements — same as login */}
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float"></div>
-      <div class="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-floatSlow"></div>
-      <div class="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse opacity-75"></div>
-      <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-accent/5 rounded-full blur-3xl animate-pulse opacity-50" style="animation-delay: 1s;"></div>
-    </div>
-
-    {/* Register Container */}
-    <div class="relative z-10 w-full max-w-md">
-      <RegisterPangkalanPage client:load />
-    </div>
-  </div>
+  <RegisterPangkalanPage client:load />
 </BaseLayout>
 
 <script>
@@ -25,9 +12,3 @@ import RegisterPangkalanPage from '@/components/pangkalan/RegisterPangkalanPage'
   document.documentElement.classList.remove('dark');
   document.documentElement.removeAttribute('data-accent');
 </script>
-
-<style>
-  :global(body) {
-    overflow-x: hidden;
-  }
-</style>

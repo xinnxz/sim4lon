@@ -93,8 +93,8 @@ export default function RegisterPangkalanPage() {
     }
 
     return (
-        <div className="w-full py-8">
-            <div className="w-full max-w-md mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <img
