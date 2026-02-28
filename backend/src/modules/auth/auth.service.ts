@@ -98,7 +98,7 @@ export class AuthService {
         trialExpiry.setDate(trialExpiry.getDate() + 14);
 
         // Atomic transaction: create everything or nothing
-        const result = await this.prisma.$transaction(async (tx) => {
+        const result = await this.prisma.$transaction(async (tx: any) => {
             // 1. Create pangkalan
             const pangkalan = await tx.pangkalans.create({
                 data: {
@@ -127,6 +127,7 @@ export class AuthService {
             });
 
             // 3. Create FREE subscription (14-day trial)
+            // Note: Needs `prisma generate` after migration for type safety
             await tx.subscriptions.create({
                 data: {
                     pangkalan_id: pangkalan.id,
@@ -148,7 +149,7 @@ export class AuthService {
             });
 
             return { pangkalan, user };
-        });
+        }) as { pangkalan: any; user: any };
 
         // 5. Auto-login: generate JWT
         const sessionId = `${result.user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;

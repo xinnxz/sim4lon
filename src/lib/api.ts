@@ -191,6 +191,26 @@ export const authApi = {
         });
     },
 
+    async registerPangkalan(data: {
+        email: string;
+        password: string;
+        owner_name: string;
+        phone?: string;
+        pangkalan_name: string;
+        address: string;
+        region?: string;
+    }): Promise<LoginResponse & { trial_expires_at: string }> {
+        const response = await apiRequest<LoginResponse & { trial_expires_at: string }>('/auth/register-pangkalan', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+
+        // Auto-save token (same as login)
+        setToken(response.access_token);
+
+        return response;
+    },
+
     logout(): void {
         removeToken();
         if (typeof window !== 'undefined') {
