@@ -32,6 +32,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import NotaDigital from '@/components/pangkalan/NotaDigital'
+import type { ConsumerOrder } from '@/lib/api'
 
 export default function CatatPenjualanPage() {
     const [lpgType, setLpgType] = useState('kg3')
@@ -43,6 +45,8 @@ export default function CatatPenjualanPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false) // Confirmation dialog
+    const [showNota, setShowNota] = useState(false) // Nota digital dialog
+    const [lastOrder, setLastOrder] = useState<ConsumerOrder | null>(null) // Last order for nota
     const [isLoading, setIsLoading] = useState(false)
     const [lpgPrices, setLpgPrices] = useState<PangkalanLpgPrice[]>([])
     const [manualPrice, setManualPrice] = useState<number | null>(null) // null = use default from API
@@ -197,7 +201,7 @@ export default function CatatPenjualanPage() {
 
         try {
             setIsSubmitting(true)
-            await consumerOrdersApi.create({
+            const createdOrder = await consumerOrdersApi.create({
                 consumer_id: selectedConsumer?.id,
                 consumer_name: selectedConsumer?.name || consumerSearch || 'Walk-in',
                 lpg_type: lpgType as any,
@@ -205,6 +209,9 @@ export default function CatatPenjualanPage() {
                 price_per_unit: currentPrice, // Use dynamic price from API
                 // payment_status selalu LUNAS (fitur hutang tidak tersedia)
             })
+
+            // Save order data for nota digital
+            setLastOrder(createdOrder as ConsumerOrder)
 
             // Update local stock after successful sale
             // Gunakan normalizeType untuk matching karena format API (3kg) beda dengan internal (kg3)
@@ -232,14 +239,38 @@ export default function CatatPenjualanPage() {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
-                        <SafeIcon name="Check" className="h-8 w-8 text-white" />
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/30 animate-bounce">
+                        <SafeIcon name="Check" className="h-10 w-10 text-white" />
                     </div>
-                    <h2 className="text-xl font-bold mb-1">Berhasil!</h2>
-                    <p className="text-slate-500 mb-4">{qty}× {selectedLpg.display} = {formatCurrency(total)}</p>
-                    <Button onClick={() => setShowSuccess(false)} className="rounded-xl">
-                        <SafeIcon name="Plus" className="h-4 w-4 mr-1" /> Catat Lagi
-                    </Button>
+                    <h2 className="text-2xl font-bold mb-1 text-slate-800">Penjualan Berhasil! 🎉</h2>
+                    <p className="text-slate-500 mb-6">{qty}× {selectedLpg.display} = {formatCurrency(total)}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        {lastOrder && (
+                            <Button
+                                onClick={() => setShowNota(true)}
+                                className="rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/25"
+                            >
+                                <SafeIcon name="Receipt" className="h-4 w-4 mr-2" />
+                                Kirim Nota
+                            </Button>
+                        )}
+                        <Button
+                            onClick={() => { setShowSuccess(false); setLastOrder(null) }}
+                            variant="outline"
+                            className="rounded-xl"
+                        >
+                            <SafeIcon name="Plus" className="h-4 w-4 mr-1" /> Catat Lagi
+                        </Button>
+                    </div>
+
+                    {/* Nota Digital Dialog */}
+                    {lastOrder && (
+                        <NotaDigital
+                            order={lastOrder}
+                            open={showNota}
+                            onClose={() => setShowNota(false)}
+                        />
+                    )}
                 </div>
             </div>
         )
