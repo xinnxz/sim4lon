@@ -34,6 +34,8 @@ import {
 } from '@/components/ui/select'
 import SafeIcon from '@/components/common/SafeIcon'
 import { authApi, pangkalanStockApi, lpgPricesApi, lpgProductsApi, agenOrdersApi, companyProfileApi, type UserProfile, type StockLevel, type LpgType, type PangkalanStockMovement, type PangkalanLpgPrice, type LpgProductWithStock, type AgenOrder, type AgenOrderStatus, type CompanyProfile } from '@/lib/api'
+import { LPG_CONFIG, LPG_IMAGES, FIXED_PRODUCTS, normalizeType, lpgTypeToSizeKg, sizeKgToLpgType, getActiveLpgTypes as getActiveLpgTypesFromConfig } from '@/lib/lpg-config'
+import { formatNumber, formatDateTime } from '@/lib/format'
 import { toast } from 'sonner'
 import { ProductManagementGrid } from './ProductManagementGrid'
 import * as XLSX from 'xlsx'
@@ -46,52 +48,11 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-// LPG type config (supports both '3kg' and 'kg3' formats)
-const LPG_CONFIG: Record<string, { name: string; color: string; gradient: string }> = {
-    // 220gram / Bright Gas Can
-    'gr220': { name: 'Bright Gas 220gr', color: '#FFA500', gradient: 'from-orange-400 to-amber-500' },
-    // 3kg
-    '3kg': { name: 'LPG 3 kg', color: '#22C55E', gradient: 'from-green-500 to-emerald-600' },
-    'kg3': { name: 'LPG 3 kg', color: '#22C55E', gradient: 'from-green-500 to-emerald-600' },
-    // 5.5kg
-    '5kg': { name: 'LPG 5.5 kg', color: '#ff82c5', gradient: 'from-pink-400 to-pink-600' },
-    'kg5': { name: 'LPG 5.5 kg', color: '#ff82c5', gradient: 'from-pink-400 to-pink-600' },
-    // 12kg
-    '12kg': { name: 'LPG 12 kg', color: '#3B82F6', gradient: 'from-blue-500 to-indigo-600' },
-    'kg12': { name: 'LPG 12 kg', color: '#3B82F6', gradient: 'from-blue-500 to-indigo-600' },
-    // 50kg
-    '50kg': { name: 'LPG 50 kg', color: '#8B5CF6', gradient: 'from-violet-500 to-purple-600' },
-    'kg50': { name: 'LPG 50 kg', color: '#8B5CF6', gradient: 'from-violet-500 to-purple-600' },
-}
+// LPG_CONFIG, LPG_IMAGES imported from @/lib/lpg-config
 
-// LPG product images mapping (support all format variations)
-const LPG_IMAGES: Record<string, string> = {
-    // 220gr / Bright Gas
-    'gr220': '/images/products/bright-gas-220gr.png',
-    '220gr': '/images/products/bright-gas-220gr.png',
-    'bright_gas_220gr': '/images/products/bright-gas-220gr.png',
-    // 3kg
-    'kg3': '/images/products/lpg-3kg.png',
-    '3kg': '/images/products/lpg-3kg.png',
-    // 5.5kg
-    'kg5': '/images/products/lpg-5kg.png',
-    '5kg': '/images/products/lpg-5kg.png',
-    // 12kg
-    'kg12': '/images/products/lpg-12kg.png',
-    '12kg': '/images/products/lpg-12kg.png',
-    // 50kg
-    'kg50': '/images/products/lpg-50kg.png',
-    '50kg': '/images/products/lpg-50kg.png',
-}
+// LPG_IMAGES imported from @/lib/lpg-config
 
-// Normalize lpg_type format: kg3 <-> 3kg for proper matching
-const normalizeType = (type: string) => {
-    if (type.startsWith('kg')) return type; // already kg3 format
-    const match = type.match(/^(\d+\.?\d*)kg$/);
-    if (match) return `kg${match[1]}`;
-    if (type.match(/g?r?220g?r?/i)) return 'gr220';
-    return type;
-}
+// normalizeType imported from @/lib/lpg-config
 
 // Tab type - simplified (removed orders tab)
 type TabType = 'stock' | 'history' | 'products';
@@ -295,33 +256,9 @@ export default function StokPangkalanPage() {
         return data.sell - data.cost
     }
 
-    const formatCurrency = (v: number) => new Intl.NumberFormat('id-ID').format(v)
+    const formatCurrency = (v: number) => formatNumber(v)
 
-    // Mapping: lpg_type (pangkalan) to size_kg (agen products)
-    const lpgTypeToSizeKg = (lpgType: string): number => {
-        const mapping: Record<string, number> = {
-            'kg3': 3,
-            'kg5': 5.5,    // kg5 means 5.5 kg
-            'kg55': 5.5,   // Alternative format
-            'kg12': 12,
-            'kg50': 50,
-            'gr220': 0.22, // 220gram Bright Gas
-            'kg220': 0.22, // Alternative for 220gram
-        }
-        return mapping[lpgType] ?? parseFloat(lpgType.replace('kg', ''))
-    }
-
-    // Mapping: size_kg to lpg_type format
-    const sizeKgToLpgType = (sizeKg: number): string => {
-        const mapping: Record<number, string> = {
-            0.22: 'gr220',
-            3: 'kg3',
-            5.5: 'kg5',
-            12: 'kg12',
-            50: 'kg50',
-        }
-        return mapping[sizeKg] ?? `kg${String(sizeKg).replace('.', '')}`
-    }
+    // lpgTypeToSizeKg and sizeKgToLpgType imported from @/lib/lpg-config
 
     // Get agen products that are not yet added to pangkalan
     const getUnaddedAgenProducts = () => {
@@ -390,17 +327,8 @@ export default function StokPangkalanPage() {
         }
     }
 
-    // Get all products to display - Fixed 5 product types
+    // FIXED_PRODUCTS imported from @/lib/lpg-config
     const getAllDisplayProducts = () => {
-        // Define fixed 5 product types
-        const FIXED_PRODUCTS = [
-            { lpgType: 'gr220', name: 'Bright Gas Can', size_kg: 0.22, color: '#FFA500' },
-            { lpgType: 'kg3', name: 'LPG 3 kg', size_kg: 3, color: '#22C55E' },
-            { lpgType: 'kg5', name: 'LPG 5.5 kg', size_kg: 5.5, color: '#ff82c5' },
-            { lpgType: 'kg12', name: 'LPG 12 kg', size_kg: 12, color: '#3B82F6' },
-            { lpgType: 'kg50', name: 'LPG 50 kg', size_kg: 50, color: '#8B5CF6' },
-        ]
-
         return FIXED_PRODUCTS.map(product => {
             // Check if this product has a price entry
             const priceData = prices.find(p => p.lpg_type === product.lpgType)
@@ -439,16 +367,7 @@ export default function StokPangkalanPage() {
 
     const activeLpgTypes = getActiveLpgTypes()
 
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr)
-        return date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    }
+    const formatDate = (dateStr: string) => formatDateTime(dateStr)
 
     // Pagination with client-side filtering backup
     const filteredMovements = movements.filter(m => {
