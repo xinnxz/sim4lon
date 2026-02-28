@@ -386,11 +386,10 @@ export default function PangkalanDashboard() {
                     <Button
                         variant="outline"
                         className="group border-blue-200 hover:bg-blue-50 text-blue-600 hover:text-blue-700 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95"
-                        onClick={() => setIsOrderDialogOpen(true)}
-                        disabled={isSubmittingOrder}
+                        onClick={() => window.location.href = '/pangkalan/stok'}
                     >
-                        <SafeIcon name="Truck" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:translate-x-1" />
-                        Pesan ke Agen
+                        <SafeIcon name="Package" className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
+                        Tambah Stok
                     </Button>
                     <Button
                         className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all active:scale-95"

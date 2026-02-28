@@ -38,14 +38,14 @@ interface StockAlertBannerProps {
     stockLevels: StockLevel[]
     /** Custom threshold per type, defaults provided */
     thresholds?: Record<string, number>
-    /** Callback saat tombol "Pesan Stok" ditekan */
-    onOrderStock?: () => void
+    /** Callback saat tombol "Tambah Stok" ditekan */
+    onAddStock?: () => void
 }
 
 export default function StockAlertBanner({
     stockLevels,
     thresholds = DEFAULT_THRESHOLDS,
-    onOrderStock,
+    onAddStock,
 }: StockAlertBannerProps) {
     const [isDismissed, setIsDismissed] = useState(false)
 
@@ -66,8 +66,8 @@ export default function StockAlertBanner({
 
     return (
         <div className={`relative overflow-hidden rounded-2xl border-2 p-4 mb-4 animate-fadeInDown ${isCritical
-                ? 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800'
-                : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800'
+            ? 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800'
+            : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800'
             }`}>
             {/* Background decoration */}
             <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 ${isCritical ? 'bg-red-100/50' : 'bg-amber-100/50'
@@ -76,8 +76,8 @@ export default function StockAlertBanner({
             <div className="relative flex items-start gap-3">
                 {/* Icon */}
                 <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${isCritical
-                        ? 'bg-red-100 dark:bg-red-900/30'
-                        : 'bg-amber-100 dark:bg-amber-900/30'
+                    ? 'bg-red-100 dark:bg-red-900/30'
+                    : 'bg-amber-100 dark:bg-amber-900/30'
                     }`}>
                     <SafeIcon
                         name={isCritical ? 'AlertTriangle' : 'AlertCircle'}
@@ -118,17 +118,17 @@ export default function StockAlertBanner({
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 mt-3">
-                        {onOrderStock && (
+                        {onAddStock && (
                             <Button
                                 size="sm"
-                                onClick={onOrderStock}
+                                onClick={onAddStock}
                                 className={`rounded-lg text-xs h-8 ${isCritical
-                                        ? 'bg-red-600 hover:bg-red-700 text-white'
-                                        : 'bg-amber-600 hover:bg-amber-700 text-white'
+                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                                    : 'bg-amber-600 hover:bg-amber-700 text-white'
                                     }`}
                             >
-                                <SafeIcon name="ShoppingCart" className="h-3.5 w-3.5 mr-1" />
-                                Pesan ke Agen
+                                <SafeIcon name="PackagePlus" className="h-3.5 w-3.5 mr-1" />
+                                Tambah Stok
                             </Button>
                         )}
                         <button
