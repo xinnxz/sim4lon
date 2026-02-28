@@ -96,10 +96,31 @@ model pangkalans {
   penyaluran_harian         penyaluran_harian[]
   perencanaan_harian        perencanaan_harian[]
   users                     users[]
+  subscriptions             subscriptions?
 
   @@index([region], map: "idx_pangkalans_region")
   @@index([is_active], map: "idx_pangkalans_active")
   @@index([agen_id], map: "idx_pangkalans_agen")
+}
+
+/// Subscription/langganan per pangkalan (SaaS billing)
+model subscriptions {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pangkalan_id String              @unique @db.Uuid
+  plan         subscription_plan   @default(FREE)
+  status       subscription_status @default(ACTIVE)
+  /// Tanggal mulai langganan
+  started_at   DateTime            @default(now()) @db.Timestamptz(6)
+  /// Tanggal expired (null = unlimited/free)
+  expires_at   DateTime?           @db.Timestamptz(6)
+  /// Tanggal dibatalkan (null = aktif)
+  cancelled_at DateTime?           @db.Timestamptz(6)
+  created_at   DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime            @default(now()) @db.Timestamptz(6)
+  pangkalans   pangkalans          @relation(fields: [pangkalan_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_subscriptions_pangkalan")
+
+  @@index([status], map: "idx_subscriptions_status")
+  @@index([expires_at], map: "idx_subscriptions_expires")
 }
 
 /// Default LPG prices per pangkalan
@@ -676,4 +697,26 @@ enum agen_order_status {
   DITERIMA
   /// Order cancelled
   BATAL
+}
+
+/// Subscription plan tiers
+enum subscription_plan {
+  /// Free trial (14 hari)
+  FREE
+  /// Basic plan (Rp 50.000/bulan)
+  BASIC
+  /// Pro plan (Rp 100.000/bulan)
+  PRO
+}
+
+/// Subscription status
+enum subscription_status {
+  /// Langganan aktif
+  ACTIVE
+  /// Masa trial
+  TRIAL
+  /// Expired / tidak diperpanjang
+  EXPIRED
+  /// Dibatalkan oleh user
+  CANCELLED
 }
