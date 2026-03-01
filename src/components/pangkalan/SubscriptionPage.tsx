@@ -62,9 +62,9 @@ const PLANS = [
     {
         id: 'PRO',
         name: 'Pro',
-        price: 100000,
+        price: 50000,
         originalPrice: 250000,
-        discount: 'HEMAT 60%',
+        discount: 'HEMAT 80%',
         period: '/bulan',
         desc: 'Untuk pangkalan besar & multi-cabang',
         popular: false,

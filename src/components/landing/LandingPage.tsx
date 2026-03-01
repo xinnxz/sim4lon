@@ -83,9 +83,9 @@ const PRICING = [
     },
     {
         name: 'Pro',
-        price: 'Rp 100.000',
+        price: 'Rp 50.000',
         originalPrice: 'Rp 250.000',
-        discount: 'HEMAT 60%',
+        discount: 'HEMAT 80%',
         period: '/bulan',
         desc: 'Untuk pangkalan besar & multi-outlet',
         features: ['Semua fitur Basic', 'Multi-user access', 'API integration', 'Priority support', 'Custom branding'],
