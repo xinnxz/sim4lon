@@ -856,489 +856,599 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
     }
 
     return (
-        <div className="space-y-8 pb-8">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Stok LPG</h1>
-                    <p className="text-slate-500 mt-1 flex items-center gap-2">
-                        <SafeIcon name="Package" className="h-4 w-4" />
-                        Kelola ketersediaan stok LPG di pangkalan
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    {/* Export Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="rounded-xl border-green-200 text-green-600 hover:bg-green-50">
-                                <SafeIcon name="Download" className="h-4 w-4 mr-2" />
-                                Export
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleExportExcel}>
-                                <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-600" />
-                                Export Excel
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleExportPDF}>
-                                <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-600" />
-                                Export PDF
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {/* Tambah Stok Manual Button */}
-                    <Button
-                        variant="outline"
-                        className="rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                        onClick={() => setIsReceiveOpen(true)}
-                    >
-                        <SafeIcon name="PackagePlus" className="h-4 w-4 mr-2" />
-                        Tambah Stok
-                    </Button>
-                </div>
-            </div>
-
-            {/* Total Stock Summary */}
-            < Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20" >
-                <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-                <CardContent className="p-6 relative">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-blue-100 text-sm mb-1 flex items-center gap-2">
-                                <SafeIcon name="Package" className="h-4 w-4" />
-                                Total Stok Tersedia
-                            </p>
-                            <p className="text-5xl font-bold tracking-tight">
-                                {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).reduce((sum, s) => sum + s.qty, 0)}
-                            </p>
-                            <p className="text-blue-100 text-sm mt-2">
-                                tabung dari {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).length} tipe LPG aktif
-                            </p>
-                        </div>
-                        <div className="w-24 h-24 rounded-xl overflow-hidden backdrop-blur-sm">
-                            <img src="/images/icons/stock-icon-2.png" alt="LPG Stock" className="w-full h-full object-contain" />
-                        </div>
+        <>
+            <div className="space-y-8 pb-8">
+                {/* Header */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Stok LPG</h1>
+                        <p className="text-slate-500 mt-1 flex items-center gap-2">
+                            <SafeIcon name="Package" className="h-4 w-4" />
+                            Kelola ketersediaan stok LPG di pangkalan
+                        </p>
                     </div>
-                </CardContent>
-            </Card >
+                    <div className="flex items-center gap-3">
+                        {/* Export Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="rounded-xl border-green-200 text-green-600 hover:bg-green-50">
+                                    <SafeIcon name="Download" className="h-4 w-4 mr-2" />
+                                    Export
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleExportExcel}>
+                                    <SafeIcon name="FileSpreadsheet" className="h-4 w-4 mr-2 text-green-600" />
+                                    Export Excel
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleExportPDF}>
+                                    <SafeIcon name="FileText" className="h-4 w-4 mr-2 text-red-600" />
+                                    Export PDF
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-            {/* Tab Navigation */}
-            < div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1 w-fit" >
-                <button
-                    onClick={() => setActiveTab('stock')}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'stock'
-                        ? 'bg-white shadow-sm text-blue-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                >
-                    <SafeIcon name="Package" className="h-4 w-4" />
-                    Stok Saat Ini
-                </button>
-                <button
-                    onClick={() => setActiveTab('history')}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'history'
-                        ? 'bg-white shadow-sm text-blue-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                >
-                    <SafeIcon name="History" className="h-4 w-4" />
-                    Riwayat
-                </button>
-                <button
-                    onClick={() => setActiveTab('products')}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'products'
-                        ? 'bg-white shadow-sm text-blue-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                >
-                    <SafeIcon name="Package" className="h-4 w-4" />
-                    Kelola Produk
-                </button>
-            </div >
+                        {/* Tambah Stok Manual Button */}
+                        <Button
+                            variant="outline"
+                            className="rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                            onClick={() => setIsReceiveOpen(true)}
+                        >
+                            <SafeIcon name="PackagePlus" className="h-4 w-4 mr-2" />
+                            Tambah Stok
+                        </Button>
+                    </div>
+                </div>
 
-            {/* Tab Content */}
-            {
-                activeTab === 'stock' ? (
-                    <>
-                        {/* Stock per Type Grid */}
-                        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                            {stocks
-                                .filter(stock => {
-                                    // Only show stocks where the product is active (normalize formats)
-                                    const priceData = prices.find(p => normalizeType(p.lpg_type) === normalizeType(stock.lpg_type))
-                                    return priceData?.is_active === true
-                                })
-                                .map((stock) => {
-                                    const config = LPG_CONFIG[stock.lpg_type] || { name: stock.lpg_type, gradient: 'from-slate-500 to-slate-600' }
-                                    const status = getStockStatus(stock)
-                                    const productImage = LPG_IMAGES[stock.lpg_type]
-                                    return (
-                                        <Card key={stock.id} className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                                            {/* Decorative gradient background */}
-                                            <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-5 group-hover:opacity-10 transition-opacity`} />
+                {/* Total Stock Summary */}
+                < Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20" >
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+                    <CardContent className="p-6 relative">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-blue-100 text-sm mb-1 flex items-center gap-2">
+                                    <SafeIcon name="Package" className="h-4 w-4" />
+                                    Total Stok Tersedia
+                                </p>
+                                <p className="text-5xl font-bold tracking-tight">
+                                    {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).reduce((sum, s) => sum + s.qty, 0)}
+                                </p>
+                                <p className="text-blue-100 text-sm mt-2">
+                                    tabung dari {stocks.filter(s => prices.find(p => normalizeType(p.lpg_type) === normalizeType(s.lpg_type))?.is_active === true).length} tipe LPG aktif
+                                </p>
+                            </div>
+                            <div className="w-24 h-24 rounded-xl overflow-hidden backdrop-blur-sm">
+                                <img src="/images/icons/stock-icon-2.png" alt="LPG Stock" className="w-full h-full object-contain" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card >
 
-                                            {/* Status Badge - Top Right */}
-                                            <div className="absolute top-3 right-3 z-10">
-                                                <Badge variant="outline" className={`${status.color} text-xs`}>
-                                                    {status.label}
-                                                </Badge>
-                                            </div>
+                {/* Tab Navigation */}
+                < div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1 w-fit" >
+                    <button
+                        onClick={() => setActiveTab('stock')}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'stock'
+                            ? 'bg-white shadow-sm text-blue-600'
+                            : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                    >
+                        <SafeIcon name="Package" className="h-4 w-4" />
+                        Stok Saat Ini
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('history')}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'history'
+                            ? 'bg-white shadow-sm text-blue-600'
+                            : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                    >
+                        <SafeIcon name="History" className="h-4 w-4" />
+                        Riwayat
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('products')}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'products'
+                            ? 'bg-white shadow-sm text-blue-600'
+                            : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                    >
+                        <SafeIcon name="Package" className="h-4 w-4" />
+                        Kelola Produk
+                    </button>
+                </div >
 
-                                            <CardContent className="p-4 relative">
-                                                {/* Product Image - Large & Centered */}
-                                                <div className="flex justify-center mb-3">
-                                                    {productImage ? (
-                                                        <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-md border overflow-hidden p-2 group-hover:scale-105 transition-transform">
-                                                            <img
-                                                                src={productImage}
-                                                                alt={config.name}
-                                                                className="w-full h-full object-contain"
+                {/* Tab Content */}
+                {
+                    activeTab === 'stock' ? (
+                        <>
+                            {/* Stock per Type Grid */}
+                            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                                {stocks
+                                    .filter(stock => {
+                                        // Only show stocks where the product is active (normalize formats)
+                                        const priceData = prices.find(p => normalizeType(p.lpg_type) === normalizeType(stock.lpg_type))
+                                        return priceData?.is_active === true
+                                    })
+                                    .map((stock) => {
+                                        const config = LPG_CONFIG[stock.lpg_type] || { name: stock.lpg_type, gradient: 'from-slate-500 to-slate-600' }
+                                        const status = getStockStatus(stock)
+                                        const productImage = LPG_IMAGES[stock.lpg_type]
+                                        return (
+                                            <Card key={stock.id} className="relative overflow-hidden bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                                                {/* Decorative gradient background */}
+                                                <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-5 group-hover:opacity-10 transition-opacity`} />
+
+                                                {/* Status Badge - Top Right */}
+                                                <div className="absolute top-3 right-3 z-10">
+                                                    <Badge variant="outline" className={`${status.color} text-xs`}>
+                                                        {status.label}
+                                                    </Badge>
+                                                </div>
+
+                                                <CardContent className="p-4 relative">
+                                                    {/* Product Image - Large & Centered */}
+                                                    <div className="flex justify-center mb-3">
+                                                        {productImage ? (
+                                                            <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-md border overflow-hidden p-2 group-hover:scale-105 transition-transform">
+                                                                <img
+                                                                    src={productImage}
+                                                                    alt={config.name}
+                                                                    className="w-full h-full object-contain"
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform`}>
+                                                                <SafeIcon name="Flame" className="h-10 w-10 text-white" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Product Name */}
+                                                    <p className="text-center text-sm font-medium text-slate-600 mb-2">{config.name}</p>
+
+                                                    {/* Stock Count - Big & Bold */}
+                                                    <div className="text-center mb-3">
+                                                        <span className="text-4xl font-bold text-slate-900">{stock.qty}</span>
+                                                        <span className="text-sm font-normal text-slate-400 ml-1">tabung</span>
+                                                    </div>
+
+                                                    {/* Stock level indicator */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between text-[10px] text-slate-400">
+                                                            <span>0</span>
+                                                            <span>Kritis: {stock.critical_level}</span>
+                                                            <span>Peringatan: {stock.warning_level}</span>
+                                                        </div>
+                                                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div
+                                                                className={`h-full rounded-full transition-all ${stock.status === 'KRITIS' ? 'bg-red-500' :
+                                                                    stock.status === 'RENDAH' ? 'bg-orange-500' : 'bg-green-500'
+                                                                    }`}
+                                                                style={{ width: `${Math.min(100, (stock.qty / stock.warning_level) * 50)}%` }}
                                                             />
                                                         </div>
-                                                    ) : (
-                                                        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform`}>
-                                                            <SafeIcon name="Flame" className="h-10 w-10 text-white" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Product Name */}
-                                                <p className="text-center text-sm font-medium text-slate-600 mb-2">{config.name}</p>
-
-                                                {/* Stock Count - Big & Bold */}
-                                                <div className="text-center mb-3">
-                                                    <span className="text-4xl font-bold text-slate-900">{stock.qty}</span>
-                                                    <span className="text-sm font-normal text-slate-400 ml-1">tabung</span>
-                                                </div>
-
-                                                {/* Stock level indicator */}
-                                                <div className="space-y-1">
-                                                    <div className="flex justify-between text-[10px] text-slate-400">
-                                                        <span>0</span>
-                                                        <span>Kritis: {stock.critical_level}</span>
-                                                        <span>Peringatan: {stock.warning_level}</span>
                                                     </div>
-                                                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                                        <div
-                                                            className={`h-full rounded-full transition-all ${stock.status === 'KRITIS' ? 'bg-red-500' :
-                                                                stock.status === 'RENDAH' ? 'bg-orange-500' : 'bg-green-500'
-                                                                }`}
-                                                            style={{ width: `${Math.min(100, (stock.qty / stock.warning_level) * 50)}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    )
-                                })}
-                        </div>
-
-                        {/* Quick Actions */}
-                        <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
-                            <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                                        <SafeIcon name="Zap" className="h-4 w-4 text-purple-600" />
-                                    </div>
-                                    Aksi Cepat
-                                </CardTitle>
-                                <CardDescription>Kelola stok dengan mudah</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div className="grid gap-4 md:grid-cols-3">
-                                    {/* Tambah Stok Manual */}
-                                    <button
-                                        onClick={() => setIsReceiveOpen(true)}
-                                        className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100 hover:border-emerald-300 transition-all group"
-                                    >
-                                        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <SafeIcon name="PackagePlus" className="h-6 w-6 text-emerald-600" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-semibold text-slate-900">Tambah Stok</p>
-                                            <p className="text-sm text-slate-500">Input manual stok masuk</p>
-                                        </div>
-                                    </button>
-
-                                    {/* Terima Stok - DISABLED */}
-                                    <div
-                                        className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative"
-                                    >
-                                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                                            <SafeIcon name="PackagePlus" className="h-6 w-6 text-slate-400" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-semibold text-slate-500">Koreksi Stok</p>
-                                            <p className="text-sm text-slate-400">Penyesuaian manual (opname)</p>
-                                        </div>
-                                        <Badge className="ml-auto bg-amber-100 text-amber-700 text-xs whitespace-nowrap">Coming Soon</Badge>
-                                    </div>
-
-                                    {/* Stock Opname - DISABLED */}
-                                    <div
-                                        className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative"
-                                    >
-                                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                                            <SafeIcon name="ClipboardCheck" className="h-6 w-6 text-slate-400" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-semibold text-slate-500">Stock Opname</p>
-                                            <p className="text-sm text-slate-400">Sesuaikan stok aktual</p>
-                                        </div>
-                                        <Badge className="ml-auto bg-amber-100 text-amber-700 text-xs whitespace-nowrap">Coming Soon</Badge>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Info Banner - Auto-Sync Aktif */}
-                        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg rounded-2xl">
-                            <CardContent className="p-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-                                        <SafeIcon name="CheckCircle" className="h-6 w-6 text-green-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-slate-900 mb-1">Stok Terintegrasi dengan Agen</h3>
-                                        <p className="text-sm text-slate-600 mb-3">
-                                            Stok otomatis bertambah saat pesanan dari agen berstatus <strong>SELESAI</strong>
-                                        </p>
-                                        <div className="grid gap-2 sm:grid-cols-2">
-                                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                                                <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                                <span>Stok masuk otomatis dari pesanan</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                                                <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                                <span>Riwayat pergerakan tercatat</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                                                <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                                <span>Sumber: ORDER (dari agen)</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                                                <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                                <span>Koreksi manual tetap tersedia</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </>
-                ) : activeTab === 'history' ? (
-                    /* Riwayat Tab */
-                    <div className="space-y-4">
-                        {/* Filter Bar */}
-                        <Card className="bg-white shadow-lg rounded-2xl border-0">
-                            <CardContent className="p-4">
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                        <SafeIcon name="Filter" className="h-4 w-4 text-slate-500" />
-                                        <span className="text-sm font-medium text-slate-600">Filter:</span>
-                                    </div>
-                                    <Select value={filterType} onValueChange={(val) => { setFilterType(val); setCurrentPage(1); }}>
-                                        <SelectTrigger className="w-full sm:w-[180px] rounded-xl">
-                                            <SelectValue placeholder="Semua Tipe" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Semua Tipe</SelectItem>
-                                            <SelectItem value="gr220">Bright Gas Can</SelectItem>
-                                            <SelectItem value="kg3">LPG 3 kg</SelectItem>
-                                            <SelectItem value="kg5">LPG 5.5 kg</SelectItem>
-                                            <SelectItem value="kg12">LPG 12 kg</SelectItem>
-                                            <SelectItem value="kg50">LPG 50 kg</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={filterMovementType} onValueChange={(val) => { setFilterMovementType(val); setCurrentPage(1); }}>
-                                        <SelectTrigger className="w-full sm:w-[150px] rounded-xl">
-                                            <SelectValue placeholder="Semua Jenis" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Semua Jenis</SelectItem>
-                                            <SelectItem value="IN">MASUK</SelectItem>
-                                            <SelectItem value="OUT">KELUAR</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <div className="flex items-center gap-2 sm:ml-auto">
-                                        {(filterType !== 'all' || filterMovementType !== 'all') && (
-                                            <Badge variant="secondary" className="text-xs">
-                                                {filteredMovements.length} hasil
-                                            </Badge>
-                                        )}
-                                        <Button variant="outline" size="sm" onClick={fetchMovements} className="rounded-xl flex-1 sm:flex-none">
-                                            <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
-                                            Refresh
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Movements Table */}
-                        <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
-                            <CardContent className="p-0">
-                                {isLoadingHistory ? (
-                                    <div className="flex items-center justify-center py-16">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-200 border-t-blue-600"></div>
-                                    </div>
-                                ) : movements.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-                                        <img
-                                            src="/images/illustrations/empty-stock.png"
-                                            alt="Belum ada riwayat"
-                                            className="w-40 h-40 object-contain opacity-70 mb-4"
-                                        />
-                                        <p className="font-medium">Belum ada riwayat</p>
-                                        <p className="text-sm text-slate-400">Pergerakan stok akan muncul di sini</p>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full">
-                                                <thead className="bg-slate-50 border-b">
-                                                    <tr>
-                                                        <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Waktu</th>
-                                                        <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Tipe LPG</th>
-                                                        <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Jenis</th>
-                                                        <th className="text-right p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Qty</th>
-                                                        <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Sumber</th>
-                                                        <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Catatan</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100">
-                                                    {paginatedMovements.map((mv, idx) => {
-                                                        const config = LPG_CONFIG[mv.lpg_type] || { name: mv.lpg_type, color: '#666' }
-                                                        // Database uses 'MASUK'/'KELUAR', not 'IN'/'OUT'
-                                                        const isIn = mv.movement_type === 'MASUK' || mv.movement_type === 'IN'
-
-                                                        return (
-                                                            <tr key={mv.id} className={`hover:bg-slate-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                                                                <td className="p-4 text-sm text-slate-600">{formatDate(mv.movement_date)}</td>
-                                                                <td className="p-4">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }}></div>
-                                                                        <span className="text-sm font-medium text-slate-900">{config.name}</span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="p-4">
-                                                                    <Badge className={`${isIn ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} border-0 rounded-full`}>
-                                                                        <SafeIcon name={isIn ? 'ArrowDownCircle' : 'ArrowUpCircle'} className="h-3 w-3 mr-1" />
-                                                                        {isIn ? 'MASUK' : 'KELUAR'}
-                                                                    </Badge>
-                                                                </td>
-                                                                <td className={`p-4 text-right font-bold ${isIn ? 'text-green-600' : 'text-red-600'}`}>
-                                                                    {isIn ? '+' : '-'}{mv.qty}
-                                                                </td>
-                                                                <td className="p-4 text-sm text-slate-600">{mv.source || '-'}</td>
-                                                                <td className="p-4 text-sm text-slate-500 max-w-[200px] truncate">{mv.note || '-'}</td>
-                                                            </tr>
-                                                        )
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        {/* Pagination */}
-                                        {totalPages > 1 && (
-                                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t bg-slate-50">
-                                                <p className="text-sm text-slate-600 text-center sm:text-left">
-                                                    Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredMovements.length)} dari {filteredMovements.length}
-                                                </p>
-                                                <div className="flex items-center gap-2">
-                                                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="rounded-lg">
-                                                        <SafeIcon name="ChevronLeft" className="h-4 w-4" />
-                                                    </Button>
-                                                    <div className="flex items-center gap-1">
-                                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                                            let pageNum: number
-                                                            if (totalPages <= 5) pageNum = i + 1
-                                                            else if (currentPage <= 3) pageNum = i + 1
-                                                            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i
-                                                            else pageNum = currentPage - 2 + i
-
-                                                            return (
-                                                                <Button
-                                                                    key={pageNum}
-                                                                    variant={currentPage === pageNum ? "default" : "outline"}
-                                                                    size="sm"
-                                                                    onClick={() => setCurrentPage(pageNum)}
-                                                                    className={`w-8 h-8 p-0 rounded-lg ${currentPage === pageNum ? 'bg-blue-600' : ''}`}
-                                                                >
-                                                                    {pageNum}
-                                                                </Button>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="rounded-lg">
-                                                        <SafeIcon name="ChevronRight" className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                ) : activeTab === 'products' ? (
-                    /* Kelola Produk Tab - Products from Agen with Pangkalan settings */
-                    <div className="space-y-6">
-                        {/* Compact Header */}
-                        <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                                    <SafeIcon name="Package" className="h-5 w-5 text-white" />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-900">Kelola Produk LPG</h2>
-                                    <p className="text-xs text-slate-500">Produk dari Agen • Atur harga & ketersediaan</p>
-                                </div>
+                                                </CardContent>
+                                            </Card>
+                                        )
+                                    })}
                             </div>
-                            {hasChanges ? (
-                                <Button
-                                    onClick={handleSavePrices}
-                                    disabled={isSaving}
-                                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl shadow-lg shadow-green-500/25 animate-pulse"
-                                >
-                                    {isSaving ? (
-                                        <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+
+                            {/* Quick Actions */}
+                            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                            <SafeIcon name="Zap" className="h-4 w-4 text-purple-600" />
+                                        </div>
+                                        Aksi Cepat
+                                    </CardTitle>
+                                    <CardDescription>Kelola stok dengan mudah</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-6">
+                                    <div className="grid gap-4 md:grid-cols-3">
+                                        {/* Tambah Stok Manual */}
+                                        <button
+                                            onClick={() => setIsReceiveOpen(true)}
+                                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100 hover:border-emerald-300 transition-all group"
+                                        >
+                                            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <SafeIcon name="PackagePlus" className="h-6 w-6 text-emerald-600" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-semibold text-slate-900">Tambah Stok</p>
+                                                <p className="text-sm text-slate-500">Input manual stok masuk</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Terima Stok - DISABLED */}
+                                        <div
+                                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative"
+                                        >
+                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
+                                                <SafeIcon name="PackagePlus" className="h-6 w-6 text-slate-400" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-semibold text-slate-500">Koreksi Stok</p>
+                                                <p className="text-sm text-slate-400">Penyesuaian manual (opname)</p>
+                                            </div>
+                                            <Badge className="ml-auto bg-amber-100 text-amber-700 text-xs whitespace-nowrap">Coming Soon</Badge>
+                                        </div>
+
+                                        {/* Stock Opname - DISABLED */}
+                                        <div
+                                            className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative"
+                                        >
+                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
+                                                <SafeIcon name="ClipboardCheck" className="h-6 w-6 text-slate-400" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-semibold text-slate-500">Stock Opname</p>
+                                                <p className="text-sm text-slate-400">Sesuaikan stok aktual</p>
+                                            </div>
+                                            <Badge className="ml-auto bg-amber-100 text-amber-700 text-xs whitespace-nowrap">Coming Soon</Badge>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Info Banner - Auto-Sync Aktif */}
+                            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg rounded-2xl">
+                                <CardContent className="p-6">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                                            <SafeIcon name="CheckCircle" className="h-6 w-6 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900 mb-1">Stok Terintegrasi dengan Agen</h3>
+                                            <p className="text-sm text-slate-600 mb-3">
+                                                Stok otomatis bertambah saat pesanan dari agen berstatus <strong>SELESAI</strong>
+                                            </p>
+                                            <div className="grid gap-2 sm:grid-cols-2">
+                                                <div className="flex items-center gap-2 text-sm text-slate-700">
+                                                    <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
+                                                    <span>Stok masuk otomatis dari pesanan</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-slate-700">
+                                                    <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
+                                                    <span>Riwayat pergerakan tercatat</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-slate-700">
+                                                    <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
+                                                    <span>Sumber: ORDER (dari agen)</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-slate-700">
+                                                    <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
+                                                    <span>Koreksi manual tetap tersedia</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </>
+                    ) : activeTab === 'history' ? (
+                        /* Riwayat Tab */
+                        <div className="space-y-4">
+                            {/* Filter Bar */}
+                            <Card className="bg-white shadow-lg rounded-2xl border-0">
+                                <CardContent className="p-4">
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                            <SafeIcon name="Filter" className="h-4 w-4 text-slate-500" />
+                                            <span className="text-sm font-medium text-slate-600">Filter:</span>
+                                        </div>
+                                        <Select value={filterType} onValueChange={(val) => { setFilterType(val); setCurrentPage(1); }}>
+                                            <SelectTrigger className="w-full sm:w-[180px] rounded-xl">
+                                                <SelectValue placeholder="Semua Tipe" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Semua Tipe</SelectItem>
+                                                <SelectItem value="gr220">Bright Gas Can</SelectItem>
+                                                <SelectItem value="kg3">LPG 3 kg</SelectItem>
+                                                <SelectItem value="kg5">LPG 5.5 kg</SelectItem>
+                                                <SelectItem value="kg12">LPG 12 kg</SelectItem>
+                                                <SelectItem value="kg50">LPG 50 kg</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <Select value={filterMovementType} onValueChange={(val) => { setFilterMovementType(val); setCurrentPage(1); }}>
+                                            <SelectTrigger className="w-full sm:w-[150px] rounded-xl">
+                                                <SelectValue placeholder="Semua Jenis" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Semua Jenis</SelectItem>
+                                                <SelectItem value="IN">MASUK</SelectItem>
+                                                <SelectItem value="OUT">KELUAR</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <div className="flex items-center gap-2 sm:ml-auto">
+                                            {(filterType !== 'all' || filterMovementType !== 'all') && (
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {filteredMovements.length} hasil
+                                                </Badge>
+                                            )}
+                                            <Button variant="outline" size="sm" onClick={fetchMovements} className="rounded-xl flex-1 sm:flex-none">
+                                                <SafeIcon name="RefreshCw" className="h-4 w-4 mr-2" />
+                                                Refresh
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Movements Table */}
+                            <Card className="bg-white shadow-lg rounded-2xl border-0 overflow-hidden">
+                                <CardContent className="p-0">
+                                    {isLoadingHistory ? (
+                                        <div className="flex items-center justify-center py-16">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-200 border-t-blue-600"></div>
+                                        </div>
+                                    ) : movements.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+                                            <img
+                                                src="/images/illustrations/empty-stock.png"
+                                                alt="Belum ada riwayat"
+                                                className="w-40 h-40 object-contain opacity-70 mb-4"
+                                            />
+                                            <p className="font-medium">Belum ada riwayat</p>
+                                            <p className="text-sm text-slate-400">Pergerakan stok akan muncul di sini</p>
+                                        </div>
                                     ) : (
                                         <>
-                                            <SafeIcon name="Save" className="h-4 w-4 mr-2" />
-                                            Simpan Perubahan
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full">
+                                                    <thead className="bg-slate-50 border-b">
+                                                        <tr>
+                                                            <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Waktu</th>
+                                                            <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Tipe LPG</th>
+                                                            <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Jenis</th>
+                                                            <th className="text-right p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Qty</th>
+                                                            <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Sumber</th>
+                                                            <th className="text-left p-4 text-xs font-semibold text-slate-600 uppercase tracking-wide">Catatan</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100">
+                                                        {paginatedMovements.map((mv, idx) => {
+                                                            const config = LPG_CONFIG[mv.lpg_type] || { name: mv.lpg_type, color: '#666' }
+                                                            // Database uses 'MASUK'/'KELUAR', not 'IN'/'OUT'
+                                                            const isIn = mv.movement_type === 'MASUK' || mv.movement_type === 'IN'
+
+                                                            return (
+                                                                <tr key={mv.id} className={`hover:bg-slate-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                                                                    <td className="p-4 text-sm text-slate-600">{formatDate(mv.movement_date)}</td>
+                                                                    <td className="p-4">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }}></div>
+                                                                            <span className="text-sm font-medium text-slate-900">{config.name}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="p-4">
+                                                                        <Badge className={`${isIn ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} border-0 rounded-full`}>
+                                                                            <SafeIcon name={isIn ? 'ArrowDownCircle' : 'ArrowUpCircle'} className="h-3 w-3 mr-1" />
+                                                                            {isIn ? 'MASUK' : 'KELUAR'}
+                                                                        </Badge>
+                                                                    </td>
+                                                                    <td className={`p-4 text-right font-bold ${isIn ? 'text-green-600' : 'text-red-600'}`}>
+                                                                        {isIn ? '+' : '-'}{mv.qty}
+                                                                    </td>
+                                                                    <td className="p-4 text-sm text-slate-600">{mv.source || '-'}</td>
+                                                                    <td className="p-4 text-sm text-slate-500 max-w-[200px] truncate">{mv.note || '-'}</td>
+                                                                </tr>
+                                                            )
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Pagination */}
+                                            {totalPages > 1 && (
+                                                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t bg-slate-50">
+                                                    <p className="text-sm text-slate-600 text-center sm:text-left">
+                                                        Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredMovements.length)} dari {filteredMovements.length}
+                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="rounded-lg">
+                                                            <SafeIcon name="ChevronLeft" className="h-4 w-4" />
+                                                        </Button>
+                                                        <div className="flex items-center gap-1">
+                                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                                                let pageNum: number
+                                                                if (totalPages <= 5) pageNum = i + 1
+                                                                else if (currentPage <= 3) pageNum = i + 1
+                                                                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i
+                                                                else pageNum = currentPage - 2 + i
+
+                                                                return (
+                                                                    <Button
+                                                                        key={pageNum}
+                                                                        variant={currentPage === pageNum ? "default" : "outline"}
+                                                                        size="sm"
+                                                                        onClick={() => setCurrentPage(pageNum)}
+                                                                        className={`w-8 h-8 p-0 rounded-lg ${currentPage === pageNum ? 'bg-blue-600' : ''}`}
+                                                                    >
+                                                                        {pageNum}
+                                                                    </Button>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="rounded-lg">
+                                                            <SafeIcon name="ChevronRight" className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </>
                                     )}
-                                </Button>
-                            ) : (
-                                <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-4 py-2 rounded-xl">
-                                    <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
-                                    <span>Tersimpan</span>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    ) : activeTab === 'products' ? (
+                        /* Kelola Produk Tab - Products from Agen with Pangkalan settings */
+                        <div className="space-y-6">
+                            {/* Compact Header */}
+                            <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                                        <SafeIcon name="Package" className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-slate-900">Kelola Produk LPG</h2>
+                                        <p className="text-xs text-slate-500">Produk dari Agen • Atur harga & ketersediaan</p>
+                                    </div>
                                 </div>
+                                {hasChanges ? (
+                                    <Button
+                                        onClick={handleSavePrices}
+                                        disabled={isSaving}
+                                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl shadow-lg shadow-green-500/25 animate-pulse"
+                                    >
+                                        {isSaving ? (
+                                            <SafeIcon name="Loader2" className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <SafeIcon name="Save" className="h-4 w-4 mr-2" />
+                                                Simpan Perubahan
+                                            </>
+                                        )}
+                                    </Button>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-4 py-2 rounded-xl">
+                                        <SafeIcon name="Check" className="h-4 w-4 text-green-500" />
+                                        <span>Tersimpan</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Product List - Modern Redesign */}
+                            {isLoadingPrices ? (
+                                <div className="flex items-center justify-center py-16">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-200 border-t-blue-600"></div>
+                                </div>
+                            ) : (
+                                <ProductManagementGrid
+                                    products={getAllDisplayProducts()}
+                                    editedPrices={editedPrices}
+                                    stocks={stocks}
+                                    isSaving={isSaving}
+                                    onAddProduct={(product) => handleAddProduct(product as LpgProductWithStock)}
+                                    onDeactivateProduct={handleDeactivateProduct}
+                                    onUpdatePrice={updatePrice}
+                                />
                             )}
                         </div>
+                    ) : null
+                }
+            </div >
 
-                        {/* Product List - Modern Redesign */}
-                        {isLoadingPrices ? (
-                            <div className="flex items-center justify-center py-16">
-                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-200 border-t-blue-600"></div>
-                            </div>
-                        ) : (
-                            <ProductManagementGrid
-                                products={getAllDisplayProducts()}
-                                editedPrices={editedPrices}
-                                stocks={stocks}
-                                isSaving={isSaving}
-                                onAddProduct={(product) => handleAddProduct(product as LpgProductWithStock)}
-                                onDeactivateProduct={handleDeactivateProduct}
-                                onUpdatePrice={updatePrice}
+            {/* ===== Dialog Tambah/Koreksi Stok ===== */}
+            <Dialog open={isReceiveOpen} onOpenChange={setIsReceiveOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <SafeIcon name="PackagePlus" className="h-5 w-5 text-emerald-600" />
+                            Tambah / Koreksi Stok
+                        </DialogTitle>
+                        <DialogDescription>
+                            Catat stok masuk atau keluar secara manual
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-2">
+                        {/* Tipe Gerakan: Masuk / Keluar */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <button
+                                onClick={() => setReceiveData({ ...receiveData, movementType: 'IN' })}
+                                className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'IN'
+                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                    }`}
+                            >
+                                <SafeIcon name="ArrowDownToLine" className="h-4 w-4" />
+                                <span className="font-medium text-sm">Stok Masuk</span>
+                            </button>
+                            <button
+                                onClick={() => setReceiveData({ ...receiveData, movementType: 'OUT' })}
+                                className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${receiveData.movementType === 'OUT'
+                                    ? 'border-red-500 bg-red-50 text-red-700'
+                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                    }`}
+                            >
+                                <SafeIcon name="ArrowUpFromLine" className="h-4 w-4" />
+                                <span className="font-medium text-sm">Stok Keluar</span>
+                            </button>
+                        </div>
+
+                        {/* Pilih Tipe LPG */}
+                        <div>
+                            <label className="text-sm font-medium text-slate-700 mb-1.5 block">Tipe LPG</label>
+                            <select
+                                value={receiveData.lpgType}
+                                onChange={(e) => setReceiveData({ ...receiveData, lpgType: e.target.value as LpgType })}
+                                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            >
+                                {stocks.length > 0
+                                    ? stocks.map((s) => (
+                                        <option key={s.lpg_type} value={s.lpg_type}>
+                                            {LPG_CONFIG[s.lpg_type]?.name || s.lpg_type} — Stok: {s.qty} tabung
+                                        </option>
+                                    ))
+                                    : Object.entries(LPG_CONFIG).map(([key, cfg]) => (
+                                        <option key={key} value={key}>{cfg.name}</option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+
+                        {/* Jumlah */}
+                        <div>
+                            <label className="text-sm font-medium text-slate-700 mb-1.5 block">Jumlah (tabung)</label>
+                            <input
+                                type="number"
+                                min={1}
+                                value={receiveData.qty || ''}
+                                onChange={(e) => setReceiveData({ ...receiveData, qty: parseInt(e.target.value) || 0 })}
+                                placeholder="Masukkan jumlah tabung"
+                                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                             />
-                        )}
+                        </div>
+
+                        {/* Catatan */}
+                        <div>
+                            <label className="text-sm font-medium text-slate-700 mb-1.5 block">Catatan (opsional)</label>
+                            <input
+                                type="text"
+                                value={receiveData.note}
+                                onChange={(e) => setReceiveData({ ...receiveData, note: e.target.value })}
+                                placeholder="Contoh: Terima dari agen, koreksi stok..."
+                                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            />
+                        </div>
                     </div>
-                ) : null
-            }
-        </div >
+
+                    <DialogFooter className="gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsReceiveOpen(false)}
+                            className="rounded-xl"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            onClick={handleReceiveStock}
+                            disabled={isSubmitting || receiveData.qty <= 0}
+                            className={`rounded-xl ${receiveData.movementType === 'IN'
+                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
+                                }`}
+                        >
+                            {isSubmitting && <SafeIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />}
+                            {receiveData.movementType === 'IN' ? 'Tambah Stok' : 'Kurangi Stok'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 }
