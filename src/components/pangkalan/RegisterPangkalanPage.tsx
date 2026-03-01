@@ -98,7 +98,7 @@ export default function RegisterPangkalanPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <img
-                        src="/logo-sim4lon-transparant-v3.png"
+                        src="/logo-sim4lon-transparant-v2.png"
                         alt="SIM4LON"
                         className="w-20 h-20 mx-auto mb-4"
                     />

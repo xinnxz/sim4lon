@@ -891,7 +891,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                     <Button
                         variant="outline"
                         className="rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                        onClick={() => { setActiveTab('stock'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                        onClick={() => setIsReceiveOpen(true)}
                     >
                         <SafeIcon name="PackagePlus" className="h-4 w-4 mr-2" />
                         Tambah Stok
@@ -1050,7 +1050,7 @@ Mohon konfirmasi ketersediaan dan estimasi pengiriman. Terima kasih.`
                                 <div className="grid gap-4 md:grid-cols-3">
                                     {/* Tambah Stok Manual */}
                                     <button
-                                        onClick={() => { setActiveTab('stock'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                                        onClick={() => setIsReceiveOpen(true)}
                                         className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100 hover:border-emerald-300 transition-all group"
                                     >
                                         <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform">

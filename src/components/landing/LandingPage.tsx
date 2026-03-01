@@ -117,7 +117,7 @@ export default function LandingPage() {
             <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
                 <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <img src="/logo-sim4lon-transparant-v3.png" alt="SIM4LON" className="w-9 h-9" />
+                        <img src="/logo-sim4lon-transparant-v2.png" alt="SIM4LON" className="w-9 h-9" />
                         <span className="font-bold text-lg text-slate-800">SIM4LON</span>
                     </div>
                     <div className="hidden md:flex items-center gap-6">
@@ -265,8 +265,8 @@ export default function LandingPage() {
                             <div
                                 key={p.name}
                                 className={`relative p-6 rounded-2xl border-2 transition-all ${p.popular
-                                        ? 'border-blue-500 shadow-xl shadow-blue-500/10 scale-[1.02]'
-                                        : 'border-slate-200 hover:border-slate-300'
+                                    ? 'border-blue-500 shadow-xl shadow-blue-500/10 scale-[1.02]'
+                                    : 'border-slate-200 hover:border-slate-300'
                                     }`}
                             >
                                 {p.popular && (
@@ -293,8 +293,8 @@ export default function LandingPage() {
                                 <a href="/register">
                                     <Button
                                         className={`w-full rounded-xl h-11 ${p.popular
-                                                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
-                                                : ''
+                                            ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                                            : ''
                                             }`}
                                         variant={p.popular ? 'default' : 'outline'}
                                     >
@@ -380,7 +380,7 @@ export default function LandingPage() {
                 <div className="max-w-6xl mx-auto px-4">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <img src="/logo-sim4lon-transparant-v3.png" alt="SIM4LON" className="w-8 h-8" />
+                            <img src="/logo-sim4lon-transparant-v2.png" alt="SIM4LON" className="w-8 h-8" />
                             <span className="font-bold text-slate-700">SIM4LON</span>
                         </div>
                         <p className="text-sm text-slate-400">
