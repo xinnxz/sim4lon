@@ -26,8 +26,11 @@ const PLANS = [
         id: 'FREE',
         name: 'Free',
         price: 0,
+        originalPrice: 0,
+        discount: '',
         period: 'Selamanya',
         desc: 'Fitur dasar untuk memulai',
+        popular: false,
         features: [
             'Catat penjualan',
             'Kelola stok',
@@ -41,8 +44,11 @@ const PLANS = [
         id: 'BASIC',
         name: 'Basic',
         price: 50000,
+        originalPrice: 99000,
+        discount: 'HEMAT 49%',
         period: '/bulan',
         desc: 'Untuk pangkalan kecil-menengah',
+        popular: true,
         features: [
             'Unlimited transaksi',
             'Laporan bulanan',
@@ -57,8 +63,11 @@ const PLANS = [
         id: 'PRO',
         name: 'Pro',
         price: 100000,
+        originalPrice: 250000,
+        discount: 'HEMAT 60%',
         period: '/bulan',
-        desc: 'Untuk pangkalan besar',
+        desc: 'Untuk pangkalan besar & multi-cabang',
+        popular: false,
         features: [
             'Semua fitur Basic',
             'Multi-user access',
@@ -68,6 +77,7 @@ const PLANS = [
         ],
         gradient: 'from-violet-500 to-purple-600',
         borderColor: 'border-violet-500',
+        badge: '🔥 Paling Hemat',
     },
 ]
 
@@ -171,8 +181,8 @@ export default function SubscriptionPage() {
                         <div
                             key={plan.id}
                             className={`relative rounded-2xl border-2 p-5 transition-all ${isCurrent
-                                    ? `${plan.borderColor} shadow-lg`
-                                    : 'border-slate-200 hover:border-slate-300'
+                                ? `${plan.borderColor} shadow-lg`
+                                : 'border-slate-200 hover:border-slate-300'
                                 }`}
                         >
                             {isCurrent && (
@@ -180,10 +190,33 @@ export default function SubscriptionPage() {
                                     Paket Anda
                                 </div>
                             )}
+                            {!isCurrent && plan.popular && (
+                                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r ${plan.gradient} text-white text-xs font-medium`}>
+                                    ⭐ Populer
+                                </div>
+                            )}
+                            {!isCurrent && (plan as any).badge && (
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-medium">
+                                    {(plan as any).badge}
+                                </div>
+                            )}
 
                             <div className="text-center mb-4 pt-2">
                                 <h3 className="font-bold text-slate-800">{plan.name}</h3>
                                 <div className="mt-2">
+                                    {/* Harga coret (anchoring) */}
+                                    {plan.originalPrice > 0 && (
+                                        <div className="mb-1">
+                                            <span className="text-sm text-slate-400 line-through">
+                                                {formatCurrency(plan.originalPrice)}
+                                            </span>
+                                            {plan.discount && (
+                                                <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">
+                                                    {plan.discount}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                     <span className="text-2xl font-extrabold text-slate-800">
                                         {plan.price === 0 ? 'Gratis' : formatCurrency(plan.price)}
                                     </span>

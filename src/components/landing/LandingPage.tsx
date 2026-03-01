@@ -58,31 +58,40 @@ const PRICING = [
     {
         name: 'Free',
         price: 'Gratis',
+        originalPrice: '',
+        discount: '',
         period: '14 hari trial',
         desc: 'Coba semua fitur tanpa biaya',
         features: ['Catat penjualan', 'Kelola stok', 'Nota digital', 'Max 50 transaksi/hari'],
         cta: 'Mulai Gratis',
         popular: false,
+        badge: '',
         gradient: 'from-slate-500 to-slate-600',
     },
     {
         name: 'Basic',
         price: 'Rp 50.000',
+        originalPrice: 'Rp 99.000',
+        discount: 'HEMAT 49%',
         period: '/bulan',
         desc: 'Untuk pangkalan kecil-menengah',
         features: ['Semua fitur Free', 'Unlimited transaksi', 'Laporan bulanan', 'Export PDF/Excel', 'WhatsApp support'],
         cta: 'Pilih Basic',
         popular: true,
+        badge: '⭐ Paling Populer',
         gradient: 'from-blue-500 to-indigo-600',
     },
     {
         name: 'Pro',
         price: 'Rp 100.000',
+        originalPrice: 'Rp 250.000',
+        discount: 'HEMAT 60%',
         period: '/bulan',
         desc: 'Untuk pangkalan besar & multi-outlet',
         features: ['Semua fitur Basic', 'Multi-user access', 'API integration', 'Priority support', 'Custom branding'],
         cta: 'Pilih Pro',
         popular: false,
+        badge: '🔥 Paling Hemat',
         gradient: 'from-violet-500 to-purple-600',
     },
 ]
@@ -271,12 +280,30 @@ export default function LandingPage() {
                             >
                                 {p.popular && (
                                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium">
-                                        Paling Populer
+                                        {p.badge}
+                                    </div>
+                                )}
+                                {!p.popular && p.badge && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-medium">
+                                        {p.badge}
                                     </div>
                                 )}
                                 <div className="text-center mb-6 pt-2">
                                     <h3 className="font-bold text-lg text-slate-800">{p.name}</h3>
                                     <div className="mt-3">
+                                        {/* Harga coret (anchoring psychology) */}
+                                        {p.originalPrice && (
+                                            <div className="mb-1">
+                                                <span className="text-sm text-slate-400 line-through">
+                                                    {p.originalPrice}
+                                                </span>
+                                                {p.discount && (
+                                                    <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">
+                                                        {p.discount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                         <span className="text-3xl font-extrabold text-slate-800">{p.price}</span>
                                         <span className="text-sm text-slate-400 ml-1">{p.period}</span>
                                     </div>
