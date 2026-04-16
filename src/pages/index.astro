@@ -1,21 +1,17 @@
-
 ---
-// Root page redirect to dashboard
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import LandingPage from '@/components/landing/LandingPage'
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SIM4LON - Redirecting...</title>
-  </head>
-  <body>
-    <script is:inline>
-      window.location.href = './dashboard-admin.html';
-    </script>
-    <noscript>
-      <meta http-equiv="refresh" content="0; url=./dashboard-admin.html" />
-    </noscript>
-  </body>
-</html>
+<BaseLayout
+  title="SIM4LON — Sistem Informasi Manajemen LPG untuk Pangkalan"
+  description="Catat penjualan, kelola stok, kirim nota WhatsApp, dan pantau laporan keuangan pangkalan LPG. Daftar gratis sekarang!"
+>
+  <LandingPage client:load />
+</BaseLayout>
+
+<script>
+  // Force light mode on landing page
+  document.documentElement.classList.remove('dark');
+  document.documentElement.removeAttribute('data-accent');
+</script>

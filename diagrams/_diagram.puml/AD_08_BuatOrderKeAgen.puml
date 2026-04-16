@@ -1,0 +1,51 @@
+@startuml AD_08_BuatOrderKeAgen
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-08: Buat Order ke Agen (Pangkalan)**\nSistem SIM4LON
+
+|Pangkalan|
+start
+:Buka menu "Order ke Agen";
+:Klik "Buat Order Baru";
+
+|Sistem|
+:Tampilkan form order;
+:Load data agen terkait;
+:Tampilkan stok saat ini;
+
+|Pangkalan|
+:Pilih jenis LPG;
+:Masukkan jumlah order;
+:Tambah catatan (opsional);
+:Klik "Kirim Order";
+
+|Sistem|
+:Validasi input;
+
+if (Input valid?) then (ya)
+    :Generate kode order\n(AGN-XXXX);
+    :Simpan agen_order\ndengan status PENDING;
+    :Set order_date = now;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses\n"Order dikirim ke Agen";
+    :Tampilkan daftar order;
+    
+    note right
+    Tunggu konfirmasi dari Agen
+    Status: PENDING → DIKIRIM → DITERIMA
+    end note
+    
+    stop
+else (tidak)
+    |Pangkalan|
+    :Tampilkan pesan error;
+    stop
+endif
+
+@enduml

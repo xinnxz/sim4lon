@@ -1,0 +1,15 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PangkalanSidebarLayout from '@/components/pangkalan/PangkalanSidebarLayout.tsx'
+import CatatPenjualanPage from '@/components/pangkalan/CatatPenjualanPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="Catat Penjualan - SIM4LON Pangkalan">
+  <ProtectedDashboard client:load allowedRoles={['PANGKALAN']}>
+    <PangkalanSidebarLayout client:load headerHeight="64px">
+      <CatatPenjualanPage client:idle />
+    </PangkalanSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>
+

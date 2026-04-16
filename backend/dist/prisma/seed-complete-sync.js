@@ -1,0 +1,273 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const client_1 = require("@prisma/client");
+const prisma = new client_1.PrismaClient();
+const TARGET_PANGKALAN_CODES = [
+    '343269997904002',
+    '343262997904008',
+    '343262997904002',
+    '343262997904006',
+    '343269997904001',
+    '343291199904001',
+    '343262997904009',
+    '3432629979044010',
+];
+function generateCode(prefix, num) {
+    return `${prefix}${String(num).padStart(4, '0')}`;
+}
+function randomDate(daysAgo) {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    return date;
+}
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+async function main() {
+    console.log('╔════════════════════════════════════════════════════════════╗');
+    console.log('║       SEED COMPLETE SYNC - PROFESSIONAL                    ║');
+    console.log('║       PT MITRA SURYA NATASYA                               ║');
+    console.log('╚════════════════════════════════════════════════════════════╝\n');
+    console.log('1️⃣ CREATING AGEN...');
+    let agen = await prisma.agen.findFirst({ where: { name: { contains: 'Mitra Surya' } } });
+    if (!agen) {
+        agen = await prisma.agen.create({
+            data: {
+                code: 'AGN-001',
+                name: 'PT Mitra Surya Natasya',
+                address: 'Jl. Raya Industri No. 88, Kawasan Industri Cikarang, Bekasi, Jawa Barat 17530',
+                pic_name: 'Bapak Surya Wijaya',
+                phone: '021-89876543',
+                email: 'info@mitrasuryaatasya.co.id',
+                note: 'Distributor resmi LPG Pertamina wilayah Jabar',
+                is_active: true,
+            }
+        });
+        console.log(`   ✅ Created: ${agen.name}`);
+    }
+    else {
+        console.log(`   ⏩ Already exists: ${agen.name}`);
+    }
+    await prisma.pangkalans.updateMany({
+        where: { code: { in: TARGET_PANGKALAN_CODES } },
+        data: { agen_id: agen.id }
+    });
+    console.log('   ✅ Linked 8 pangkalans to agen\n');
+    console.log('2️⃣ CREATING AGEN_ORDERS (Order via WhatsApp)...');
+    await prisma.agen_orders.deleteMany({});
+    const pangkalans = await prisma.pangkalans.findMany({
+        where: { code: { in: TARGET_PANGKALAN_CODES } }
+    });
+    let agenOrderCount = 0;
+    const statusOptions = ['PENDING', 'DIKIRIM', 'DITERIMA', 'BATAL'];
+    for (const pk of pangkalans) {
+        const orderCount = randomInt(3, 5);
+        for (let i = 0; i < orderCount; i++) {
+            const daysAgo = randomInt(0, 14);
+            const status = statusOptions[Math.min(Math.floor(daysAgo / 4), 3)];
+            const qty = randomInt(30, 100);
+            await prisma.agen_orders.create({
+                data: {
+                    code: generateCode(`AO-${pk.code.slice(-3)}-`, agenOrderCount + 1),
+                    pangkalan_id: pk.id,
+                    agen_id: agen.id,
+                    lpg_type: 'kg3',
+                    qty_ordered: qty,
+                    qty_received: status === 'DITERIMA' ? qty : (status === 'DIKIRIM' ? 0 : 0),
+                    status: status,
+                    order_date: randomDate(daysAgo),
+                    received_date: status === 'DITERIMA' ? randomDate(daysAgo - 1) : null,
+                    note: status === 'PENDING' ? 'Menunggu konfirmasi agen' :
+                        status === 'DIKIRIM' ? 'Dalam pengiriman' :
+                            status === 'DITERIMA' ? 'Barang sudah diterima' : 'Dibatalkan',
+                }
+            });
+            agenOrderCount++;
+        }
+    }
+    console.log(`   ✅ Created ${agenOrderCount} agen_orders\n`);
+    console.log('3️⃣ CREATING EXPENSES...');
+    await prisma.expenses.deleteMany({});
+    const expenseCategories = [
+        { category: 'Operasional', amounts: [50000, 100000, 150000] },
+        { category: 'Transportasi', amounts: [30000, 75000, 120000] },
+        { category: 'Gaji Karyawan', amounts: [500000, 1000000, 1500000] },
+        { category: 'Maintenance', amounts: [100000, 250000, 500000] },
+        { category: 'Listrik & Air', amounts: [200000, 350000, 500000] },
+        { category: 'Lain-lain', amounts: [25000, 50000, 100000] },
+    ];
+    let expenseCount = 0;
+    for (const pk of pangkalans) {
+        const numExpenses = randomInt(5, 10);
+        for (let i = 0; i < numExpenses; i++) {
+            const cat = expenseCategories[randomInt(0, expenseCategories.length - 1)];
+            const amount = cat.amounts[randomInt(0, cat.amounts.length - 1)];
+            await prisma.expenses.create({
+                data: {
+                    pangkalan_id: pk.id,
+                    category: cat.category,
+                    amount: amount,
+                    description: `${cat.category} - ${pk.name}`,
+                    expense_date: randomDate(randomInt(0, 30)),
+                }
+            });
+            expenseCount++;
+        }
+    }
+    console.log(`   ✅ Created ${expenseCount} expenses\n`);
+    console.log('4️⃣ CREATING TIMELINE_TRACKS...');
+    await prisma.timeline_tracks.deleteMany({});
+    const orders = await prisma.orders.findMany({
+        orderBy: { created_at: 'asc' }
+    });
+    let timelineCount = 0;
+    const statusFlow = ['DRAFT', 'MENUNGGU_PEMBAYARAN', 'DIPROSES', 'SIAP_KIRIM', 'DIKIRIM', 'SELESAI'];
+    const statusDescriptions = {
+        'DRAFT': 'Pesanan dibuat',
+        'MENUNGGU_PEMBAYARAN': 'Menunggu pembayaran dari pangkalan',
+        'DIPROSES': 'Pembayaran diterima, pesanan diproses',
+        'SIAP_KIRIM': 'Barang siap untuk dikirim',
+        'DIKIRIM': 'Barang dalam pengiriman',
+        'SELESAI': 'Pesanan selesai, barang diterima',
+        'BATAL': 'Pesanan dibatalkan',
+    };
+    for (const order of orders) {
+        const targetStatusIndex = statusFlow.indexOf(order.current_status);
+        if (targetStatusIndex === -1)
+            continue;
+        let baseTime = new Date(order.created_at);
+        for (let i = 0; i <= targetStatusIndex; i++) {
+            const status = statusFlow[i];
+            await prisma.timeline_tracks.create({
+                data: {
+                    order_id: order.id,
+                    status: status,
+                    description: statusDescriptions[status] || `Status: ${status}`,
+                    note: i === 0 ? `Pesanan ${order.code} dibuat` : null,
+                    created_at: baseTime,
+                }
+            });
+            baseTime = new Date(baseTime.getTime() + randomInt(1, 4) * 60 * 60 * 1000);
+            timelineCount++;
+        }
+    }
+    console.log(`   ✅ Created ${timelineCount} timeline_tracks\n`);
+    console.log('5️⃣ CREATING INVOICES...');
+    await prisma.invoices.deleteMany({});
+    const paidOrders = await prisma.orders.findMany({
+        where: { current_status: { in: ['DIPROSES', 'SIAP_KIRIM', 'DIKIRIM', 'SELESAI'] } },
+        include: { pangkalans: true }
+    });
+    let invoiceCount = 0;
+    for (const order of paidOrders) {
+        const invoiceDate = new Date(order.created_at);
+        invoiceDate.setHours(invoiceDate.getHours() + randomInt(1, 24));
+        await prisma.invoices.create({
+            data: {
+                order_id: order.id,
+                invoice_number: `INV-${new Date().getFullYear()}-${String(invoiceCount + 1).padStart(4, '0')}`,
+                invoice_date: invoiceDate,
+                due_date: new Date(invoiceDate.getTime() + 7 * 24 * 60 * 60 * 1000),
+                billing_address: order.pangkalans.address,
+                billed_to_name: order.pangkalans.name,
+                sub_total: order.subtotal,
+                tax_rate: 0,
+                tax_amount: order.tax_amount,
+                grand_total: order.total_amount,
+                payment_status: order.current_status === 'SELESAI' ? 'PAID' : 'UNPAID',
+            }
+        });
+        invoiceCount++;
+    }
+    console.log(`   ✅ Created ${invoiceCount} invoices\n`);
+    console.log('6️⃣ CREATING PAYMENT_RECORDS...');
+    await prisma.payment_records.deleteMany({});
+    const adminUser = await prisma.users.findFirst({ where: { role: 'ADMIN' } });
+    if (!adminUser) {
+        console.log('   ⚠️ No admin user found, skipping payment_records');
+    }
+    else {
+        const invoices = await prisma.invoices.findMany({
+            where: { payment_status: 'PAID' },
+            include: { orders: true }
+        });
+        let paymentCount = 0;
+        const methods = ['TUNAI', 'TRANSFER'];
+        for (const invoice of invoices) {
+            const paymentDate = new Date(invoice.invoice_date);
+            paymentDate.setHours(paymentDate.getHours() + randomInt(1, 48));
+            await prisma.payment_records.create({
+                data: {
+                    order_id: invoice.order_id,
+                    invoice_id: invoice.id,
+                    method: methods[randomInt(0, 1)],
+                    amount: invoice.grand_total,
+                    payment_time: paymentDate,
+                    recorded_by_user_id: adminUser.id,
+                    note: `Pembayaran untuk ${invoice.invoice_number}`,
+                }
+            });
+            paymentCount++;
+        }
+        console.log(`   ✅ Created ${paymentCount} payment_records\n`);
+    }
+    console.log('7️⃣ ADDING ACTIVITY LOGS...');
+    const recentOrders = await prisma.orders.findMany({
+        take: 20,
+        orderBy: { created_at: 'desc' },
+        include: { pangkalans: true }
+    });
+    let logCount = 0;
+    const logTypes = [
+        { type: 'order_created', title: 'Pesanan Baru', icon: 'ShoppingCart' },
+        { type: 'payment_received', title: 'Pembayaran Diterima', icon: 'CreditCard' },
+        { type: 'stock_updated', title: 'Stok Diupdate', icon: 'Package' },
+    ];
+    for (const order of recentOrders) {
+        const logType = logTypes[randomInt(0, logTypes.length - 1)];
+        await prisma.activity_logs.create({
+            data: {
+                user_id: adminUser?.id,
+                order_id: order.id,
+                type: logType.type,
+                title: logType.title,
+                description: `${logType.title} - ${order.code} dari ${order.pangkalans.name}`,
+                pangkalan_name: order.pangkalans.name,
+                detail_numeric: order.total_amount,
+                icon_name: logType.icon,
+                order_status: order.current_status,
+                timestamp: order.created_at,
+            }
+        });
+        logCount++;
+    }
+    console.log(`   ✅ Added ${logCount} activity_logs\n`);
+    console.log('╔════════════════════════════════════════════════════════════╗');
+    console.log('║                    SYNC COMPLETE                           ║');
+    console.log('╚════════════════════════════════════════════════════════════╝\n');
+    const counts = {
+        agen: await prisma.agen.count(),
+        agen_orders: await prisma.agen_orders.count(),
+        expenses: await prisma.expenses.count(),
+        timeline_tracks: await prisma.timeline_tracks.count(),
+        invoices: await prisma.invoices.count(),
+        payment_records: await prisma.payment_records.count(),
+        activity_logs: await prisma.activity_logs.count(),
+    };
+    console.log('📊 FINAL COUNTS:');
+    console.log(`   agen            : ${counts.agen}`);
+    console.log(`   agen_orders     : ${counts.agen_orders}`);
+    console.log(`   expenses        : ${counts.expenses}`);
+    console.log(`   timeline_tracks : ${counts.timeline_tracks}`);
+    console.log(`   invoices        : ${counts.invoices}`);
+    console.log(`   payment_records : ${counts.payment_records}`);
+    console.log(`   activity_logs   : ${counts.activity_logs}`);
+    console.log('\n✅ ALL TABLES SYNCED SUCCESSFULLY!\n');
+}
+main()
+    .catch(e => {
+    console.error('❌ Error:', e);
+    process.exit(1);
+})
+    .finally(() => prisma.$disconnect());
+//# sourceMappingURL=seed-complete-sync.js.map

@@ -1,0 +1,76 @@
+@startuml AD_20_KelolaKonsumen
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-20: Kelola Konsumen (Pangkalan)**\nSistem SIM4LON
+
+|Pangkalan|
+start
+:Buka halaman Konsumen;
+
+|Sistem|
+:Load daftar konsumen\npangkalan ini;
+:Tampilkan dengan filter\n(tipe konsumen, status);
+
+|Pangkalan|
+:Pilih aksi;
+
+switch (Aksi?)
+case (Tambah Baru)
+    :Klik "Tambah Konsumen";
+    
+    |Sistem|
+    :Tampilkan form konsumen;
+    
+    |Pangkalan|
+    :Isi nama konsumen;
+    :Isi NIK (untuk verifikasi subsidi);
+    :Isi Nomor KK;
+    :Isi no. telepon;
+    :Isi alamat;
+    :Pilih tipe\n(RUMAH_TANGGA/WARUNG);
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Validasi input;
+    :Simpan data konsumen;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+
+case (Edit)
+    :Klik "Edit" pada konsumen;
+    
+    |Sistem|
+    :Load data konsumen;
+    :Tampilkan form edit;
+    
+    |Pangkalan|
+    :Ubah data yang diperlukan;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Update data konsumen;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+
+case (Nonaktifkan)
+    :Klik toggle status;
+    
+    |Sistem|
+    :Update is_active = false;
+    
+    |Pangkalan|
+    :Tampilkan pesan sukses;
+
+endswitch
+
+:Refresh daftar;
+stop
+
+@enduml

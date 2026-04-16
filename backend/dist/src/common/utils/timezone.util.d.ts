@@ -1,0 +1,10 @@
+export declare const TIMEZONE = "Asia/Jakarta";
+export declare function nowWIB(): Date;
+export declare function todayWIB(): Date;
+export declare function startOfDayWIB(date: Date): Date;
+export declare function endOfDayWIB(date: Date): Date;
+export declare function formatDateWIB(date: Date, options?: Intl.DateTimeFormatOptions): string;
+export declare function formatDateTimeWIB(date: Date): string;
+export declare function formatTimeWIB(date: Date): string;
+export declare function isTodayWIB(date: Date): boolean;
+export declare function getRelativeTimeWIB(date: Date): string;

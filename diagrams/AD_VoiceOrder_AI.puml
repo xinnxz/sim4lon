@@ -1,0 +1,83 @@
+@startuml AD_VoiceOrder_AI
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+skinparam wrapWidth 120
+
+title **AD-10: Voice Order AI**\nSistem SIM4LON
+
+|#e3f2fd|Admin|
+start
+:Klik tombol mikrofon;
+
+|#e8f5e9|Sistem|
+:Request izin mikrofon;
+
+|Admin|
+if (Izin OK?) then (ya)
+    
+    |Sistem|
+    :Aktifkan Speech API;
+    :Status "Mendengarkan";
+    
+    |Admin|
+    :Ucapkan perintah;
+    note right: "50 tabung\n12kg ke Reon"
+    
+    |Sistem|
+    :Speech to text;
+    :Tampilkan transcript;
+    
+    if (Selesai?) then (ya)
+        :Kirim ke Gemini AI;
+        :Parse qty & product;
+        :Match pangkalan (fuzzy);
+        :Query DB;
+        :Cek stok;
+        
+        if (Valid?) then (ya)
+            :Tampilkan konfirmasi;
+            
+            |Admin|
+            if (OK?) then (ya)
+                
+                |Sistem|
+                :Generate ORD-XXXX;
+                :Simpan order;
+                :Log aktivitas;
+                
+                |Admin|
+                :Pesan sukses;
+                
+                if (Lihat?) then (ya)
+                    :Buka detail;
+                else (tidak)
+                    :Tutup;
+                endif
+                stop
+                
+            else (tidak)
+                :Batal;
+                stop
+            endif
+            
+        else (tidak)
+            |Admin|
+            :Error: stok/pangkalan;
+            stop
+        endif
+        
+    else (tidak)
+        :Lanjut dengar;
+    endif
+    
+else (tidak)
+    |Sistem|
+    :Error: izin ditolak;
+    stop
+endif
+
+@enduml

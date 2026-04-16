@@ -1,0 +1,86 @@
+@startuml AD_08_BuatOrderKeAgen
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-08: Buat Order ke Agen (Pangkalan)**\nSistem SIM4LON
+
+|Pangkalan|
+start
+
+:Buka halaman "Stok LPG";
+
+|Sistem|
+
+:Load data stok pangkalan;
+:Load data Company Profile\n(info Agen);
+
+|Pangkalan|
+
+:Klik tombol "Pesan ke Agen";
+
+|Sistem|
+
+:Tampilkan modal order;
+:Load daftar tipe LPG aktif;
+:Tampilkan info Agen\n(nama & nomor telepon);
+
+|Pangkalan|
+
+:Pilih Tipe LPG;
+:Masukkan Jumlah (tabung);
+:Tambahkan Catatan (opsional);
+:Klik "Buat Pesanan";
+
+|Sistem|
+
+:Validasi input;
+
+if (Jumlah > 0?) then (ya)
+    
+    if (Nomor telepon Agen ada?) then (ya)
+        
+        :Format nomor WhatsApp\n(0xxx → 62xxx);
+        
+        :Generate pesan pesanan:\n• Nama Pangkalan\n• Tipe LPG\n• Jumlah tabung\n• Catatan;
+        
+        :Buka WhatsApp Web\ndengan pesan otomatis;
+        
+        note right
+        wa.me/62xxx?text=...
+        Pesan dikirim ke Agen
+        via WhatsApp
+        end note
+        
+        :Simpan pesanan ke database\n(status: PENDING);
+        
+        |Pangkalan|
+        
+        :Tampilkan notifikasi sukses;
+        :WhatsApp terbuka\ndi tab baru;
+        
+        :Kirim pesan ke Agen;
+        
+        note right
+        Alur Status:
+        PENDING → DIKIRIM → DITERIMA
+        end note
+        
+        stop
+        
+    else (tidak)
+        |Pangkalan|
+        :Tampilkan error:\n"Nomor telepon Agen\nbelum terdaftar";
+        stop
+    endif
+    
+else (tidak)
+    |Pangkalan|
+    :Tampilkan error:\n"Jumlah harus > 0";
+    stop
+endif
+
+@enduml

@@ -1,0 +1,62 @@
+@startuml AD_16_GenerateInvoice
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+
+title **AD-16: Generate Invoice / Nota**\nSistem SIM4LON
+
+|User|
+start
+:Buka Detail Pesanan;
+:Klik "Cetak Invoice/Nota";
+
+|Sistem|
+:Navigasi ke halaman dokumen;
+:Fetch data order dari API;
+:Load company profile;
+:Cek status pembayaran;
+
+if (Order ditemukan?) then (ya)
+    :Tampilkan dokumen dengan tabs;
+    
+    note right
+      **Tab Toggle:**
+      - Invoice: Selalu aktif
+      - Nota: Hanya aktif jika LUNAS
+    end note
+    
+    |User|
+    :Lihat dokumen (default: Nota/Invoice);
+    
+    if (Mau switch ke Nota?) then (ya)
+        if (Sudah lunas?) then (ya)
+            :Switch tab ke Nota;
+            :Tampilkan watermark LUNAS;
+        else (tidak)
+            :Tampilkan error;
+            :Tab Nota ter-lock;
+        endif
+    endif
+    
+    switch (Pilih Aksi?)
+    case (Print)
+        :Set judul dokumen;
+        :window.print();
+    case (Share WA)
+        :Generate pesan format;
+        :Buka WhatsApp dengan link;
+    case (Copy Link)
+        :Copy URL ke clipboard;
+        :Tampilkan notifikasi sukses;
+    endswitch
+    
+    stop
+    
+else (tidak)
+    |User|
+    :Tampilkan error;
+    stop
+endif
+
+@enduml

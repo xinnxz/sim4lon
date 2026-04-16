@@ -1,0 +1,93 @@
+@startuml DSS_Alert_Generation_Activity
+
+title Activity Diagram: DSS Alert Generation Process
+
+skinparam backgroundColor #FEFEFE
+skinparam activity {
+    BackgroundColor #DAE8FC
+    BorderColor #6C8EBF
+    FontColor #333333
+}
+skinparam diamond {
+    BackgroundColor #FFF2CC
+    BorderColor #D6B656
+}
+
+|Admin|
+start
+:Admin Accesses Dashboard;
+
+|System|
+:System Fetches DSS Alerts API;
+
+fork
+  |Stock Analysis|
+  :Analyze Stock Levels;
+  note right: Check all products\nin inventory
+  
+  if (Stock < 50?) then (Yes)
+    #F8CECC:Generate\nLow Stock Alert;
+    note right
+      Severity:
+      - Advisory: 25-50
+      - Critical: < 25
+    end note
+  else (No)
+    :No Alert Needed;
+  endif
+
+fork again
+  |Health Score|
+  :Calculate Health Score;
+  #E1D5E7:Generate\nHealth Index (0-100);
+  note right
+    Formula:
+    100 - (lowStock * 5)
+    - (overdue * 3)
+    - (pending * 2)
+  end note
+  
+  #E1D5E7:Generate\nRecommendations;
+
+fork again
+  |Payment Analysis|
+  :Analyze Payment Status;
+  note left: Check all unpaid\norders
+  
+  if (Overdue > 1 day?) then (Yes)
+    #F8CECC:Generate\nPayment Overdue Alert;
+    note left
+      Severity:
+      - Advisory: 1-7 days
+      - Critical: > 14 days
+    end note
+  else (No)
+    :No Alert Needed;
+  endif
+
+end fork
+
+|Dashboard|
+:Display DSS Dashboard\nwith Alerts & Insights;
+note right
+  Dashboard Components:
+  - Health Score Gauge
+  - Low Stock Alert Cards
+  - Payment Overdue List
+  - Summary Statistics
+end note
+
+stop
+
+legend right
+  |= Color |= Meaning |
+  |<#DAE8FC> | System Action |
+  |<#D5E8D4> | Analysis Process |
+  |<#F8CECC> | Alert Generation |
+  |<#E1D5E7> | DSS Output |
+  |<#FFF2CC> | Decision Point |
+endlegend
+
+footer SIM4LON - Intelligent Decision Support System
+
+@enduml

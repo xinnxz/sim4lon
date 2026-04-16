@@ -1,0 +1,81 @@
+@startuml AD_12_KelolaSupir
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-12: Kelola Supir**\nSistem SIM4LON
+
+|Admin|
+start
+:Buka halaman Master Supir;
+
+|Sistem|
+:Load daftar supir;
+:Tampilkan dengan pagination;
+
+|Admin|
+:Pilih aksi;
+
+switch (Aksi?)
+case (Tambah Baru)
+    :Klik "Tambah Supir";
+    
+    |Sistem|
+    :Tampilkan form supir;
+    
+    |Admin|
+    :Isi nama, no. telepon;
+    :Isi nomor plat kendaraan;
+    :Tambah catatan (opsional);
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Validasi input;
+    :Generate kode supir (DRV-XXX);
+    :Simpan data supir;
+    :Log aktivitas;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Edit)
+    :Klik "Edit" pada supir;
+    
+    |Sistem|
+    :Load data supir;
+    :Tampilkan form edit;
+    
+    |Admin|
+    :Ubah data yang diperlukan;
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Update data supir;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+case (Hapus)
+    :Klik "Hapus" pada supir;
+    
+    |Sistem|
+    :Tampilkan konfirmasi;
+    
+    |Admin|
+    :Konfirmasi hapus;
+    
+    |Sistem|
+    :Soft delete supir;
+    
+    |Admin|
+    :Tampilkan pesan sukses;
+
+endswitch
+
+:Refresh daftar;
+stop
+
+@enduml

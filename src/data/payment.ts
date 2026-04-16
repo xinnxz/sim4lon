@@ -15,5 +15,5 @@ export interface PaymentRecordModel {
   recordedByUserId: string;
 }
 
-export const MOCK_PAYMENT_PROOF_IMAGE_URL: string = "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/106a398a-f0e5-458b-856e-24a243bb5283.png";
+export const MOCK_PAYMENT_PROOF_IMAGE_URL: string = "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/3/106a398a-f0e5-458b-856e-24a243bb5283.png";
 

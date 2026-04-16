@@ -1,0 +1,56 @@
+{
+    "name": "SIM4LON - Sistem Informasi Manajemen LPG",
+    "short_name": "SIM4LON",
+    "description": "Aplikasi manajemen penjualan LPG untuk pangkalan. Catat penjualan, kelola stok, dan pantau keuangan dengan mudah.",
+    "start_url": "/pangkalan/dashboard",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "categories": [
+        "business",
+        "finance",
+        "utilities"
+    ],
+    "lang": "id",
+    "icons": [
+        {
+            "src": "/logo-sim4lon-transparant-v3.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/logo-sim4lon-transparant-v2.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "screenshots": [],
+    "shortcuts": [
+        {
+            "name": "Catat Penjualan",
+            "short_name": "Jual",
+            "url": "/pangkalan/penjualan/catat",
+            "icons": [
+                {
+                    "src": "/logo-sim4lon-transparant-v3.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Cek Stok",
+            "short_name": "Stok",
+            "url": "/pangkalan/stok",
+            "icons": [
+                {
+                    "src": "/logo-sim4lon-transparant-v3.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

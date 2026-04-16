@@ -1,0 +1,62 @@
+@startuml SD_05_AssignDriver
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-05: ASSIGN DRIVER\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "OrderDetailPage" as ODP
+control "OrderService" as OS
+database "drivers" as DriversDB
+database "orders" as OrdersDB
+database "timeline_tracks" as TimelineDB
+
+== Menampilkan Modal Assign Driver ==
+
+Admin -> ODP : 1: Klik "Assign Driver"
+activate ODP
+
+ODP -> OS : 1.1: getActiveDrivers()
+activate OS
+OS -> DriversDB : 1.1.1: SELECT * FROM drivers\nWHERE is_active = true
+activate DriversDB
+DriversDB --> OS : 1.1.1.1: driverList
+deactivate DriversDB
+OS --> ODP : 1.1.2: driverList
+deactivate OS
+
+ODP --> Admin : 1.2: Tampilkan modal\ndengan daftar driver
+
+== Pilih Driver ==
+
+Admin -> ODP : 2: Pilih driver dari daftar
+Admin -> ODP : 3: Klik "Simpan"
+
+ODP -> OS : 3.1: assignDriver(orderId, driverId)
+activate OS
+
+OS -> OS : 3.1.1: validateDriver(driverId)
+
+OS -> OrdersDB : 3.1.2: UPDATE orders\nSET driver_id = ?\nWHERE id = ?
+activate OrdersDB
+OrdersDB --> OS : 3.1.2.1: updated
+deactivate OrdersDB
+
+OS -> TimelineDB : 3.1.3: INSERT INTO timeline_tracks\n{order_id, desc='Driver ditugaskan: [nama]'}
+activate TimelineDB
+TimelineDB --> OS : 3.1.3.1: created
+deactivate TimelineDB
+
+OS --> ODP : 3.2: {success, driverName}
+deactivate OS
+
+ODP --> Admin : 3.3: Tampilkan pesan sukses\n"Driver berhasil ditugaskan"
+ODP --> Admin : 3.4: Refresh halaman detail
+
+deactivate ODP
+
+@enduml

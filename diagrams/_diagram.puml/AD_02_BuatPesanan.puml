@@ -1,0 +1,49 @@
+@startuml AD_02_BuatPesanan
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-02: Buat Pesanan**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman Pesanan;
+:Klik "Buat Pesanan Baru";
+
+|Sistem|
+:Tampilkan form pesanan;
+:Load daftar Pangkalan aktif;
+:Load daftar Produk LPG;
+
+|User|
+:Pilih Pangkalan;
+:Pilih jenis LPG & jumlah;
+:Tambahkan catatan (opsional);
+:Klik "Simpan";
+
+|Sistem|
+:Validasi input;
+
+if (Input valid?) then (ya)
+    :Generate kode pesanan\n(ORD-XXXX);
+    :Hitung subtotal per item;
+    :Hitung PPN (12% untuk non-subsidi);
+    :Hitung total amount;
+    :Simpan pesanan\ndengan status DRAFT;
+    :Buat timeline track\n"Pesanan Dibuat";
+    :Log aktivitas\n"order_created";
+    
+    |User|
+    :Tampilkan pesan sukses;
+    :Redirect ke detail pesanan;
+    stop
+else (tidak)
+    |User|
+    :Tampilkan pesan error;
+    stop
+endif
+
+@enduml

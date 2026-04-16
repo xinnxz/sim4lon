@@ -1,28 +1,55 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { ActivityService } from './activity.service';
+import { CreateActivityLogDto } from './dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/decorators';
-import { UserRole } from '@prisma/client';
+import { user_role } from '@prisma/client';
 
 @Controller('activities')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@UseGuards(JwtAuthGuard)
 export class ActivityController {
     constructor(private readonly activityService: ActivityService) { }
 
     @Get()
-    async findAll(
+    findAll(
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
         @Query('type') type?: string,
-        @Query('startDate') startDate?: string,
-        @Query('endDate') endDate?: string,
+        @Query('user_id') userId?: string,
+    ) {
+        return this.activityService.findAll(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 20,
+            type,
+            userId,
+        );
+    }
+
+    @Get('recent')
+    getRecent(@Query('limit') limit?: string) {
+        return this.activityService.getRecent(limit ? parseInt(limit, 10) : 10);
+    }
+
+    @Get('by-type')
+    getByType(
+        @Query('type') type: string,
         @Query('limit') limit?: string,
     ) {
-        const data = await this.activityService.findAll({
-            type,
-            startDate,
-            endDate,
-            limit: limit ? parseInt(limit) : 50,
-        });
-        return { success: true, data };
+        return this.activityService.getByType(type, limit ? parseInt(limit, 10) : 20);
+    }
+
+    @Post()
+    @UseGuards(RolesGuard)
+    @Roles(user_role.ADMIN)
+    create(@Body() dto: CreateActivityLogDto) {
+        return this.activityService.create(dto);
+    }
+
+    // DEV ONLY: Seed sample activities for testing
+    @Post('seed')
+    @UseGuards(RolesGuard)
+    @Roles(user_role.ADMIN)
+    seedActivities() {
+        return this.activityService.seedSampleActivities();
     }
 }

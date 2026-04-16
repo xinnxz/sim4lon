@@ -1,0 +1,140 @@
+@startuml SIM4LON_Deployment
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 10
+skinparam linetype ortho
+skinparam nodesep 35
+skinparam ranksep 30
+
+skinparam node {
+    BackgroundColor #ADD8E6
+    BorderColor #4682B4
+    FontStyle bold
+}
+
+skinparam artifact {
+    BackgroundColor #E0FFFF
+    BorderColor #4682B4
+}
+
+skinparam component {
+    BackgroundColor #E0FFFF
+    BorderColor #4682B4
+}
+
+skinparam database {
+    BackgroundColor #FFE4B5
+    BorderColor #D2691E
+}
+
+skinparam cloud {
+    BackgroundColor #E8F5E9
+    BorderColor #4CAF50
+}
+
+title <size:16>**Deployment Diagram**</size>\n<size:11>SIM4LON App | Full Stack Application</size>
+
+' ===================================================
+' CLIENT LAYER
+' ===================================================
+
+node "<<device>>\nClient Layer" as client {
+    node "Browser" as browser {
+        artifact "<<artifact>>\nSIM4LON Web App" as webapp
+    }
+}
+
+' ===================================================
+' VERCEL PLATFORM
+' ===================================================
+
+node "<<platform>>\nVercel" as vercel {
+    node "Astro + React Application" as reactapp {
+        artifact "Astro 5" as astro
+        artifact "React 18" as react
+        artifact "Tailwind CSS" as tailwind
+        artifact "Shadcn/UI" as shadcn
+        artifact "Recharts" as recharts
+        artifact "Lucide Icons" as lucide
+    }
+}
+
+' ===================================================
+' RAILWAY API PLATFORM
+' ===================================================
+
+node "<<platform>>\nRailway" as railway {
+    node "API Container" as apicontainer {
+        artifact "NestJS 11" as nestjs
+        artifact "Prisma ORM 6" as prisma
+        
+        component "Auth Module\n(JWT+Passport)" as auth
+        component "Order Service" as orderService
+        component "Stock Service" as stockService
+        component "Payment Service" as paymentService
+        component "Pangkalan Service" as pangkalanService
+        component "Dashboard Service" as dashboardService
+        component "Report Service" as reportService
+    }
+}
+
+' ===================================================
+' RAILWAY POSTGRESQL DATABASE
+' ===================================================
+
+database "<<service>>\nRailway PostgreSQL" as postgresNode {
+    artifact "PostgreSQL 15" as postgres
+    artifact "23 Tables" as tables
+    artifact "7 Enums" as enums
+    artifact "Daily Backup" as backup
+}
+
+' ===================================================
+' SUPABASE STORAGE
+' ===================================================
+
+node "<<service>>\nSupabase Storage" as supabase {
+    node "S3-compatible Storage" as objectStorage {
+        artifact "/profile-pictures/" as profilePics
+        artifact "/payment-proofs/" as paymentProofs
+    }
+}
+
+' ===================================================
+' GOOGLE GEMINI AI API
+' ===================================================
+
+cloud "<<external>>\nGoogle Cloud" as googleCloud {
+    artifact "API Gemini 2.0 Flash" as gemini
+}
+
+' ===================================================
+' CONNECTIONS WITH PROTOCOLS
+' ===================================================
+
+client -down-> vercel : "HTTPS:443\nWeb Request"
+vercel -down-> railway : "HTTPS:443\nREST API"
+railway -down-> postgresNode : "TCP:5432\nPrisma Query"
+railway -right-> supabase : "HTTPS:443\nFile Storage"
+railway -left-> googleCloud : "HTTPS:443\nVoice Order AI"
+
+' ===================================================
+' LEGEND
+' ===================================================
+
+legend right
+  |= Component |= Technology |= Description |
+  | **Frontend** | Astro 5 + React 18 | Static Site Generation |
+  | | Tailwind CSS | Utility-first Styling |
+  | | Shadcn/UI | Component Library |
+  | | Recharts | Data Visualization |
+  | **Backend** | NestJS 11 | REST API Framework |
+  | | Prisma 6 | ORM & Query Builder |
+  | | JWT + Passport | Authentication |
+  | **Database** | PostgreSQL 15 | Relational Database |
+  | | 23 Tables, 7 Enums | Schema Structure |
+  | **Storage** | Supabase S3 | Object Storage (RLS) |
+  | **AI** | Gemini 2.0 Flash | Voice Order NLP |
+endlegend
+
+@enduml

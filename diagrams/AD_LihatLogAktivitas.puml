@@ -1,0 +1,62 @@
+@startuml AD_LihatLogAktivitas
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD: Lihat Log Aktivitas**\nSistem SIM4LON
+
+|Admin|
+start
+
+:Buka menu Riwayat Aktivitas;
+
+|Sistem|
+
+:Load total aktivitas;
+:Load daftar aktivitas\n(timeline format);
+
+:Tampilkan halaman\nRiwayat Aktivitas;
+
+|Admin|
+
+:Lihat timeline aktivitas;
+
+note right
+Setiap item menampilkan:
+• Ikon berwarna (hijau/oranye/abu)
+• Judul aktivitas
+• Label kategori
+• Deskripsi detail
+• Waktu relatif
+• Nama aktor
+end note
+
+if (Filter kategori?) then (ya)
+    
+    :Klik tombol filter:\n• Semua\n• Pesanan\n• Stok LPG\n• Sistem;
+    
+    |Sistem|
+    :Query aktivitas sesuai filter;
+    :Tampilkan hasil;
+    
+    |Admin|
+    
+endif
+
+if (Ubah jumlah per halaman?) then (ya)
+    
+    :Pilih dropdown:\n• 10 per halaman\n• 25 per halaman\n• 50 per halaman;
+    
+    |Sistem|
+    :Refresh daftar aktivitas;
+    
+    |Admin|
+    
+endif
+
+stop
+
+@enduml

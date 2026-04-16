@@ -9,9 +9,9 @@ interface QuickActionsSectionProps {
 }
 
 const actionLinks: Record<string, string> = {
-  'Buat Pesanan': './buat-pesanan.html',
-  'Tambah Pangkalan': './tambah-pangkalan.html',
-  'Update Stok': './update-stok.html',
+  'Buat Pesanan': '/buat-pesanan',
+  'Tambah Pangkalan': '/daftar-pangkalan',
+  'Update Stok': '/stok-lpg',
 }
 
 export default function QuickActionsSection({ actions }: QuickActionsSectionProps) {

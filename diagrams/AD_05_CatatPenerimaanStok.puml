@@ -1,0 +1,48 @@
+@startuml AD_05_CatatPenerimaanStok
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-05: Catat Penerimaan Stok**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman Penerimaan Stok;
+:Klik "Tambah Penerimaan";
+
+|Sistem|
+:Tampilkan form penerimaan;
+
+|User|
+:Masukkan No. SO\n(Sales Order);
+:Masukkan No. LO\n(Loading Order);
+:Masukkan nama material\n(contoh: REFILL LPG @3KG);
+:Masukkan qty (pcs);
+:Masukkan qty (kg);
+:Pilih tanggal penerimaan;
+:Masukkan sumber/supplier;
+:Klik "Simpan";
+
+|Sistem|
+:Validasi input;
+
+if (Input valid?) then (ya)
+    :Simpan data penerimaan_stok;
+    :Buat stock_history\ndengan movement_type = MASUK;
+    :Hitung ulang total stok;
+    :Log aktivitas\n"stock_received";
+    
+    |User|
+    :Tampilkan pesan sukses;
+    :Refresh daftar penerimaan;
+    stop
+else (tidak)
+    |User|
+    :Tampilkan pesan error;
+    stop
+endif
+
+@enduml

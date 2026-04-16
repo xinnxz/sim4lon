@@ -1,0 +1,15 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PangkalanSidebarLayout from '@/components/pangkalan/PangkalanSidebarLayout.tsx'
+import ProfilPangkalanPage from '@/components/pangkalan/ProfilPangkalanPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="Profil - SIM4LON Pangkalan">
+  <ProtectedDashboard client:load allowedRoles={['PANGKALAN']}>
+    <PangkalanSidebarLayout client:load headerHeight="64px">
+      <ProfilPangkalanPage client:idle />
+    </PangkalanSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>
+

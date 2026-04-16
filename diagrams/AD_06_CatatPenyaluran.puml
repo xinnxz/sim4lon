@@ -1,0 +1,51 @@
+@startuml AD_06_CatatPenyaluran
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+skinparam PartitionBackgroundColor #e3f2fd
+skinparam PartitionBorderColor #1565c0
+
+title **AD-06: Catat Penyaluran**\nSistem SIM4LON
+
+|User|
+start
+:Buka halaman Penyaluran;
+:Pilih bulan & tipe LPG;
+
+|Sistem|
+:Load data rekapitulasi\npenyaluran bulan berjalan;
+:Tampilkan grid per pangkalan\ndengan kolom tanggal;
+
+|User|
+:Klik cell untuk input;
+:Masukkan jumlah normal;
+:Masukkan jumlah fakultatif;
+:Pilih tipe pembayaran\n(CASH/CASHLESS);
+:Klik "Simpan";
+
+|Sistem|
+:Validasi input;
+
+if (Input valid?) then (ya)
+    if (Data sudah ada?) then (ya)
+        :Update data penyaluran;
+    else (tidak)
+        :Buat data penyaluran baru;
+    endif
+    
+    :Buat stock_history\ndengan movement_type = KELUAR;
+    :Hitung ulang stok agen;
+    :Log aktivitas\n"stock_distributed";
+    
+    |User|
+    :Tampilkan pesan sukses;
+    :Refresh grid;
+    stop
+else (tidak)
+    |User|
+    :Tampilkan pesan error;
+    stop
+endif
+
+@enduml

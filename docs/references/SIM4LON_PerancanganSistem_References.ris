@@ -1,0 +1,97 @@
+TY  - BOOK
+AU  - Cockburn, Alistair
+TI  - Writing Effective Use Cases
+PY  - 2001
+CY  - Boston
+PB  - Addison-Wesley Professional
+SN  - 978-0201702255
+ER  - 
+
+TY  - BOOK
+AU  - Connolly, Thomas M.
+AU  - Begg, Carolyn E.
+TI  - Database Systems: A Practical Approach to Design, Implementation, and Management
+PY  - 2015
+ET  - 6th Edition
+PB  - Pearson
+SN  - 978-0132943260
+ER  - 
+
+TY  - BOOK
+AU  - Sommerville, Ian
+TI  - Software Engineering
+PY  - 2016
+ET  - 10th Edition
+PB  - Pearson
+SN  - 978-0133943030
+ER  - 
+
+TY  - BOOK
+AU  - Pressman, Roger S.
+AU  - Maxim, Bruce R.
+TI  - Software Engineering: A Practitioner's Approach
+PY  - 2020
+ET  - 9th Edition
+PB  - McGraw-Hill
+SN  - 978-1259872976
+ER  - 
+
+TY  - BOOK
+AU  - Dennis, Alan
+AU  - Wixom, Barbara Haley
+AU  - Roth, Roberta M.
+TI  - Systems Analysis and Design
+PY  - 2015
+ET  - 6th Edition
+PB  - Wiley
+SN  - 978-1118897843
+ER  - 
+
+TY  - BOOK
+AU  - Fowler, Martin
+TI  - UML Distilled: A Brief Guide to the Standard Object Modeling Language
+PY  - 2018
+ET  - 3rd Edition
+PB  - Addison-Wesley Professional
+SN  - 978-0321193681
+ER  - 
+
+TY  - BOOK
+AU  - Larman, Craig
+TI  - Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development
+PY  - 2004
+ET  - 3rd Edition
+PB  - Prentice Hall
+SN  - 978-0131489066
+ER  - 
+
+TY  - ELEC
+AU  - Kemper, Anatoly
+TI  - Use-Case Model: Writing Requirements in Context
+T2  - CS435 Lecture Slides
+PY  - 2024
+PB  - College of William & Mary
+UR  - https://www.cs.wm.edu/~kemper/cs435/slides/l5.pdf
+ER  - 
+
+TY  - GEN
+AU  - Object Management Group
+TI  - Unified Modeling Language (UML) Specification
+PY  - 2017
+VL  - 2.5.1
+UR  - https://www.omg.org/spec/UML/
+ER  - 
+
+TY  - GEN
+AU  - PlantUML Team
+TI  - PlantUML Documentation
+PY  - 2024
+UR  - https://plantuml.com/
+ER  - 
+
+TY  - GEN
+AU  - Balsamiq Studios
+TI  - Balsamiq Wireframes Documentation
+PY  - 2024
+UR  - https://balsamiq.com/wireframes/
+ER  - 

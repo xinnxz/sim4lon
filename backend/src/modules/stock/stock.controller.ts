@@ -1,50 +1,53 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { StockService } from './stock.service';
+import { CreateStockMovementDto } from './dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Roles } from '../auth/decorators';
-import { UserRole, LpgType, StockMovementType } from '@prisma/client';
+import { CurrentUser, Roles } from '../auth/decorators';
+import { lpg_type, stock_movement_type, user_role } from '@prisma/client';
 
-@Controller('stock')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.OPERATOR) // Both ADMIN and OPERATOR can access
+@Controller('stocks')
+@UseGuards(JwtAuthGuard)
 export class StockController {
     constructor(private readonly stockService: StockService) { }
 
-    @Get('summary')
-    async getSummary() {
-        const data = await this.stockService.getSummary();
-        return { success: true, data };
-    }
-
-    @Post('movement')
-    async recordMovement(
-        @Body() body: {
-            pangkalanId: string;
-            lpgType: LpgType;
-            movementType: StockMovementType;
-            qty: number;
-            note?: string;
-        },
-    ) {
-        const data = await this.stockService.recordMovement(body);
-        return { success: true, data };
-    }
-
     @Get('history')
-    async getHistory(
-        @Query('lpgType') lpgType?: LpgType,
-        @Query('movementType') movementType?: StockMovementType,
-        @Query('startDate') startDate?: string,
-        @Query('endDate') endDate?: string,
+    getHistory(
+        @Query('page') page?: string,
         @Query('limit') limit?: string,
+        @Query('lpg_type') lpgType?: lpg_type,
+        @Query('movement_type') movementType?: stock_movement_type,
     ) {
-        const data = await this.stockService.getHistory({
+        return this.stockService.getHistory(
+            page ? parseInt(page, 10) : 1,
+            limit ? parseInt(limit, 10) : 10,
             lpgType,
             movementType,
-            startDate,
-            endDate,
-            limit: limit ? parseInt(limit) : 50,
-        });
-        return { success: true, data };
+        );
+    }
+
+    @Get('summary')
+    getSummary() {
+        return this.stockService.getSummary();
+    }
+
+    @Get('history/:lpgType')
+    getHistoryByType(
+        @Param('lpgType') lpgType: lpg_type,
+        @Query('limit') limit?: string,
+    ) {
+        return this.stockService.getHistoryByType(
+            lpgType,
+            limit ? parseInt(limit, 10) : 20,
+        );
+    }
+
+    @Post('movements')
+    @UseGuards(RolesGuard)
+    @Roles(user_role.ADMIN, user_role.OPERATOR)
+    createMovement(
+        @Body() dto: CreateStockMovementDto,
+        @CurrentUser('id') userId: string,
+    ) {
+        return this.stockService.createMovement(dto, userId);
     }
 }

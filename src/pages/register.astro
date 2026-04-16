@@ -1,0 +1,14 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import RegisterPangkalanPage from '@/components/pangkalan/RegisterPangkalanPage'
+---
+
+<BaseLayout title="Daftar Pangkalan - SIM4LON" description="Daftarkan pangkalan Anda dan mulai kelola penjualan LPG dengan SIM4LON.">
+  <RegisterPangkalanPage client:load />
+</BaseLayout>
+
+<script>
+  // Force light mode on register page
+  document.documentElement.classList.remove('dark');
+  document.documentElement.removeAttribute('data-accent');
+</script>

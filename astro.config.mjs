@@ -110,15 +110,15 @@ export default defineConfig({
   build: {
     concurrency: 4,
     format: "file",
-    assets: "",
-    assetsPrefix: ".",
+    // Use default Astro assets folder - fixes 404 on nested routes like /pangkalan/*
+    assets: "_astro",
     rollupOptions: {
       maxParallelFileOps: 24,
       output: {
         manualChunks: undefined,
-        entryFileNames: "[name].[hash].js",
-        chunkFileNames: "[name].[hash].js",
-        assetFileNames: "[name].[hash].[ext]",
+        entryFileNames: "_astro/[name].[hash].js",
+        chunkFileNames: "_astro/[name].[hash].js",
+        assetFileNames: "_astro/[name].[hash].[ext]",
         generatedCode: {
           preset: "es2022",
         },
@@ -127,10 +127,27 @@ export default defineConfig({
   },
   compressHTML: false,
   vite: {
-    base: "./",
+    // Use absolute base path to avoid nested route issues
+    base: "/",
     resolve: {
       alias: {
         "@": "/src",
+      },
+    },
+    // Force clear cache on startup to avoid stale module issues
+    cacheDir: "node_modules/.vite",
+    server: {
+      // Disable module pre-bundling caching issues
+      warmup: {
+        clientFiles: [],
+      },
+      // Proxy /api requests to backend during development
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
     build: {
@@ -140,9 +157,9 @@ export default defineConfig({
       rollupOptions: {
         maxParallelFileOps: 24,
         output: {
-          entryFileNames: "[name].[hash].js",
-          chunkFileNames: "[name].[hash].js",
-          assetFileNames: "[name].[hash][extname]",
+          entryFileNames: "_astro/[name].[hash].js",
+          chunkFileNames: "_astro/[name].[hash].js",
+          assetFileNames: "_astro/[name].[hash][extname]",
         },
       },
     },
@@ -154,7 +171,8 @@ export default defineConfig({
       treeShaking: true,
     },
     optimizeDeps: {
-      force: false,
+      // Disable persistent caching to avoid stale imports
+      force: true,
       include: ["tslib"],
     },
     ssr: {
@@ -162,3 +180,4 @@ export default defineConfig({
     },
   },
 });
+

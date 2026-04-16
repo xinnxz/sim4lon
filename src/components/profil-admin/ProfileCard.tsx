@@ -1,118 +1,288 @@
+/**
+ * ProfileCard - Menampilkan profil user yang sedang login
+ * 
+ * PENJELASAN:
+ * Component ini fetch data profil dari API /auth/profile
+ * menggunakan authApi.getProfile(). Data real dari database.
+ * 
+ * Design: Responsive - Desktop original, Mobile compact modern
+ */
 
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import SafeIcon from '@/components/common/SafeIcon'
+import { authApi, type UserProfile } from '@/lib/api'
 
-interface AdminProfile {
-  id: string
-  name: string
-  email: string
-  phone: string
-  role: string
-  department: string
-  joinDate: string
-  lastLogin: string
-  status: 'active' | 'inactive'
-  avatar: string
-}
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000'
 
-const mockAdminProfile: AdminProfile = {
-  id: 'ADM001',
-  name: 'Budi Santoso',
-  email: 'budi.santoso@sim4lon.id',
-  phone: '+62 812-3456-7890',
-  role: 'Administrator',
-  department: '',
-  joinDate: '15 Januari 2023',
-lastLogin: '2 jam yang lalu',
-  status: 'active',
-  avatar: 'https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/307adb9b-4e82-4810-bce6-d781a7e2c71a.png'
+// Helper to get proper avatar URL with API prefix
+const getAvatarUrl = (url: string | null | undefined) => {
+  if (!url) return undefined
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}/api${url}`
 }
 
 export default function ProfileCard() {
-  return (
-    <div className="space-y-6">
-      {/* Main Profile Card */}
-      <Card className="border shadow-card">
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle>Informasi Profil</CardTitle>
-              <CardDescription>Detail akun administrator Anda</CardDescription>
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true)
+        const data = await authApi.getProfile()
+        setProfile(data)
+        setError(null)
+      } catch (err) {
+        console.error('Failed to fetch profile:', err)
+        setError('Gagal memuat profil')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfile()
+  }, [])
+
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <>
+        {/* Mobile Skeleton */}
+        <div className="space-y-3 sm:hidden">
+          <div className="glass-card rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-14 w-14 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <Skeleton className="h-5 w-12 rounded-full" />
             </div>
-            <Badge 
-              variant="outline" 
-              className={`${mockAdminProfile.status === 'active' ? 'bg-green-50 text-primary border-primary/30' : 'bg-gray-50'}`}
-            >
-              <span className={`h-2 w-2 rounded-full mr-2 ${mockAdminProfile.status === 'active' ? 'bg-primary' : 'bg-gray-400'}`}></span>
-              {mockAdminProfile.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
-            </Badge>
           </div>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          {/* Avatar & Basic Info */}
-          <div className="flex flex-col sm:flex-row gap-6 mb-8">
-            <Avatar className="h-24 w-24 shrink-0">
-              <AvatarImage src={mockAdminProfile.avatar} alt={mockAdminProfile.name} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
-                {mockAdminProfile.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+          <div className="glass-card rounded-xl p-4 space-y-3">
+            <Skeleton className="h-12 w-full rounded-lg" />
+            <Skeleton className="h-12 w-full rounded-lg" />
+          </div>
+        </div>
+        {/* Desktop Skeleton */}
+        <Card className="border shadow-card hidden sm:block">
+          <CardContent className="p-8 flex items-center justify-center">
+            <SafeIcon name="Loader2" className="h-8 w-8 animate-spin text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </>
+    )
+  }
+
+  // Error state
+  if (error || !profile) {
+    return (
+      <Card className="border shadow-card">
+        <CardContent className="p-8 text-center">
+          <SafeIcon name="AlertCircle" className="h-12 w-12 mx-auto mb-4 text-destructive" />
+          <p className="text-destructive">{error || 'Profil tidak ditemukan'}</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Coba Lagi
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Get initials for avatar fallback
+  const initials = profile.name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+
+  return (
+    <>
+      {/* ===== MOBILE VIEW - Compact Modern ===== */}
+      <div className="space-y-3 sm:hidden">
+        {/* Profile Header */}
+        <div className="glass-card rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-14 w-14 ring-2 ring-primary/20">
+              <AvatarImage src={getAvatarUrl(profile.avatar_url)} alt={profile.name} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
+                {initials}
               </AvatarFallback>
             </Avatar>
-<div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">{mockAdminProfile.name}</h2>
-              <p className="text-sm text-primary font-medium mt-1">{mockAdminProfile.role}</p>
-              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                <SafeIcon name="Clock" className="h-3 w-3" />
-                <span>{mockAdminProfile.lastLogin}</span>
+            <div className="flex-1 min-w-0">
+              <h2 className="font-semibold text-foreground truncate">{profile.name}</h2>
+              <p className="text-xs text-primary font-medium">
+                {profile.role === 'ADMIN' ? 'Administrator' : 'Operator'}
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className={`shrink-0 text-[10px] px-2 py-0.5 ${profile.is_active
+                ? 'bg-green-50 text-green-600 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700'
+                : 'bg-gray-100 text-gray-500'}`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full mr-1 ${profile.is_active ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+              {profile.is_active ? 'Aktif' : 'Nonaktif'}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Contact Info - List Style */}
+        <div className="glass-card rounded-xl overflow-hidden">
+          <div className="px-4 py-2 bg-muted/30 border-b border-border/50">
+            <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Informasi Kontak</h3>
+          </div>
+          <div className="divide-y divide-border/50">
+            <div className="flex items-center gap-3 px-4 py-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <SafeIcon name="Mail" className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-muted-foreground">Email</p>
+                <p className="text-sm font-medium text-foreground truncate">{profile.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <SafeIcon name="Phone" className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-muted-foreground">Telepon</p>
+                <p className="text-sm font-medium text-foreground">{profile.phone || '-'}</p>
               </div>
             </div>
           </div>
+        </div>
 
-          <Separator className="my-6" />
+        {/* Account Details - List Style */}
+        <div className="glass-card rounded-xl overflow-hidden">
+          <div className="px-4 py-2 bg-muted/30 border-b border-border/50">
+            <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Detail Akun</h3>
+          </div>
+          <div className="divide-y divide-border/50">
+            <div className="flex items-center gap-3 px-4 py-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                <SafeIcon name="Hash" className="h-4 w-4 text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-muted-foreground">ID User</p>
+                <p className="text-sm font-mono font-medium text-foreground">{profile.code || 'USR-001'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <SafeIcon name="Calendar" className="h-4 w-4 text-amber-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-muted-foreground">Tanggal Bergabung</p>
+                <p className="text-sm font-medium text-foreground">{formatDate(profile.created_at)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          {/* Contact Information */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Informasi Kontak</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex items-start gap-3">
-                <SafeIcon name="Mail" className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="text-sm font-medium text-foreground break-all">{mockAdminProfile.email}</p>
+      {/* ===== DESKTOP VIEW - Original Design ===== */}
+      <div className="hidden sm:block space-y-6">
+        <Card className="border shadow-card">
+          <CardHeader className="pb-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Informasi Profil</CardTitle>
+                <CardDescription>Detail akun Anda</CardDescription>
+              </div>
+              <Badge
+                variant="outline"
+                className={`${profile.is_active ? 'bg-green-50 text-primary border-primary/30' : 'bg-gray-50'}`}
+              >
+                <span className={`h-2 w-2 rounded-full mr-2 ${profile.is_active ? 'bg-primary' : 'bg-gray-400'}`}></span>
+                {profile.is_active ? 'Aktif' : 'Tidak Aktif'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-6">
+            {/* Avatar & Basic Info */}
+            <div className="flex flex-col sm:flex-row gap-6 mb-8">
+              <Avatar className="h-24 w-24 shrink-0">
+                <AvatarImage src={getAvatarUrl(profile.avatar_url)} alt={profile.name} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-foreground">{profile.name}</h2>
+                <p className="text-sm text-primary font-medium mt-1">
+                  {profile.role === 'ADMIN' ? 'Administrator' : 'Operator'}
+                </p>
+              </div>
+            </div>
+
+            <Separator className="my-6" />
+
+            {/* Contact Information */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground">Informasi Kontak</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  <SafeIcon name="Mail" className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm font-medium text-foreground break-all">{profile.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <SafeIcon name="Phone" className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Telepon</p>
+                    <p className="text-sm font-medium text-foreground">{profile.phone || '-'}</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <SafeIcon name="Phone" className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Telepon</p>
-                  <p className="text-sm font-medium text-foreground">{mockAdminProfile.phone}</p>
+            </div>
+
+            <Separator className="my-6" />
+
+            {/* Account Details */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground">Detail Akun</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <p className="text-xs text-muted-foreground mb-1">ID User</p>
+                  <p className="text-sm font-mono font-medium text-foreground">{profile.code || 'USR-001'}</p>
+                </div>
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Tanggal Bergabung</p>
+                  <p className="text-sm font-medium text-foreground">{formatDate(profile.created_at)}</p>
                 </div>
               </div>
             </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          {/* Account Details */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Detail Akun</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <p className="text-xs text-muted-foreground mb-1">ID Administrator</p>
-                <p className="text-sm font-mono font-medium text-foreground">{mockAdminProfile.id}</p>
-              </div>
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <p className="text-xs text-muted-foreground mb-1">Tanggal Bergabung</p>
-                <p className="text-sm font-medium text-foreground">{mockAdminProfile.joinDate}</p>
-              </div>
-            </div>
-          </div>
-
-</CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

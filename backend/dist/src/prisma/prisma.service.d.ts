@@ -1,0 +1,37 @@
+import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+export declare class PrismaService implements OnModuleInit, OnModuleDestroy {
+    private configService;
+    private pool;
+    private _client;
+    constructor(configService: ConfigService);
+    get client(): PrismaClient;
+    get users(): import("@prisma/client").Prisma.usersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get drivers(): import("@prisma/client").Prisma.driversDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get pangkalans(): import("@prisma/client").Prisma.pangkalansDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get orders(): import("@prisma/client").Prisma.ordersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get order_items(): import("@prisma/client").Prisma.order_itemsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get order_payment_details(): import("@prisma/client").Prisma.order_payment_detailsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get timeline_tracks(): import("@prisma/client").Prisma.timeline_tracksDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get invoices(): import("@prisma/client").Prisma.invoicesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get payment_records(): import("@prisma/client").Prisma.payment_recordsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get stock_histories(): import("@prisma/client").Prisma.stock_historiesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get activity_logs(): import("@prisma/client").Prisma.activity_logsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get lpg_products(): import("@prisma/client").Prisma.lpg_productsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get consumers(): import("@prisma/client").Prisma.consumersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get consumer_orders(): import("@prisma/client").Prisma.consumer_ordersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get expenses(): import("@prisma/client").Prisma.expensesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get pangkalan_stocks(): import("@prisma/client").Prisma.pangkalan_stocksDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get pangkalan_stock_movements(): import("@prisma/client").Prisma.pangkalan_stock_movementsDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get lpg_prices(): import("@prisma/client").Prisma.lpg_pricesDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get perencanaan_harian(): import("@prisma/client").Prisma.perencanaan_harianDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get penyaluran_harian(): import("@prisma/client").Prisma.penyaluran_harianDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get penerimaan_stok(): import("@prisma/client").Prisma.penerimaan_stokDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get company_profile(): import("@prisma/client").Prisma.company_profileDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get agen(): import("@prisma/client").Prisma.agenDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    get agen_orders(): import("@prisma/client").Prisma.agen_ordersDelegate<import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    $transaction<T>(fn: Parameters<typeof this._client.$transaction>[0]): ReturnType<typeof this._client.$transaction>;
+    onModuleInit(): Promise<void>;
+    onModuleDestroy(): Promise<void>;
+}

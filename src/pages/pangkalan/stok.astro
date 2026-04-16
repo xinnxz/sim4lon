@@ -1,0 +1,15 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PangkalanSidebarLayout from '@/components/pangkalan/PangkalanSidebarLayout.tsx'
+import StokPangkalanPage from '@/components/pangkalan/StokPangkalanPage.tsx'
+import ProtectedDashboard from '@/components/auth/ProtectedDashboard.tsx'
+---
+
+<BaseLayout title="Stok LPG - SIM4LON Pangkalan">
+  <ProtectedDashboard client:load allowedRoles={['PANGKALAN']}>
+    <PangkalanSidebarLayout client:load headerHeight="64px">
+      <StokPangkalanPage client:idle />
+    </PangkalanSidebarLayout>
+  </ProtectedDashboard>
+</BaseLayout>
+

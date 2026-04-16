@@ -1,0 +1,43 @@
+@startuml AD_KelolaStok
+!theme plain
+skinparam backgroundColor #f0f8ff
+skinparam ActivityBackgroundColor #87CEEB
+skinparam ActivityBorderColor #1565c0
+
+title **AD: Kelola Stok (Admin/Operator)**\nSistem SIM4LON
+
+|Admin/Operator|
+start
+
+:Buka menu Stok LPG;
+
+|Sistem|
+:Load statistik stok\n(Total, Subsidi, Non-Subsidi);
+:Load card stok per produk;
+:Tampilkan grafik\nkonsumsi mingguan;
+
+:Tampilkan halaman Stok LPG;
+
+|Admin/Operator|
+:Lihat ringkasan stok;
+
+if (Aksi?) then (Catat Penerimaan)
+    :<<AD-05>>\nCatat Penerimaan Stok;
+    note right: Sub-Activity
+elseif (Lihat In/Out) then
+    :<<AD-19>>\nLihat In-Out Agen;
+    note right: Sub-Activity
+elseif (Kelola Produk) then
+    :<<AD-13>>\nKelola Produk LPG;
+    note right: Sub-Activity
+elseif (Catat Penyaluran) then
+    :<<AD-06>>\nCatat Penyaluran;
+    note right: Sub-Activity
+else (Selesai)
+    :Tutup halaman;
+endif
+
+|Admin/Operator|
+stop
+
+@enduml

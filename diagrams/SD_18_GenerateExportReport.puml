@@ -1,0 +1,88 @@
+@startuml SD_18_GenerateExportReport
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-18: GENERATE & EXPORT REPORT\n<size:10>Sistem SIM4LON</size>
+
+actor "Admin" as Admin
+boundary "ReportPage" as RP
+control "ReportService" as RS
+database "orders" as OrdersDB
+database "payment_records" as PaymentDB
+database "stock_histories" as StockDB
+
+== Pilih Jenis Laporan ==
+
+Admin -> RP : 1: Buka halaman Laporan
+activate RP
+RP --> Admin : 1.1: Tampilkan pilihan jenis laporan
+
+Admin -> RP : 2: Pilih jenis laporan
+Admin -> RP : 3: Pilih periode (start_date - end_date)
+Admin -> RP : 4: Pilih filter tambahan (pangkalan, status, dll)
+Admin -> RP : 5: Klik "Generate"
+
+RP -> RS : 5.1: generateReport(type, filters)
+activate RS
+
+alt Laporan Penjualan
+    RS -> OrdersDB : 5.1.1: SELECT * FROM orders\nWHERE order_date BETWEEN ? AND ?\nAND status = ? AND pangkalan_id = ?
+    activate OrdersDB
+    OrdersDB --> RS : 5.1.1.1: orderData
+    deactivate OrdersDB
+    RS -> RS : 5.1.2: calculateTotals()
+    
+else Laporan Pembayaran
+    RS -> PaymentDB : 5.1.1: SELECT * FROM payment_records\nJOIN orders\nWHERE payment_time BETWEEN ? AND ?
+    activate PaymentDB
+    PaymentDB --> RS : 5.1.1.1: paymentData
+    deactivate PaymentDB
+    RS -> RS : 5.1.2: groupByMethod()
+    
+else Laporan Stok
+    RS -> StockDB : 5.1.1: SELECT * FROM stock_histories\nWHERE timestamp BETWEEN ? AND ?
+    activate StockDB
+    StockDB --> RS : 5.1.1.1: stockData
+    deactivate StockDB
+    RS -> RS : 5.1.2: calculateInOut()
+end
+
+RS -> RS : 5.1.3: formatReportData()
+
+RS --> RP : 5.2: ReportData
+deactivate RS
+
+RP --> Admin : 5.3: Tampilkan laporan di layar
+
+== Export ke Excel ==
+
+Admin -> RP : 6: Klik "Export Excel"
+
+RP -> RS : 6.1: exportToExcel(reportData)
+activate RS
+
+RS -> RS : 6.1.1: createWorkbook()
+RS -> RS : 6.1.2: addHeaders(columns)
+RS -> RS : 6.1.3: addDataRows(data)
+RS -> RS : 6.1.4: setColumnWidths()
+RS -> RS : 6.1.5: applyStyles()
+RS -> RS : 6.1.6: generateFileName()\n→ "Laporan_Penjualan_2024-12.xlsx"
+
+RS --> RP : 6.2: excelBuffer
+deactivate RS
+
+RP -> RP : 6.3: triggerDownload(buffer, fileName)
+RP --> Admin : 6.4: File terdownload
+
+deactivate RP
+
+note right of RS
+  Format nama file:
+  Laporan_[Jenis]_[Periode].xlsx
+end note
+
+@enduml

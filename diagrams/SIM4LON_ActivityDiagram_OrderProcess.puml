@@ -1,0 +1,97 @@
+@startuml SIM4LON_ActivityDiagram_OrderProcess
+
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1565C0
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #424242
+
+title <size:16>**Activity Diagram - Order Processing Workflow**</size>\n<size:10>SIM4LON - LPG Distribution Management System</size>
+
+|#E8F5E9| Admin/Operator |
+|#E3F2FD| System |
+
+|Admin/Operator|
+start
+
+:Open Create Order Form;
+
+:Select Pangkalan;
+
+:Select LPG products & quantity;
+
+:Click "Save";
+
+|System|
+:Validate input;
+
+if (Valid?) then (yes)
+    :Generate order code;
+    :Calculate total & tax;
+    :Save order (DRAFT);
+else (no)
+    |Admin/Operator|
+    :Show error;
+    stop
+endif
+
+|Admin/Operator|
+:Submit order;
+
+|System|
+:Update status: MENUNGGU_PEMBAYARAN;
+
+|Admin/Operator|
+:Record payment;
+
+|System|
+:Validate payment;
+
+if (Payment valid?) then (yes)
+    :Save payment record;
+    :Update status: DIPROSES;
+else (no)
+    |Admin/Operator|
+    :Show error;
+    stop
+endif
+
+|Admin/Operator|
+:Prepare & assign driver;
+
+|System|
+:Update status: SIAP_KIRIM;
+:Assign driver to order;
+
+|Admin/Operator|
+:Start delivery;
+
+|System|
+:Update status: DIKIRIM;
+
+|Admin/Operator|
+:Confirm delivery complete;
+
+|System|
+:Update status: SELESAI;
+:Auto sync stock to Pangkalan;
+:Generate invoice;
+
+|Admin/Operator|
+:View completed order;
+
+stop
+
+legend right
+  |= Status Flow |
+  | DRAFT |
+  | MENUNGGU_PEMBAYARAN |
+  | DIPROSES |
+  | SIAP_KIRIM |
+  | DIKIRIM |
+  | SELESAI |
+endlegend
+
+@enduml

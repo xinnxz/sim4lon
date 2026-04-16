@@ -37,7 +37,7 @@ export interface DriverManagementItemModel extends DriverSummaryModel {
 }
 
 /**
- * Model untuk data profil admin yang sedang login.
+ * Model untuk data Profil Akun yang sedang login.
  */
 export interface AdminProfileModel {
   userId: string;
@@ -56,7 +56,7 @@ export const MOCK_USERS_DATA: UserModel[] = [
     telepon: "081122334455",
     email: "admin.rian@sim4lon.co.id",
     role: "ADMIN",
-    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/8ef5ced8-689f-44f0-9bf0-8306799606b9.png",
+    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/3/8ef5ced8-689f-44f0-9bf0-8306799606b9.png",
     isActive: true,
   },
   {
@@ -65,7 +65,7 @@ export const MOCK_USERS_DATA: UserModel[] = [
     telepon: "082211445566",
     email: "siti.rahma@sim4lon.co.id",
     role: "OPERATOR",
-    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/a863320f-b222-464e-9d78-6a123b045bf2.png",
+    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/3/a863320f-b222-464e-9d78-6a123b045bf2.png",
     isActive: true,
   },
   {
@@ -74,7 +74,7 @@ export const MOCK_USERS_DATA: UserModel[] = [
     telepon: "083399887766",
     email: "bambang.driver@sim4lon.co.id",
     role: "DRIVER",
-    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/d3e81287-77ff-4dc6-830c-0e4e53fcee67.png",
+    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/3/d3e81287-77ff-4dc6-830c-0e4e53fcee67.png",
     isActive: true,
   },
   {
@@ -83,7 +83,7 @@ export const MOCK_USERS_DATA: UserModel[] = [
     telepon: "087712345678",
     email: "asep.super@sim4lon.co.id",
     role: "SUPERVISOR",
-    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/3/f01ae5bf-3071-4671-9554-a0df0f84bb32.png",
+    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/3/f01ae5bf-3071-4671-9554-a0df0f84bb32.png",
     isActive: true,
   },
   {
@@ -92,12 +92,12 @@ export const MOCK_USERS_DATA: UserModel[] = [
     telepon: "089812312312",
     email: "dedi.driver@sim4lon.co.id",
     role: "DRIVER",
-    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2025/12/4/d4827dfa-9699-4dd4-961e-d99b46bdba7f.png",
+    avatarUrl: "https://spark-builder.s3.us-east-1.amazonaws.com/image/2026/01/4/d4827dfa-9699-4dd4-961e-d99b46bdba7f.png",
     isActive: false, // Nonaktif
   }
 ];
 
-// Data Mock Profil Admin (Rian Hidayat)
+// Data Mock Profil Akun (Rian Hidayat)
 export const MOCK_ADMIN_PROFILE: AdminProfileModel = {
   userId: "U-001",
   nama: "Rian Hidayat (Admin)",

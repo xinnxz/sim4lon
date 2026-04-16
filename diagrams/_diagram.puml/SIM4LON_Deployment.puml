@@ -1,0 +1,163 @@
+@startuml SIM4LON_Deployment
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+
+skinparam node {
+    BackgroundColor #ADD8E6
+    BorderColor #4682B4
+    FontStyle bold
+}
+
+skinparam artifact {
+    BackgroundColor #E0FFFF
+    BorderColor #4682B4
+}
+
+skinparam component {
+    BackgroundColor #E0FFFF
+    BorderColor #4682B4
+}
+
+skinparam database {
+    BackgroundColor #ADD8E6
+    BorderColor #4682B4
+}
+
+skinparam rectangle {
+    BackgroundColor #ADD8E6
+    BorderColor #4682B4
+}
+
+title SIM4LON Deployment Diagram
+
+' ===================================================
+' CLIENT LAYER
+' ===================================================
+
+node "<<device>>\nClient Layer" as client {
+    node "Browser" as browser {
+        artifact "<<artifact>>\nSIM4LON Web App" as webapp
+    }
+}
+
+' ===================================================
+' VERCEL PLATFORM
+' ===================================================
+
+node "<<platform>>\nVercel" as vercel {
+    node "React + Vite Application" as reactapp {
+        artifact "<<artifact>>\nReact 18" as react
+        artifact "<<artifact>>\nVite 5 (Build Tool)" as vite
+        artifact "<<artifact>>\nTanStack Query v5" as tanstack
+        artifact "<<artifact>>\nReact Router v6" as router
+        artifact "<<artifact>>\nTailwind CSS" as tailwind
+        artifact "<<artifact>>\nShadcn/UI Components" as shadcn
+    }
+}
+
+' ===================================================
+' RAILWAY API PLATFORM
+' ===================================================
+
+node "<<platform>>\nRailway" as railway {
+    node "API Container" as apicontainer {
+        artifact "<<artifact>>\nNestJS 10 Runtime" as nestjs
+        artifact "<<artifact>>\nPrisma ORM 5" as prisma
+        
+        component "<<component>>\nAuth Module\n(JWT + Passport)" as auth
+        component "<<component>>\nOrder Service" as orderService
+        component "<<component>>\nStock Service" as stockService
+        component "<<component>>\nPayment Service" as paymentService
+        component "<<component>>\nPangkalan Service" as pangkalanService
+        component "<<component>>\nDashboard Service" as dashboardService
+        component "<<component>>\nReport Service" as reportService
+    }
+}
+
+' ===================================================
+' RAILWAY POSTGRESQL DATABASE
+' ===================================================
+
+node "<<service>>\nRailway PostgreSQL" as postgresNode {
+    database "PostgreSQL 15" as postgres {
+        artifact "<<artifact>>\nSingle Instance" as instance
+        artifact "<<artifact>>\n21 Tables" as tables
+        artifact "<<artifact>>\n7 Enum Types" as enums
+        artifact "<<artifact>>\nDaily Backup" as backup
+    }
+}
+
+' ===================================================
+' SUPABASE STORAGE
+' ===================================================
+
+node "<<service>>\nSupabase Storage" as supabase {
+    node "Object Storage (S3-compatible)" as objectStorage {
+        artifact "<<artifact>>\n/profile-pictures/" as profilePics
+        artifact "<<artifact>>\n/payment-proofs/" as paymentProofs
+    }
+}
+
+' ===================================================
+' CONNECTIONS WITH PROTOCOLS
+' ===================================================
+
+client -down-> vercel : "HTTPS:443\nWeb Request"
+vercel -down-> railway : "HTTPS:443\nREST API Request"
+railway -down-> postgresNode : "TCP:5432\nPrisma Query"
+railway -right-> supabase : "HTTPS:443\nFile Upload/Download"
+
+' ===================================================
+' LEGEND NOTE
+' ===================================================
+
+note right of client
+  <b>SIM4LON Deployment Diagram</b>
+  <b>Full Stack Application</b>
+  
+  ═══════════════════════════════
+  <b>FRONTEND (Vercel)</b>
+  ═══════════════════════════════
+  Framework: React 18
+  Build Tool: Vite 5
+  Styling: Tailwind CSS
+  UI Library: Shadcn/UI
+  State: TanStack Query v5
+  Routing: React Router v6
+  
+  ═══════════════════════════════
+  <b>BACKEND (Railway)</b>
+  ═══════════════════════════════
+  Framework: NestJS 10
+  ORM: Prisma 5
+  Auth: JWT + Passport
+  Upload: Multer
+  Validation: class-validator
+  
+  ═══════════════════════════════
+  <b>DATABASE (Railway)</b>
+  ═══════════════════════════════
+  Engine: PostgreSQL 15
+  Tables: 21
+  Enums: 7
+  Extensions: pgcrypto, uuid-ossp
+  
+  ═══════════════════════════════
+  <b>STORAGE (Supabase)</b>
+  ═══════════════════════════════
+  Type: S3-compatible
+  Buckets: profile-pictures,
+           payment-proofs
+  Security: RLS enabled
+  
+  ═══════════════════════════════
+  <b>COMMUNICATION PROTOCOLS</b>
+  ═══════════════════════════════
+  Browser ↔ Vercel: HTTPS:443
+  Vercel ↔ Railway: HTTPS:443
+  Railway ↔ PostgreSQL: TCP:5432
+  Railway ↔ Supabase: HTTPS:443
+end note
+
+@enduml

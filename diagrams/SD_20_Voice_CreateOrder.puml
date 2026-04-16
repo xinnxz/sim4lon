@@ -1,0 +1,162 @@
+@startuml SD_Voice_CreateOrder
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 5
+skinparam maxmessagesize 200
+skinparam sequenceParticipant underline
+
+title SD-Voice: AI-POWERED SPEECH-TO-ORDER\n<size:10>Sistem SIM4LON - Gemini AI Integration</size>
+
+actor "Admin" as Admin
+boundary "FloatingVoiceWidget" as FVW
+control "useVoiceOrder" as UVO
+control "useSpeechRecognition" as USR
+boundary "WebSpeechAPI" as WSA
+entity "Backend API" as BE
+database "Gemini AI" as AI
+database "Database" as DB
+
+== 1. Aktivasi Voice Order ==
+
+Admin -> FVW : 1: Klik tombol FAB 🎤
+activate FVW
+
+FVW -> UVO : 1.1: startListening()
+activate UVO
+
+UVO -> USR : 1.2: startListening()
+activate USR
+
+USR -> WSA : 1.2.1: new SpeechRecognition()
+activate WSA
+WSA --> USR : recognition instance
+
+USR -> WSA : 1.2.2: recognition.start()
+WSA -> Admin : 1.2.3: Request izin mikrofon
+
+Admin -> WSA : 1.3: Allow permission
+WSA --> USR : Permission granted
+
+USR --> UVO : 1.4: status = "listening"
+UVO --> FVW : 1.5: isListening = true
+FVW --> Admin : 1.6: UI: Pulsing circles\n"Mendengarkan..."
+
+== 2. Speech Recognition (Real-time) ==
+
+Admin -> WSA : 2: Speak: "Lima puluh tabung\n12 kilo ke Reon"
+
+loop Real-time transcript
+    WSA -> WSA : 2.1: Audio processing
+    WSA --> USR : 2.2: onResult(interim)
+    USR --> UVO : 2.3: interimTranscript update
+    note right: liveTranscript =\ntranscript + interimTranscript
+    UVO --> FVW : 2.4: Display real-time
+    FVW --> Admin : 2.5: "Lima puluh..."
+end
+
+WSA --> USR : 2.6: onResult(final)\ntranscript = "lima puluh tabung\n12 kilo ke reon"
+deactivate WSA
+
+USR --> UVO : 2.7: transcript final
+
+== 3. Auto-Stop & AI Parsing ==
+
+note over USR : Silence 4 detik\n→ Auto-stop
+USR -> UVO : 3.1: onSpeechEnd(transcript)
+deactivate USR
+
+UVO -> UVO : 3.2: status = "parsing"
+UVO --> FVW : 3.3: Show spinner\n"AI menganalisis..."
+
+UVO -> BE : 3.4: POST /gemini/parse-order\n{ text: "lima puluh..." }
+activate BE
+
+BE -> AI : 3.5: Send to Gemini AI
+activate AI
+
+AI -> AI : 3.6: NLP Processing:\n- Extract quantity: 50\n- Extract product: 12kg\n- Match pangkalan: "Reon"
+
+AI --> BE : 3.7: ParsedOrderData
+note right of AI
+  {
+    pangkalanName: "Reon",
+    items: [{
+      productName: "LPG 12kg",
+      quantity: 50,
+      lpgType: "kg12"
+    }],
+    confidence: 0.92
+  }
+end note
+deactivate AI
+
+== 4. Fuzzy Matching & Validation ==
+
+BE -> DB : 4.1: Find pangkalan by name
+note right: Levenshtein fuzzy match\n"reon" → "Reon" (93%)
+
+DB --> BE : pangkalan_id, name
+
+BE -> DB : 4.2: Get product info
+DB --> BE : product_id, price
+
+BE -> DB : 4.3: Check stock\n(by lpg_product_id)
+DB --> BE : currentStock = 130
+
+BE -> BE : 4.4: Validate:\n✓ Pangkalan aktif\n✓ Stok cukup\n✓ Quantity valid
+
+BE --> UVO : 4.5: GeminiParseResult\n{ success: true, validation: { isValid: true } }
+deactivate BE
+
+== 5. Konfirmasi User ==
+
+UVO -> UVO : 5.1: status = "confirming"
+UVO --> FVW : 5.2: Show confirmation card
+activate FVW
+
+FVW --> Admin : 5.3: Display parsed result:\n- Pangkalan: Reon\n- 50x LPG 12kg\n- Total: Rp xxx\n[Batal] [Konfirmasi]
+
+Admin -> FVW : 6: Klik "Konfirmasi"
+
+FVW -> UVO : 6.1: confirmAndCreate()
+
+== 6. Create Order ==
+
+UVO -> UVO : 6.2: status = "creating"
+UVO --> FVW : 6.3: Show "Membuat pesanan..."
+
+UVO -> BE : 6.4: POST /orders/create
+activate BE
+
+BE -> DB : 6.5: Create order
+DB --> BE : order_id, code
+
+BE -> DB : 6.6: Create order_items
+BE -> DB : 6.7: Create timeline_track
+BE -> DB : 6.8: Log activity
+
+BE --> UVO : 6.9: { success: true, orderCode: "ORD-0123" }
+deactivate BE
+
+== 7. Success ==
+
+UVO -> UVO : 7.1: status = "success"
+UVO --> FVW : 7.2: Show success message
+
+FVW --> Admin : 7.3: "✓ Pesanan ORD-0123\nberhasil dibuat!"
+
+Admin -> FVW : 8: Klik "Lihat Pesanan"
+FVW -> FVW : 8.1: Navigate to /pesanan/ORD-0123
+
+deactivate FVW
+deactivate UVO
+
+note over AI
+  <b>AI Technology Stack:</b>
+  - Google Gemini API
+  - Levenshtein Fuzzy Matching
+  - Web Speech API (Chrome/Edge)
+end note
+
+@enduml
